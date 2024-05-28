@@ -4,7 +4,7 @@ Welcome to the **OptiSort** GitHub repository! This project focuses on developin
 
 ## Project Overview
 
-**OptiSort** aims to revolutionize the sorting process for monosilicon by leveraging advanced optical technologies. This system is designed to automatically identify and sort monosilicon based on specific criteria such as size, shape and morhpology. The goal is to enhance efficiency, reduce waste, and improve the overall quality of sorted monosilicon frgaments.
+**OptiSort** aims to revolutionize the sorting process for monosilicon by leveraging advanced optical technologies. This system is designed to automatically identify and sort monosilicon based on specific criteria such as size, shape and morhpology. The goal is to enhance efficiency, reduce waste, and improve the overall quality of sorted monosilicon fragments.
 
 ## Features
 
