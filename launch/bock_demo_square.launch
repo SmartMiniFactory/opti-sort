@@ -1,0 +1,31 @@
+<launch>
+    <!-- This launch file is aimed to set up the whole systems ready to navigate. It runs both the nodes necessary to
+    communicate over CAN, as well as the nodes to compute Mattro's pose in space thanks to odometry and IMU --> 
+
+
+    <!-- Run the node which convert Twist messages to target wheel speeds and publish them over CAN -->
+    <node pkg="bock_controller" type="can_write.py" name="CanWrite" output="screen">
+        <rosparam param="base_width">0.644</rosparam>
+        <rosparam param="rate">10</rosparam>
+    </node>
+
+    <!-- Run the node which publish bock_status messages -->
+    <node pkg="bock_controller" type="can_read.py" name="CanRead" output="screen"/>
+
+    <!-- Run the node of the IMU X-Sens 650 -->
+    <node  name="xsens_mti_node" pkg="xsens_mti_driver" type="xsens_mti_node" output="screen">
+        <rosparam command="load" file="$(find xsens_mti_driver)/param/xsens_mti_node.yaml" />
+    </node>
+
+    <!-- Run the node which publish Mattro's pose in space using odometry-->
+    <node pkg="bock_controller" type="mattro_odom.py" name="MattroOdom" output="screen"/>
+
+     <!-- Run the tf broadcasters nodes -->
+    <node pkg="bock_controller" type="controlbox_tf.py" name="ControlBoxTf" output="screen"/>
+    <node pkg="bock_controller" type="mattro_tf.py" name="MattroTf" output="screen"/>
+    <node pkg="bock_controller" type="world_tf.py" name="WorldTf" output="screen"/>
+
+    <!-- Run the node which defines the path -->
+    <node pkg="bock_controller" type="demo_square_2.py" name="MattroOdom" output="screen"/>
+    
+</launch>

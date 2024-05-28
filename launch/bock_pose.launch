@@ -1,0 +1,19 @@
+<launch>
+    <!-- This is the format for a comment in HTML --> 
+
+    <!-- Run the node of the IMU X-Sens 650 -->
+    <node  name="xsens_mti_node" pkg="xsens_mti_driver" type="xsens_mti_node" output="screen">
+        <rosparam command="load" file="$(find xsens_mti_driver)/param/xsens_mti_node.yaml" />
+    </node>
+
+    <!-- Run the node which convert quaternion into Euler angles -->
+
+     <!-- Run the tf broadcasters nodes -->
+    <node pkg="bock_controller" type="controlbox_tf.py" name="ControlBoxTf" output="screen"/>
+    <node pkg="bock_controller" type="mattro_tf.py" name="MattroTf" output="screen"/>
+    <node pkg="bock_controller" type="world_tf.py" name="WorldTf" output="screen"/>
+
+    <!-- Run the node which publish Mattro's pose in space using odometry-->
+    <node pkg="bock_controller" type="mattro_odom.py" name="MattroOdom" output="screen"/>
+    
+</launch>

@@ -1,0 +1,16 @@
+<launch>
+    <!-- This lunch file is aimed to execute only the ROS nodes which allow the communication over CAN bus
+    between the Mattro Rovo 2 and the Jetson or any other control board --> 
+
+
+    <!-- Run the node which convert Twist messages to target wheel speeds and publish them over CAN -->
+    <node pkg="bock_controller" type="can_write.py" name="CanWrite" output="screen">
+        <rosparam param="base_width">0.644</rosparam>
+        <rosparam param="rate">10</rosparam>
+    </node>
+
+    <!-- Run the node which publish bock_status messages -->
+    <node pkg="bock_controller" type="can_read.py" name="CanRead" output="screen"/>
+
+
+</launch>

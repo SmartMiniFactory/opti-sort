@@ -1,0 +1,26 @@
+<launch>
+    <!-- This lunch file is aimed to test the navigation using different data sources.
+    Those data are then fused together using an Extended Kalman Filter.
+    The sources are:
+    1. Custom defined odometry
+    2. Xsens IMU
+    3. Pozyx indoor GPS --> 
+
+    <!-- Run the node that computes the filtered odometry -->
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
+        <rosparam command="load" file="$(find bock_controller)/config/efk_bock.yaml" />
+    </node>
+
+    <!-- Run the node of the IMU X-Sens 650 -->
+    <node  name="xsens_mti_node" pkg="xsens_mti_driver" type="xsens_mti_node" output="screen">
+        <rosparam command="load" file="$(find xsens_mti_driver)/param/xsens_mti_node.yaml" />
+    </node>
+
+    <!-- Run the node which publishes Mattro's odometry -->
+    <node pkg="bock_controller" type="mattro_odom.py" name="MattroOdom" output="screen"/>
+
+     <!-- Run the tf broadcasters nodes -->
+    <node pkg="bock_controller" type="controlbox_tf.py" name="ControlBoxTf" output="screen"/>
+    <node pkg="bock_controller" type="mattro_tf.py" name="MattroTf" output="screen"/>
+    
+</launch>
