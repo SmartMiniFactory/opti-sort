@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this repository, please cite it as below."
 authors:
   - family-names: Galli
-    given-names: Davide
-    orcid: https://www.unibz.it/it/
-title: "ROS Controller for Mattro ROVO 2"
+  - given-names: Davide
+  - orcid: 0009-0000-1929-2590
+title: "Monosilicon Optical Sorting Technology"
 version: 1.0.1
-date-released: 2022-09-27
+date-released: 2024-05-28
