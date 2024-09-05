@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2B171215-A859-4653-B100-5732412066C4}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>OptiSort</RootNamespace>
+    <AssemblyName>OptiSort</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Ace.Adept">
+      <HintPath>..\CobraLibrary\references\Ace.Adept.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.Adept.Common">
+      <HintPath>..\CobraLibrary\references\Ace.Adept.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.AdeptSight">
+      <HintPath>..\CobraLibrary\references\Ace.AdeptSight.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.AdeptSight.Common">
+      <HintPath>..\CobraLibrary\references\Ace.AdeptSight.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.Core">
+      <HintPath>..\CobraLibrary\references\Ace.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.Feeder">
+      <HintPath>..\CobraLibrary\references\Ace.Feeder.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.Feeder.Common">
+      <HintPath>..\CobraLibrary\references\Ace.Feeder.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.HSVision">
+      <HintPath>..\CobraLibrary\references\Ace.HSVision.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.HSVision.Common">
+      <HintPath>..\CobraLibrary\references\Ace.HSVision.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.ProcessManager">
+      <HintPath>..\CobraLibrary\references\Ace.ProcessManager.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.ProcessManager.Common">
+      <HintPath>..\CobraLibrary\references\Ace.ProcessManager.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.UIBuilder">
+      <HintPath>..\CobraLibrary\references\Ace.UIBuilder.dll</HintPath>
+    </Reference>
+    <Reference Include="Ace.UIBuilder.Common">
+      <HintPath>..\CobraLibrary\references\Ace.UIBuilder.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="ActiproSoftware.Shared.Net20">
+      <HintPath>..\CobraLibrary\references\ActiproSoftware.Shared.Net20.dll</HintPath>
+    </Reference>
+    <Reference Include="ActiproSoftware.SyntaxEditor.Addons.DotNet.Net20">
+      <HintPath>..\CobraLibrary\references\ActiproSoftware.SyntaxEditor.Addons.DotNet.Net20.dll</HintPath>
+    </Reference>
+    <Reference Include="ActiproSoftware.SyntaxEditor.Addons.Web.Net20">
+      <HintPath>..\CobraLibrary\references\ActiproSoftware.SyntaxEditor.Addons.Web.Net20.dll</HintPath>
+    </Reference>
+    <Reference Include="ActiproSoftware.SyntaxEditor.Net20">
+      <HintPath>..\CobraLibrary\references\ActiproSoftware.SyntaxEditor.Net20.dll</HintPath>
+    </Reference>
+    <Reference Include="ActiproSoftware.WinUICore.Net20">
+      <HintPath>..\CobraLibrary\references\ActiproSoftware.WinUICore.Net20.dll</HintPath>
+    </Reference>
+    <Reference Include="AxInterop.HSDISPLAYLib">
+      <HintPath>..\CobraLibrary\references\AxInterop.HSDISPLAYLib.dll</HintPath>
+    </Reference>
+    <Reference Include="BidirectionalTCP">
+      <HintPath>..\CobraLibrary\references\BidirectionalTCP.dll</HintPath>
+    </Reference>
+    <Reference Include="DotNetMagic2005">
+      <HintPath>..\CobraLibrary\references\DotNetMagic2005.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.HSCLASSLIBRARYLib">
+      <HintPath>..\CobraLibrary\references\Interop.HSCLASSLIBRARYLib.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Interop.HSDISPLAYLib">
+      <HintPath>..\CobraLibrary\references\Interop.HSDISPLAYLib.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="MQTTnet, Version=4.3.6.1152, Culture=neutral, PublicKeyToken=fdb7629f2e364a63, processorArchitecture=MSIL">
+      <HintPath>..\packages\MQTTnet.4.3.6.1152\lib\net48\MQTTnet.dll</HintPath>
+    </Reference>
+    <Reference Include="MQTTnet.Extensions.ManagedClient, Version=4.3.6.1152, Culture=neutral, PublicKeyToken=fdb7629f2e364a63, processorArchitecture=MSIL">
+      <HintPath>..\packages\MQTTnet.Extensions.ManagedClient.4.3.6.1152\lib\net48\MQTTnet.Extensions.ManagedClient.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HMI.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CobraLibrary\CobraLibrary.csproj">
+      <Project>{efdce63d-f10d-46bf-b928-20d25a5581ac}</Project>
+      <Name>CobraLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
