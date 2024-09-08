@@ -113,6 +113,7 @@ namespace HMI
 
             this.Disposed += UcScara_Disposed;
             this.HandleCreated += UcScara_HandleCreated;
+            
             _targetQueue.Rows.Clear();
 
         }
