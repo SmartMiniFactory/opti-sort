@@ -123,6 +123,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ucCameraStream.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucCameraStream.Designer.cs">
+      <DependentUpon>ucCameraStream.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -131,6 +137,9 @@
     </Compile>
     <Compile Include="HMI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="ucCameraStream.resx">
+      <DependentUpon>ucCameraStream.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

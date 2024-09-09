@@ -18,5 +18,16 @@ namespace HMI
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new ucOptiSort());
         }
+
+        internal class Cameras
+        {
+            public int ID { get; set; }
+            public string Text { get; set; }
+
+            public override string ToString() // Overriding ToString to display Text in the ComboBox
+            {
+                return Text;
+            }
+        }
     }
 }

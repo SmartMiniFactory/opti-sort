@@ -14,12 +14,16 @@ using CobraLibrary;
 using System.ComponentModel;
 using ActiproSoftware.Drawing;
 using System.Collections.Concurrent;
+using OptiSort;
+using static HMI.HMI;
+using System.Collections.Generic;
 
 namespace HMI
 {
     public partial class ucOptiSort : Form
     {   
-        // MQTT
+        // MQTT 
+        // TODO chiarire necessità singole definizioni
         IMqttClient _client;
         byte[] _byteReceived = new byte[1];
         string _msgReceived = string.Empty;
@@ -30,7 +34,7 @@ namespace HMI
         string _brokerIp = "localhost";
         string _topic = "optisort/scara/target";
         int _port = 1883;
-        Thread _thDefineLocation;
+        Thread _thDefineLocation; 
 
         // Omron ACE
         static private IAceServer _aceServer;
@@ -52,6 +56,38 @@ namespace HMI
         {
             InitializeComponent();
 
+            // initialize combobox with camera names
+            List<Cameras> camerasList = new List<Cameras>
+            {
+                new Cameras { ID = 0, Text = "Integrated Camera" },
+                new Cameras { ID = 1, Text = "IDS" },
+                new Cameras { ID = 2, Text = "Luxonics" },
+                new Cameras { ID = 3, Text = "???" }
+            };
+            cmbCameras.DataSource = camerasList;
+            cmbCameras.DisplayMember = "Text";
+            cmbCameras.ValueMember = "ID";    
+            cmbCameras.DataSource = camerasList;
+
+
+            
+            // TODO indagare meglio
+            initBl();
+
+            //this.Disposed += UcScara_Disposed;
+            //this.HandleCreated += UcScara_HandleCreated;
+
+            _targetQueue.Rows.Clear();
+
+            ucCameraStream cameraUC = new ucCameraStream();
+            cameraUC.Dock = DockStyle.Fill;
+            pnlCameraStream.Controls.Clear();
+            pnlCameraStream.Controls.Add(cameraUC);
+        }
+
+
+        private void initBl()
+        {
             // Create a binding list to store the target locations
             _targetQueueList = new BindingList<Transform3D>();
 
@@ -110,13 +146,8 @@ namespace HMI
 
             // Bind the BindingList to the DataGridView
             this._targetQueue.DataSource = _targetQueueList;
-
-            this.Disposed += UcScara_Disposed;
-            this.HandleCreated += UcScara_HandleCreated;
-            
-            _targetQueue.Rows.Clear();
-
         }
+
         private void UcScara_HandleCreated(object sender, EventArgs e)
         {
             Restart();

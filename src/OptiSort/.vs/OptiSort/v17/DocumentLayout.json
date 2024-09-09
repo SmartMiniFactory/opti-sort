@@ -3,12 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\hmi\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|c:\\users\\dylan\\source\\repos\\opti-sort\\src\\optisort\\hmi\\uccamerastream.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|solutionrelative:hmi\\uccamerastream.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|c:\\users\\dylan\\source\\repos\\opti-sort\\src\\optisort\\hmi\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|solutionrelative:hmi\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EFDCE63D-F10D-46BF-B928-20D25A5581AC}|CobraLibrary\\CobraLibrary.csproj|c:\\users\\dylan\\source\\repos\\opti-sort\\src\\optisort\\cobralibrary\\cobra.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EFDCE63D-F10D-46BF-B928-20D25A5581AC}|CobraLibrary\\CobraLibrary.csproj|solutionrelative:cobralibrary\\cobra.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|c:\\users\\dylan\\source\\repos\\opti-sort\\src\\optisort\\hmi\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|solutionrelative:hmi\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|c:\\users\\dylan\\source\\repos\\opti-sort\\src\\optisort\\hmi\\uccamerastream.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|solutionrelative:hmi\\uccamerastream.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -34,26 +42,50 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Cobra.cs",
-              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\CobraLibrary\\Cobra.cs",
-              "RelativeDocumentMoniker": "CobraLibrary\\Cobra.cs",
-              "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\CobraLibrary\\Cobra.cs",
-              "RelativeToolTip": "CobraLibrary\\Cobra.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAhAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "ucCameraStream.cs",
+              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\ucCameraStream.cs",
+              "RelativeDocumentMoniker": "HMI\\ucCameraStream.cs",
+              "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\ucCameraStream.cs",
+              "RelativeToolTip": "HMI\\ucCameraStream.cs",
+              "ViewState": "AgIAAIoAAAAAAAAAAAAUwJgAAABcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-08T08:13:02.352Z",
+              "WhenOpened": "2024-09-09T20:20:53.119Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
+              "Title": "ucCameraStream.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\ucCameraStream.cs",
+              "RelativeDocumentMoniker": "HMI\\ucCameraStream.cs",
+              "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\ucCameraStream.cs [Design]",
+              "RelativeToolTip": "HMI\\ucCameraStream.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-09T20:20:51.347Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainForm.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\MainForm.cs",
+              "RelativeDocumentMoniker": "HMI\\MainForm.cs",
+              "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\MainForm.cs [Design]",
+              "RelativeToolTip": "HMI\\MainForm.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-09T19:37:34.583Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "MainForm.cs",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\MainForm.cs",
               "RelativeDocumentMoniker": "HMI\\MainForm.cs",
               "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\MainForm.cs",
               "RelativeToolTip": "HMI\\MainForm.cs",
-              "ViewState": "AgIAAEkAAAAAAAAAAAAQwHUAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAADQAAAAAAAAAAAAYwFQAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-05T19:14:13.613Z",
               "EditorCaption": ""

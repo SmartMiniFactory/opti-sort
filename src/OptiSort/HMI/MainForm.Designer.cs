@@ -45,10 +45,16 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBoxTargetQueue = new System.Windows.Forms.GroupBox();
             this._targetQueue = new System.Windows.Forms.DataGridView();
+            this.pnlCameraStream = new System.Windows.Forms.Panel();
+            this.pnlGroups = new System.Windows.Forms.FlowLayoutPanel();
+            this.pnlCameraSelection = new System.Windows.Forms.Panel();
+            this.cmbCameras = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBoxTargetQueue.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._targetQueue)).BeginInit();
+            this.pnlGroups.SuspendLayout();
+            this.pnlCameraSelection.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBoxX
@@ -128,7 +134,7 @@
             this.listBox.Location = new System.Drawing.Point(3, 31);
             this.listBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.listBox.Name = "listBox";
-            this.listBox.Size = new System.Drawing.Size(930, 443);
+            this.listBox.Size = new System.Drawing.Size(822, 443);
             this.listBox.TabIndex = 6;
             // 
             // labelYaw
@@ -214,7 +220,7 @@
             this.groupBox1.Controls.Add(this.textBoxRoll);
             this.groupBox1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(61, 7);
+            this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(471, 189);
             this.groupBox1.TabIndex = 14;
@@ -226,9 +232,9 @@
             this.groupBox2.BackColor = System.Drawing.Color.Teal;
             this.groupBox2.Controls.Add(this.listBox);
             this.groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(8, 202);
+            this.groupBox2.Location = new System.Drawing.Point(3, 198);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(936, 477);
+            this.groupBox2.Size = new System.Drawing.Size(828, 477);
             this.groupBox2.TabIndex = 15;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Console";
@@ -239,9 +245,9 @@
             this.groupBoxTargetQueue.Controls.Add(this._targetQueue);
             this.groupBoxTargetQueue.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBoxTargetQueue.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.groupBoxTargetQueue.Location = new System.Drawing.Point(14, 685);
+            this.groupBoxTargetQueue.Location = new System.Drawing.Point(3, 681);
             this.groupBoxTargetQueue.Name = "groupBoxTargetQueue";
-            this.groupBoxTargetQueue.Size = new System.Drawing.Size(930, 377);
+            this.groupBoxTargetQueue.Size = new System.Drawing.Size(828, 377);
             this.groupBoxTargetQueue.TabIndex = 17;
             this.groupBoxTargetQueue.TabStop = false;
             this.groupBoxTargetQueue.Text = "Target queue";
@@ -264,9 +270,46 @@
             this._targetQueue.RowHeadersVisible = false;
             this._targetQueue.RowHeadersWidth = 62;
             this._targetQueue.RowTemplate.Height = 24;
-            this._targetQueue.Size = new System.Drawing.Size(924, 343);
+            this._targetQueue.Size = new System.Drawing.Size(822, 343);
             this._targetQueue.TabIndex = 0;
             this._targetQueue.UseWaitCursor = true;
+            // 
+            // pnlCameraStream
+            // 
+            this.pnlCameraStream.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlCameraStream.Location = new System.Drawing.Point(854, 421);
+            this.pnlCameraStream.Name = "pnlCameraStream";
+            this.pnlCameraStream.Size = new System.Drawing.Size(964, 656);
+            this.pnlCameraStream.TabIndex = 18;
+            // 
+            // pnlGroups
+            // 
+            this.pnlGroups.Controls.Add(this.groupBox1);
+            this.pnlGroups.Controls.Add(this.groupBox2);
+            this.pnlGroups.Controls.Add(this.groupBoxTargetQueue);
+            this.pnlGroups.Dock = System.Windows.Forms.DockStyle.Left;
+            this.pnlGroups.Location = new System.Drawing.Point(0, 0);
+            this.pnlGroups.Name = "pnlGroups";
+            this.pnlGroups.Size = new System.Drawing.Size(854, 1077);
+            this.pnlGroups.TabIndex = 20;
+            // 
+            // pnlCameraSelection
+            // 
+            this.pnlCameraSelection.Controls.Add(this.cmbCameras);
+            this.pnlCameraSelection.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlCameraSelection.Location = new System.Drawing.Point(854, 0);
+            this.pnlCameraSelection.Name = "pnlCameraSelection";
+            this.pnlCameraSelection.Size = new System.Drawing.Size(964, 421);
+            this.pnlCameraSelection.TabIndex = 19;
+            // 
+            // cmbCameras
+            // 
+            this.cmbCameras.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cmbCameras.FormattingEnabled = true;
+            this.cmbCameras.Location = new System.Drawing.Point(0, 0);
+            this.cmbCameras.Name = "cmbCameras";
+            this.cmbCameras.Size = new System.Drawing.Size(964, 28);
+            this.cmbCameras.TabIndex = 0;
             // 
             // ucOptiSort
             // 
@@ -274,9 +317,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1818, 1077);
-            this.Controls.Add(this.groupBoxTargetQueue);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.pnlCameraStream);
+            this.Controls.Add(this.pnlCameraSelection);
+            this.Controls.Add(this.pnlGroups);
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "ucOptiSort";
             this.Text = "SCARA Remote Control";
@@ -285,6 +328,8 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBoxTargetQueue.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this._targetQueue)).EndInit();
+            this.pnlGroups.ResumeLayout(false);
+            this.pnlCameraSelection.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -308,6 +353,10 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBoxTargetQueue;
         private System.Windows.Forms.DataGridView _targetQueue;
+        private System.Windows.Forms.Panel pnlCameraStream;
+        private System.Windows.Forms.FlowLayoutPanel pnlGroups;
+        private System.Windows.Forms.Panel pnlCameraSelection;
+        private System.Windows.Forms.ComboBox cmbCameras;
     }
 }
 

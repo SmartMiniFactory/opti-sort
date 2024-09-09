@@ -1,13 +1,20 @@
-using MQTTnet;
+﻿using Ace.Process.Server;
 using MQTTnet.Client;
-using MQTTnet.Extensions.ManagedClient;
-using System.Configuration;
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
-namespace videoStream
+namespace OptiSort
 {
-    public partial class Form : System.Windows.Forms.Form
+    public partial class ucCameraStream : UserControl
     {
         // MQTT settings
         string _topic = "optisort/luxonis/stream";
@@ -30,7 +37,7 @@ namespace videoStream
 
         Thread _thDrawImage;
 
-        public Form()
+        public ucCameraStream()
         {
             InitializeComponent();
             InitializeVideoStream();
@@ -38,7 +45,6 @@ namespace videoStream
             _stop = false;
             _thDrawImage = new Thread(DrawImage) { IsBackground = true };
             _thDrawImage.Start();
-            //Process.Start("C:\\Users\\DGalli\\Desktop\\mqtt-test\\dist\\luxonis-mqtt.exe");
         }
 
         public async void InitializeVideoStream()
@@ -149,7 +155,7 @@ namespace videoStream
                                 _img = Image.FromStream(ms);
                                 IAsyncResult r = BeginInvoke((MethodInvoker)delegate
                                 {
-                                    using (Graphics g = pnlImg.CreateGraphics())
+                                    using (Graphics g = pnlStream.CreateGraphics())
                                     {
                                         if (_imgDstRectangle.Width == 0)
                                             CalcSize(_img);
@@ -171,14 +177,14 @@ namespace videoStream
                         {
                             busy++;
                             _imgDate = DateTime.Now.AddSeconds(5);
-                            //se non ricevo immagini da pi� di 2 secondi disegno una grande X rossa
+                            //se non ricevo immagini da più di 2 secondi disegno una grande X rossa
                             IAsyncResult r = BeginInvoke((MethodInvoker)delegate
                             {
-                                using (Graphics g = pnlImg.CreateGraphics())
+                                using (Graphics g = pnlStream.CreateGraphics())
                                 {
                                     g.Clear(Color.Black);
-                                    g.DrawLine(new System.Drawing.Pen(Color.Red, 10), pnlImg.Width / 3, pnlImg.Height / 3, pnlImg.Width * 2 / 3, pnlImg.Height * 2 / 3);
-                                    g.DrawLine(new System.Drawing.Pen(Color.Red, 10), pnlImg.Width / 3, pnlImg.Height * 2 / 3, pnlImg.Width * 2 / 3, pnlImg.Height / 3);
+                                    g.DrawLine(new System.Drawing.Pen(Color.Red, 10), pnlStream.Width / 3, pnlStream.Height / 3, pnlStream.Width * 2 / 3, pnlStream.Height * 2 / 3);
+                                    g.DrawLine(new System.Drawing.Pen(Color.Red, 10), pnlStream.Width / 3, pnlStream.Height * 2 / 3, pnlStream.Width * 2 / 3, pnlStream.Height / 3);
                                 }
                                 busy = 0;
                             });
@@ -207,23 +213,20 @@ namespace videoStream
             float nPercent = 1;
             int destX = 0;
             int destY = 0;
-            float nPercentW = (float)pnlImg.Width / (float)image.Width;
-            float nPercentH = (float)pnlImg.Height / (float)image.Height;
+            float nPercentW = (float)pnlStream.Width / (float)image.Width;
+            float nPercentH = (float)pnlStream.Height / (float)image.Height;
             if (nPercentH < nPercentW)
             {
                 nPercent = nPercentH;
-                destX = (int)((pnlImg.Width - image.Width * nPercent) / 2);
+                destX = (int)((pnlStream.Width - image.Width * nPercent) / 2);
             }
             else
             {
                 nPercent = nPercentW;
-                destY = (int)((pnlImg.Height - image.Height * nPercent) / 2);
+                destY = (int)((pnlStream.Height - image.Height * nPercent) / 2);
             }
-            //_imgSrcRectangle = pnlImg.ClientRectangle;
+            //_imgSrcRectangle = pnlStream.ClientRectangle;
             _imgDstRectangle = new Rectangle(destX, destY, (int)(image.Width * nPercent), (int)(image.Height * nPercent));
-
         }
-
-
     }
 }
