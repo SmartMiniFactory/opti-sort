@@ -23,7 +23,6 @@ namespace HMI
     public partial class ucOptiSort : Form
     {   
         // MQTT 
-        // TODO chiarire necessità singole definizioni
         IMqttClient _client;
         byte[] _byteReceived = new byte[1];
         string _msgReceived = string.Empty;
@@ -72,7 +71,7 @@ namespace HMI
 
             
             // TODO indagare meglio
-            initBl();
+            InitBl();
 
             //this.Disposed += UcScara_Disposed;
             //this.HandleCreated += UcScara_HandleCreated;
@@ -86,7 +85,7 @@ namespace HMI
         }
 
 
-        private void initBl()
+        private void InitBl()
         {
             // Create a binding list to store the target locations
             _targetQueueList = new BindingList<Transform3D>();
@@ -188,7 +187,7 @@ namespace HMI
             }
             catch (Exception ex)
             {
-                listBox.Items.Add(ex.ToString());
+                lstLog.Items.Add(ex.ToString());
             }
         }
         public async void Restart()
@@ -201,9 +200,9 @@ namespace HMI
         }
         private async System.Threading.Tasks.Task ConnectAce()
         {
-            listBox.Items.Add("Connecting to the robot");
+            lstLog.Items.Add("Connecting to the robot");
             (_aceController, _aceRobot, _aceServer) = Cobra.Init.Connect(_controllerIP, "OptiSort");
-            listBox.Items.Add("Robot connected");
+            lstLog.Items.Add("Robot connected");
         }
         private async System.Threading.Tasks.Task ConnectMqtt(string broker, int port, string topic)
         {
@@ -231,7 +230,7 @@ namespace HMI
 
                 _client.ConnectedAsync += new Func<MQTTnet.Client.MqttClientConnectedEventArgs, System.Threading.Tasks.Task>(arg =>
                 {
-                    listBox.Items.Add($"Listening on {topic} from {broker}");
+                    lstLog.Items.Add($"Listening on {topic} from {broker}");
                     var topicFilter = new MQTTnet.MqttTopicFilterBuilder().WithTopic(topic).Build();
                     MQTTnet.Client.MqttClientSubscribeOptions subOptions = new MQTTnet.Client.MqttClientSubscribeOptions();
                     subOptions.TopicFilters.Add(topicFilter);
@@ -242,7 +241,7 @@ namespace HMI
                 {
                     try
                     {
-                        listBox.Items.Add($"Stop control robot");
+                        lstLog.Items.Add($"Stop control robot");
                     }
                     catch (Exception) { }
                     return System.Threading.Tasks.Task.CompletedTask;
@@ -255,7 +254,7 @@ namespace HMI
             }
             catch (Exception)
             {
-                listBox.Items.Add($"Error connecting to {broker}");
+                lstLog.Items.Add($"Error connecting to {broker}");
             }
         }
         private System.Threading.Tasks.Task Client_ApplicationMessageReceivedAsync(MQTTnet.Client.MqttApplicationMessageReceivedEventArgs arg)
@@ -376,7 +375,7 @@ namespace HMI
                             textBoxPitch.Text = _locTarget.Pitch.ToString();
                             textBoxYaw.Text = _locTarget.Yaw.ToString();
 
-                            listBox.Items.Add("Moving to target: " + _locTarget);
+                            lstLog.Items.Add("Moving to target: " + _locTarget);
 
                             
                             Cobra.Motion.Approach(_aceServer, _aceRobot, _locTarget, 20);
@@ -398,7 +397,7 @@ namespace HMI
                             }
                             
                             
-                            listBox.Items.Add("Target reached");
+                            lstLog.Items.Add("Target reached");
                             busy++;
                         }
                         _robotIsMoving = false;  

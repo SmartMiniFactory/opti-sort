@@ -34,7 +34,6 @@
             this.textBoxY = new System.Windows.Forms.TextBox();
             this.labelZ = new System.Windows.Forms.Label();
             this.textBoxZ = new System.Windows.Forms.TextBox();
-            this.listBox = new System.Windows.Forms.ListBox();
             this.labelYaw = new System.Windows.Forms.Label();
             this.textBoxYaw = new System.Windows.Forms.TextBox();
             this.labelPitch = new System.Windows.Forms.Label();
@@ -42,19 +41,23 @@
             this.labelRoll = new System.Windows.Forms.Label();
             this.textBoxRoll = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBoxTargetQueue = new System.Windows.Forms.GroupBox();
             this._targetQueue = new System.Windows.Forms.DataGridView();
             this.pnlCameraStream = new System.Windows.Forms.Panel();
-            this.pnlGroups = new System.Windows.Forms.FlowLayoutPanel();
-            this.pnlCameraSelection = new System.Windows.Forms.Panel();
             this.cmbCameras = new System.Windows.Forms.ComboBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.lstLog = new System.Windows.Forms.ListBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.pnlRobot3D = new System.Windows.Forms.Panel();
+            this.lblRobotIP = new System.Windows.Forms.Label();
+            this.txtRobotIP = new System.Windows.Forms.TextBox();
+            this.lblControllerIP = new System.Windows.Forms.Label();
+            this.txtControllerIP = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.groupBoxTargetQueue.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._targetQueue)).BeginInit();
-            this.pnlGroups.SuspendLayout();
-            this.pnlCameraSelection.SuspendLayout();
+            this.panel1.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBoxX
@@ -123,19 +126,6 @@
             this.textBoxZ.ReadOnly = true;
             this.textBoxZ.Size = new System.Drawing.Size(148, 35);
             this.textBoxZ.TabIndex = 4;
-            // 
-            // listBox
-            // 
-            this.listBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.listBox.FormattingEnabled = true;
-            this.listBox.HorizontalScrollbar = true;
-            this.listBox.ItemHeight = 22;
-            this.listBox.Location = new System.Drawing.Point(3, 31);
-            this.listBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.listBox.Name = "listBox";
-            this.listBox.Size = new System.Drawing.Size(822, 443);
-            this.listBox.TabIndex = 6;
             // 
             // labelYaw
             // 
@@ -220,24 +210,12 @@
             this.groupBox1.Controls.Add(this.textBoxRoll);
             this.groupBox1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(3, 3);
+            this.groupBox1.Location = new System.Drawing.Point(30, 330);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(471, 189);
             this.groupBox1.TabIndex = 14;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Current Target";
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.BackColor = System.Drawing.Color.Teal;
-            this.groupBox2.Controls.Add(this.listBox);
-            this.groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(3, 198);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(828, 477);
-            this.groupBox2.TabIndex = 15;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Console";
             // 
             // groupBoxTargetQueue
             // 
@@ -245,9 +223,9 @@
             this.groupBoxTargetQueue.Controls.Add(this._targetQueue);
             this.groupBoxTargetQueue.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBoxTargetQueue.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.groupBoxTargetQueue.Location = new System.Drawing.Point(3, 681);
+            this.groupBoxTargetQueue.Location = new System.Drawing.Point(27, 540);
             this.groupBoxTargetQueue.Name = "groupBoxTargetQueue";
-            this.groupBoxTargetQueue.Size = new System.Drawing.Size(828, 377);
+            this.groupBoxTargetQueue.Size = new System.Drawing.Size(773, 377);
             this.groupBoxTargetQueue.TabIndex = 17;
             this.groupBoxTargetQueue.TabStop = false;
             this.groupBoxTargetQueue.Text = "Target queue";
@@ -270,46 +248,108 @@
             this._targetQueue.RowHeadersVisible = false;
             this._targetQueue.RowHeadersWidth = 62;
             this._targetQueue.RowTemplate.Height = 24;
-            this._targetQueue.Size = new System.Drawing.Size(822, 343);
+            this._targetQueue.Size = new System.Drawing.Size(767, 343);
             this._targetQueue.TabIndex = 0;
             this._targetQueue.UseWaitCursor = true;
             // 
             // pnlCameraStream
             // 
             this.pnlCameraStream.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlCameraStream.Location = new System.Drawing.Point(854, 421);
+            this.pnlCameraStream.Location = new System.Drawing.Point(3, 71);
             this.pnlCameraStream.Name = "pnlCameraStream";
-            this.pnlCameraStream.Size = new System.Drawing.Size(964, 656);
+            this.pnlCameraStream.Size = new System.Drawing.Size(672, 448);
             this.pnlCameraStream.TabIndex = 18;
-            // 
-            // pnlGroups
-            // 
-            this.pnlGroups.Controls.Add(this.groupBox1);
-            this.pnlGroups.Controls.Add(this.groupBox2);
-            this.pnlGroups.Controls.Add(this.groupBoxTargetQueue);
-            this.pnlGroups.Dock = System.Windows.Forms.DockStyle.Left;
-            this.pnlGroups.Location = new System.Drawing.Point(0, 0);
-            this.pnlGroups.Name = "pnlGroups";
-            this.pnlGroups.Size = new System.Drawing.Size(854, 1077);
-            this.pnlGroups.TabIndex = 20;
-            // 
-            // pnlCameraSelection
-            // 
-            this.pnlCameraSelection.Controls.Add(this.cmbCameras);
-            this.pnlCameraSelection.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlCameraSelection.Location = new System.Drawing.Point(854, 0);
-            this.pnlCameraSelection.Name = "pnlCameraSelection";
-            this.pnlCameraSelection.Size = new System.Drawing.Size(964, 421);
-            this.pnlCameraSelection.TabIndex = 19;
             // 
             // cmbCameras
             // 
             this.cmbCameras.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cmbCameras.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cmbCameras.FormattingEnabled = true;
-            this.cmbCameras.Location = new System.Drawing.Point(0, 0);
+            this.cmbCameras.Location = new System.Drawing.Point(3, 3);
             this.cmbCameras.Name = "cmbCameras";
-            this.cmbCameras.Size = new System.Drawing.Size(964, 28);
+            this.cmbCameras.Size = new System.Drawing.Size(672, 54);
             this.cmbCameras.TabIndex = 0;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.lstLog);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel1.Location = new System.Drawing.Point(0, 977);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1818, 100);
+            this.panel1.TabIndex = 0;
+            // 
+            // lstLog
+            // 
+            this.lstLog.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lstLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstLog.FormattingEnabled = true;
+            this.lstLog.ItemHeight = 20;
+            this.lstLog.Location = new System.Drawing.Point(0, 0);
+            this.lstLog.Name = "lstLog";
+            this.lstLog.Size = new System.Drawing.Size(1818, 100);
+            this.lstLog.TabIndex = 0;
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Controls.Add(this.pnlRobot3D, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.pnlCameraStream, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.cmbCameras, 0, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(1140, 0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.976745F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 46.51163F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 46.51163F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(678, 977);
+            this.tableLayoutPanel1.TabIndex = 19;
+            // 
+            // pnlRobot3D
+            // 
+            this.pnlRobot3D.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlRobot3D.Location = new System.Drawing.Point(3, 525);
+            this.pnlRobot3D.Name = "pnlRobot3D";
+            this.pnlRobot3D.Size = new System.Drawing.Size(672, 449);
+            this.pnlRobot3D.TabIndex = 19;
+            // 
+            // lblRobotIP
+            // 
+            this.lblRobotIP.AutoSize = true;
+            this.lblRobotIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblRobotIP.Location = new System.Drawing.Point(24, 21);
+            this.lblRobotIP.Name = "lblRobotIP";
+            this.lblRobotIP.Size = new System.Drawing.Size(132, 36);
+            this.lblRobotIP.TabIndex = 20;
+            this.lblRobotIP.Text = "Robot IP";
+            // 
+            // txtRobotIP
+            // 
+            this.txtRobotIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtRobotIP.Location = new System.Drawing.Point(216, 21);
+            this.txtRobotIP.Name = "txtRobotIP";
+            this.txtRobotIP.Size = new System.Drawing.Size(285, 41);
+            this.txtRobotIP.TabIndex = 21;
+            // 
+            // lblControllerIP
+            // 
+            this.lblControllerIP.AutoSize = true;
+            this.lblControllerIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblControllerIP.Location = new System.Drawing.Point(24, 82);
+            this.lblControllerIP.Name = "lblControllerIP";
+            this.lblControllerIP.Size = new System.Drawing.Size(181, 36);
+            this.lblControllerIP.TabIndex = 22;
+            this.lblControllerIP.Text = "Controller IP";
+            // 
+            // txtControllerIP
+            // 
+            this.txtControllerIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtControllerIP.Location = new System.Drawing.Point(216, 79);
+            this.txtControllerIP.Name = "txtControllerIP";
+            this.txtControllerIP.Size = new System.Drawing.Size(285, 41);
+            this.txtControllerIP.TabIndex = 23;
             // 
             // ucOptiSort
             // 
@@ -317,20 +357,25 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1818, 1077);
-            this.Controls.Add(this.pnlCameraStream);
-            this.Controls.Add(this.pnlCameraSelection);
-            this.Controls.Add(this.pnlGroups);
+            this.Controls.Add(this.txtControllerIP);
+            this.Controls.Add(this.lblControllerIP);
+            this.Controls.Add(this.txtRobotIP);
+            this.Controls.Add(this.lblRobotIP);
+            this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.groupBoxTargetQueue);
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "ucOptiSort";
             this.Text = "SCARA Remote Control";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
             this.groupBoxTargetQueue.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this._targetQueue)).EndInit();
-            this.pnlGroups.ResumeLayout(false);
-            this.pnlCameraSelection.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -342,7 +387,6 @@
         private System.Windows.Forms.TextBox textBoxY;
         private System.Windows.Forms.Label labelZ;
         private System.Windows.Forms.TextBox textBoxZ;
-        private System.Windows.Forms.ListBox listBox;
         private System.Windows.Forms.Label labelYaw;
         private System.Windows.Forms.TextBox textBoxYaw;
         private System.Windows.Forms.Label labelPitch;
@@ -350,13 +394,18 @@
         private System.Windows.Forms.Label labelRoll;
         private System.Windows.Forms.TextBox textBoxRoll;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBoxTargetQueue;
         private System.Windows.Forms.DataGridView _targetQueue;
         private System.Windows.Forms.Panel pnlCameraStream;
-        private System.Windows.Forms.FlowLayoutPanel pnlGroups;
-        private System.Windows.Forms.Panel pnlCameraSelection;
         private System.Windows.Forms.ComboBox cmbCameras;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.ListBox lstLog;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.Panel pnlRobot3D;
+        private System.Windows.Forms.Label lblRobotIP;
+        private System.Windows.Forms.TextBox txtRobotIP;
+        private System.Windows.Forms.Label lblControllerIP;
+        private System.Windows.Forms.TextBox txtControllerIP;
     }
 }
 
