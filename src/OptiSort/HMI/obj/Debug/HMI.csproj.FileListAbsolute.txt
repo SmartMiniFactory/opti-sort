@@ -76,3 +76,4 @@ C:\Users\dylan\Source\Repos\opti-sort\src\OptiSort\HMI\obj\Debug\OptiSort.exe
 C:\Users\dylan\Source\Repos\opti-sort\src\OptiSort\HMI\obj\Debug\OptiSort.pdb
 C:\Users\dylan\source\repos\opti-sort\src\OptiSort\HMI\obj\Debug\HMI.ucOptiSort.resources
 C:\Users\dylan\source\repos\opti-sort\src\OptiSort\HMI\obj\Debug\OptiSort.ucCameraStream.resources
+C:\Users\dylan\Source\Repos\opti-sort\src\OptiSort\HMI\obj\Debug\OptiSort.ucRobotView.resources

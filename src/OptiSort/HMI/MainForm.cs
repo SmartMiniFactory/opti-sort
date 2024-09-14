@@ -17,6 +17,12 @@ using System.Collections.Concurrent;
 using OptiSort;
 using static HMI.HMI;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using ActiproSoftware.SyntaxEditor.Addons.DotNet.Ast;
+using Ace.Adept.Server.Device;
+using Ace.Adept.Server.Motion.Robots;
+using Ace.Core.Server.Motion;
+using Ace.Core.Util;
 
 namespace HMI
 {
@@ -28,9 +34,9 @@ namespace HMI
         string _msgReceived = string.Empty;
         int _byteLen;
         bool _msgReady = false;
-        DateTime _msgDate = DateTime.MinValue;
+
         bool _stop = false;
-        string _brokerIp = "localhost";
+        string _broker = "localhost";
         string _topic = "optisort/scara/target";
         int _port = 1883;
         Thread _thDefineLocation; 
@@ -40,7 +46,7 @@ namespace HMI
         static private IAceClient _aceClient;
         static private IAdeptController _aceController;
         static private IAdeptRobot _aceRobot;
-        static private IAbstractEndEffector endEffector;
+        static private IAbstractEndEffector _endEffector;
         const string _robotIP = "10.90.90.60";
         const string _controllerIP = "127.0.0.1";
         static bool _robotIsMoving = false;
@@ -55,7 +61,8 @@ namespace HMI
         {
             InitializeComponent();
 
-            // initialize combobox with camera names
+            // init combobox
+            lstLog.Items.Add("Initializing cameras combobox");
             List<Cameras> camerasList = new List<Cameras>
             {
                 new Cameras { ID = 0, Text = "Integrated Camera" },
@@ -69,142 +76,66 @@ namespace HMI
             cmbCameras.DataSource = camerasList;
 
 
+            // init dgv
+            lstLog.Items.Add("Initializing datagridview");
+            _targetQueueList = new BindingList<Transform3D>();
+            _targetQueue.AutoGenerateColumns = false;
+            DataGridViewTextBoxColumn xColumn = new DataGridViewTextBoxColumn
+                {HeaderText = "DX", DataPropertyName = "DX", Width = 100};
+            DataGridViewTextBoxColumn yColumn = new DataGridViewTextBoxColumn
+                {HeaderText = "DY", DataPropertyName = "DY", Width = 100};
+            DataGridViewTextBoxColumn zColumn = new DataGridViewTextBoxColumn
+                {HeaderText = "DZ", DataPropertyName = "DZ", Width = 100};
+            DataGridViewTextBoxColumn yawColumn = new DataGridViewTextBoxColumn
+                {HeaderText = "Yaw", DataPropertyName = "Yaw", Width = 100};
+            DataGridViewTextBoxColumn pitchColumn = new DataGridViewTextBoxColumn
+                {HeaderText = "Pitch", DataPropertyName = "Pitch", Width = 100};
+            DataGridViewTextBoxColumn rollColumn = new DataGridViewTextBoxColumn
+                {HeaderText = "Roll", DataPropertyName = "Roll", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill};
             
-            // TODO indagare meglio
-            InitBl();
-
-            //this.Disposed += UcScara_Disposed;
-            //this.HandleCreated += UcScara_HandleCreated;
-
+            _targetQueue.Columns.Add(xColumn);
+            _targetQueue.Columns.Add(yColumn);
+            _targetQueue.Columns.Add(zColumn);
+            _targetQueue.Columns.Add(yawColumn);
+            _targetQueue.Columns.Add(pitchColumn);
+            _targetQueue.Columns.Add(rollColumn);
+            _targetQueue.DataSource = _targetQueueList;
             _targetQueue.Rows.Clear();
 
+            // init camera view
+            // TODO: add selection from txtbox
+            lstLog.Items.Add("Initializing cameras view");
             ucCameraStream cameraUC = new ucCameraStream();
             cameraUC.Dock = DockStyle.Fill;
             pnlCameraStream.Controls.Clear();
             pnlCameraStream.Controls.Add(cameraUC);
+
+            InitializeConnections();
+
         }
 
-
-        private void InitBl()
+        private async void InitializeConnections()
         {
-            // Create a binding list to store the target locations
-            _targetQueueList = new BindingList<Transform3D>();
-
-            // Set up the DataGridView
-            this._targetQueue.AutoGenerateColumns = false;
-
-            // Create and bind columns to properties
-            DataGridViewTextBoxColumn xColumn = new DataGridViewTextBoxColumn
+            // MQTT connection
+            // TODO: create dedicated mqtt connection class, organize better and standardize robot/camera
+            lstLog.Items.Add("Connecting to MQTT broker");
+            Task<bool> mqtt = ConnectMqtt(_broker, _port, _topic);
+            bool connected = await mqtt;
+            if (!connected)
             {
-                HeaderText = "DX",
-                DataPropertyName = "DX",
-                Width = 100 // Set fixed width
-            };
-            this._targetQueue.Columns.Add(xColumn);
-
-            DataGridViewTextBoxColumn yColumn = new DataGridViewTextBoxColumn
-            {
-                HeaderText = "DY",
-                DataPropertyName = "DY",
-                Width = 100 // Set fixed width
-            };
-            this._targetQueue.Columns.Add(yColumn);
-
-            DataGridViewTextBoxColumn zColumn = new DataGridViewTextBoxColumn
-            {
-                HeaderText = "DZ",
-                DataPropertyName = "DZ",
-                Width = 100 // Set auto-size mode
-            };
-            this._targetQueue.Columns.Add(zColumn);
-
-            DataGridViewTextBoxColumn yawColumn = new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Yaw",
-                DataPropertyName = "Yaw",
-                Width = 100 // Set auto-size mode
-            };
-            this._targetQueue.Columns.Add(yawColumn);
-
-            DataGridViewTextBoxColumn pitchColumn = new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Pitch",
-                DataPropertyName = "Pitch",
-                Width = 100 // Set auto-size mode
-            };
-            this._targetQueue.Columns.Add(pitchColumn);
-
-            DataGridViewTextBoxColumn rollColumn = new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Roll",
-                DataPropertyName = "Roll",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill // Set auto-size mode
-
-            };
-            this._targetQueue.Columns.Add(rollColumn);
-
-            // Bind the BindingList to the DataGridView
-            this._targetQueue.DataSource = _targetQueueList;
-        }
-
-        private void UcScara_HandleCreated(object sender, EventArgs e)
-        {
-            Restart();
-
-            _stop = false;
-            // Start a new thread to add the target locations to the queue
-            _thDefineLocation = new Thread(AddToLocationQueue) { IsBackground = true };
-            _thDefineLocation.Start();
-            
-            // Start a new thread to move the robot to the target locations
-            _thReachLocation = new Thread(MoveToLoc) { IsBackground = true };
-            _thReachLocation.Start();
-        }
-        private void UcScara_Disposed(object sender, EventArgs e)
-        {
-            try
-            {
-                if (_client != null)
-                {
-                    _stop = true;
-                    // Stop the threads
-                    if (_thDefineLocation != null && _thDefineLocation.IsAlive)
-                        _thDefineLocation.Join(2000);
-                    _thDefineLocation = null;
-
-                    if (_thReachLocation != null && _thReachLocation.IsAlive)
-                        _thReachLocation.Join(2000);
-                    _thReachLocation = null;
-
-                    // Disconnect the MQTT client
-                    _client.ApplicationMessageReceivedAsync -= Client_ApplicationMessageReceivedAsync;
-                    _client.DisconnectAsync().Wait();
-                    _client.Dispose();
-
-                    // Disconnect from Omron ACE
-                    Cobra.Init.Disconnet(_aceController, _aceRobot);
-                }
+                lstLog.Items.Add("Failed to connect to MQTT broker");
+                return;
             }
-            catch (Exception ex)
-            {
-                lstLog.Items.Add(ex.ToString());
-            }
-        }
-        public async void Restart()
-        {
-            // Connect to the MQTT broker
-            await ConnectMqtt(_brokerIp, _port, _topic);
+            lstLog.Items.Add("Connected to MQTT broker");
 
-            // Connect to Omron ACE
-            await ConnectAce();
+
+            lstLog.Items.Add("Connecting to ACE Server");
+            Task<bool> robot = Cobra.Init.Connect(_controllerIP, "OptiSort");
+
         }
-        private async System.Threading.Tasks.Task ConnectAce()
-        {
-            lstLog.Items.Add("Connecting to the robot");
-            (_aceController, _aceRobot, _aceServer) = Cobra.Init.Connect(_controllerIP, "OptiSort");
-            lstLog.Items.Add("Robot connected");
-        }
-        private async System.Threading.Tasks.Task ConnectMqtt(string broker, int port, string topic)
+
+
+        private async Task<bool> ConnectMqtt(string broker, int port, string topic)
         {
             try
             {
@@ -251,12 +182,192 @@ namespace HMI
                 var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
                 await _client.ConnectAsync(options, tokenSource.Token);
                 tokenSource.Dispose();
+                return true;
             }
             catch (Exception)
             {
                 lstLog.Items.Add($"Error connecting to {broker}");
+                return false;
             }
         }
+
+
+        // TODO: temporary copied from Cobra class
+        public static (IAdeptController, IAdeptRobot, IAceServer) Connect(string _controllerIP, string _controllerName, string _endEffectorName = "Suction Cup", string _remotingName = "ace")
+        {
+            // Initialize remoting infrastructure
+            RemotingUtil.InitializeRemotingSubsystem(true, _callbackPort);
+
+            // Connect to ACE
+            IAceServer aceServer = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, _controllerIP, _remotingPort);
+            Console.WriteLine("Connected to server");
+
+            IAceClient aceClient = new AceClient(aceServer);
+            Console.WriteLine("Connected to client");
+
+            aceClient.InitializePlugins(null);
+
+            if (_newWorkspace)
+            {
+                // Clear the workspace
+                aceServer.Clear();
+            }
+
+            aceServer.EmulationMode = _emulation;
+
+            // Get the available controllers
+            IList<IAceObject> availableControllers = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IAdeptController)), true);
+            if (availableControllers.Count == 0)
+            {
+                // Handle the case when no controllers are available
+                Console.WriteLine("No controllers available.\nCreating a new one.");
+
+                // Create a controller and robot and establish the connection
+                controller = aceServer.Root.AddObjectOfType(typeof(IAdeptController), _controllerName) as IAdeptController;
+
+            }
+            else
+            {
+                // Connect to the first available controller
+                Console.WriteLine("Connecting to {0}", availableControllers.FirstOrDefault());
+                _controller = availableControllers.FirstOrDefault() as IAdeptController;
+            }
+
+            // Get the available robots
+            IList<IAceObject> availableRobots = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IAdeptRobot)), true);
+            if (availableRobots.Count == 0)
+            {
+                // Handle the case when no controllers are available
+                Console.WriteLine("No robots available.\nCreating a new one.");
+
+                // Create a controller and robot and establish the connection
+                robot = aceServer.Root.AddObjectOfType(typeof(ICobra600), "R1 Cobra600") as IAdeptRobot;
+            }
+            else
+            {
+                // Connect to the first available robot
+                Console.WriteLine("Connecting to {0}", availableRobots.FirstOrDefault());
+                robot = availableRobots.FirstOrDefault() as IAdeptRobot;
+            }
+
+            // Configure the robot and controller IP addresses
+            controller.Address = RobotIP;
+            robot.Controller = controller;
+
+            // Get the available end-effectors
+            IList<IAceObject> availableEndEffectors = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IIODrivenEndEffector)), true);
+            if (availableEndEffectors.Count == 0)
+            {
+                // Handle the case when no controllers are available
+                Console.WriteLine("No End-effectors available.\nCreating a new one.");
+
+                // Create an end-effector object
+                endEffector = aceServer.Root.AddObjectOfType(typeof(IIODrivenEndEffector), _endEffectorName) as IAbstractEndEffector;
+            }
+            else
+            {
+                // Connect to the first available end-effector
+                Console.WriteLine("Connecting to {0}", availableEndEffectors.FirstOrDefault());
+                endEffector = availableEndEffectors.FirstOrDefault() as IIODrivenEndEffector;
+            }
+
+            // Associate the end-effector with the robot
+            robot.SelectedEndEffector = endEffector;
+            robot.EndEffectorGripSignal = 98;
+            robot.EndEffectorReleaseSignal = 97;
+
+            // Enable the controller
+            controller.Enabled = true;
+
+            // If not calibrated, calibrate the robot
+            try
+            {
+                if (robot.IsCalibrated == false)
+                {
+                    robot.Power = true;
+                    controller.HighPower = true;
+                    Console.WriteLine("Enabling power to {0}. Please press the button on the front panel.", robot);
+                    robot.Calibrate();
+                    controller.Calibrate();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return (controller, robot, aceServer);
+        }
+
+
+
+
+
+
+
+        //private void UcScara_HandleCreated(object sender, EventArgs e)
+        //{
+        //    Restart();
+
+        //    _stop = false;
+        //    // Start a new thread to add the target locations to the queue
+        //    _thDefineLocation = new Thread(AddToLocationQueue) { IsBackground = true };
+        //    _thDefineLocation.Start();
+            
+        //    // Start a new thread to move the robot to the target locations
+        //    _thReachLocation = new Thread(MoveToLoc) { IsBackground = true };
+        //    _thReachLocation.Start();
+        //}
+
+        //private void UcScara_Disposed(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        if (_client != null)
+        //        {
+        //            _stop = true;
+        //            // Stop the threads
+        //            if (_thDefineLocation != null && _thDefineLocation.IsAlive)
+        //                _thDefineLocation.Join(2000);
+        //            _thDefineLocation = null;
+
+        //            if (_thReachLocation != null && _thReachLocation.IsAlive)
+        //                _thReachLocation.Join(2000);
+        //            _thReachLocation = null;
+
+        //            // Disconnect the MQTT client
+        //            _client.ApplicationMessageReceivedAsync -= Client_ApplicationMessageReceivedAsync;
+        //            _client.DisconnectAsync().Wait();
+        //            _client.Dispose();
+
+        //            // Disconnect from Omron ACE
+        //            Cobra.Init.Disconnet(_aceController, _aceRobot);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        lstLog.Items.Add(ex.ToString());
+        //    }
+        //}
+
+        //public async void Restart()
+        //{
+        //    // Connect to the MQTT broker
+        //    await ConnectMqtt("localhost", _port, _topic);
+
+        //    // Connect to Omron ACE
+        //    await ConnectAce();
+        //}
+
+        //private async Task ConnectAce()
+        //{
+        //    lstLog.Items.Add("Connecting to the robot");
+        //    await (_aceController, _aceRobot, _aceServer) = Cobra.Init.Connect(_controllerIP, "OptiSort");
+        //    lstLog.Items.Add("Robot connected");
+        //}
+        
+
         private System.Threading.Tasks.Task Client_ApplicationMessageReceivedAsync(MQTTnet.Client.MqttApplicationMessageReceivedEventArgs arg)
         {
             try
@@ -276,6 +387,7 @@ namespace HMI
             catch (Exception) { }
             return System.Threading.Tasks.Task.CompletedTask;
         }
+
         private void AddToLocationQueue()
         {
             int busy = 0;
@@ -414,6 +526,11 @@ namespace HMI
                 }
                 Thread.Sleep(10);
             }
+        }
+
+        private void btnConnect_Click(object sender, EventArgs e)
+        {
+            ConnectAce();
         }
     }
 }

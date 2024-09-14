@@ -53,6 +53,8 @@
             this.txtRobotIP = new System.Windows.Forms.TextBox();
             this.lblControllerIP = new System.Windows.Forms.Label();
             this.txtControllerIP = new System.Windows.Forms.TextBox();
+            this.btnConnect = new System.Windows.Forms.Button();
+            this.btnDisconnect = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBoxTargetQueue.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._targetQueue)).BeginInit();
@@ -351,12 +353,34 @@
             this.txtControllerIP.Size = new System.Drawing.Size(285, 41);
             this.txtControllerIP.TabIndex = 23;
             // 
+            // btnConnect
+            // 
+            this.btnConnect.Location = new System.Drawing.Point(523, 21);
+            this.btnConnect.Name = "btnConnect";
+            this.btnConnect.Size = new System.Drawing.Size(118, 41);
+            this.btnConnect.TabIndex = 24;
+            this.btnConnect.Text = "Connect";
+            this.btnConnect.UseVisualStyleBackColor = true;
+            this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
+            // 
+            // btnDisconnect
+            // 
+            this.btnDisconnect.Enabled = false;
+            this.btnDisconnect.Location = new System.Drawing.Point(523, 79);
+            this.btnDisconnect.Name = "btnDisconnect";
+            this.btnDisconnect.Size = new System.Drawing.Size(118, 41);
+            this.btnDisconnect.TabIndex = 25;
+            this.btnDisconnect.Text = "Disconnect";
+            this.btnDisconnect.UseVisualStyleBackColor = true;
+            // 
             // ucOptiSort
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1818, 1077);
+            this.Controls.Add(this.btnDisconnect);
+            this.Controls.Add(this.btnConnect);
             this.Controls.Add(this.txtControllerIP);
             this.Controls.Add(this.lblControllerIP);
             this.Controls.Add(this.txtRobotIP);
@@ -406,6 +430,8 @@
         private System.Windows.Forms.TextBox txtRobotIP;
         private System.Windows.Forms.Label lblControllerIP;
         private System.Windows.Forms.TextBox txtControllerIP;
+        private System.Windows.Forms.Button btnConnect;
+        private System.Windows.Forms.Button btnDisconnect;
     }
 }
 
