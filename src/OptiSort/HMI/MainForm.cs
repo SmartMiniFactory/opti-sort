@@ -23,18 +23,31 @@ using Ace.Adept.Server.Device;
 using Ace.Adept.Server.Motion.Robots;
 using Ace.Core.Server.Motion;
 using Ace.Core.Util;
+using Ace.Core.Server.Event;
+using System.Net.Sockets;
 
 namespace HMI
 {
     public partial class ucOptiSort : Form
-    {   
-        // MQTT 
+    {
+
+        /// <summary>
+        /// single MQTT broker where at least two topics are present: 
+        /// 1. image streaming (one per camera, incoming); python file
+        /// 2. scara's pick location streaming (incoming); same python file that operates with openCV on image
+        /// 
+        /// UDP protocol for flexibowl's communication (outgoing); flexibowl library
+        /// 
+        /// TCP connection with scara robot (in/out); cobra library
+        /// </summary>
+        /// 
+
+       // MQTT 
         IMqttClient _client;
         byte[] _byteReceived = new byte[1];
         string _msgReceived = string.Empty;
         int _byteLen;
         bool _msgReady = false;
-
         bool _stop = false;
         string _broker = "localhost";
         string _topic = "optisort/scara/target";
@@ -76,31 +89,15 @@ namespace HMI
             cmbCameras.DataSource = camerasList;
 
 
-            // init dgv
-            lstLog.Items.Add("Initializing datagridview");
-            _targetQueueList = new BindingList<Transform3D>();
-            _targetQueue.AutoGenerateColumns = false;
-            DataGridViewTextBoxColumn xColumn = new DataGridViewTextBoxColumn
-                {HeaderText = "DX", DataPropertyName = "DX", Width = 100};
-            DataGridViewTextBoxColumn yColumn = new DataGridViewTextBoxColumn
-                {HeaderText = "DY", DataPropertyName = "DY", Width = 100};
-            DataGridViewTextBoxColumn zColumn = new DataGridViewTextBoxColumn
-                {HeaderText = "DZ", DataPropertyName = "DZ", Width = 100};
-            DataGridViewTextBoxColumn yawColumn = new DataGridViewTextBoxColumn
-                {HeaderText = "Yaw", DataPropertyName = "Yaw", Width = 100};
-            DataGridViewTextBoxColumn pitchColumn = new DataGridViewTextBoxColumn
-                {HeaderText = "Pitch", DataPropertyName = "Pitch", Width = 100};
-            DataGridViewTextBoxColumn rollColumn = new DataGridViewTextBoxColumn
-                {HeaderText = "Roll", DataPropertyName = "Roll", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill};
-            
-            _targetQueue.Columns.Add(xColumn);
-            _targetQueue.Columns.Add(yColumn);
-            _targetQueue.Columns.Add(zColumn);
-            _targetQueue.Columns.Add(yawColumn);
-            _targetQueue.Columns.Add(pitchColumn);
-            _targetQueue.Columns.Add(rollColumn);
-            _targetQueue.DataSource = _targetQueueList;
-            _targetQueue.Rows.Clear();
+            // init scara dgv
+            lstLog.Items.Add("Initializing scara datagridview");
+            Cobra cobra600 = new Cobra();
+            ucScara ucScara = new ucScara();
+            ucScara.Cobra600 = cobra600;
+            ucScara.Dock = DockStyle.Fill;
+            pnlScara.Controls.Clear();
+            pnlScara.Controls.Add(ucScara);
+
 
             // init camera view
             // TODO: add selection from txtbox
@@ -111,8 +108,8 @@ namespace HMI
             pnlCameraStream.Controls.Add(cameraUC);
 
             InitializeConnections();
-
         }
+
 
         private async void InitializeConnections()
         {
@@ -129,9 +126,8 @@ namespace HMI
             lstLog.Items.Add("Connected to MQTT broker");
 
 
-            lstLog.Items.Add("Connecting to ACE Server");
-            Task<bool> robot = Cobra.Init.Connect(_controllerIP, "OptiSort");
-
+            // TODO: autoconnect ACE
+            
         }
 
 
@@ -175,7 +171,7 @@ namespace HMI
                         lstLog.Items.Add($"Stop control robot");
                     }
                     catch (Exception) { }
-                    return System.Threading.Tasks.Task.CompletedTask;
+                    return Task.CompletedTask;
                 });
 
                 _client.ApplicationMessageReceivedAsync += Client_ApplicationMessageReceivedAsync;
@@ -192,120 +188,6 @@ namespace HMI
         }
 
 
-        // TODO: temporary copied from Cobra class
-        public static (IAdeptController, IAdeptRobot, IAceServer) Connect(string _controllerIP, string _controllerName, string _endEffectorName = "Suction Cup", string _remotingName = "ace")
-        {
-            // Initialize remoting infrastructure
-            RemotingUtil.InitializeRemotingSubsystem(true, _callbackPort);
-
-            // Connect to ACE
-            IAceServer aceServer = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, _controllerIP, _remotingPort);
-            Console.WriteLine("Connected to server");
-
-            IAceClient aceClient = new AceClient(aceServer);
-            Console.WriteLine("Connected to client");
-
-            aceClient.InitializePlugins(null);
-
-            if (_newWorkspace)
-            {
-                // Clear the workspace
-                aceServer.Clear();
-            }
-
-            aceServer.EmulationMode = _emulation;
-
-            // Get the available controllers
-            IList<IAceObject> availableControllers = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IAdeptController)), true);
-            if (availableControllers.Count == 0)
-            {
-                // Handle the case when no controllers are available
-                Console.WriteLine("No controllers available.\nCreating a new one.");
-
-                // Create a controller and robot and establish the connection
-                controller = aceServer.Root.AddObjectOfType(typeof(IAdeptController), _controllerName) as IAdeptController;
-
-            }
-            else
-            {
-                // Connect to the first available controller
-                Console.WriteLine("Connecting to {0}", availableControllers.FirstOrDefault());
-                _controller = availableControllers.FirstOrDefault() as IAdeptController;
-            }
-
-            // Get the available robots
-            IList<IAceObject> availableRobots = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IAdeptRobot)), true);
-            if (availableRobots.Count == 0)
-            {
-                // Handle the case when no controllers are available
-                Console.WriteLine("No robots available.\nCreating a new one.");
-
-                // Create a controller and robot and establish the connection
-                robot = aceServer.Root.AddObjectOfType(typeof(ICobra600), "R1 Cobra600") as IAdeptRobot;
-            }
-            else
-            {
-                // Connect to the first available robot
-                Console.WriteLine("Connecting to {0}", availableRobots.FirstOrDefault());
-                robot = availableRobots.FirstOrDefault() as IAdeptRobot;
-            }
-
-            // Configure the robot and controller IP addresses
-            controller.Address = RobotIP;
-            robot.Controller = controller;
-
-            // Get the available end-effectors
-            IList<IAceObject> availableEndEffectors = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IIODrivenEndEffector)), true);
-            if (availableEndEffectors.Count == 0)
-            {
-                // Handle the case when no controllers are available
-                Console.WriteLine("No End-effectors available.\nCreating a new one.");
-
-                // Create an end-effector object
-                endEffector = aceServer.Root.AddObjectOfType(typeof(IIODrivenEndEffector), _endEffectorName) as IAbstractEndEffector;
-            }
-            else
-            {
-                // Connect to the first available end-effector
-                Console.WriteLine("Connecting to {0}", availableEndEffectors.FirstOrDefault());
-                endEffector = availableEndEffectors.FirstOrDefault() as IIODrivenEndEffector;
-            }
-
-            // Associate the end-effector with the robot
-            robot.SelectedEndEffector = endEffector;
-            robot.EndEffectorGripSignal = 98;
-            robot.EndEffectorReleaseSignal = 97;
-
-            // Enable the controller
-            controller.Enabled = true;
-
-            // If not calibrated, calibrate the robot
-            try
-            {
-                if (robot.IsCalibrated == false)
-                {
-                    robot.Power = true;
-                    controller.HighPower = true;
-                    Console.WriteLine("Enabling power to {0}. Please press the button on the front panel.", robot);
-                    robot.Calibrate();
-                    controller.Calibrate();
-
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            return (controller, robot, aceServer);
-        }
-
-
-
-
-
-
-
         //private void UcScara_HandleCreated(object sender, EventArgs e)
         //{
         //    Restart();
@@ -314,7 +196,7 @@ namespace HMI
         //    // Start a new thread to add the target locations to the queue
         //    _thDefineLocation = new Thread(AddToLocationQueue) { IsBackground = true };
         //    _thDefineLocation.Start();
-            
+
         //    // Start a new thread to move the robot to the target locations
         //    _thReachLocation = new Thread(MoveToLoc) { IsBackground = true };
         //    _thReachLocation.Start();
@@ -351,24 +233,8 @@ namespace HMI
         //    }
         //}
 
-        //public async void Restart()
-        //{
-        //    // Connect to the MQTT broker
-        //    await ConnectMqtt("localhost", _port, _topic);
 
-        //    // Connect to Omron ACE
-        //    await ConnectAce();
-        //}
-
-        //private async Task ConnectAce()
-        //{
-        //    lstLog.Items.Add("Connecting to the robot");
-        //    await (_aceController, _aceRobot, _aceServer) = Cobra.Init.Connect(_controllerIP, "OptiSort");
-        //    lstLog.Items.Add("Robot connected");
-        //}
-        
-
-        private System.Threading.Tasks.Task Client_ApplicationMessageReceivedAsync(MQTTnet.Client.MqttApplicationMessageReceivedEventArgs arg)
+        private Task Client_ApplicationMessageReceivedAsync(MQTTnet.Client.MqttApplicationMessageReceivedEventArgs arg)
         {
             try
             {
@@ -385,152 +251,76 @@ namespace HMI
                         }
             }
             catch (Exception) { }
-            return System.Threading.Tasks.Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        private void AddToLocationQueue()
-        {
-            int busy = 0;
-            while (_stop == false)
-            {
-                try
-                {
-                    if (_msgReady)
-                    {
-                        if (busy == 0)
-                        {
-                            busy++;
-                            lock (_msgReceived)
-                            {   
-                                // Remove the brackets from the message
-                                string _msgClean = _msgReceived.Replace("[", "").Replace("]", "");
-                                // Split the message into an array using the comma as separator
-                                string[] _msgTarget = _msgClean.Split(',');
+        
+        //private void MoveToLoc()
+        //{
+        //    int busy = 0;
+        //    while (_stop == false)
+        //    {
+        //            try
+        //            {
+        //            if (_targetQueueList.Count > 0 && _robotIsMoving == false)
+        //            {
+        //                _robotIsMoving = true;
+        //                if (busy == 0)
+        //                {
+        //                                                // Get the first element of the queue
+        //                    Transform3D _locTarget = _targetQueueList[0];
 
-                                // Convert the string to double
-                                double.TryParse(_msgTarget[0], out double _x);
-                                double.TryParse(_msgTarget[1], out double _y);
-                                double.TryParse(_msgTarget[2], out double _z);
-                                double.TryParse(_msgTarget[3], out double _yaw);
-                                double.TryParse(_msgTarget[4], out double _pitch);
-                                double.TryParse(_msgTarget[5], out double _roll);                            
+        //                    textBoxX.Text = _locTarget.DX.ToString();
+        //                    textBoxY.Text = _locTarget.DY.ToString();
+        //                    textBoxZ.Text = _locTarget.DZ.ToString();
+        //                    textBoxRoll.Text = _locTarget.Roll.ToString();
+        //                    textBoxPitch.Text = _locTarget.Pitch.ToString();
+        //                    textBoxYaw.Text = _locTarget.Yaw.ToString();
 
-                                // Define a new target location
-                                Transform3D _locTarget = new Transform3D(_x, _y, _z, _yaw, _pitch, _roll);
-                                {
-                                    if (_targetQueueList.Count == 0)
-                                    {
-                                        try
-                                        {
-                                            //_targetQueueList.Add(_locTarget);
-                                            _targetQueueList.Add(_locTarget);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            MessageBox.Show($"Error adding new entry: " + ex.ToString());
-                                        }
-                                        _lastTarget = _locTarget;
-                                    }
-                                    else if (_targetQueueList.Count > 0)
-                                    {
+        //                    lstLog.Items.Add("Moving to target: " + _locTarget);
 
-                                        if (_lastTarget != _locTarget)
-                                        {
-                                            try
-                                            {
-                                                _targetQueueList.Add(_locTarget);
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                MessageBox.Show($"Error adding new entry: " + ex.ToString());
-                                            }
-                                            _lastTarget = _locTarget;
-                                        }
-                                    }
-                                }
-                                _msgReady = false;
-                            }
-                        }
-                    }
-                    if (busy > 20)
-                        busy = 0;
-                    else if (busy > 0)
-                        busy++;
-                }
-                catch (Exception ex)
-                {
-                    if (ex is System.ObjectDisposedException)
-                        break;
-                }
-                Thread.Sleep(10);
-            }
-        }
-        private void MoveToLoc()
-        {
-            int busy = 0;
-            while (_stop == false)
-            {
-                    try
-                    {
-                    if (_targetQueueList.Count > 0 && _robotIsMoving == false)
-                    {
-                        _robotIsMoving = true;
-                        if (busy == 0)
-                        {
-                                                        // Get the first element of the queue
-                            Transform3D _locTarget = _targetQueueList[0];
 
-                            textBoxX.Text = _locTarget.DX.ToString();
-                            textBoxY.Text = _locTarget.DY.ToString();
-                            textBoxZ.Text = _locTarget.DZ.ToString();
-                            textBoxRoll.Text = _locTarget.Roll.ToString();
-                            textBoxPitch.Text = _locTarget.Pitch.ToString();
-                            textBoxYaw.Text = _locTarget.Yaw.ToString();
+        //                    Cobra.Motion.Approach(_aceServer, _aceRobot, _locTarget, 20);
+        //                    Cobra.Motion.CartesianMove(_aceServer, _aceRobot, _locTarget, true);
+        //                    Cobra.Motion.Approach(_aceServer, _aceRobot, _locTarget, 20);
 
-                            lstLog.Items.Add("Moving to target: " + _locTarget);
+        //                    Thread.Sleep(1000);
 
-                            
-                            Cobra.Motion.Approach(_aceServer, _aceRobot, _locTarget, 20);
-                            Cobra.Motion.CartesianMove(_aceServer, _aceRobot, _locTarget, true);
-                            Cobra.Motion.Approach(_aceServer, _aceRobot, _locTarget, 20);
+        //                    lock (_targetQueueList)
+        //                    {
+        //                        try
+        //                        {
+        //                            _targetQueueList.RemoveAt(0);
+        //                        }
+        //                        catch (Exception ex)
+        //                        {
+        //                            MessageBox.Show($"Error removing an entry: " + ex.ToString());
+        //                        }
+        //                    }
 
-                            Thread.Sleep(1000);
 
-                            lock (_targetQueueList)
-                            {
-                                try
-                                {
-                                    _targetQueueList.RemoveAt(0);
-                                }
-                                catch (Exception ex)
-                                {
-                                    MessageBox.Show($"Error removing an entry: " + ex.ToString());
-                                }
-                            }
-                            
-                            
-                            lstLog.Items.Add("Target reached");
-                            busy++;
-                        }
-                        _robotIsMoving = false;  
-                    }
-                    if (busy > 20)
-                        busy = 0;
-                    else if (busy > 0)
-                        busy++;
-                }
-                catch (Exception ex)
-                {
-                    if (ex is System.ObjectDisposedException)
-                        break;
-                }
-                Thread.Sleep(10);
-            }
-        }
+        //                    lstLog.Items.Add("Target reached");
+        //                    busy++;
+        //                }
+        //                _robotIsMoving = false;  
+        //            }
+        //            if (busy > 20)
+        //                busy = 0;
+        //            else if (busy > 0)
+        //                busy++;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            if (ex is System.ObjectDisposedException)
+        //                break;
+        //        }
+        //        Thread.Sleep(10);
+        //    }
+        //}
 
-        private void btnConnect_Click(object sender, EventArgs e)
-        {
-            ConnectAce();
-        }
+        //private void btnConnect_Click(object sender, EventArgs e)
+        //{
+        //    ConnectAce();
+        //}
     }
 }
