@@ -1,0 +1,15 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/opti-sort
+/src/OptiSort/.vs/OptiSort
+/src/OptiSort/CobraLibrary/.vs
+/src/OptiSort/ControllerLibrary/.vs
+/src/OptiSort/FlexibowlLibrary/.vs
+/src/OptiSort/FlexibowlLibrary/obj/Debug
+/src/OptiSort/HMI/.vs
+/src/OptiSort/HMI/obj/Debug
+*.user
+/src/videoStream/.vs
+/src/videoStream
