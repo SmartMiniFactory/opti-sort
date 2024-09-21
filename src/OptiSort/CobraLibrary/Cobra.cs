@@ -11,143 +11,156 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Ace.Adept.Server.Desktop.Connection;
+using Ace.Core.Server.Motion;
+using Ace.Core.Server.Event;
+using Ace.Core.Client.Sim3d.Controls;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace CobraLibrary
 {
-    public class Cobra
+    public partial class Cobra
     {
-        // Hanlde robot's intialisation
-        public class Init
+
+        const int _callbackPort = 43431; 
+        const int _remotingPort = 43434;
+        const string _endEffectorName = "Suction Cup";
+        const string _remotingName = "ace";
+        const string _controllerName = "OptiSort";
+
+        const string _robotIP = "10.90.90.60";
+        const string _controllerIP = "127.0.0.1";
+
+        const bool _newWorkspace = true;
+
+        private IAceServer aceServer;
+        private IAceClient aceClient;
+        static private IAdeptController controller;
+        static private IAdeptRobot robot;
+        static private IAbstractEndEffector endEffector;
+
+        private RemoteAceObjectEventHandler generalEventHandler;
+        private RemoteApplicationEventHandler applicationEventHandler;
+        private SimulationContainerControl simulationControl;
+        private ControlPanelManager pendantManager;
+
+
+        public (IAdeptController controller, IAdeptRobot robot, IAceServer aceServer, IAceClient aceClient) Connect(bool emulate)
         {
-            const int _callbackPort = 43431;
-            const int _remotingPort = 43434;
+            // Connect to ACE
+            aceServer = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, "localhost", _remotingPort);
+            Console.WriteLine("Connected to server");
 
-            const string RobotIP = "10.90.90.60";
-            const string ControllerIP = "127.0.0.1";
+            aceClient = new AceClient(aceServer);
+            Console.WriteLine("Connected to client");
 
-            const bool _emulation = true;
-            const bool _newWorkspace = true;
+            aceClient.InitializePlugins(null);
 
-            static private IAceServer aceServer;
-            static private IAceClient aceClient;
-            static private IAdeptController controller;
-            static private IAdeptRobot robot;
-            static private IAbstractEndEffector endEffector;
+            if (_newWorkspace)
+                aceServer.Clear(); // Clear the workspace
 
-            public static (IAdeptController, IAdeptRobot, IAceServer) Connect(string _controllerIP, string _controllerName, string _endEffectorName = "Suction Cup", string _remotingName = "ace")
+            aceServer.EmulationMode = emulate;
+
+            // Get the available controllers
+            IList<IAceObject> availableControllers = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IAdeptController)), true);
+            if (availableControllers.Count == 0)
             {
-                // Initialize remoting infrastructure
-                RemotingUtil.InitializeRemotingSubsystem(true, _callbackPort);
-
-                // Connect to ACE
-                IAceServer aceServer = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, _controllerIP, _remotingPort);
-                Console.WriteLine("Connected to server");
-
-                IAceClient aceClient = new AceClient(aceServer);
-                Console.WriteLine("Connected to client");
-
-                aceClient.InitializePlugins(null);
-
-                if (_newWorkspace)
-                {
-                    // Clear the workspace
-                    aceServer.Clear();
-                }
-
-                aceServer.EmulationMode = _emulation;
-
-                // Get the available controllers
-                IList<IAceObject> availableControllers = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IAdeptController)), true);
-                if (availableControllers.Count == 0)
-                {
-                    // Handle the case when no controllers are available
-                    Console.WriteLine("No controllers available.\nCreating a new one.");
-
-                    // Create a controller and robot and establish the connection
-                    controller = aceServer.Root.AddObjectOfType(typeof(IAdeptController), _controllerName) as IAdeptController;
-
-                }
-                else
-                {
-                    // Connect to the first available controller
-                    Console.WriteLine("Connecting to {0}", availableControllers.FirstOrDefault());
-                    controller = availableControllers.FirstOrDefault() as IAdeptController;
-                }
-
-                // Get the available robots
-                IList<IAceObject> availableRobots = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IAdeptRobot)), true);
-                if (availableRobots.Count == 0)
-                {
-                    // Handle the case when no controllers are available
-                    Console.WriteLine("No robots available.\nCreating a new one.");
-
-                    // Create a controller and robot and establish the connection
-                    robot = aceServer.Root.AddObjectOfType(typeof(ICobra600), "R1 Cobra600") as IAdeptRobot;
-                }
-                else
-                {
-                    // Connect to the first available robot
-                    Console.WriteLine("Connecting to {0}", availableRobots.FirstOrDefault());
-                    robot = availableRobots.FirstOrDefault() as IAdeptRobot;
-                }
-
-                // Configure the robot and controller IP addresses
-                controller.Address = RobotIP;
-                robot.Controller = controller;
-
-                // Get the available end-effectors
-                IList<IAceObject> availableEndEffectors = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IIODrivenEndEffector)), true);
-                if (availableEndEffectors.Count == 0)
-                {
-                    // Handle the case when no controllers are available
-                    Console.WriteLine("No End-effectors available.\nCreating a new one.");
-
-                    // Create an end-effector object
-                    endEffector = aceServer.Root.AddObjectOfType(typeof(IIODrivenEndEffector), _endEffectorName) as IAbstractEndEffector;
-                }
-                else
-                {
-                    // Connect to the first available end-effector
-                    Console.WriteLine("Connecting to {0}", availableEndEffectors.FirstOrDefault());
-                    endEffector = availableEndEffectors.FirstOrDefault() as IIODrivenEndEffector;
-                }
-
-                // Associate the end-effector with the robot
-                robot.SelectedEndEffector = endEffector;
-                robot.EndEffectorGripSignal = 98;
-                robot.EndEffectorReleaseSignal = 97;
-
-                // Enable the controller
-                controller.Enabled = true;
-
-                // If not calibrated, calibrate the robot
-                try
-                {
-                    if (robot.IsCalibrated == false)
-                    {
-                        robot.Power = true;
-                        controller.HighPower = true;
-                        Console.WriteLine("Enabling power to {0}. Please press the button on the front panel.", robot);
-                        robot.Calibrate();
-                        controller.Calibrate();
-
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-
-                return (controller, robot, aceServer);
+                Console.WriteLine("No controllers available.\nCreating a new one.");
+                controller = aceServer.Root.AddObjectOfType(typeof(IAdeptController), _controllerName) as IAdeptController; // create and connect
             }
-            public static void Disconnet(IAdeptController controller, IAdeptRobot robot)
+            else
             {
-                Console.WriteLine("Shutting down {0}", robot);
-                robot.Power = false;
-                Console.WriteLine("Disconnecting from {0}", controller);
+                Console.WriteLine("Connecting to {0}", availableControllers.FirstOrDefault());
+                controller = availableControllers.FirstOrDefault() as IAdeptController; // connect to first available
+            }
+
+            // Get the available robots
+            IList<IAceObject> availableRobots = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IAdeptRobot)), true);
+            if (availableRobots.Count == 0)
+            {
+                Console.WriteLine("No robots available.\nCreating a new one.");
+                robot = aceServer.Root.AddObjectOfType(typeof(ICobra600), "R1 Cobra600") as IAdeptRobot; // create and connect
+            }
+            else
+            {
+                Console.WriteLine("Connecting to {0}", availableRobots.FirstOrDefault());
+                robot = availableRobots.FirstOrDefault() as IAdeptRobot; // connect to first available
+            }
+
+            // Configure the robot and controller IP addresses
+            controller.Address = _robotIP;
+            robot.Controller = controller;
+
+            // Get the available end-effectors
+            IList<IAceObject> availableEndEffectors = aceServer.Root.Filter(new ObjectTypeFilter(typeof(IIODrivenEndEffector)), true);
+            if (availableEndEffectors.Count == 0)
+            {
+                Console.WriteLine("No End-effectors available.\nCreating a new one.");
+                endEffector = aceServer.Root.AddObjectOfType(typeof(IIODrivenEndEffector), _endEffectorName) as IAbstractEndEffector; // create object
+            }
+            else
+            {
+                Console.WriteLine("Connecting to {0}", availableEndEffectors.FirstOrDefault());
+                endEffector = availableEndEffectors.FirstOrDefault() as IIODrivenEndEffector; // use first available
+            }
+
+            // Associate the end-effector with the robot
+            robot.SelectedEndEffector = endEffector;
+            robot.EndEffectorGripSignal = 98;
+            robot.EndEffectorReleaseSignal = 97;
+
+
+            controller.Enabled = true; // Enable the controller
+
+
+            // If not calibrated, calibrate the robot
+            try
+            {
+                if (robot.IsCalibrated == false)
+                {
+                    robot.Power = true;
+                    controller.HighPower = true;
+                    Console.WriteLine("Enabling power to {0}. Please press the button on the front panel.", robot);
+                    robot.Calibrate();
+                    controller.Calibrate();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return (null, null, null, null);
+            }
+
+            return (controller, robot, aceServer, aceClient);
+        }
+
+
+        public void Disconnect(IAdeptController controller, IAceServer server)
+        {
+            try
+            {
+                //ChangeControlState(false);
+                //Remove3DDisplay();
+                //ClosePendant();
+
+                // Release all event handlers before we clear the workspace.				
+                generalEventHandler.Dispose();
+                generalEventHandler = null;
+                applicationEventHandler.Dispose();
+                applicationEventHandler = null;
+
+                // Clear the workspace
                 controller.Enabled = false;
+                server.Clear();
+                server = null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                //GuiUtil.ShowExceptionDialog(this, ex);
             }
         }
+
 
         // Handle robot's motion
         public class Motion

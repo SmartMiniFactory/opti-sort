@@ -14,181 +14,126 @@ using CobraLibrary;
 using System.ComponentModel;
 using ActiproSoftware.Drawing;
 using System.Collections.Concurrent;
+using OptiSort;
+using static HMI.HMI;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using ActiproSoftware.SyntaxEditor.Addons.DotNet.Ast;
+using Ace.Adept.Server.Device;
+using Ace.Adept.Server.Motion.Robots;
+using Ace.Core.Server.Motion;
+using Ace.Core.Util;
+using Ace.Core.Server.Event;
+using System.Net.Sockets;
 
 namespace HMI
 {
     public partial class ucOptiSort : Form
-    {   
-        // MQTT
-        IMqttClient _client;
+    {
+
+        /// <summary>
+        /// single MQTT broker where at least two topics are present: 
+        /// 1. image streaming (one per camera, incoming); python file
+        /// 2. scara's pick location streaming (incoming); same python file that operates with openCV on image
+        /// 
+        /// UDP protocol for flexibowl's communication (outgoing); flexibowl library
+        /// 
+        /// TCP connection with scara robot (in/out); cobra library
+        /// </summary>
+        /// 
+
+        // MQTT 
+        IMqttClient _mqttClient;
         byte[] _byteReceived = new byte[1];
         string _msgReceived = string.Empty;
-        int _byteLen;
         bool _msgReady = false;
-        DateTime _msgDate = DateTime.MinValue;
-        bool _stop = false;
-        string _brokerIp = "localhost";
+        int _byteLen;
+        string _broker = "localhost";
         string _topic = "optisort/scara/target";
         int _port = 1883;
-        Thread _thDefineLocation;
-
-        // Omron ACE
-        static private IAceServer _aceServer;
-        static private IAceClient _aceClient;
-        static private IAdeptController _aceController;
-        static private IAdeptRobot _aceRobot;
-        static private IAbstractEndEffector endEffector;
-        const string _robotIP = "10.90.90.60";
-        const string _controllerIP = "127.0.0.1";
-        static bool _robotIsMoving = false;
-        static Thread _thReachLocation;
-        static private SimulationContainerControl _simulationControl;
-        static private ControlPanelManager _pendantManager;
-        static private Transform3D _lastTarget = new Transform3D(0, 0, 0, 0, 0, 0);
-        static private BindingList<Transform3D> _targetQueueList;
 
 
         public ucOptiSort()
         {
             InitializeComponent();
 
-            // Create a binding list to store the target locations
-            _targetQueueList = new BindingList<Transform3D>();
-
-            // Set up the DataGridView
-            this._targetQueue.AutoGenerateColumns = false;
-
-            // Create and bind columns to properties
-            DataGridViewTextBoxColumn xColumn = new DataGridViewTextBoxColumn
+            // init combobox
+            Log("Initializing cameras combobox");
+            List<Cameras> camerasList = new List<Cameras>
             {
-                HeaderText = "DX",
-                DataPropertyName = "DX",
-                Width = 100 // Set fixed width
+                new Cameras { ID = 0, Text = "Integrated Camera" },
+                new Cameras { ID = 1, Text = "IDS" },
+                new Cameras { ID = 2, Text = "Luxonics" },
+                new Cameras { ID = 3, Text = "???" }
             };
-            this._targetQueue.Columns.Add(xColumn);
+            cmbCameras.DataSource = camerasList;
+            cmbCameras.DisplayMember = "Text";
+            cmbCameras.ValueMember = "ID";    
+            cmbCameras.DataSource = camerasList;
 
-            DataGridViewTextBoxColumn yColumn = new DataGridViewTextBoxColumn
-            {
-                HeaderText = "DY",
-                DataPropertyName = "DY",
-                Width = 100 // Set fixed width
-            };
-            this._targetQueue.Columns.Add(yColumn);
 
-            DataGridViewTextBoxColumn zColumn = new DataGridViewTextBoxColumn
-            {
-                HeaderText = "DZ",
-                DataPropertyName = "DZ",
-                Width = 100 // Set auto-size mode
-            };
-            this._targetQueue.Columns.Add(zColumn);
+            // init scara dgv
+            Log("Initializing scara datagridview");
+            Cobra cobra600 = new Cobra();
+            ucScara ucScara = new ucScara(this);
+            ucScara.Cobra600 = cobra600;
+            ucScara.Dock = DockStyle.Fill;
+            pnlScara.Controls.Clear();
+            pnlScara.Controls.Add(ucScara);
 
-            DataGridViewTextBoxColumn yawColumn = new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Yaw",
-                DataPropertyName = "Yaw",
-                Width = 100 // Set auto-size mode
-            };
-            this._targetQueue.Columns.Add(yawColumn);
 
-            DataGridViewTextBoxColumn pitchColumn = new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Pitch",
-                DataPropertyName = "Pitch",
-                Width = 100 // Set auto-size mode
-            };
-            this._targetQueue.Columns.Add(pitchColumn);
+            // init camera view
+            // TODO: add selection from txtbox
+            Log("Initializing cameras view");
+            ucCameraStream cameraUC = new ucCameraStream();
+            cameraUC.Dock = DockStyle.Fill;
+            pnlCameraStream.Controls.Clear();
+            pnlCameraStream.Controls.Add(cameraUC);
 
-            DataGridViewTextBoxColumn rollColumn = new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Roll",
-                DataPropertyName = "Roll",
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill // Set auto-size mode
-
-            };
-            this._targetQueue.Columns.Add(rollColumn);
-
-            // Bind the BindingList to the DataGridView
-            this._targetQueue.DataSource = _targetQueueList;
-
-            this.Disposed += UcScara_Disposed;
-            this.HandleCreated += UcScara_HandleCreated;
-            _targetQueue.Rows.Clear();
-
+            InitializeConnections();
         }
-        private void UcScara_HandleCreated(object sender, EventArgs e)
+
+
+        private async void InitializeConnections()
         {
-            Restart();
-
-            _stop = false;
-            // Start a new thread to add the target locations to the queue
-            _thDefineLocation = new Thread(AddToLocationQueue) { IsBackground = true };
-            _thDefineLocation.Start();
-            
-            // Start a new thread to move the robot to the target locations
-            _thReachLocation = new Thread(MoveToLoc) { IsBackground = true };
-            _thReachLocation.Start();
+            // MQTT connection
+            // TODO: create dedicated mqtt connection class, organize better and standardize robot/camera
+            lstLog.Items.Add("Connecting to MQTT broker");
+            Task<bool> mqtt = ConnectMqtt(_broker, _port, _topic);
+            bool connected = await mqtt;
+            if (!connected)
+            {
+                Log("Failed to connect to MQTT broker");
+                return;
+            }
+            Log("Connected to MQTT broker");            
         }
-        private void UcScara_Disposed(object sender, EventArgs e)
+
+
+        public void Log(string msg)
+        {
+            lstLog.Items.Add(msg);
+            lstLog.TopIndex = lstLog.Items.Count - 1;
+        }
+
+
+        // TODO: add summary
+        private async Task<bool> ConnectMqtt(string broker, int port, string topic)
         {
             try
             {
-                if (_client != null)
+                if (_mqttClient != null)
                 {
-                    _stop = true;
-                    // Stop the threads
-                    if (_thDefineLocation != null && _thDefineLocation.IsAlive)
-                        _thDefineLocation.Join(2000);
-                    _thDefineLocation = null;
-
-                    if (_thReachLocation != null && _thReachLocation.IsAlive)
-                        _thReachLocation.Join(2000);
-                    _thReachLocation = null;
-
-                    // Disconnect the MQTT client
-                    _client.ApplicationMessageReceivedAsync -= Client_ApplicationMessageReceivedAsync;
-                    _client.DisconnectAsync().Wait();
-                    _client.Dispose();
-
-                    // Disconnect from Omron ACE
-                    Cobra.Init.Disconnet(_aceController, _aceRobot);
-                }
-            }
-            catch (Exception ex)
-            {
-                listBox.Items.Add(ex.ToString());
-            }
-        }
-        public async void Restart()
-        {
-            // Connect to the MQTT broker
-            await ConnectMqtt(_brokerIp, _port, _topic);
-
-            // Connect to Omron ACE
-            await ConnectAce();
-        }
-        private async System.Threading.Tasks.Task ConnectAce()
-        {
-            listBox.Items.Add("Connecting to the robot");
-            (_aceController, _aceRobot, _aceServer) = Cobra.Init.Connect(_controllerIP, "OptiSort");
-            listBox.Items.Add("Robot connected");
-        }
-        private async System.Threading.Tasks.Task ConnectMqtt(string broker, int port, string topic)
-        {
-            try
-            {
-                if (_client != null)
-                {
-                    if (_client.IsConnected)
-                        await _client.DisconnectAsync();
-                    _client.ApplicationMessageReceivedAsync -= Client_ApplicationMessageReceivedAsync;
-                    _client.Dispose();
-                    _client = null;
+                    if (_mqttClient.IsConnected)
+                        await _mqttClient.DisconnectAsync();
+                    _mqttClient.ApplicationMessageReceivedAsync -= Client_ApplicationMessageReceivedAsync;
+                    _mqttClient.Dispose();
+                    _mqttClient = null;
                 }
 
                 var mqttFactory = new MQTTnet.MqttFactory();
-                _client = mqttFactory.CreateMqttClient();
-                var options = new MQTTnet.Client.MqttClientOptionsBuilder()
+                _mqttClient = mqttFactory.CreateMqttClient();
+                var options = new MqttClientOptionsBuilder()
                     .WithClientId("Cobra600")
                     .WithTcpServer(broker, port)
                     .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
@@ -197,36 +142,74 @@ namespace HMI
                     .WithCleanSession()
                     .Build();
 
-                _client.ConnectedAsync += new Func<MQTTnet.Client.MqttClientConnectedEventArgs, System.Threading.Tasks.Task>(arg =>
+                _mqttClient.ConnectedAsync += new Func<MqttClientConnectedEventArgs, Task>(arg =>
                 {
-                    listBox.Items.Add($"Listening on {topic} from {broker}");
+                    Log($"Listening on {topic} from {broker}");
                     var topicFilter = new MQTTnet.MqttTopicFilterBuilder().WithTopic(topic).Build();
-                    MQTTnet.Client.MqttClientSubscribeOptions subOptions = new MQTTnet.Client.MqttClientSubscribeOptions();
+                    MQTTnet.Client.MqttClientSubscribeOptions subOptions = new MqttClientSubscribeOptions();
                     subOptions.TopicFilters.Add(topicFilter);
-                    return _client.SubscribeAsync(subOptions);
+                    return _mqttClient.SubscribeAsync(subOptions);
                 });
 
-                _client.DisconnectedAsync += new Func<MqttClientDisconnectedEventArgs, System.Threading.Tasks.Task>(arg =>
+                _mqttClient.DisconnectedAsync += new Func<MqttClientDisconnectedEventArgs, Task>(arg =>
                 {
                     try
                     {
-                        listBox.Items.Add($"Stop control robot");
+                        Log($"Stop control robot");
                     }
                     catch (Exception) { }
-                    return System.Threading.Tasks.Task.CompletedTask;
+                    return Task.CompletedTask;
                 });
 
-                _client.ApplicationMessageReceivedAsync += Client_ApplicationMessageReceivedAsync;
+                _mqttClient.ApplicationMessageReceivedAsync += Client_ApplicationMessageReceivedAsync;
                 var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
-                await _client.ConnectAsync(options, tokenSource.Token);
+                await _mqttClient.ConnectAsync(options, tokenSource.Token);
                 tokenSource.Dispose();
+                return true;
             }
             catch (Exception)
             {
-                listBox.Items.Add($"Error connecting to {broker}");
+                Log($"Error connecting to {broker}");
+                return false;
             }
         }
-        private System.Threading.Tasks.Task Client_ApplicationMessageReceivedAsync(MQTTnet.Client.MqttApplicationMessageReceivedEventArgs arg)
+
+
+        private void DisconnectMqtt()
+        {
+            try
+            {
+                if (_mqttClient != null)
+                {
+                    // TODO: l'arrivo delle coordinate sono legate alla connessione dell'mqtt. Se questo viene connesso, forse va pulita la tabella? Indagare sul senso della cosa di cui sotto
+                    //_stop = true;
+                    //// Stop the threads
+                    //if (_thDefineLocation != null && _thDefineLocation.IsAlive)
+                    //    _thDefineLocation.Join(2000);
+                    //_thDefineLocation = null;
+
+                    //if (_thReachLocation != null && _thReachLocation.IsAlive)
+                    //    _thReachLocation.Join(2000);
+                    //_thReachLocation = null;
+
+                    // Disconnect the MQTT client
+                    _mqttClient.ApplicationMessageReceivedAsync -= Client_ApplicationMessageReceivedAsync;
+                    _mqttClient.DisconnectAsync().Wait();
+                    _mqttClient.Dispose();
+                    Log("Mqtt disconnected");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log(ex.ToString());
+            }
+        }
+
+
+       
+
+        // TODO: add summary
+        private Task Client_ApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs arg)
         {
             try
             {
@@ -243,146 +226,7 @@ namespace HMI
                         }
             }
             catch (Exception) { }
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
-        private void AddToLocationQueue()
-        {
-            int busy = 0;
-            while (_stop == false)
-            {
-                try
-                {
-                    if (_msgReady)
-                    {
-                        if (busy == 0)
-                        {
-                            busy++;
-                            lock (_msgReceived)
-                            {   
-                                // Remove the brackets from the message
-                                string _msgClean = _msgReceived.Replace("[", "").Replace("]", "");
-                                // Split the message into an array using the comma as separator
-                                string[] _msgTarget = _msgClean.Split(',');
-
-                                // Convert the string to double
-                                double.TryParse(_msgTarget[0], out double _x);
-                                double.TryParse(_msgTarget[1], out double _y);
-                                double.TryParse(_msgTarget[2], out double _z);
-                                double.TryParse(_msgTarget[3], out double _yaw);
-                                double.TryParse(_msgTarget[4], out double _pitch);
-                                double.TryParse(_msgTarget[5], out double _roll);                            
-
-                                // Define a new target location
-                                Transform3D _locTarget = new Transform3D(_x, _y, _z, _yaw, _pitch, _roll);
-                                {
-                                    if (_targetQueueList.Count == 0)
-                                    {
-                                        try
-                                        {
-                                            //_targetQueueList.Add(_locTarget);
-                                            _targetQueueList.Add(_locTarget);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            MessageBox.Show($"Error adding new entry: " + ex.ToString());
-                                        }
-                                        _lastTarget = _locTarget;
-                                    }
-                                    else if (_targetQueueList.Count > 0)
-                                    {
-
-                                        if (_lastTarget != _locTarget)
-                                        {
-                                            try
-                                            {
-                                                _targetQueueList.Add(_locTarget);
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                MessageBox.Show($"Error adding new entry: " + ex.ToString());
-                                            }
-                                            _lastTarget = _locTarget;
-                                        }
-                                    }
-                                }
-                                _msgReady = false;
-                            }
-                        }
-                    }
-                    if (busy > 20)
-                        busy = 0;
-                    else if (busy > 0)
-                        busy++;
-                }
-                catch (Exception ex)
-                {
-                    if (ex is System.ObjectDisposedException)
-                        break;
-                }
-                Thread.Sleep(10);
-            }
-        }
-        private void MoveToLoc()
-        {
-            int busy = 0;
-            while (_stop == false)
-            {
-                    try
-                    {
-                    if (_targetQueueList.Count > 0 && _robotIsMoving == false)
-                    {
-                        _robotIsMoving = true;
-                        if (busy == 0)
-                        {
-                                                        // Get the first element of the queue
-                            Transform3D _locTarget = _targetQueueList[0];
-
-                            textBoxX.Text = _locTarget.DX.ToString();
-                            textBoxY.Text = _locTarget.DY.ToString();
-                            textBoxZ.Text = _locTarget.DZ.ToString();
-                            textBoxRoll.Text = _locTarget.Roll.ToString();
-                            textBoxPitch.Text = _locTarget.Pitch.ToString();
-                            textBoxYaw.Text = _locTarget.Yaw.ToString();
-
-                            listBox.Items.Add("Moving to target: " + _locTarget);
-
-                            
-                            Cobra.Motion.Approach(_aceServer, _aceRobot, _locTarget, 20);
-                            Cobra.Motion.CartesianMove(_aceServer, _aceRobot, _locTarget, true);
-                            Cobra.Motion.Approach(_aceServer, _aceRobot, _locTarget, 20);
-
-                            Thread.Sleep(1000);
-
-                            lock (_targetQueueList)
-                            {
-                                try
-                                {
-                                    _targetQueueList.RemoveAt(0);
-                                }
-                                catch (Exception ex)
-                                {
-                                    MessageBox.Show($"Error removing an entry: " + ex.ToString());
-                                }
-                            }
-                            
-                            
-                            listBox.Items.Add("Target reached");
-                            busy++;
-                        }
-                        _robotIsMoving = false;  
-                    }
-                    if (busy > 20)
-                        busy = 0;
-                    else if (busy > 0)
-                        busy++;
-                }
-                catch (Exception ex)
-                {
-                    if (ex is System.ObjectDisposedException)
-                        break;
-                }
-                Thread.Sleep(10);
-            }
+            return Task.CompletedTask;
         }
     }
 }

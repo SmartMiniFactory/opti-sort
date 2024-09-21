@@ -9,7 +9,7 @@ import numpy as np
 ####################################################### VARIABLES #######################################################
 
 # MQTT
-BOKER_ID = 2
+BOKER_ID = 1
 MQTT_BROKER = ["192.168.0.102", "localhost", "10.10.238.20"] # IP address of the MQTTT broker
 MQTT_PORT = 1883 # Port of the MQTT Broker
 MQTT_TOPIC = "optisort/luxonis/stream" # Topic on which frame will be published

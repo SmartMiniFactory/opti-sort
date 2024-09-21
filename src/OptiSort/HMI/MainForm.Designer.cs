@@ -28,278 +28,220 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.textBoxX = new System.Windows.Forms.TextBox();
-            this.labelX = new System.Windows.Forms.Label();
-            this.labelY = new System.Windows.Forms.Label();
-            this.textBoxY = new System.Windows.Forms.TextBox();
-            this.labelZ = new System.Windows.Forms.Label();
-            this.textBoxZ = new System.Windows.Forms.TextBox();
-            this.listBox = new System.Windows.Forms.ListBox();
-            this.labelYaw = new System.Windows.Forms.Label();
-            this.textBoxYaw = new System.Windows.Forms.TextBox();
-            this.labelPitch = new System.Windows.Forms.Label();
-            this.textBoxPitch = new System.Windows.Forms.TextBox();
-            this.labelRoll = new System.Windows.Forms.Label();
-            this.textBoxRoll = new System.Windows.Forms.TextBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.groupBoxTargetQueue = new System.Windows.Forms.GroupBox();
-            this._targetQueue = new System.Windows.Forms.DataGridView();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
-            this.groupBoxTargetQueue.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this._targetQueue)).BeginInit();
+            this.pnlCameraStream = new System.Windows.Forms.Panel();
+            this.cmbCameras = new System.Windows.Forms.ComboBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.lstLog = new System.Windows.Forms.ListBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.pnlRobot3D = new System.Windows.Forms.Panel();
+            this.lblRobotIP = new System.Windows.Forms.Label();
+            this.txtRobotIP = new System.Windows.Forms.TextBox();
+            this.lblControllerIP = new System.Windows.Forms.Label();
+            this.txtControllerIP = new System.Windows.Forms.TextBox();
+            this.btnConnect = new System.Windows.Forms.Button();
+            this.btnDisconnect = new System.Windows.Forms.Button();
+            this.tblRobots = new System.Windows.Forms.TableLayoutPanel();
+            this.pnlConfig = new System.Windows.Forms.Panel();
+            this.pnlScara = new System.Windows.Forms.Panel();
+            this.panel1.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
+            this.tblRobots.SuspendLayout();
+            this.pnlConfig.SuspendLayout();
             this.SuspendLayout();
             // 
-            // textBoxX
+            // pnlCameraStream
             // 
-            this.textBoxX.BackColor = System.Drawing.SystemColors.WindowFrame;
-            this.textBoxX.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxX.ForeColor = System.Drawing.Color.LightGoldenrodYellow;
-            this.textBoxX.Location = new System.Drawing.Point(41, 27);
-            this.textBoxX.Name = "textBoxX";
-            this.textBoxX.ReadOnly = true;
-            this.textBoxX.Size = new System.Drawing.Size(100, 26);
-            this.textBoxX.TabIndex = 0;
+            this.pnlCameraStream.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlCameraStream.Location = new System.Drawing.Point(3, 71);
+            this.pnlCameraStream.Name = "pnlCameraStream";
+            this.pnlCameraStream.Size = new System.Drawing.Size(672, 448);
+            this.pnlCameraStream.TabIndex = 18;
             // 
-            // labelX
+            // cmbCameras
             // 
-            this.labelX.AutoSize = true;
-            this.labelX.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelX.Location = new System.Drawing.Point(5, 33);
-            this.labelX.Name = "labelX";
-            this.labelX.Size = new System.Drawing.Size(24, 20);
-            this.labelX.TabIndex = 1;
-            this.labelX.Text = "X:";
+            this.cmbCameras.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cmbCameras.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cmbCameras.FormattingEnabled = true;
+            this.cmbCameras.Location = new System.Drawing.Point(3, 3);
+            this.cmbCameras.Name = "cmbCameras";
+            this.cmbCameras.Size = new System.Drawing.Size(672, 54);
+            this.cmbCameras.TabIndex = 0;
             // 
-            // labelY
+            // panel1
             // 
-            this.labelY.AutoSize = true;
-            this.labelY.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelY.Location = new System.Drawing.Point(6, 64);
-            this.labelY.Name = "labelY";
-            this.labelY.Size = new System.Drawing.Size(24, 20);
-            this.labelY.TabIndex = 3;
-            this.labelY.Text = "Y:";
+            this.panel1.Controls.Add(this.lstLog);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel1.Location = new System.Drawing.Point(0, 977);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1818, 100);
+            this.panel1.TabIndex = 0;
             // 
-            // textBoxY
+            // lstLog
             // 
-            this.textBoxY.BackColor = System.Drawing.SystemColors.WindowFrame;
-            this.textBoxY.ForeColor = System.Drawing.Color.LightGoldenrodYellow;
-            this.textBoxY.Location = new System.Drawing.Point(41, 59);
-            this.textBoxY.Name = "textBoxY";
-            this.textBoxY.ReadOnly = true;
-            this.textBoxY.Size = new System.Drawing.Size(100, 26);
-            this.textBoxY.TabIndex = 2;
+            this.lstLog.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lstLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstLog.FormattingEnabled = true;
+            this.lstLog.ItemHeight = 20;
+            this.lstLog.Location = new System.Drawing.Point(0, 0);
+            this.lstLog.Name = "lstLog";
+            this.lstLog.Size = new System.Drawing.Size(1818, 100);
+            this.lstLog.TabIndex = 0;
             // 
-            // labelZ
+            // tableLayoutPanel1
             // 
-            this.labelZ.AutoSize = true;
-            this.labelZ.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelZ.Location = new System.Drawing.Point(6, 96);
-            this.labelZ.Name = "labelZ";
-            this.labelZ.Size = new System.Drawing.Size(23, 20);
-            this.labelZ.TabIndex = 5;
-            this.labelZ.Text = "Z:";
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Controls.Add(this.pnlRobot3D, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.pnlCameraStream, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.cmbCameras, 0, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(1140, 0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.976745F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 46.51163F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 46.51163F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(678, 977);
+            this.tableLayoutPanel1.TabIndex = 19;
             // 
-            // textBoxZ
+            // pnlRobot3D
             // 
-            this.textBoxZ.BackColor = System.Drawing.SystemColors.WindowFrame;
-            this.textBoxZ.ForeColor = System.Drawing.Color.LightGoldenrodYellow;
-            this.textBoxZ.Location = new System.Drawing.Point(41, 90);
-            this.textBoxZ.Name = "textBoxZ";
-            this.textBoxZ.ReadOnly = true;
-            this.textBoxZ.Size = new System.Drawing.Size(100, 26);
-            this.textBoxZ.TabIndex = 4;
+            this.pnlRobot3D.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlRobot3D.Location = new System.Drawing.Point(3, 525);
+            this.pnlRobot3D.Name = "pnlRobot3D";
+            this.pnlRobot3D.Size = new System.Drawing.Size(672, 449);
+            this.pnlRobot3D.TabIndex = 19;
             // 
-            // listBox
+            // lblRobotIP
             // 
-            this.listBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.listBox.FormattingEnabled = true;
-            this.listBox.HorizontalScrollbar = true;
-            this.listBox.ItemHeight = 15;
-            this.listBox.Location = new System.Drawing.Point(2, 21);
-            this.listBox.Name = "listBox";
-            this.listBox.Size = new System.Drawing.Size(620, 287);
-            this.listBox.TabIndex = 6;
+            this.lblRobotIP.AutoSize = true;
+            this.lblRobotIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblRobotIP.Location = new System.Drawing.Point(27, 18);
+            this.lblRobotIP.Name = "lblRobotIP";
+            this.lblRobotIP.Size = new System.Drawing.Size(132, 36);
+            this.lblRobotIP.TabIndex = 20;
+            this.lblRobotIP.Text = "Robot IP";
             // 
-            // labelYaw
+            // txtRobotIP
             // 
-            this.labelYaw.AutoSize = true;
-            this.labelYaw.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelYaw.Location = new System.Drawing.Point(155, 93);
-            this.labelYaw.Name = "labelYaw";
-            this.labelYaw.Size = new System.Drawing.Size(44, 20);
-            this.labelYaw.TabIndex = 12;
-            this.labelYaw.Text = "Yaw:";
+            this.txtRobotIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtRobotIP.Location = new System.Drawing.Point(219, 18);
+            this.txtRobotIP.Name = "txtRobotIP";
+            this.txtRobotIP.Size = new System.Drawing.Size(285, 41);
+            this.txtRobotIP.TabIndex = 21;
             // 
-            // textBoxYaw
+            // lblControllerIP
             // 
-            this.textBoxYaw.BackColor = System.Drawing.SystemColors.WindowFrame;
-            this.textBoxYaw.ForeColor = System.Drawing.Color.LightGoldenrodYellow;
-            this.textBoxYaw.Location = new System.Drawing.Point(207, 90);
-            this.textBoxYaw.Name = "textBoxYaw";
-            this.textBoxYaw.ReadOnly = true;
-            this.textBoxYaw.Size = new System.Drawing.Size(100, 26);
-            this.textBoxYaw.TabIndex = 11;
+            this.lblControllerIP.AutoSize = true;
+            this.lblControllerIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblControllerIP.Location = new System.Drawing.Point(27, 79);
+            this.lblControllerIP.Name = "lblControllerIP";
+            this.lblControllerIP.Size = new System.Drawing.Size(181, 36);
+            this.lblControllerIP.TabIndex = 22;
+            this.lblControllerIP.Text = "Controller IP";
             // 
-            // labelPitch
+            // txtControllerIP
             // 
-            this.labelPitch.AutoSize = true;
-            this.labelPitch.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPitch.Location = new System.Drawing.Point(155, 64);
-            this.labelPitch.Name = "labelPitch";
-            this.labelPitch.Size = new System.Drawing.Size(48, 20);
-            this.labelPitch.TabIndex = 10;
-            this.labelPitch.Text = "Pitch:";
+            this.txtControllerIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtControllerIP.Location = new System.Drawing.Point(219, 76);
+            this.txtControllerIP.Name = "txtControllerIP";
+            this.txtControllerIP.Size = new System.Drawing.Size(285, 41);
+            this.txtControllerIP.TabIndex = 23;
             // 
-            // textBoxPitch
+            // btnConnect
             // 
-            this.textBoxPitch.BackColor = System.Drawing.SystemColors.WindowFrame;
-            this.textBoxPitch.ForeColor = System.Drawing.Color.LightGoldenrodYellow;
-            this.textBoxPitch.Location = new System.Drawing.Point(207, 58);
-            this.textBoxPitch.Name = "textBoxPitch";
-            this.textBoxPitch.ReadOnly = true;
-            this.textBoxPitch.Size = new System.Drawing.Size(100, 26);
-            this.textBoxPitch.TabIndex = 9;
+            this.btnConnect.Location = new System.Drawing.Point(526, 18);
+            this.btnConnect.Name = "btnConnect";
+            this.btnConnect.Size = new System.Drawing.Size(118, 41);
+            this.btnConnect.TabIndex = 24;
+            this.btnConnect.Text = "Connect";
+            this.btnConnect.UseVisualStyleBackColor = true;
             // 
-            // labelRoll
+            // btnDisconnect
             // 
-            this.labelRoll.AutoSize = true;
-            this.labelRoll.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelRoll.Location = new System.Drawing.Point(161, 33);
-            this.labelRoll.Name = "labelRoll";
-            this.labelRoll.Size = new System.Drawing.Size(40, 20);
-            this.labelRoll.TabIndex = 8;
-            this.labelRoll.Text = "Roll:";
+            this.btnDisconnect.Enabled = false;
+            this.btnDisconnect.Location = new System.Drawing.Point(526, 76);
+            this.btnDisconnect.Name = "btnDisconnect";
+            this.btnDisconnect.Size = new System.Drawing.Size(118, 41);
+            this.btnDisconnect.TabIndex = 25;
+            this.btnDisconnect.Text = "Disconnect";
+            this.btnDisconnect.UseVisualStyleBackColor = true;
             // 
-            // textBoxRoll
+            // tblRobots
             // 
-            this.textBoxRoll.BackColor = System.Drawing.SystemColors.WindowFrame;
-            this.textBoxRoll.ForeColor = System.Drawing.Color.LightGoldenrodYellow;
-            this.textBoxRoll.Location = new System.Drawing.Point(207, 27);
-            this.textBoxRoll.Name = "textBoxRoll";
-            this.textBoxRoll.ReadOnly = true;
-            this.textBoxRoll.Size = new System.Drawing.Size(100, 26);
-            this.textBoxRoll.TabIndex = 7;
+            this.tblRobots.ColumnCount = 1;
+            this.tblRobots.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tblRobots.Controls.Add(this.pnlConfig, 0, 0);
+            this.tblRobots.Controls.Add(this.pnlScara, 0, 2);
+            this.tblRobots.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tblRobots.Location = new System.Drawing.Point(0, 0);
+            this.tblRobots.Name = "tblRobots";
+            this.tblRobots.RowCount = 3;
+            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 35F));
+            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 55F));
+            this.tblRobots.Size = new System.Drawing.Size(1140, 977);
+            this.tblRobots.TabIndex = 26;
             // 
-            // groupBox1
+            // pnlConfig
             // 
-            this.groupBox1.BackColor = System.Drawing.Color.Tomato;
-            this.groupBox1.Controls.Add(this.labelZ);
-            this.groupBox1.Controls.Add(this.textBoxX);
-            this.groupBox1.Controls.Add(this.labelYaw);
-            this.groupBox1.Controls.Add(this.labelX);
-            this.groupBox1.Controls.Add(this.textBoxYaw);
-            this.groupBox1.Controls.Add(this.textBoxY);
-            this.groupBox1.Controls.Add(this.labelPitch);
-            this.groupBox1.Controls.Add(this.labelY);
-            this.groupBox1.Controls.Add(this.textBoxPitch);
-            this.groupBox1.Controls.Add(this.textBoxZ);
-            this.groupBox1.Controls.Add(this.labelRoll);
-            this.groupBox1.Controls.Add(this.textBoxRoll);
-            this.groupBox1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(6, 6);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(314, 123);
-            this.groupBox1.TabIndex = 14;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Current Target";
+            this.pnlConfig.Controls.Add(this.lblRobotIP);
+            this.pnlConfig.Controls.Add(this.btnDisconnect);
+            this.pnlConfig.Controls.Add(this.txtRobotIP);
+            this.pnlConfig.Controls.Add(this.btnConnect);
+            this.pnlConfig.Controls.Add(this.lblControllerIP);
+            this.pnlConfig.Controls.Add(this.txtControllerIP);
+            this.pnlConfig.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlConfig.Location = new System.Drawing.Point(3, 3);
+            this.pnlConfig.Name = "pnlConfig";
+            this.pnlConfig.Size = new System.Drawing.Size(1134, 335);
+            this.pnlConfig.TabIndex = 18;
             // 
-            // groupBox2
+            // pnlScara
             // 
-            this.groupBox2.BackColor = System.Drawing.Color.Teal;
-            this.groupBox2.Controls.Add(this.listBox);
-            this.groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(5, 131);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox2.Size = new System.Drawing.Size(624, 310);
-            this.groupBox2.TabIndex = 15;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Console";
+            this.pnlScara.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlScara.Location = new System.Drawing.Point(3, 441);
+            this.pnlScara.Name = "pnlScara";
+            this.pnlScara.Size = new System.Drawing.Size(1134, 533);
+            this.pnlScara.TabIndex = 19;
             // 
-            // groupBoxTargetQueue
+            // ucOptiSort
             // 
-            this.groupBoxTargetQueue.BackColor = System.Drawing.Color.GreenYellow;
-            this.groupBoxTargetQueue.Controls.Add(this._targetQueue);
-            this.groupBoxTargetQueue.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBoxTargetQueue.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.groupBoxTargetQueue.Location = new System.Drawing.Point(9, 445);
-            this.groupBoxTargetQueue.Margin = new System.Windows.Forms.Padding(2);
-            this.groupBoxTargetQueue.Name = "groupBoxTargetQueue";
-            this.groupBoxTargetQueue.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBoxTargetQueue.Size = new System.Drawing.Size(620, 245);
-            this.groupBoxTargetQueue.TabIndex = 17;
-            this.groupBoxTargetQueue.TabStop = false;
-            this.groupBoxTargetQueue.Text = "Target queue";
-            // 
-            // _targetQueue
-            // 
-            this._targetQueue.AllowUserToAddRows = false;
-            this._targetQueue.AllowUserToDeleteRows = false;
-            this._targetQueue.AllowUserToResizeColumns = false;
-            this._targetQueue.AllowUserToResizeRows = false;
-            this._targetQueue.BackgroundColor = System.Drawing.Color.Snow;
-            this._targetQueue.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Sunken;
-            this._targetQueue.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this._targetQueue.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._targetQueue.GridColor = System.Drawing.SystemColors.Info;
-            this._targetQueue.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this._targetQueue.Location = new System.Drawing.Point(2, 21);
-            this._targetQueue.Margin = new System.Windows.Forms.Padding(2);
-            this._targetQueue.MultiSelect = false;
-            this._targetQueue.Name = "_targetQueue";
-            this._targetQueue.RowHeadersVisible = false;
-            this._targetQueue.RowTemplate.Height = 24;
-            this._targetQueue.Size = new System.Drawing.Size(616, 222);
-            this._targetQueue.TabIndex = 0;
-            this._targetQueue.UseWaitCursor = true;
-            // 
-            // ucScara
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
-            this.ClientSize = new System.Drawing.Size(1212, 700);
-            this.Controls.Add(this.groupBoxTargetQueue);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
-            this.Name = "ucScara";
+            this.ClientSize = new System.Drawing.Size(1818, 1077);
+            this.Controls.Add(this.tblRobots);
+            this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.panel1);
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Name = "ucOptiSort";
             this.Text = "SCARA Remote Control";
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBoxTargetQueue.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this._targetQueue)).EndInit();
+            this.panel1.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tblRobots.ResumeLayout(false);
+            this.pnlConfig.ResumeLayout(false);
+            this.pnlConfig.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.TextBox textBoxX;
-        private System.Windows.Forms.Label labelX;
-        private System.Windows.Forms.Label labelY;
-        private System.Windows.Forms.TextBox textBoxY;
-        private System.Windows.Forms.Label labelZ;
-        private System.Windows.Forms.TextBox textBoxZ;
-        private System.Windows.Forms.ListBox listBox;
-        private System.Windows.Forms.Label labelYaw;
-        private System.Windows.Forms.TextBox textBoxYaw;
-        private System.Windows.Forms.Label labelPitch;
-        private System.Windows.Forms.TextBox textBoxPitch;
-        private System.Windows.Forms.Label labelRoll;
-        private System.Windows.Forms.TextBox textBoxRoll;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.GroupBox groupBoxTargetQueue;
-        private System.Windows.Forms.DataGridView _targetQueue;
+        private System.Windows.Forms.Panel pnlCameraStream;
+        private System.Windows.Forms.ComboBox cmbCameras;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.ListBox lstLog;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.Panel pnlRobot3D;
+        private System.Windows.Forms.Label lblRobotIP;
+        private System.Windows.Forms.TextBox txtRobotIP;
+        private System.Windows.Forms.Label lblControllerIP;
+        private System.Windows.Forms.TextBox txtControllerIP;
+        private System.Windows.Forms.Button btnConnect;
+        private System.Windows.Forms.Button btnDisconnect;
+        private System.Windows.Forms.TableLayoutPanel tblRobots;
+        private System.Windows.Forms.Panel pnlConfig;
+        private System.Windows.Forms.Panel pnlScara;
     }
 }
 
