@@ -45,145 +45,7 @@ namespace CobraLibrary
         private ControlPanelManager pendantManager;
 
 
-
-        //public void Connect(bool emulate)
-        //{
-
-        //    try
-        //    {
-        //        RemotingUtil.InitializeRemotingSubsystem(true, _callbackPort);
-
-        //        // Connect to ACE.
-        //        aceServer = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), "ace", "localhost", _remotingPort);
-        //        aceClient = new AceClient(aceServer);
-        //        aceClient.InitializePlugins(null);
-
-        //        // Clear the workspace and put in emulation mode
-        //        aceServer.Clear();
-        //        aceServer.EmulationMode = emulate;
-
-        //        // Create a controller and robot and establish the connection
-        //        controller = aceServer.Root.AddObjectOfType(typeof(IAdeptController), "Controller") as IAdeptController;
-        //        robot = aceServer.Root.AddObjectOfType(typeof(ICobra800), "Robot") as IAdeptRobot;
-        //        robot.Controller = controller;
-        //        controller.Enabled = true;
-
-        //        // Force the power on and the robot to calibrated
-        //        controller.HighPower = true;
-        //        controller.Calibrate();
-
-        //        // Hook into the general and application event monitors
-        //        //generalEventHandler = new RemoteAceObjectEventHandler(aceClient, controller);
-        //        //generalEventHandler.ObjectPropertyModified += new EventHandler<PropertyModifiedEventArgs>(generalEventHandler_ObjectPropertyModified);
-        //        //applicationEventHandler = new RemoteApplicationEventHandler(controller);
-        //        //applicationEventHandler.ApplicationEventReceived += new EventHandler<NumericChangeEventArgs>(applicationEventHandler_ApplicationEventReceived);
-
-        //        // Load the file on the controller directly from the resource
-        //        // embedded in this project.
-        //        //DownloadProgramToController();
-
-        //        // Initalize monitor speed display
-        //        //this.numericUpDownMonitorSpeed.Value = controller.MonitorSpeed;
-
-        //        // Initialize power button state
-        //        //if (controller.HighPower)
-        //        //    this.buttonPower.Image = Resources.powerOn;
-        //        //else
-        //        //    this.buttonPower.Image = Resources.powerOff;
-
-        //        // Create a pendant manager
-        //        pendantManager = new ControlPanelManager();
-
-        //        //InitializeLocationDisplay();
-        //        //ChangeControlState(true);
-        //        //Create3DDisplay();
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine("AAA" + ex.Message);
-        //        //GuiUtil.ShowExceptionDialog(this, ex);
-        //    }
-
-        //}
-
-
-        //private void DownloadProgramToController()
-        //{
-
-        //    string tempFile = Path.GetTempFileName();
-        //    try
-        //    {
-
-        //        // Load the file
-        //        using (Stream stream = new BufferedStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(typeof(MainForm), ProgramFile)))
-        //        {
-        //            IOUtil.WriteStreamToFile(stream, tempFile);
-        //        }
-
-        //        controller.LoadFromPC("rob.main", tempFile);
-
-        //    }
-        //    finally
-        //    {
-        //        File.Delete(tempFile);
-        //    }
-        //}
-
-
-        //private void Create3DDisplay()
-        //{
-
-        //    simulationControl = new SimulationContainerControl();
-        //    simulationControl.Dock = DockStyle.Fill;
-        //    groupBoxVirtualDisplay.Controls.Add(simulationControl);
-
-        //    simulationControl.Client = aceClient;
-        //    simulationControl.Visible = false;
-        //    simulationControl.Visible = true;
-        //    simulationControl.AddToScene(robot);
-        //    simulationControl.CameraPositions = new Transform3D[] { simulationControl.DefaultIsometricViewPosition };
-
-        //}
-
-
-        //private void InitializeLocationDisplay()
-        //{
-
-        //    string tempFile = Path.GetTempFileName();
-        //    try
-        //    {
-
-        //        // Load the file
-        //        using (Stream stream = new BufferedStream(Assembly.GetExecutingAssembly().GetManifestResourceStream(typeof(MainForm), ProgramFile)))
-        //        {
-        //            IOUtil.WriteStreamToFile(stream, tempFile);
-        //        }
-
-        //        string[] lines = File.ReadAllLines(tempFile);
-        //        Dictionary<string, object> variables = VPlusModuleUtil.ExtractVariables(lines);
-
-        //        foreach (string variableName in variables.Keys)
-        //        {
-
-        //            object variableValue = variables[variableName];
-        //            Transform3D transform = variableValue as Transform3D;
-        //            if (transform == null)
-        //                continue;
-
-        //            this.dataGridViewLocations.Rows.Add(variableName, transform.DX, transform.DY, transform.DZ, transform.Yaw, transform.Pitch, transform.Roll);
-
-        //        }
-
-        //    }
-        //    finally
-        //    {
-        //        File.Delete(tempFile);
-        //    }
-
-        //}
-
-        public bool Connect(bool emulate)
+        public (IAdeptController controller, IAdeptRobot robot, IAceServer aceServer, IAceClient aceClient) Connect(bool emulate)
         {
             // Connect to ACE
             aceServer = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, "localhost", _remotingPort);
@@ -261,27 +123,19 @@ namespace CobraLibrary
                     Console.WriteLine("Enabling power to {0}. Please press the button on the front panel.", robot);
                     robot.Calibrate();
                     controller.Calibrate();
-
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return (null, null, null, null);
             }
 
-            return true; // (controller, robot, aceServer);
+            return (controller, robot, aceServer, aceClient);
         }
 
 
-        //public static void Disconnet(IAdeptController controller, IAdeptRobot robot)
-        //{
-        //    Console.WriteLine("Shutting down {0}", robot);
-        //    robot.Power = false;
-        //    Console.WriteLine("Disconnecting from {0}", controller);
-        //    controller.Enabled = false;
-        //}
-
-        public void Disconnect()
+        public void Disconnect(IAdeptController controller, IAceServer server)
         {
             try
             {
@@ -297,8 +151,8 @@ namespace CobraLibrary
 
                 // Clear the workspace
                 controller.Enabled = false;
-                aceServer.Clear();
-                aceServer = null;
+                server.Clear();
+                server = null;
             }
             catch (Exception ex)
             {

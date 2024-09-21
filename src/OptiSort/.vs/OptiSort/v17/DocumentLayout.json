@@ -3,32 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{EFDCE63D-F10D-46BF-B928-20D25A5581AC}|CobraLibrary\\CobraLibrary.csproj|c:\\users\\dylan\\source\\repos\\opti-sort\\src\\optisort\\cobralibrary\\cobra.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EFDCE63D-F10D-46BF-B928-20D25A5581AC}|CobraLibrary\\CobraLibrary.csproj|solutionrelative:cobralibrary\\cobra.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\hmi\\ucscara.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|solutionrelative:hmi\\ucscara.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\hmi\\ucrobotview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|solutionrelative:hmi\\ucrobotview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\hmi\\ucrobotview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|solutionrelative:hmi\\ucrobotview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\hmi\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|solutionrelative:hmi\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\hmi\\ucscara.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|solutionrelative:hmi\\ucscara.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|c:\\users\\dylan\\source\\repos\\opti-sort\\src\\optisort\\hmi\\ucscara.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|solutionrelative:hmi\\ucscara.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\hmi\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|c:\\users\\dylan\\source\\repos\\opti-sort\\src\\optisort\\hmi\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{2B171215-A859-4653-B100-5732412066C4}|HMI\\HMI.csproj|solutionrelative:hmi\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EFDCE63D-F10D-46BF-B928-20D25A5581AC}|CobraLibrary\\CobraLibrary.csproj|c:\\users\\dylan\\source\\repos\\opti-sort\\src\\optisort\\cobralibrary\\cobra.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EFDCE63D-F10D-46BF-B928-20D25A5581AC}|CobraLibrary\\CobraLibrary.csproj|solutionrelative:cobralibrary\\cobra.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -53,43 +41,16 @@
               "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ucRobotView.cs",
-              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\ucRobotView.cs",
-              "RelativeDocumentMoniker": "HMI\\ucRobotView.cs",
-              "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\ucRobotView.cs",
-              "RelativeToolTip": "HMI\\ucRobotView.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-18T20:12:28.423Z"
-            },
-            {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "ucRobotView.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\ucRobotView.cs",
-              "RelativeDocumentMoniker": "HMI\\ucRobotView.cs",
-              "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\ucRobotView.cs [Design]",
-              "RelativeToolTip": "HMI\\ucRobotView.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-18T20:12:26.65Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
               "Title": "Cobra.cs",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\CobraLibrary\\Cobra.cs",
               "RelativeDocumentMoniker": "CobraLibrary\\Cobra.cs",
               "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\CobraLibrary\\Cobra.cs",
               "RelativeToolTip": "CobraLibrary\\Cobra.cs",
-              "ViewState": "AgIAAPcAAAAAAAAAAAAwwP4AAAAPAAAAAAAAAA==",
+              "ViewState": "AgIAAI4AAAAAAAAAAAAcwIkAAABGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-16T20:45:01.411Z",
+              "WhenOpened": "2024-09-21T10:43:57.527Z",
               "EditorCaption": ""
             },
             {
@@ -100,43 +61,35 @@
               "RelativeDocumentMoniker": "HMI\\ucScara.cs",
               "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\ucScara.cs",
               "RelativeToolTip": "HMI\\ucScara.cs",
-              "ViewState": "AgIAAE0AAACAzczMzEwtwLMAAAAiAAAAAAAAAA==",
+              "ViewState": "AgIAAGoAAAAAAAAAAAAkwHMAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-16T19:51:38.342Z"
+              "WhenOpened": "2024-09-21T09:47:24.773Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ucScara.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\ucScara.cs",
-              "RelativeDocumentMoniker": "HMI\\ucScara.cs",
-              "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\ucScara.cs [Design]",
-              "RelativeToolTip": "HMI\\ucScara.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-16T19:50:27.414Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "MainForm.cs",
-              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\MainForm.cs",
-              "RelativeDocumentMoniker": "HMI\\MainForm.cs",
-              "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\MainForm.cs",
-              "RelativeToolTip": "HMI\\MainForm.cs",
-              "ViewState": "AgIAAEsAAAAAAAAAAAAQwGAAAAAqAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-16T19:06:24.762Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 2,
               "Title": "MainForm.cs [Design]",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\MainForm.cs",
               "RelativeDocumentMoniker": "HMI\\MainForm.cs",
               "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\MainForm.cs [Design]",
               "RelativeToolTip": "HMI\\MainForm.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-16T19:06:18.463Z"
+              "WhenOpened": "2024-09-09T19:37:34.583Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainForm.cs",
+              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\MainForm.cs",
+              "RelativeDocumentMoniker": "HMI\\MainForm.cs",
+              "ToolTip": "C:\\Users\\dylan\\source\\repos\\opti-sort\\src\\OptiSort\\HMI\\MainForm.cs",
+              "RelativeToolTip": "HMI\\MainForm.cs",
+              "ViewState": "AgIAAL8AAAAAAAAAAAArwOQAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-05T19:14:13.613Z",
+              "EditorCaption": ""
             }
           ]
         },
