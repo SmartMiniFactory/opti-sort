@@ -37,7 +37,7 @@ namespace OptiSort
 
         Thread _thDrawImage;
 
-        public ucCameraStream()
+        internal ucCameraStream(HMI.Program.Cameras camera)
         {
             InitializeComponent();
             InitializeVideoStream();

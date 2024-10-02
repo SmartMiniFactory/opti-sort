@@ -400,3 +400,9 @@ FodyWeavers.xsd
 # .vs folder
 */.vs
 **/*.suo
+/src/OptiSort/.vs/OptiSort/v17/.suo
+/src/OptiSort/.vs/OptiSort/v17/DocumentLayout.backup.json
+/src/OptiSort/.vs/OptiSort/v17/DocumentLayout.json
+/src/OptiSort/HMI/obj/Debug/HMI.csproj.AssemblyReference.cache
+/src/OptiSort/HMI/obj/Debug/HMI.csproj.CoreCompileInputs.cache
+/src/OptiSort/HMI/obj/Debug/HMI.csproj.GenerateResource.cache

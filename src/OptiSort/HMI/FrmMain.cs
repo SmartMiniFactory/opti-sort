@@ -15,7 +15,7 @@ using System.ComponentModel;
 using ActiproSoftware.Drawing;
 using System.Collections.Concurrent;
 using OptiSort;
-using static HMI.HMI;
+using static HMI.Program;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ActiproSoftware.SyntaxEditor.Addons.DotNet.Ast;
@@ -28,7 +28,7 @@ using System.Net.Sockets;
 
 namespace HMI
 {
-    public partial class ucOptiSort : Form
+    public partial class frmMain : Form
     {
 
         /// <summary>
@@ -49,11 +49,15 @@ namespace HMI
         bool _msgReady = false;
         int _byteLen;
         string _broker = "localhost";
-        string _topic = "optisort/scara/target";
         int _port = 1883;
+        string _scaraTopic = "optisort/scara/target";
+        string _idsTopic = "optisort/ids/stream";
+        string _luxonisTopic = "optisort/luxonis/stream";
+        string _baslerTopic = "optisort/basler/stream";
 
 
-        public ucOptiSort()
+
+        public frmMain()
         {
             InitializeComponent();
 
@@ -61,10 +65,9 @@ namespace HMI
             Log("Initializing cameras combobox");
             List<Cameras> camerasList = new List<Cameras>
             {
-                new Cameras { ID = 0, Text = "Integrated Camera" },
-                new Cameras { ID = 1, Text = "IDS" },
-                new Cameras { ID = 2, Text = "Luxonics" },
-                new Cameras { ID = 3, Text = "???" }
+                new Cameras { ID = 0, Text = "Basler", mqttTopic = _baslerTopic },
+                new Cameras { ID = 1, Text = "IDS", mqttTopic = _idsTopic },
+                new Cameras { ID = 2, Text = "Luxonics", mqttTopic = _luxonisTopic }
             };
             cmbCameras.DataSource = camerasList;
             cmbCameras.DisplayMember = "Text";
@@ -82,14 +85,23 @@ namespace HMI
             pnlScara.Controls.Add(ucScara);
 
 
+            // init robot3D view
+            Log("Initializing scara 3D View");
+            ucRobotView ucRobotView = new ucRobotView(this);
+            ucRobotView.Dock = DockStyle.Fill;
+            pnlRobot3D.Controls.Clear();
+            pnlRobot3D.Controls.Add(ucRobotView);
+
+
             // init camera view
             // TODO: add selection from txtbox
             Log("Initializing cameras view");
-            ucCameraStream cameraUC = new ucCameraStream();
-            cameraUC.Dock = DockStyle.Fill;
+            ucCameraStream ucCameraStream = new ucCameraStream(camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex));
+            ucCameraStream.Dock = DockStyle.Fill;
             pnlCameraStream.Controls.Clear();
-            pnlCameraStream.Controls.Add(cameraUC);
-
+            pnlCameraStream.Controls.Add(ucCameraStream);
+            Log("Initialization complete");
+            
             InitializeConnections();
         }
 
@@ -98,8 +110,8 @@ namespace HMI
         {
             // MQTT connection
             // TODO: create dedicated mqtt connection class, organize better and standardize robot/camera
-            lstLog.Items.Add("Connecting to MQTT broker");
-            Task<bool> mqtt = ConnectMqtt(_broker, _port, _topic);
+            Log("Connecting to MQTT broker...");
+            Task<bool> mqtt = ActivateMQTT(_broker, _port, _scaraTopic);
             bool connected = await mqtt;
             if (!connected)
             {
@@ -118,7 +130,7 @@ namespace HMI
 
 
         // TODO: add summary
-        private async Task<bool> ConnectMqtt(string broker, int port, string topic)
+        private async Task<bool> ActivateMQTT(string broker, int port, string topic)
         {
             try
             {

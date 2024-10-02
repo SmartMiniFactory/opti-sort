@@ -1,6 +1,6 @@
 ﻿namespace HMI
 {
-    partial class ucOptiSort
+    partial class frmMain
     {
         /// <summary>
         /// Required designer variable.
@@ -205,7 +205,7 @@
             this.pnlScara.Size = new System.Drawing.Size(1134, 533);
             this.pnlScara.TabIndex = 19;
             // 
-            // ucOptiSort
+            // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -215,7 +215,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.panel1);
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.Name = "ucOptiSort";
+            this.Name = "frmMain";
             this.Text = "SCARA Remote Control";
             this.panel1.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);

@@ -31,8 +31,7 @@ namespace OptiSort
     public partial class ucScara : UserControl
     {
         public Cobra Cobra600 { get; set; }
-
-        private HMI.ucOptiSort _frmMain;
+        private frmMain _frmMain;
 
         // ROBOT INSTANCE
         //private const int CallbackPort = 43431;
@@ -59,7 +58,7 @@ namespace OptiSort
         private BindingList<Transform3D> _targetQueueList;
 
 
-        public ucScara(ucOptiSort ucOptiSort)
+        public ucScara(frmMain ucOptiSort)
         {
             InitializeComponent();
 
@@ -168,7 +167,6 @@ namespace OptiSort
                                     {
                                         try
                                         {
-                                            //_targetQueueList.Add(_locTarget);
                                             _targetQueueList.Add(_locTarget);
                                         }
                                         catch (Exception ex)
@@ -237,7 +235,8 @@ namespace OptiSort
                             //textBoxPitch.Text = _locTarget.Pitch.ToString();
                             //textBoxYaw.Text = _locTarget.Yaw.ToString();
 
-                            _frmMain.Log("Moving to target: " + _locTarget);
+                            // TODO: can't log like this because of a cross-thread conflict
+                            //_frmMain.Log("Moving to target: " + _locTarget);
 
 
                             Cobra.Motion.Approach(_server, _robot, _locTarget, 20);
@@ -258,7 +257,8 @@ namespace OptiSort
                                 }
                             }
 
-                            _frmMain.Log("Target reached");
+                            // TODO: can't log like this because of a cross-thread conflict
+                            //_frmMain.Log("Target reached");
                             busy++;
                         }
                         _robotIsMoving = false;
