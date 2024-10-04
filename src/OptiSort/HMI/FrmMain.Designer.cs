@@ -1,4 +1,4 @@
-﻿namespace HMI
+﻿namespace OptiSort
 {
     partial class frmMain
     {

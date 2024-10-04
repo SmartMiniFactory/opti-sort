@@ -1,5 +1,6 @@
 ﻿using Ace.Process.Server;
 using MQTTnet.Client;
+using MQTTnet.Server;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,13 +17,15 @@ namespace OptiSort
 {
     public partial class ucCameraStream : UserControl
     {
+
+        private MQTT _mqttClient;
+
         // MQTT settings
-        string _topic = "optisort/luxonis/stream";
-        string _broker = "localhost"; //"10.10.238.20";
-        int _port = 1883;
-        string _clientId = Guid.NewGuid().ToString();
-        int _timeout = 2; // seconds
-        IMqttClient _client;
+        //string _topic = "optisort/luxonis/stream";
+        //string _broker = "localhost"; //"10.10.238.20";
+        //int _port = 1883;
+        //string _clientId = Guid.NewGuid().ToString();
+        //IMqttClient _client;
 
 
         // Image decoding settings
@@ -34,98 +37,112 @@ namespace OptiSort
         Rectangle _imgRectengle;
         Rectangle _imgDstRectangle;
         bool _stop = false;
-
+        int _timeout = 2; // seconds
         Thread _thDrawImage;
 
-        internal ucCameraStream(HMI.Program.Cameras camera)
+        internal ucCameraStream(Program.Cameras camera, MQTT mqttClient)
         {
             InitializeComponent();
-            InitializeVideoStream();
 
-            _stop = false;
+            _mqttClient = mqttClient;
+
+            //InitializeVideoStream();
+
+            //_stop = false;
             _thDrawImage = new Thread(DrawImage) { IsBackground = true };
             _thDrawImage.Start();
         }
 
-        public async void InitializeVideoStream()
+
+        // This method will be called when a message is received
+        public void OnMessageReceived(string topic, string message)
         {
-            await Connect();
-        }
-
-        private async Task Connect()
-        {
-            try
+            // Process messages based on the topic
+            if (topic == "topic1")
             {
-                if (_client != null)
-                {
-                    if (_client.IsConnected)
-                        await _client.DisconnectAsync();
-                    _client.ApplicationMessageReceivedAsync -= Client_ApplicationMessageReceivedAsync;
-                    _client.Dispose();
-                    _client = null;
 
-                    _imgDstRectangle.Width = 0;
-                }
 
-                var mqttFactory = new MQTTnet.MqttFactory();
-                _client = mqttFactory.CreateMqttClient();
-                var options = new MQTTnet.Client.MqttClientOptionsBuilder()
-                    .WithClientId(_clientId)
-                    .WithTcpServer(_broker, _port)
-                    .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
-                    .WithWillRetain(false)
-                    .WithWillQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-                    .WithCleanSession()
-                    .Build();
-
-                _client.ConnectedAsync += new Func<MQTTnet.Client.MqttClientConnectedEventArgs, Task>(arg =>
-                {
-                    var topicFilter = new MQTTnet.MqttTopicFilterBuilder().WithTopic(_topic).Build();
-                    MQTTnet.Client.MqttClientSubscribeOptions subOptions = new MQTTnet.Client.MqttClientSubscribeOptions();
-                    subOptions.TopicFilters.Add(topicFilter);
-                    return _client.SubscribeAsync(subOptions);
-                });
-
-                _client.DisconnectedAsync += new Func<MqttClientDisconnectedEventArgs, Task>(arg =>
-                {
-                    try
-                    {
-                        _imgRectengle.Width = 0;
-                    }
-                    catch (Exception) { }
-                    return Task.CompletedTask;
-                });
-
-                _client.ApplicationMessageReceivedAsync += Client_ApplicationMessageReceivedAsync;
-                var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
-                await _client.ConnectAsync(options, tokenSource.Token);
-                tokenSource.Dispose();
-            }
-            catch (Exception)
-            {
+                
+                //aaa
 
             }
         }
 
-        private Task Client_ApplicationMessageReceivedAsync(MQTTnet.Client.MqttApplicationMessageReceivedEventArgs arg)
-        {
-            try
-            {
-                if (arg.ReasonCode == MqttApplicationMessageReceivedReasonCode.Success)
-                    if (arg.ApplicationMessage.PayloadSegment.Count > 0)
-                        lock (_imgReceived)
-                        {
-                            _imgLen = arg.ApplicationMessage.PayloadSegment.Count;
-                            if (_imgLen > _imgReceived.Length)
-                                _imgReceived = new byte[_imgLen];
-                            Array.Copy(arg.ApplicationMessage.PayloadSegment.ToArray(), _imgReceived, _imgLen);
-                            _imgReady = true;
-                            _imgDate = DateTime.Now;
-                        }
-            }
-            catch (Exception) { }
-            return Task.CompletedTask;
-        }
+
+        //private async Task Connect()
+        //{
+        //    try
+        //    {
+        //        if (_client != null)
+        //        {
+        //            if (_client.IsConnected)
+        //                await _client.DisconnectAsync();
+        //            _client.ApplicationMessageReceivedAsync -= Client_ApplicationMessageReceivedAsync;
+        //            _client.Dispose();
+        //            _client = null;
+
+        //            _imgDstRectangle.Width = 0;
+        //        }
+
+        //        var mqttFactory = new MQTTnet.MqttFactory();
+        //        _client = mqttFactory.CreateMqttClient();
+        //        var options = new MQTTnet.Client.MqttClientOptionsBuilder()
+        //            .WithClientId(_clientId)
+        //            .WithTcpServer(_broker, _port)
+        //            .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
+        //            .WithWillRetain(false)
+        //            .WithWillQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+        //            .WithCleanSession()
+        //            .Build();
+
+        //        _client.ConnectedAsync += new Func<MQTTnet.Client.MqttClientConnectedEventArgs, Task>(arg =>
+        //        {
+        //            var topicFilter = new MQTTnet.MqttTopicFilterBuilder().WithTopic(_topic).Build();
+        //            MQTTnet.Client.MqttClientSubscribeOptions subOptions = new MQTTnet.Client.MqttClientSubscribeOptions();
+        //            subOptions.TopicFilters.Add(topicFilter);
+        //            return _client.SubscribeAsync(subOptions);
+        //        });
+
+        //        _client.DisconnectedAsync += new Func<MqttClientDisconnectedEventArgs, Task>(arg =>
+        //        {
+        //            try
+        //            {
+        //                _imgRectengle.Width = 0;
+        //            }
+        //            catch (Exception) { }
+        //            return Task.CompletedTask;
+        //        });
+
+        //        _client.ApplicationMessageReceivedAsync += Client_ApplicationMessageReceivedAsync;
+        //        var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+        //        await _client.ConnectAsync(options, tokenSource.Token);
+        //        tokenSource.Dispose();
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //    }
+        //}
+
+        //private Task Client_ApplicationMessageReceivedAsync(MQTTnet.Client.MqttApplicationMessageReceivedEventArgs arg)
+        //{
+        //    try
+        //    {
+        //        if (arg.ReasonCode == MqttApplicationMessageReceivedReasonCode.Success)
+        //            if (arg.ApplicationMessage.PayloadSegment.Count > 0)
+        //                lock (_imgReceived)
+        //                {
+        //                    _imgLen = arg.ApplicationMessage.PayloadSegment.Count;
+        //                    if (_imgLen > _imgReceived.Length)
+        //                        _imgReceived = new byte[_imgLen];
+        //                    Array.Copy(arg.ApplicationMessage.PayloadSegment.ToArray(), _imgReceived, _imgLen);
+        //                    _imgReady = true;
+        //                    _imgDate = DateTime.Now;
+        //                }
+        //    }
+        //    catch (Exception) { }
+        //    return Task.CompletedTask;
+        //}
 
         private void DrawImage()
         {
@@ -183,8 +200,8 @@ namespace OptiSort
                                 using (Graphics g = pnlStream.CreateGraphics())
                                 {
                                     g.Clear(Color.Black);
-                                    g.DrawLine(new System.Drawing.Pen(Color.Red, 10), pnlStream.Width / 3, pnlStream.Height / 3, pnlStream.Width * 2 / 3, pnlStream.Height * 2 / 3);
-                                    g.DrawLine(new System.Drawing.Pen(Color.Red, 10), pnlStream.Width / 3, pnlStream.Height * 2 / 3, pnlStream.Width * 2 / 3, pnlStream.Height / 3);
+                                    g.DrawLine(new Pen(Color.Red, 10), pnlStream.Width / 3, pnlStream.Height / 3, pnlStream.Width * 2 / 3, pnlStream.Height * 2 / 3);
+                                    g.DrawLine(new Pen(Color.Red, 10), pnlStream.Width / 3, pnlStream.Height * 2 / 3, pnlStream.Width * 2 / 3, pnlStream.Height / 3);
                                 }
                                 busy = 0;
                             });
@@ -201,7 +218,7 @@ namespace OptiSort
                 }
                 catch (Exception ex)
                 {
-                    if (ex is System.ObjectDisposedException)
+                    if (ex is ObjectDisposedException)
                         break;
                 }
                 Thread.Sleep(10);

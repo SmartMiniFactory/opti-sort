@@ -1,37 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System.Linq;
 using System.Windows.Forms;
-using MQTTnet.Client;
-using Ace.Adept.Server.Controls;
-using Ace.Adept.Server.Motion;
-using Ace.Core.Client;
-using Ace.Core.Server.Device;
-using Ace.Core.Server;
-using Ace.Core.Client.Sim3d.Controls;
 using CobraLibrary;
-using System.ComponentModel;
-using ActiproSoftware.Drawing;
-using System.Collections.Concurrent;
-using OptiSort;
-using static HMI.Program;
+using static OptiSort.Program;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ActiproSoftware.SyntaxEditor.Addons.DotNet.Ast;
-using Ace.Adept.Server.Device;
-using Ace.Adept.Server.Motion.Robots;
-using Ace.Core.Server.Motion;
-using Ace.Core.Util;
-using Ace.Core.Server.Event;
-using System.Net.Sockets;
 
-namespace HMI
+namespace OptiSort
 {
     public partial class frmMain : Form
     {
 
-        /// <summary>
+        /// <summary
         /// single MQTT broker where at least two topics are present: 
         /// 1. image streaming (one per camera, incoming); python file
         /// 2. scara's pick location streaming (incoming); same python file that operates with openCV on image
@@ -42,24 +21,19 @@ namespace HMI
         /// </summary>
         /// 
 
-        // MQTT 
-        IMqttClient _mqttClient;
-        byte[] _byteReceived = new byte[1];
-        string _msgReceived = string.Empty;
-        bool _msgReady = false;
-        int _byteLen;
-        string _broker = "localhost";
-        int _port = 1883;
+        MQTT _mqttClient;
+        ucScara _ucScara;
+
         string _scaraTopic = "optisort/scara/target";
         string _idsTopic = "optisort/ids/stream";
         string _luxonisTopic = "optisort/luxonis/stream";
         string _baslerTopic = "optisort/basler/stream";
 
-
-
         public frmMain()
         {
             InitializeComponent();
+
+            InitializeMQTTClient();
 
             // init combobox
             Log("Initializing cameras combobox");
@@ -71,18 +45,18 @@ namespace HMI
             };
             cmbCameras.DataSource = camerasList;
             cmbCameras.DisplayMember = "Text";
-            cmbCameras.ValueMember = "ID";    
+            cmbCameras.ValueMember = "ID";
             cmbCameras.DataSource = camerasList;
 
 
             // init scara dgv
             Log("Initializing scara datagridview");
             Cobra cobra600 = new Cobra();
-            ucScara ucScara = new ucScara(this);
-            ucScara.Cobra600 = cobra600;
-            ucScara.Dock = DockStyle.Fill;
+            _ucScara = new ucScara(this);
+            _ucScara.Cobra600 = cobra600;
+            _ucScara.Dock = DockStyle.Fill;
             pnlScara.Controls.Clear();
-            pnlScara.Controls.Add(ucScara);
+            pnlScara.Controls.Add(_ucScara);
 
 
             // init robot3D view
@@ -96,149 +70,61 @@ namespace HMI
             // init camera view
             // TODO: add selection from txtbox
             Log("Initializing cameras view");
-            ucCameraStream ucCameraStream = new ucCameraStream(camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex));
+            ucCameraStream ucCameraStream = new ucCameraStream(camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex), _mqttClient);
             ucCameraStream.Dock = DockStyle.Fill;
             pnlCameraStream.Controls.Clear();
             pnlCameraStream.Controls.Add(ucCameraStream);
-            Log("Initialization complete");
-            
-            InitializeConnections();
+            Log("Initialization complete"); 
         }
 
-
-        private async void InitializeConnections()
+        private async void InitializeMQTTClient()
         {
-            // MQTT connection
-            // TODO: create dedicated mqtt connection class, organize better and standardize robot/camera
-            Log("Connecting to MQTT broker...");
-            Task<bool> mqtt = ActivateMQTT(_broker, _port, _scaraTopic);
-            bool connected = await mqtt;
-            if (!connected)
+            _mqttClient = new MQTT();
+
+            // create new client
+            var clientID = "Optisort";
+            Task<bool> client = _mqttClient.CreateClient(clientID);
+            bool clientCreated = await client; // await (optional) pauses the execution here until the async task completes
+
+            if (clientCreated)
             {
-                Log("Failed to connect to MQTT broker");
-                return;
+                // Subscribe to the necessary topics
+                bool scaraSubscriberd = await _mqttClient.SubscribeClientToTopic(clientID, _scaraTopic);
+                bool idsSubscribed = await _mqttClient.SubscribeClientToTopic(clientID, _idsTopic);
+                bool baslerSubscribed = await _mqttClient.SubscribeClientToTopic(clientID, _baslerTopic);
+                bool luxonisSubscribed = await _mqttClient.SubscribeClientToTopic(clientID, _luxonisTopic);
+
+                // logging
+                if (scaraSubscriberd) Log($"{clientID} subscribed to {_scaraTopic}");
+                else Log($"Unable subscribing {clientID} to {_scaraTopic}");
+
+                if (idsSubscribed) Log($"{clientID} subscribed to {_idsTopic}");
+                else Log($"Unable subscribing {clientID} to {_idsTopic}");
+
+                if (baslerSubscribed) Log($"{clientID} subscribed to {_baslerTopic}");
+                else Log($"Unable subscribing {clientID} to {_baslerTopic}");
+
+                if (luxonisSubscribed) Log($"{clientID} subscribed to {_luxonisTopic}");
+                else Log($"Unable subscribing {clientID} to {_luxonisTopic}");
+
+
+                // Subscribe user controls to the message received event
+                _mqttClient.MessageReceived += _ucScara.OnMessageReceived;
+                //_mqttClient.MessageReceived += ucCameraStream.OnMessageReceived;
+
+               
             }
-            Log("Connected to MQTT broker");            
+            else
+                Log($"Failed to create '{clientID}' MQTT client");
         }
+
+        // TODO: come connettersi alla stream della telecamera? Cosa inviare all'ucCameraStream per decodificare l'immagine? Rivedere funzioni li dentro??
 
 
         public void Log(string msg)
         {
             lstLog.Items.Add(msg);
             lstLog.TopIndex = lstLog.Items.Count - 1;
-        }
-
-
-        // TODO: add summary
-        private async Task<bool> ActivateMQTT(string broker, int port, string topic)
-        {
-            try
-            {
-                if (_mqttClient != null)
-                {
-                    if (_mqttClient.IsConnected)
-                        await _mqttClient.DisconnectAsync();
-                    _mqttClient.ApplicationMessageReceivedAsync -= Client_ApplicationMessageReceivedAsync;
-                    _mqttClient.Dispose();
-                    _mqttClient = null;
-                }
-
-                var mqttFactory = new MQTTnet.MqttFactory();
-                _mqttClient = mqttFactory.CreateMqttClient();
-                var options = new MqttClientOptionsBuilder()
-                    .WithClientId("Cobra600")
-                    .WithTcpServer(broker, port)
-                    .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
-                    .WithWillRetain(false)
-                    .WithWillQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-                    .WithCleanSession()
-                    .Build();
-
-                _mqttClient.ConnectedAsync += new Func<MqttClientConnectedEventArgs, Task>(arg =>
-                {
-                    Log($"Listening on {topic} from {broker}");
-                    var topicFilter = new MQTTnet.MqttTopicFilterBuilder().WithTopic(topic).Build();
-                    MQTTnet.Client.MqttClientSubscribeOptions subOptions = new MqttClientSubscribeOptions();
-                    subOptions.TopicFilters.Add(topicFilter);
-                    return _mqttClient.SubscribeAsync(subOptions);
-                });
-
-                _mqttClient.DisconnectedAsync += new Func<MqttClientDisconnectedEventArgs, Task>(arg =>
-                {
-                    try
-                    {
-                        Log($"Stop control robot");
-                    }
-                    catch (Exception) { }
-                    return Task.CompletedTask;
-                });
-
-                _mqttClient.ApplicationMessageReceivedAsync += Client_ApplicationMessageReceivedAsync;
-                var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
-                await _mqttClient.ConnectAsync(options, tokenSource.Token);
-                tokenSource.Dispose();
-                return true;
-            }
-            catch (Exception)
-            {
-                Log($"Error connecting to {broker}");
-                return false;
-            }
-        }
-
-
-        private void DisconnectMqtt()
-        {
-            try
-            {
-                if (_mqttClient != null)
-                {
-                    // TODO: l'arrivo delle coordinate sono legate alla connessione dell'mqtt. Se questo viene connesso, forse va pulita la tabella? Indagare sul senso della cosa di cui sotto
-                    //_stop = true;
-                    //// Stop the threads
-                    //if (_thDefineLocation != null && _thDefineLocation.IsAlive)
-                    //    _thDefineLocation.Join(2000);
-                    //_thDefineLocation = null;
-
-                    //if (_thReachLocation != null && _thReachLocation.IsAlive)
-                    //    _thReachLocation.Join(2000);
-                    //_thReachLocation = null;
-
-                    // Disconnect the MQTT client
-                    _mqttClient.ApplicationMessageReceivedAsync -= Client_ApplicationMessageReceivedAsync;
-                    _mqttClient.DisconnectAsync().Wait();
-                    _mqttClient.Dispose();
-                    Log("Mqtt disconnected");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log(ex.ToString());
-            }
-        }
-
-
-       
-
-        // TODO: add summary
-        private Task Client_ApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs arg)
-        {
-            try
-            {
-                if (arg.ReasonCode == MqttApplicationMessageReceivedReasonCode.Success)
-                    if (arg.ApplicationMessage.PayloadSegment.Count > 0)
-                        lock (_byteReceived)
-                        {
-                            _byteLen = arg.ApplicationMessage.PayloadSegment.Count;
-                            if (_byteLen > _byteReceived.Length)
-                                _byteReceived = new byte[_byteLen];
-                            Array.Copy(arg.ApplicationMessage.PayloadSegment.ToArray(), _byteReceived, _byteLen);
-                            _msgReceived = Encoding.UTF8.GetString(_byteReceived, 0, _byteLen);
-                            _msgReady = true;
-                        }
-            }
-            catch (Exception) { }
-            return Task.CompletedTask;
         }
     }
 }

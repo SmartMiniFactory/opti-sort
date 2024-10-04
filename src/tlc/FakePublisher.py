@@ -42,7 +42,7 @@ while True:
     client.publish(topic, str(message))
     print("Message sent: " + str(message), end = "\r")
     #qprint("Message sent: " + str(message))
-    time.sleep(0.01)
+    time.sleep(0.1)
     # Wait for user input to quit
     if keyboard.is_pressed('q'):
         print("\nqQuitting...")

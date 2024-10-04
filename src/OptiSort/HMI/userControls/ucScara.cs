@@ -20,7 +20,9 @@ using Ace.Core.Server.Event;
 using CobraLibrary;
 using Ace.Core.Client.Sim3d.Controls;
 using System.Drawing.Text;
-using HMI;
+using OptiSort;
+using System.Diagnostics;
+using System.Text.Json;
 
 namespace OptiSort
 {
@@ -97,6 +99,64 @@ namespace OptiSort
         }
 
 
+        public void OnMessageReceived(string topic, JsonElement message)
+        {
+            // Process messages based on the topic
+            if (topic == "optisort/scara/target")
+            {
+
+
+                //// Remove the brackets from the message
+                //string msgClean = message.Replace("[", "").Replace("]", "");
+                //// Split the message into an array using the comma as separator
+                //string[] msgTarget = msgClean.Split(',');
+
+                // Convert the string to double
+                //double.TryParse(msgTarget[0], out double x);
+                //double.TryParse(msgTarget[1], out double y);
+                //double.TryParse(msgTarget[2], out double z);
+                //double.TryParse(msgTarget[3], out double yaw);
+                //double.TryParse(msgTarget[4], out double pitch);
+                //double.TryParse(msgTarget[5], out double roll);
+                double x = message.GetProperty("x").GetDouble();
+                double y = message.GetProperty("y").GetDouble();
+                double z = message.GetProperty("z").GetDouble();
+                double yaw = message.GetProperty("rx").GetDouble();
+                double pitch = message.GetProperty("ry").GetDouble();
+                double roll = message.GetProperty("rz").GetDouble();
+
+                // Define a new target location
+                Transform3D row = new Transform3D(x, y, z, yaw, pitch, roll);
+
+                // Safely add the new row to the UI-bound collection
+                AddLocRowSafe(row);
+            }
+        }
+
+        private void AddLocRowSafe(Transform3D row)
+        {
+            if (InvokeRequired)
+            {
+                // Marshal to the UI thread
+                Invoke(new Action<Transform3D>(AddLocRowSafe), row);
+            }
+            else
+            {
+                // Only update the list if it's empty or the row is different from the last target
+                if (_targetQueueList.Count == 0 || _lastTarget != row)
+                {
+                    try
+                    {
+                        _targetQueueList.Add(row);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error adding new entry: {ex.Message}");
+                    }
+                    _lastTarget = row;
+                }
+            }
+        }
 
         // ---------------------------------------------------------------------------
 
@@ -104,7 +164,7 @@ namespace OptiSort
         {
             _frmMain.Log("Connecting to Cobra600...");
             (_controller, _robot, _server, _client) = Cobra600.Connect(chkEmulate.Checked);
-            
+
             if (_controller != null && _robot != null && _server != null)
             {
                 _frmMain.Log("Connected to Cobra600");
