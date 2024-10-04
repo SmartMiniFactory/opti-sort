@@ -146,7 +146,10 @@ while(nRet == ueye.IS_SUCCESS):
     cv2.imshow("IDS Camera Stream", frame) # Show the frame
     end = time.time() # End time
     t = end - start
-    fps = 1/t
+    if t != 0:
+        fps = 1/t
+    else :
+        fps = 0
 
     print("FPS IDS: ", np.round(fps, 0), end="\r") # Print the FPS
 
