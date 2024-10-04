@@ -1,6 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\samples",
+    "\\src",
+    "\\src\\videoStream"
   ],
+  "SelectedNode": "\\src\\feature_recognition.py",
   "PreviewInSolutionExplorer": false
 }
