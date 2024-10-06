@@ -23,36 +23,37 @@ namespace OptiSort
 
         MQTT _mqttClient;
         ucScara _ucScara;
+        ucCameraStream _ucCameraStream;
+
+        List<Cameras> _camerasList = new List<Cameras> { };
 
         string _scaraTopic = "optisort/scara/target";
         string _idsTopic = "optisort/ids/stream";
         string _luxonisTopic = "optisort/luxonis/stream";
         string _baslerTopic = "optisort/basler/stream";
 
+
+
         public frmMain()
         {
             InitializeComponent();
-
             InitializeMQTTClient();
 
             // init combobox
             Log("Initializing cameras combobox");
-            List<Cameras> camerasList = new List<Cameras>
-            {
-                new Cameras { ID = 0, Text = "Basler", mqttTopic = _baslerTopic },
-                new Cameras { ID = 1, Text = "IDS", mqttTopic = _idsTopic },
-                new Cameras { ID = 2, Text = "Luxonics", mqttTopic = _luxonisTopic }
-            };
-            cmbCameras.DataSource = camerasList;
+            _camerasList.Add(new Cameras { ID = 0, Text = "Basler", mqttTopic = _baslerTopic });
+            _camerasList.Add(new Cameras { ID = 1, Text = "IDS", mqttTopic = _idsTopic });
+            _camerasList.Add(new Cameras { ID = 2, Text = "Luxonics", mqttTopic = _luxonisTopic });
+            cmbCameras.DataSource = _camerasList;
             cmbCameras.DisplayMember = "Text";
             cmbCameras.ValueMember = "ID";
-            cmbCameras.DataSource = camerasList;
 
 
             // init scara dgv
             Log("Initializing scara datagridview");
             Cobra cobra600 = new Cobra();
             _ucScara = new ucScara(this);
+            _ucScara.ScaraTarget = _scaraTopic;
             _ucScara.Cobra600 = cobra600;
             _ucScara.Dock = DockStyle.Fill;
             pnlScara.Controls.Clear();
@@ -68,13 +69,14 @@ namespace OptiSort
 
 
             // init camera view
-            // TODO: add selection from txtbox
             Log("Initializing cameras view");
-            ucCameraStream ucCameraStream = new ucCameraStream(camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex), _mqttClient);
-            ucCameraStream.Dock = DockStyle.Fill;
+            _ucCameraStream = new ucCameraStream(_camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex));
+            _ucCameraStream.StreamTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
+            _ucCameraStream.Dock = DockStyle.Fill;
             pnlCameraStream.Controls.Clear();
-            pnlCameraStream.Controls.Add(ucCameraStream);
-            Log("Initialization complete"); 
+            pnlCameraStream.Controls.Add(_ucCameraStream);
+
+            Log("Initialization complete");
         }
 
         private async void InitializeMQTTClient()
@@ -82,12 +84,15 @@ namespace OptiSort
             _mqttClient = new MQTT();
 
             // create new client
-            var clientID = "Optisort";
+            var clientID = "OptiSort";
             Task<bool> client = _mqttClient.CreateClient(clientID);
             bool clientCreated = await client; // await (optional) pauses the execution here until the async task completes
 
             if (clientCreated)
             {
+                Log($"MQTT client '{clientID}' created");
+
+
                 // Subscribe to the necessary topics
                 bool scaraSubscriberd = await _mqttClient.SubscribeClientToTopic(clientID, _scaraTopic);
                 bool idsSubscribed = await _mqttClient.SubscribeClientToTopic(clientID, _idsTopic);
@@ -110,21 +115,26 @@ namespace OptiSort
 
                 // Subscribe user controls to the message received event
                 _mqttClient.MessageReceived += _ucScara.OnMessageReceived;
-                //_mqttClient.MessageReceived += ucCameraStream.OnMessageReceived;
-
-               
+                _mqttClient.MessageReceived += _ucCameraStream.OnMessageReceived;
             }
             else
                 Log($"Failed to create '{clientID}' MQTT client");
         }
 
-        // TODO: come connettersi alla stream della telecamera? Cosa inviare all'ucCameraStream per decodificare l'immagine? Rivedere funzioni li dentro??
-
-
         public void Log(string msg)
         {
             lstLog.Items.Add(msg);
             lstLog.TopIndex = lstLog.Items.Count - 1;
+        }
+
+        private void cmbCameras_SelectedIndexChanged(object sender, System.EventArgs e)
+        {
+            if (_ucCameraStream != null)
+            {
+                var newTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
+                _ucCameraStream.StreamTopic = newTopic;
+                Log($"Streaming topic updated to '{newTopic}'");
+            }
         }
     }
 }

@@ -25,11 +25,6 @@ namespace OptiSort
             public string Text { get; set; }
             public string mqttTopic { get; set; }
 
-
-            public override string ToString() // Overriding ToString to display Text in the ComboBox
-            {
-                return Text;
-            }
         }
     }
 }

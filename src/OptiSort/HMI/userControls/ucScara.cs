@@ -33,6 +33,8 @@ namespace OptiSort
     public partial class ucScara : UserControl
     {
         public Cobra Cobra600 { get; set; }
+        public string ScaraTarget { get; set; }
+
         private frmMain _frmMain;
 
         // ROBOT INSTANCE
@@ -102,22 +104,8 @@ namespace OptiSort
         public void OnMessageReceived(string topic, JsonElement message)
         {
             // Process messages based on the topic
-            if (topic == "optisort/scara/target")
+            if (topic == ScaraTarget)
             {
-
-
-                //// Remove the brackets from the message
-                //string msgClean = message.Replace("[", "").Replace("]", "");
-                //// Split the message into an array using the comma as separator
-                //string[] msgTarget = msgClean.Split(',');
-
-                // Convert the string to double
-                //double.TryParse(msgTarget[0], out double x);
-                //double.TryParse(msgTarget[1], out double y);
-                //double.TryParse(msgTarget[2], out double z);
-                //double.TryParse(msgTarget[3], out double yaw);
-                //double.TryParse(msgTarget[4], out double pitch);
-                //double.TryParse(msgTarget[5], out double roll);
                 double x = message.GetProperty("x").GetDouble();
                 double y = message.GetProperty("y").GetDouble();
                 double z = message.GetProperty("z").GetDouble();
@@ -127,18 +115,16 @@ namespace OptiSort
 
                 // Define a new target location
                 Transform3D row = new Transform3D(x, y, z, yaw, pitch, roll);
-
-                // Safely add the new row to the UI-bound collection
-                AddLocRowSafe(row);
+                AddLocRow(row);
             }
         }
 
-        private void AddLocRowSafe(Transform3D row)
+        private void AddLocRow(Transform3D row)
         {
             if (InvokeRequired)
             {
-                // Marshal to the UI thread
-                Invoke(new Action<Transform3D>(AddLocRowSafe), row);
+                // Marshal to the UI thread (needed to avoid cross-thread error)
+                Invoke(new Action<Transform3D>(AddLocRow), row);
             }
             else
             {
@@ -148,12 +134,12 @@ namespace OptiSort
                     try
                     {
                         _targetQueueList.Add(row);
+                        _lastTarget = row;
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show($"Error adding new entry: {ex.Message}");
                     }
-                    _lastTarget = row;
                 }
             }
         }
@@ -172,12 +158,12 @@ namespace OptiSort
                 _stop = false;
 
                 // Start a new thread to add the target locations to the queue
-                _thDefineLocation = new Thread(AddToLocationQueue) { IsBackground = true };
-                _thDefineLocation.Start();
+                //_thDefineLocation = new Thread(AddToLocationQueue) { IsBackground = true };
+                //_thDefineLocation.Start();
 
-                // Start a new thread to move the robot to the target locations
-                _thReachLocation = new Thread(MoveToLoc) { IsBackground = true };
-                _thReachLocation.Start();
+                //// Start a new thread to move the robot to the target locations
+                //_thReachLocation = new Thread(MoveToLoc) { IsBackground = true };
+                //_thReachLocation.Start();
 
                 _frmMain.Log("Location threads started");
             }
@@ -192,150 +178,71 @@ namespace OptiSort
 
         // ---------------------------------------------------------------------------
 
-        // TODO: add summary
-        private void AddToLocationQueue()
-        {
-            int busy = 0;
-            while (_stop == false)
-            {
-                try
-                {
-                    if (_msgReady)
-                    {
-                        if (busy == 0)
-                        {
-                            busy++;
-                            lock (_msgReceived)
-                            {
-                                // Remove the brackets from the message
-                                string _msgClean = _msgReceived.Replace("[", "").Replace("]", "");
-                                // Split the message into an array using the comma as separator
-                                string[] _msgTarget = _msgClean.Split(',');
+        //// TODO: REVIEW
+        //private void MoveToLoc()
+        //{
+        //    int busy = 0;
+        //    while (_stop == false)
+        //    {
+        //        try
+        //        {
+        //            if (_targetQueueList.Count > 0 && _robotIsMoving == false)
+        //            {
+        //                _robotIsMoving = true;
+        //                if (busy == 0)
+        //                {
+        //                    // Get the first element of the queue
+        //                    Transform3D _locTarget = _targetQueueList[0];
 
-                                // Convert the string to double
-                                double.TryParse(_msgTarget[0], out double _x);
-                                double.TryParse(_msgTarget[1], out double _y);
-                                double.TryParse(_msgTarget[2], out double _z);
-                                double.TryParse(_msgTarget[3], out double _yaw);
-                                double.TryParse(_msgTarget[4], out double _pitch);
-                                double.TryParse(_msgTarget[5], out double _roll);
+        //                    // TODO: anzichè fare questo, evidenziare la row sulla dgv
+        //                    //textBoxX.Text = _locTarget.DX.ToString();
+        //                    //textBoxY.Text = _locTarget.DY.ToString();
+        //                    //textBoxZ.Text = _locTarget.DZ.ToString();
+        //                    //textBoxRoll.Text = _locTarget.Roll.ToString();
+        //                    //textBoxPitch.Text = _locTarget.Pitch.ToString();
+        //                    //textBoxYaw.Text = _locTarget.Yaw.ToString();
 
-                                // Define a new target location
-                                Transform3D _locTarget = new Transform3D(_x, _y, _z, _yaw, _pitch, _roll);
-                                {
-                                    if (_targetQueueList.Count == 0)
-                                    {
-                                        try
-                                        {
-                                            _targetQueueList.Add(_locTarget);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            MessageBox.Show($"Error adding new entry: " + ex.ToString());
-                                        }
-                                        _lastTarget = _locTarget;
-                                    }
-                                    else if (_targetQueueList.Count > 0)
-                                    {
-
-                                        if (_lastTarget != _locTarget)
-                                        {
-                                            try
-                                            {
-                                                _targetQueueList.Add(_locTarget);
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                MessageBox.Show($"Error adding new entry: " + ex.ToString());
-                                            }
-                                            _lastTarget = _locTarget;
-                                        }
-                                    }
-                                }
-                                _msgReady = false;
-                            }
-                        }
-                    }
-                    if (busy > 20)
-                        busy = 0;
-                    else if (busy > 0)
-                        busy++;
-                }
-                catch (Exception ex)
-                {
-                    if (ex is System.ObjectDisposedException)
-                        break;
-                }
-                Thread.Sleep(10);
-            }
-        }
+        //                    // TODO: can't log like this because of a cross-thread conflict
+        //                    //_frmMain.Log("Moving to target: " + _locTarget);
 
 
-        // TODO: add summary
-        private void MoveToLoc()
-        {
-            int busy = 0;
-            while (_stop == false)
-            {
-                try
-                {
-                    if (_targetQueueList.Count > 0 && _robotIsMoving == false)
-                    {
-                        _robotIsMoving = true;
-                        if (busy == 0)
-                        {
-                            // Get the first element of the queue
-                            Transform3D _locTarget = _targetQueueList[0];
+        //                    Cobra.Motion.Approach(_server, _robot, _locTarget, 20);
+        //                    Cobra.Motion.CartesianMove(_server, _robot, _locTarget, true);
+        //                    Cobra.Motion.Approach(_server, _robot, _locTarget, 20);
 
-                            // TODO: anzichè fare questo, evidenziare la row sulla dgv
-                            //textBoxX.Text = _locTarget.DX.ToString();
-                            //textBoxY.Text = _locTarget.DY.ToString();
-                            //textBoxZ.Text = _locTarget.DZ.ToString();
-                            //textBoxRoll.Text = _locTarget.Roll.ToString();
-                            //textBoxPitch.Text = _locTarget.Pitch.ToString();
-                            //textBoxYaw.Text = _locTarget.Yaw.ToString();
+        //                    Thread.Sleep(1000);
 
-                            // TODO: can't log like this because of a cross-thread conflict
-                            //_frmMain.Log("Moving to target: " + _locTarget);
+        //                    lock (_targetQueueList)
+        //                    {
+        //                        try
+        //                        {
+        //                            _targetQueueList.RemoveAt(0);
+        //                        }
+        //                        catch (Exception ex)
+        //                        {
+        //                            MessageBox.Show($"Error removing an entry: " + ex.ToString());
+        //                        }
+        //                    }
 
-
-                            Cobra.Motion.Approach(_server, _robot, _locTarget, 20);
-                            Cobra.Motion.CartesianMove(_server, _robot, _locTarget, true);
-                            Cobra.Motion.Approach(_server, _robot, _locTarget, 20);
-
-                            Thread.Sleep(1000);
-
-                            lock (_targetQueueList)
-                            {
-                                try
-                                {
-                                    _targetQueueList.RemoveAt(0);
-                                }
-                                catch (Exception ex)
-                                {
-                                    MessageBox.Show($"Error removing an entry: " + ex.ToString());
-                                }
-                            }
-
-                            // TODO: can't log like this because of a cross-thread conflict
-                            //_frmMain.Log("Target reached");
-                            busy++;
-                        }
-                        _robotIsMoving = false;
-                    }
-                    if (busy > 20)
-                        busy = 0;
-                    else if (busy > 0)
-                        busy++;
-                }
-                catch (Exception ex)
-                {
-                    if (ex is System.ObjectDisposedException)
-                        break;
-                }
-                Thread.Sleep(10);
-            }
-        }
+        //                    // TODO: can't log like this because of a cross-thread conflict
+        //                    //_frmMain.Log("Target reached");
+        //                    busy++;
+        //                }
+        //                _robotIsMoving = false;
+        //            }
+        //            if (busy > 20)
+        //                busy = 0;
+        //            else if (busy > 0)
+        //                busy++;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            if (ex is System.ObjectDisposedException)
+        //                break;
+        //        }
+        //        Thread.Sleep(10);
+        //    }
+        //}
 
     }
 }

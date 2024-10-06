@@ -90,9 +90,6 @@ namespace OptiSort
                     // Parse the message as JSON
                     var jsonMessage = JsonDocument.Parse(msgReceived).RootElement;
 
-                    // Convert the JSON object to a formatted JSON string for export/logging
-                    //JsonElement formattedJsonMessage = JsonSerializer.Serialize(jsonMessage, new JsonSerializerOptions { WriteIndented = true });
-
                     // Raise the event to notify subscribers with the JSON formatted message
                     MessageReceived?.Invoke(topic, jsonMessage);
                 }

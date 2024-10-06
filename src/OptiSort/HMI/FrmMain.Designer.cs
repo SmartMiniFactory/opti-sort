@@ -66,6 +66,7 @@
             this.cmbCameras.Name = "cmbCameras";
             this.cmbCameras.Size = new System.Drawing.Size(672, 54);
             this.cmbCameras.TabIndex = 0;
+            this.cmbCameras.SelectedIndexChanged += new System.EventHandler(this.cmbCameras_SelectedIndexChanged);
             // 
             // panel1
             // 
