@@ -178,9 +178,9 @@
             this.tblRobots.Location = new System.Drawing.Point(0, 0);
             this.tblRobots.Name = "tblRobots";
             this.tblRobots.RowCount = 3;
-            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 35F));
-            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
-            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 55F));
+            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 18.11668F));
+            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.56602F));
+            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.3173F));
             this.tblRobots.Size = new System.Drawing.Size(1140, 977);
             this.tblRobots.TabIndex = 26;
             // 
@@ -195,15 +195,15 @@
             this.pnlConfig.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlConfig.Location = new System.Drawing.Point(3, 3);
             this.pnlConfig.Name = "pnlConfig";
-            this.pnlConfig.Size = new System.Drawing.Size(1134, 335);
+            this.pnlConfig.Size = new System.Drawing.Size(1134, 171);
             this.pnlConfig.TabIndex = 18;
             // 
             // pnlScara
             // 
             this.pnlScara.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlScara.Location = new System.Drawing.Point(3, 441);
+            this.pnlScara.Location = new System.Drawing.Point(3, 293);
             this.pnlScara.Name = "pnlScara";
-            this.pnlScara.Size = new System.Drawing.Size(1134, 533);
+            this.pnlScara.Size = new System.Drawing.Size(1134, 681);
             this.pnlScara.TabIndex = 19;
             // 
             // frmMain

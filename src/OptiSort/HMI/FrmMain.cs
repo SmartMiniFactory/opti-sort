@@ -67,6 +67,8 @@ namespace OptiSort
             pnlRobot3D.Controls.Clear();
             pnlRobot3D.Controls.Add(ucRobotView);
 
+            _ucScara.RobotConnected += ucRobotView.Create3DDisplay;
+
 
             // init camera view
             Log("Initializing cameras view");

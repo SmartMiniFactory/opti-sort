@@ -23,6 +23,8 @@ using System.Drawing.Text;
 using OptiSort;
 using System.Diagnostics;
 using System.Text.Json;
+using Ace.Core.Server.Motion;
+using System.Net.Sockets;
 
 namespace OptiSort
 {
@@ -42,13 +44,19 @@ namespace OptiSort
         //private const int RemotingPort = 43434;
         //private const string ProgramFile = "robot.v2";
         //private const int VPlusRobotTask = 1;
-        private IAceClient _client;
-        private IAceServer _server;
-        private IAdeptController _controller;
-        private IAdeptRobot _robot;
+
+        public IAceClient _client {  get; set; }
+        public IAceServer _server { get; set; }
+        public IAdeptController _controller { get; set; }
+        public IAdeptRobot _robot { get; set; }
+
+        private bool _connected = false;
+        private int _backlog = 0;
+
+        public event Action<IAceClient, IAdeptRobot> RobotConnected; // Define an event for message received
+
         //private RemoteAceObjectEventHandler generalEventHandler;
         //private RemoteApplicationEventHandler applicationEventHandler;
-        //private SimulationContainerControl simulationControl;
         //private ControlPanelManager pendantManager;
 
         // LOCATIONS
@@ -104,7 +112,7 @@ namespace OptiSort
         public void OnMessageReceived(string topic, JsonElement message)
         {
             // Process messages based on the topic
-            if (topic == ScaraTarget)
+            if (topic == ScaraTarget && _connected)
             {
                 double x = message.GetProperty("x").GetDouble();
                 double y = message.GetProperty("y").GetDouble();
@@ -116,6 +124,8 @@ namespace OptiSort
                 // Define a new target location
                 Transform3D row = new Transform3D(x, y, z, yaw, pitch, roll);
                 AddLocRow(row);
+
+                _backlog++;
             }
         }
 
@@ -148,24 +158,29 @@ namespace OptiSort
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
+            // check if ACE is running
+            Process[] ProcessList = Process.GetProcessesByName("Ace");
+            if (ProcessList.Length != 1)
+            {
+                MessageBox.Show("ACE is not running: please open the robot server");
+                return;
+            }
+
+            // attempt connection to server
             _frmMain.Log("Connecting to Cobra600...");
             (_controller, _robot, _server, _client) = Cobra600.Connect(chkEmulate.Checked);
 
             if (_controller != null && _robot != null && _server != null)
             {
                 _frmMain.Log("Connected to Cobra600");
+                _connected = true;
 
-                _stop = false;
-
-                // Start a new thread to add the target locations to the queue
-                //_thDefineLocation = new Thread(AddToLocationQueue) { IsBackground = true };
-                //_thDefineLocation.Start();
+                RobotConnected?.Invoke(_client, _robot); // trigger robot connected event
 
                 //// Start a new thread to move the robot to the target locations
                 //_thReachLocation = new Thread(MoveToLoc) { IsBackground = true };
                 //_thReachLocation.Start();
-
-                _frmMain.Log("Location threads started");
+                //_frmMain.Log("Location threads started");
             }
         }
 
@@ -176,7 +191,10 @@ namespace OptiSort
             Cobra600.Disconnect(_controller, _server);
         }
 
-        // ---------------------------------------------------------------------------
+
+        
+
+
 
         //// TODO: REVIEW
         //private void MoveToLoc()
