@@ -400,3 +400,16 @@ FodyWeavers.xsd
 # .vs folder
 */.vs
 **/*.suo
+/src/OptiSort/.vs/OptiSort/FileContentIndex/112fb550-d3da-4f29-ac19-e15e0ab87e7c.vsidx
+/src/OptiSort/.vs/OptiSort/FileContentIndex/4a47f327-720c-4a4a-8ba9-d703a634f109.vsidx
+/src/OptiSort/.vs/OptiSort/FileContentIndex/7cf46452-2065-422d-8fbd-2845b7e79074.vsidx
+/src/OptiSort/.vs/OptiSort/FileContentIndex/cb91af08-9735-461e-82b2-f25201743d5f.vsidx
+/src/OptiSort/.vs/OptiSort/FileContentIndex/e21efc1a-7d6c-4af8-852c-2016f24aeb03.vsidx
+/src/OptiSort/.vs/OptiSort/v17/.suo
+/src/OptiSort/CobraLibrary/obj/Debug/CobraLibrary.csproj.AssemblyReference.cache
+/src/OptiSort/ControllerLibrary/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+/src/OptiSort/FlexibowlLibrary/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+/src/OptiSort/HMI/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+/src/OptiSort/HMI/obj/Debug/HMI.csproj.AssemblyReference.cache
+/.vs/opti-sort/v17/.wsuo
+/.vs/opti-sort/v17/DocumentLayout.json
