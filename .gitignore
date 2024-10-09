@@ -413,3 +413,5 @@ FodyWeavers.xsd
 /src/OptiSort/HMI/obj/Debug/HMI.csproj.AssemblyReference.cache
 /.vs/opti-sort/v17/.wsuo
 /.vs/opti-sort/v17/DocumentLayout.json
+/src/OptiSort/.vs/OptiSort/v17/DocumentLayout.backup.json
+/src/OptiSort/.vs/OptiSort/v17/DocumentLayout.json
