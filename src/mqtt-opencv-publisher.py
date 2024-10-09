@@ -5,14 +5,17 @@ import paho.mqtt.client as mqtt
 import base64
 import time
 import numpy as np
+import json
+import datetime
 
 ####################################################### VARIABLES #######################################################
+
 
 # MQTT
 BOKER_ID = 1
 MQTT_BROKER = ["192.168.0.102", "localhost", "10.10.238.20"] # IP address of the MQTTT broker
 MQTT_PORT = 1883 # Port of the MQTT Broker
-MQTT_TOPIC = "optisort/luxonis/stream" # Topic on which frame will be published
+MQTT_TOPIC = "optisort/ids/stream" # Topic on which frame will be published
 MQTT_USER = "dgalli" # Username for the MQTT Broker
 MQTT_PASSWORD = "dgalli" # Password for the MQTT Broker
 
@@ -42,20 +45,26 @@ if not stream.isOpened():
 print("Starting streaming")
 print("Press 'Q' to quit")
 
+def im2json(imdata):
+    jstr = json.dumps({"image": base64.b64encode(imdata).decode('ascii'), "timestamp": datetime.datetime.now().isoformat()})
+    return jstr
+
+
 while True:
     start = time.time() # Start time
     _, frame = stream.read() # Read frame
 
     # Encode image to PNG format
     _frame = cv2.imencode('.png', frame, encode_param_png)[1].tobytes()
-    client.publish(MQTT_TOPIC, _frame) # Publish the Frame on the Topic home/server
+    client.publish(MQTT_TOPIC, im2json(_frame)) # Publish the Frame on the Topic home/server
     cv2.imshow("Stream input", frame) # Show the frame
     end = time.time() # End time
     t = end - start
     fps = 1/t
     print("FPS: ", np.round(fps, 0), end="\r") # Print the FPS
 
-    
+    time.sleep(0.066) # streaming performance depends also on publishing frequency; 1/15 (FPS) = 0.66
+
     # Press q if you want to end the loop
     if cv2.waitKey(1) & keyboard.is_pressed('q'):
         print("\nqQuitting...")

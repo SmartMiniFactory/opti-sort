@@ -1,6 +1,0 @@
-C:\Users\DGalli\Desktop\src\OptiSort\FlexibowlLibrary\bin\Debug\FlexibowlLibrary.dll
-C:\Users\DGalli\Desktop\src\OptiSort\FlexibowlLibrary\bin\Debug\FlexibowlLibrary.pdb
-C:\Users\DGalli\Desktop\src\OptiSort\FlexibowlLibrary\obj\Debug\FlexibowlLibrary.csproj.AssemblyReference.cache
-C:\Users\DGalli\Desktop\src\OptiSort\FlexibowlLibrary\obj\Debug\FlexibowlLibrary.csproj.CoreCompileInputs.cache
-C:\Users\DGalli\Desktop\src\OptiSort\FlexibowlLibrary\obj\Debug\FlexibowlLibrary.dll
-C:\Users\DGalli\Desktop\src\OptiSort\FlexibowlLibrary\obj\Debug\FlexibowlLibrary.pdb

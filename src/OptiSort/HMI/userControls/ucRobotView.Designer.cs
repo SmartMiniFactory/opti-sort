@@ -1,6 +1,6 @@
 ﻿namespace OptiSort
 {
-    partial class ucCameraStream
+    partial class ucRobotView
     {
         /// <summary> 
         /// Required designer variable.
@@ -28,30 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pnlStream = new System.Windows.Forms.Panel();
+            this.pnl3D = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
-            // pnlStream
+            // pnl3D
             // 
-            this.pnlStream.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlStream.Location = new System.Drawing.Point(0, 0);
-            this.pnlStream.Name = "pnlStream";
-            this.pnlStream.Size = new System.Drawing.Size(842, 752);
-            this.pnlStream.TabIndex = 0;
+            this.pnl3D.BackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.pnl3D.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnl3D.Location = new System.Drawing.Point(0, 0);
+            this.pnl3D.Name = "pnl3D";
+            this.pnl3D.Size = new System.Drawing.Size(648, 572);
+            this.pnl3D.TabIndex = 0;
             // 
-            // CameraStream
+            // ucRobotView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.pnlStream);
-            this.Name = "CameraStream";
-            this.Size = new System.Drawing.Size(842, 752);
+            this.Controls.Add(this.pnl3D);
+            this.Name = "ucRobotView";
+            this.Size = new System.Drawing.Size(648, 572);
+            this.Load += new System.EventHandler(this.ucRobotView_Load);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Panel pnlStream;
+        private System.Windows.Forms.Panel pnl3D;
     }
 }

@@ -400,6 +400,7 @@ FodyWeavers.xsd
 # .vs folder
 */.vs
 **/*.suo
+<<<<<<< HEAD
 /src/OptiSort/.vs/OptiSort/FileContentIndex/112fb550-d3da-4f29-ac19-e15e0ab87e7c.vsidx
 /src/OptiSort/.vs/OptiSort/FileContentIndex/4a47f327-720c-4a4a-8ba9-d703a634f109.vsidx
 /src/OptiSort/.vs/OptiSort/FileContentIndex/7cf46452-2065-422d-8fbd-2845b7e79074.vsidx
@@ -415,3 +416,40 @@ FodyWeavers.xsd
 /.vs/opti-sort/v17/DocumentLayout.json
 /src/OptiSort/.vs/OptiSort/v17/DocumentLayout.backup.json
 /src/OptiSort/.vs/OptiSort/v17/DocumentLayout.json
+=======
+/src/OptiSort/.vs/OptiSort/v17/.suo
+/src/OptiSort/.vs/OptiSort/v17/DocumentLayout.backup.json
+/src/OptiSort/.vs/OptiSort/v17/DocumentLayout.json
+/src/OptiSort/HMI/obj/Debug/HMI.csproj.AssemblyReference.cache
+/src/OptiSort/HMI/obj/Debug/HMI.csproj.CoreCompileInputs.cache
+/src/OptiSort/HMI/obj/Debug/HMI.csproj.GenerateResource.cache
+/.vs/slnx.sqlite
+/src/OptiSort/.vs/OptiSort/v17/.suo
+/src/OptiSort/.vs/OptiSort/v17/DocumentLayout.backup.json
+/src/OptiSort/CobraLibrary/obj/Debug/CobraLibrary.csproj.AssemblyReference.cache
+/src/OptiSort/CobraLibrary/obj/Release/CobraLibrary.csproj.AssemblyReference.cache
+/src/OptiSort/.vs/OptiSort/v17/DocumentLayout.json
+/src/OptiSort/HMI/bin/Debug/OptiSort.exe
+/src/OptiSort/HMI/bin/Debug/OptiSort.pdb
+/src/OptiSort/HMI/obj/Debug/HMI.csproj.AssemblyReference.cache
+/src/OptiSort/HMI/obj/Debug/HMI.csproj.CoreCompileInputs.cache
+/src/OptiSort/HMI/obj/Debug/HMI.csproj.FileListAbsolute.txt
+/src/OptiSort/HMI/obj/Debug/HMI.csproj.GenerateResource.cache
+/src/OptiSort/HMI/obj/Debug/OptiSort.exe
+/src/OptiSort/HMI/obj/Debug/OptiSort.pdb
+/src/OptiSort/HMI/obj/Release/HMI.csproj.AssemblyReference.cache
+/.vs/VSWorkspaceState.json
+/src/OptiSort/HMI/bin/Debug/OptiSort.exe.config
+/src/OptiSort/HMI/obj/Debug/DesignTimeResolveAssemblyReferences.cache
+/src/OptiSort/HMI/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+/src/OptiSort/FlexibowlLibrary/bin/Debug/FlexibowlLibrary.dll
+/src/OptiSort/FlexibowlLibrary/bin/Debug/FlexibowlLibrary.pdb
+/src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.csproj.FileListAbsolute.txt
+/src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.dll
+/src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.pdb
+>>>>>>> Robot-3D-View
+/src/OptiSort/FlexibowlLibrary/bin/Debug/FlexibowlLibrary.dll
+/src/OptiSort/FlexibowlLibrary/bin/Debug/FlexibowlLibrary.pdb
+/src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.csproj.FileListAbsolute.txt
+/src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.dll
+/src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.pdb

@@ -1,6 +1,6 @@
-﻿namespace HMI
+﻿namespace OptiSort
 {
-    partial class ucOptiSort
+    partial class frmMain
     {
         /// <summary>
         /// Required designer variable.
@@ -66,6 +66,7 @@
             this.cmbCameras.Name = "cmbCameras";
             this.cmbCameras.Size = new System.Drawing.Size(672, 54);
             this.cmbCameras.TabIndex = 0;
+            this.cmbCameras.SelectedIndexChanged += new System.EventHandler(this.cmbCameras_SelectedIndexChanged);
             // 
             // panel1
             // 
@@ -177,9 +178,9 @@
             this.tblRobots.Location = new System.Drawing.Point(0, 0);
             this.tblRobots.Name = "tblRobots";
             this.tblRobots.RowCount = 3;
-            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 35F));
-            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
-            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 55F));
+            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 18.11668F));
+            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.56602F));
+            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.3173F));
             this.tblRobots.Size = new System.Drawing.Size(1140, 977);
             this.tblRobots.TabIndex = 26;
             // 
@@ -194,18 +195,18 @@
             this.pnlConfig.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlConfig.Location = new System.Drawing.Point(3, 3);
             this.pnlConfig.Name = "pnlConfig";
-            this.pnlConfig.Size = new System.Drawing.Size(1134, 335);
+            this.pnlConfig.Size = new System.Drawing.Size(1134, 170);
             this.pnlConfig.TabIndex = 18;
             // 
             // pnlScara
             // 
             this.pnlScara.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlScara.Location = new System.Drawing.Point(3, 441);
+            this.pnlScara.Location = new System.Drawing.Point(3, 292);
             this.pnlScara.Name = "pnlScara";
-            this.pnlScara.Size = new System.Drawing.Size(1134, 533);
+            this.pnlScara.Size = new System.Drawing.Size(1134, 682);
             this.pnlScara.TabIndex = 19;
             // 
-            // ucOptiSort
+            // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -215,7 +216,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.panel1);
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.Name = "ucOptiSort";
+            this.Name = "frmMain";
             this.Text = "SCARA Remote Control";
             this.panel1.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);

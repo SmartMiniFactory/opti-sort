@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace HMI
+namespace OptiSort
 {
-    internal static class program
+    internal static class Program
     {
         /// <summary>
         /// The main entry point for the application.
@@ -16,7 +16,15 @@ namespace HMI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ucOptiSort());
+            Application.Run(new frmMain());
+        }
+
+        internal class Cameras
+        {
+            public int ID { get; set; }
+            public string Text { get; set; }
+            public string mqttTopic { get; set; }
+
         }
     }
 }
