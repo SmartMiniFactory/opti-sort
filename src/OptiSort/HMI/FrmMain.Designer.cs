@@ -195,15 +195,15 @@
             this.pnlConfig.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlConfig.Location = new System.Drawing.Point(3, 3);
             this.pnlConfig.Name = "pnlConfig";
-            this.pnlConfig.Size = new System.Drawing.Size(1134, 171);
+            this.pnlConfig.Size = new System.Drawing.Size(1134, 170);
             this.pnlConfig.TabIndex = 18;
             // 
             // pnlScara
             // 
             this.pnlScara.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlScara.Location = new System.Drawing.Point(3, 293);
+            this.pnlScara.Location = new System.Drawing.Point(3, 292);
             this.pnlScara.Name = "pnlScara";
-            this.pnlScara.Size = new System.Drawing.Size(1134, 681);
+            this.pnlScara.Size = new System.Drawing.Size(1134, 682);
             this.pnlScara.TabIndex = 19;
             // 
             // frmMain

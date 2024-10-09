@@ -425,3 +425,8 @@ FodyWeavers.xsd
 /src/OptiSort/HMI/bin/Debug/OptiSort.exe.config
 /src/OptiSort/HMI/obj/Debug/DesignTimeResolveAssemblyReferences.cache
 /src/OptiSort/HMI/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+/src/OptiSort/FlexibowlLibrary/bin/Debug/FlexibowlLibrary.dll
+/src/OptiSort/FlexibowlLibrary/bin/Debug/FlexibowlLibrary.pdb
+/src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.csproj.FileListAbsolute.txt
+/src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.dll
+/src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.pdb

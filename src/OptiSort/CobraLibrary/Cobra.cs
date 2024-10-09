@@ -49,11 +49,7 @@ namespace CobraLibrary
         {
             // Connect to ACE
             aceServer = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, "localhost", _remotingPort);
-            Console.WriteLine("Connected to server");
-
             aceClient = new AceClient(aceServer);
-            Console.WriteLine("Connected to client");
-
             aceClient.InitializePlugins(null);
 
             if (_newWorkspace)
