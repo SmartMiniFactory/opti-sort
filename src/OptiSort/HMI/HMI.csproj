@@ -169,6 +169,30 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="userControls\ucConfiguration.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucConfiguration.Designer.cs">
+      <DependentUpon>ucConfiguration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="userControls\ucFlexibowl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucFlexibowl.Designer.cs">
+      <DependentUpon>ucFlexibowl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="userControls\ucManualControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucManualControl.Designer.cs">
+      <DependentUpon>ucManualControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="userControls\ucProcessView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucProcessView.Designer.cs">
+      <DependentUpon>ucProcessView.cs</DependentUpon>
+    </Compile>
     <Compile Include="userControls\ucRobotView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -196,6 +220,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="userControls\ucProcessView.resx">
+      <DependentUpon>ucProcessView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucRobotView.resx">
       <DependentUpon>ucRobotView.cs</DependentUpon>
     </EmbeddedResource>

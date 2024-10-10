@@ -8,7 +8,7 @@ using System.Text.Json;
 
 namespace OptiSort
 {
-    internal class MQTT
+    public class MQTT
     {
         byte[] _byteReceived = new byte[1];
         string _msgReceived = string.Empty;

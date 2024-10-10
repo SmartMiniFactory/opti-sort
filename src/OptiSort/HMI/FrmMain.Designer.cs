@@ -28,54 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pnlCameraStream = new System.Windows.Forms.Panel();
-            this.cmbCameras = new System.Windows.Forms.ComboBox();
-            this.panel1 = new System.Windows.Forms.Panel();
             this.lstLog = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.pnlRobot3D = new System.Windows.Forms.Panel();
-            this.lblRobotIP = new System.Windows.Forms.Label();
-            this.txtRobotIP = new System.Windows.Forms.TextBox();
-            this.lblControllerIP = new System.Windows.Forms.Label();
-            this.txtControllerIP = new System.Windows.Forms.TextBox();
-            this.btnConnect = new System.Windows.Forms.Button();
-            this.btnDisconnect = new System.Windows.Forms.Button();
-            this.tblRobots = new System.Windows.Forms.TableLayoutPanel();
-            this.pnlConfig = new System.Windows.Forms.Panel();
-            this.pnlScara = new System.Windows.Forms.Panel();
-            this.panel1.SuspendLayout();
+            this.btnConfig = new System.Windows.Forms.Button();
+            this.btnManual = new System.Windows.Forms.Button();
+            this.btnProcess = new System.Windows.Forms.Button();
+            this.pnlCurrentUc = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1.SuspendLayout();
-            this.tblRobots.SuspendLayout();
-            this.pnlConfig.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // pnlCameraStream
-            // 
-            this.pnlCameraStream.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlCameraStream.Location = new System.Drawing.Point(3, 71);
-            this.pnlCameraStream.Name = "pnlCameraStream";
-            this.pnlCameraStream.Size = new System.Drawing.Size(672, 448);
-            this.pnlCameraStream.TabIndex = 18;
-            // 
-            // cmbCameras
-            // 
-            this.cmbCameras.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.cmbCameras.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmbCameras.FormattingEnabled = true;
-            this.cmbCameras.Location = new System.Drawing.Point(3, 3);
-            this.cmbCameras.Name = "cmbCameras";
-            this.cmbCameras.Size = new System.Drawing.Size(672, 54);
-            this.cmbCameras.TabIndex = 0;
-            this.cmbCameras.SelectedIndexChanged += new System.EventHandler(this.cmbCameras_SelectedIndexChanged);
-            // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.lstLog);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 977);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1818, 100);
-            this.panel1.TabIndex = 0;
             // 
             // lstLog
             // 
@@ -83,128 +43,79 @@
             this.lstLog.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lstLog.FormattingEnabled = true;
             this.lstLog.ItemHeight = 20;
-            this.lstLog.Location = new System.Drawing.Point(0, 0);
+            this.lstLog.Location = new System.Drawing.Point(3, 976);
             this.lstLog.Name = "lstLog";
-            this.lstLog.Size = new System.Drawing.Size(1818, 100);
+            this.lstLog.Size = new System.Drawing.Size(1337, 98);
             this.lstLog.TabIndex = 0;
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.ColumnCount = 1;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.pnlRobot3D, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.pnlCameraStream, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.cmbCameras, 0, 0);
-            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(1140, 0);
+            this.tableLayoutPanel1.ColumnCount = 4;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 73.91304F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 8.69565F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 8.69565F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 8.69565F));
+            this.tableLayoutPanel1.Controls.Add(this.btnConfig, 3, 1);
+            this.tableLayoutPanel1.Controls.Add(this.btnManual, 2, 1);
+            this.tableLayoutPanel1.Controls.Add(this.lstLog, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.btnProcess, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.pnlCurrentUc, 0, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.976745F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 46.51163F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 46.51163F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(678, 977);
-            this.tableLayoutPanel1.TabIndex = 19;
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 90.38461F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 9.615385F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1818, 1077);
+            this.tableLayoutPanel1.TabIndex = 1;
             // 
-            // pnlRobot3D
+            // btnConfig
             // 
-            this.pnlRobot3D.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlRobot3D.Location = new System.Drawing.Point(3, 525);
-            this.pnlRobot3D.Name = "pnlRobot3D";
-            this.pnlRobot3D.Size = new System.Drawing.Size(672, 449);
-            this.pnlRobot3D.TabIndex = 19;
+            this.btnConfig.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnConfig.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnConfig.Location = new System.Drawing.Point(1662, 976);
+            this.btnConfig.Name = "btnConfig";
+            this.btnConfig.Size = new System.Drawing.Size(153, 98);
+            this.btnConfig.TabIndex = 3;
+            this.btnConfig.TabStop = false;
+            this.btnConfig.Text = "CONFIG";
+            this.btnConfig.UseVisualStyleBackColor = true;
+            this.btnConfig.Click += new System.EventHandler(this.btnConfig_Click);
             // 
-            // lblRobotIP
+            // btnManual
             // 
-            this.lblRobotIP.AutoSize = true;
-            this.lblRobotIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblRobotIP.Location = new System.Drawing.Point(27, 18);
-            this.lblRobotIP.Name = "lblRobotIP";
-            this.lblRobotIP.Size = new System.Drawing.Size(132, 36);
-            this.lblRobotIP.TabIndex = 20;
-            this.lblRobotIP.Text = "Robot IP";
+            this.btnManual.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnManual.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnManual.Location = new System.Drawing.Point(1504, 976);
+            this.btnManual.Name = "btnManual";
+            this.btnManual.Size = new System.Drawing.Size(152, 98);
+            this.btnManual.TabIndex = 2;
+            this.btnManual.TabStop = false;
+            this.btnManual.Text = "MANUAL";
+            this.btnManual.UseVisualStyleBackColor = true;
+            this.btnManual.Click += new System.EventHandler(this.btnManual_Click);
             // 
-            // txtRobotIP
+            // btnProcess
             // 
-            this.txtRobotIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtRobotIP.Location = new System.Drawing.Point(219, 18);
-            this.txtRobotIP.Name = "txtRobotIP";
-            this.txtRobotIP.Size = new System.Drawing.Size(285, 41);
-            this.txtRobotIP.TabIndex = 21;
+            this.btnProcess.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnProcess.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProcess.Location = new System.Drawing.Point(1346, 976);
+            this.btnProcess.Name = "btnProcess";
+            this.btnProcess.Size = new System.Drawing.Size(152, 98);
+            this.btnProcess.TabIndex = 1;
+            this.btnProcess.TabStop = false;
+            this.btnProcess.Text = "AUTO";
+            this.btnProcess.UseVisualStyleBackColor = true;
+            this.btnProcess.Click += new System.EventHandler(this.btnProcess_Click);
             // 
-            // lblControllerIP
+            // pnlCurrentUc
             // 
-            this.lblControllerIP.AutoSize = true;
-            this.lblControllerIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblControllerIP.Location = new System.Drawing.Point(27, 79);
-            this.lblControllerIP.Name = "lblControllerIP";
-            this.lblControllerIP.Size = new System.Drawing.Size(181, 36);
-            this.lblControllerIP.TabIndex = 22;
-            this.lblControllerIP.Text = "Controller IP";
-            // 
-            // txtControllerIP
-            // 
-            this.txtControllerIP.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtControllerIP.Location = new System.Drawing.Point(219, 76);
-            this.txtControllerIP.Name = "txtControllerIP";
-            this.txtControllerIP.Size = new System.Drawing.Size(285, 41);
-            this.txtControllerIP.TabIndex = 23;
-            // 
-            // btnConnect
-            // 
-            this.btnConnect.Location = new System.Drawing.Point(526, 18);
-            this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(118, 41);
-            this.btnConnect.TabIndex = 24;
-            this.btnConnect.Text = "Connect";
-            this.btnConnect.UseVisualStyleBackColor = true;
-            // 
-            // btnDisconnect
-            // 
-            this.btnDisconnect.Enabled = false;
-            this.btnDisconnect.Location = new System.Drawing.Point(526, 76);
-            this.btnDisconnect.Name = "btnDisconnect";
-            this.btnDisconnect.Size = new System.Drawing.Size(118, 41);
-            this.btnDisconnect.TabIndex = 25;
-            this.btnDisconnect.Text = "Disconnect";
-            this.btnDisconnect.UseVisualStyleBackColor = true;
-            // 
-            // tblRobots
-            // 
-            this.tblRobots.ColumnCount = 1;
-            this.tblRobots.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tblRobots.Controls.Add(this.pnlConfig, 0, 0);
-            this.tblRobots.Controls.Add(this.pnlScara, 0, 2);
-            this.tblRobots.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tblRobots.Location = new System.Drawing.Point(0, 0);
-            this.tblRobots.Name = "tblRobots";
-            this.tblRobots.RowCount = 3;
-            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 18.11668F));
-            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.56602F));
-            this.tblRobots.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.3173F));
-            this.tblRobots.Size = new System.Drawing.Size(1140, 977);
-            this.tblRobots.TabIndex = 26;
-            // 
-            // pnlConfig
-            // 
-            this.pnlConfig.Controls.Add(this.lblRobotIP);
-            this.pnlConfig.Controls.Add(this.btnDisconnect);
-            this.pnlConfig.Controls.Add(this.txtRobotIP);
-            this.pnlConfig.Controls.Add(this.btnConnect);
-            this.pnlConfig.Controls.Add(this.lblControllerIP);
-            this.pnlConfig.Controls.Add(this.txtControllerIP);
-            this.pnlConfig.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlConfig.Location = new System.Drawing.Point(3, 3);
-            this.pnlConfig.Name = "pnlConfig";
-            this.pnlConfig.Size = new System.Drawing.Size(1134, 170);
-            this.pnlConfig.TabIndex = 18;
-            // 
-            // pnlScara
-            // 
-            this.pnlScara.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlScara.Location = new System.Drawing.Point(3, 292);
-            this.pnlScara.Name = "pnlScara";
-            this.pnlScara.Size = new System.Drawing.Size(1134, 682);
-            this.pnlScara.TabIndex = 19;
+            this.tableLayoutPanel1.SetColumnSpan(this.pnlCurrentUc, 4);
+            this.pnlCurrentUc.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlCurrentUc.Location = new System.Drawing.Point(3, 3);
+            this.pnlCurrentUc.Name = "pnlCurrentUc";
+            this.pnlCurrentUc.Size = new System.Drawing.Size(1812, 967);
+            this.pnlCurrentUc.TabIndex = 4;
             // 
             // frmMain
             // 
@@ -212,37 +123,23 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
             this.ClientSize = new System.Drawing.Size(1818, 1077);
-            this.Controls.Add(this.tblRobots);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Controls.Add(this.panel1);
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "frmMain";
-            this.Text = "SCARA Remote Control";
-            this.panel1.ResumeLayout(false);
+            this.Text = "OptiSort";
             this.tableLayoutPanel1.ResumeLayout(false);
-            this.tblRobots.ResumeLayout(false);
-            this.pnlConfig.ResumeLayout(false);
-            this.pnlConfig.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-        private System.Windows.Forms.Panel pnlCameraStream;
-        private System.Windows.Forms.ComboBox cmbCameras;
-        private System.Windows.Forms.Panel panel1;
+
         private System.Windows.Forms.ListBox lstLog;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.Panel pnlRobot3D;
-        private System.Windows.Forms.Label lblRobotIP;
-        private System.Windows.Forms.TextBox txtRobotIP;
-        private System.Windows.Forms.Label lblControllerIP;
-        private System.Windows.Forms.TextBox txtControllerIP;
-        private System.Windows.Forms.Button btnConnect;
-        private System.Windows.Forms.Button btnDisconnect;
-        private System.Windows.Forms.TableLayoutPanel tblRobots;
-        private System.Windows.Forms.Panel pnlConfig;
-        private System.Windows.Forms.Panel pnlScara;
+        private System.Windows.Forms.Button btnProcess;
+        private System.Windows.Forms.Button btnConfig;
+        private System.Windows.Forms.Button btnManual;
+        private System.Windows.Forms.Panel pnlCurrentUc;
     }
 }
 
