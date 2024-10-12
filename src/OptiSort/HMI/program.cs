@@ -19,6 +19,8 @@ namespace OptiSort
             Application.Run(new frmMain());
         }
 
+
+        // TODO: move from here
         internal class Cameras
         {
             public int ID { get; set; }

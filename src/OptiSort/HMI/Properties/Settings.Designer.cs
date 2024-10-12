@@ -8,22 +8,102 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace OptiSort.Properties
-{
-
-
+namespace OptiSort.Properties {
+    
+    
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "11.0.0.0")]
-    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase
-    {
-
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.11.0.0")]
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
+        
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
-
-        public static Settings Default
-        {
-            get
-            {
+        
+        public static Settings Default {
+            get {
                 return defaultInstance;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10.90.90.60")]
+        public string IP_scara {
+            get {
+                return ((string)(this["IP_scara"]));
+            }
+            set {
+                this["IP_scara"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
+        public string IP_controller {
+            get {
+                return ((string)(this["IP_controller"]));
+            }
+            set {
+                this["IP_controller"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("OptiSort")]
+        public string mqttClientName {
+            get {
+                return ((string)(this["mqttClientName"]));
+            }
+            set {
+                this["mqttClientName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("optisort/scara/target")]
+        public string mqttTopic_scaraTarget {
+            get {
+                return ((string)(this["mqttTopic_scaraTarget"]));
+            }
+            set {
+                this["mqttTopic_scaraTarget"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("optisort/basler/stream")]
+        public string mqttTopic_baslerStream {
+            get {
+                return ((string)(this["mqttTopic_baslerStream"]));
+            }
+            set {
+                this["mqttTopic_baslerStream"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("optisort/ids/stream")]
+        public string mqttTopic_idsStream {
+            get {
+                return ((string)(this["mqttTopic_idsStream"]));
+            }
+            set {
+                this["mqttTopic_idsStream"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("optisort/luxonis/stream")]
+        public string mqttTopic_luxonisStream {
+            get {
+                return ((string)(this["mqttTopic_luxonisStream"]));
+            }
+            set {
+                this["mqttTopic_luxonisStream"] = value;
             }
         }
     }

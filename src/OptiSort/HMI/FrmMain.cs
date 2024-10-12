@@ -1,10 +1,9 @@
 ﻿using System.Linq;
 using System.Windows.Forms;
-using CobraLibrary;
-using static OptiSort.Program;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using OptiSort.userControls;
+using System.IO;
+using System.Text.Json;
 
 namespace OptiSort
 {
@@ -23,45 +22,91 @@ namespace OptiSort
         /// 
 
         public MQTT _mqttClient;
-        public string _mqttClientName = "OptiSort";
-        public bool _clientCreated = false;
+
 
         public frmMain()
         {
             InitializeComponent();
 
+
+            // Initialize MQTT connection
+            _mqttClient = new MQTT();
             InitializeMQTTClient();
 
+
+            // Display default user control
             ucProcessView ucProcessView = new ucProcessView(this);
             ucProcessView.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Clear();
             pnlCurrentUc.Controls.Add(ucProcessView);
 
+            // Activate default pushbuttons
             btnProcess.Enabled = false;
             btnManual.Enabled = true;
             btnConfig.Enabled = true;
         }
 
+
+        // -----------------------------------------------------------------------------------
+        // -------------------------------------- MQTT ---------------------------------------
+        // -----------------------------------------------------------------------------------
+
         private async void InitializeMQTTClient()
         {
-            _mqttClient = new MQTT();
+            string mqttClientName = Properties.Settings.Default.mqttClientName;
+            Task<bool> createClient = _mqttClient.CreateClient(mqttClientName);
 
-            Task<bool> client = _mqttClient.CreateClient(_mqttClientName);
-            _clientCreated = await client; 
-
-            if (_clientCreated)
-                Log($"MQTT client '{_mqttClientName}' created");
+            if (await createClient)
+            {
+                Log($"MQTT client '{mqttClientName}' created");
+                subscribeMqttTopics();
+            }
             else
-                Log($"Failed to create '{_mqttClientName}' MQTT client");
+                Log($"Failed to create '{mqttClientName}' MQTT client");
         }
 
 
-        public void Log(string msg)
+        private async void subscribeMqttTopics()
         {
-            lstLog.Items.Add(msg);
-            lstLog.TopIndex = lstLog.Items.Count - 1; // showing last row
+
+            // Retreive topics from configuration file
+            string mqttClientName = Properties.Settings.Default.mqttClientName;
+            string topicScaraTarget = Properties.Settings.Default.mqttTopic_scaraTarget;
+            string topicIdsStream = Properties.Settings.Default.mqttTopic_idsStream;
+            string topicLuxonisStream = Properties.Settings.Default.mqttTopic_luxonisStream;
+            string topicBaslerStream = Properties.Settings.Default.mqttTopic_baslerStream;
+
+
+            // Subscribe to the necessary topics
+            bool scaraSubscriberd = await _mqttClient.SubscribeClientToTopic(mqttClientName, topicScaraTarget);
+            bool idsSubscribed = await _mqttClient.SubscribeClientToTopic(mqttClientName, topicIdsStream);
+            bool baslerSubscribed = await _mqttClient.SubscribeClientToTopic(mqttClientName, topicBaslerStream);
+            bool luxonisSubscribed = await _mqttClient.SubscribeClientToTopic(mqttClientName, topicLuxonisStream);
+
+            // logging
+            if (scaraSubscriberd) Log($"{mqttClientName} subscribed to {topicScaraTarget}");
+            else Log($"Unable subscribing {mqttClientName} to {topicScaraTarget}");
+
+            if (idsSubscribed) Log($"{mqttClientName} subscribed to {topicIdsStream}");
+            else Log($"Unable subscribing {mqttClientName} to {topicIdsStream}");
+
+            if (baslerSubscribed) Log($"{mqttClientName} subscribed to {topicBaslerStream}");
+            else Log($"Unable subscribing {mqttClientName} to {topicBaslerStream}");
+
+            if (luxonisSubscribed) Log($"{mqttClientName} subscribed to {topicLuxonisStream}");
+            else Log($"Unable subscribing {mqttClientName} to {topicLuxonisStream}");
+
+            // Subscribe user controls to the message received event
+            //_mqttClient.MessageReceived += _ucScara.OnMessageReceived;
+            //_mqttClient.MessageReceived += _ucCameraStream.OnMessageReceived;
         }
 
+
+        
+
+        // -----------------------------------------------------------------------------------
+        // ---------------------------- CHANGING USER CONTROL --------------------------------
+        // -----------------------------------------------------------------------------------
 
         private void CleanPnlCurrentUc()
         {
@@ -70,7 +115,7 @@ namespace OptiSort
             pnlCurrentUc.Controls.Clear();
 
             previousControl.Dispose();
-            // TODO: detach events
+            // TODO: detach active events
         }
 
         
@@ -118,5 +163,16 @@ namespace OptiSort
 
             Log("Switched to configuration view");
         }
+
+
+        // -----------------------------------------------------------------------------------
+        // -------------------------------- SUPPORT FUNCTIONS --------------------------------
+        // -----------------------------------------------------------------------------------
+        public void Log(string msg)
+        {
+            lstLog.Items.Add(msg);
+            lstLog.TopIndex = lstLog.Items.Count - 1; // showing last row
+        }
+
     }
 }

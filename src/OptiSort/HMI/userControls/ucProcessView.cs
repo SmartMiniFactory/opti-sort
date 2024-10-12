@@ -19,12 +19,6 @@ namespace OptiSort.userControls
 
         List<Cameras> _camerasList = new List<Cameras> { };
 
-        // TODO: insert in ucConfig
-        string _scaraTopic = "optisort/scara/target";
-        string _idsTopic = "optisort/ids/stream";
-        string _luxonisTopic = "optisort/luxonis/stream";
-        string _baslerTopic = "optisort/basler/stream";
-
         ucScara _ucScara;
         ucCameraStream _ucCameraStream;
 
@@ -35,9 +29,9 @@ namespace OptiSort.userControls
 
             // init combobox
             _frmMain.Log("Initializing cameras combobox");
-            _camerasList.Add(new Cameras { ID = 0, Text = "Basler", mqttTopic = _baslerTopic });
-            _camerasList.Add(new Cameras { ID = 1, Text = "IDS", mqttTopic = _idsTopic });
-            _camerasList.Add(new Cameras { ID = 2, Text = "Luxonics", mqttTopic = _luxonisTopic });
+            _camerasList.Add(new Cameras { ID = 0, Text = "Basler", mqttTopic = Properties.Settings.Default.mqttTopic_baslerStream });
+            _camerasList.Add(new Cameras { ID = 1, Text = "IDS", mqttTopic = Properties.Settings.Default.mqttTopic_idsStream });
+            _camerasList.Add(new Cameras { ID = 2, Text = "Luxonics", mqttTopic = Properties.Settings.Default.mqttTopic_luxonisStream });
             cmbCameras.DataSource = _camerasList;
             cmbCameras.DisplayMember = "Text";
             cmbCameras.ValueMember = "ID";
@@ -47,7 +41,7 @@ namespace OptiSort.userControls
             _frmMain.Log("Initializing scara datagridview");
             Cobra cobra600 = new Cobra();
             _ucScara = new ucScara(_frmMain);
-            _ucScara.ScaraTarget = _scaraTopic;
+            _ucScara.ScaraTarget = Properties.Settings.Default.mqttTopic_scaraTarget;
             _ucScara.Cobra600 = cobra600;
             _ucScara.Dock = DockStyle.Fill;
             pnlScara.Controls.Clear();
@@ -82,39 +76,11 @@ namespace OptiSort.userControls
 
             _frmMain.Log("Initialization complete");
 
-
-            if (_frmMain._clientCreated)
-                subscribeMqttTopics();
-
         }
 
 
 
-        private async void subscribeMqttTopics()
-        {
-            // Subscribe to the necessary topics
-            bool scaraSubscriberd = await _frmMain._mqttClient.SubscribeClientToTopic(_frmMain._mqttClientName, _scaraTopic);
-            bool idsSubscribed = await _frmMain._mqttClient.SubscribeClientToTopic(_frmMain._mqttClientName, _idsTopic);
-            bool baslerSubscribed = await _frmMain._mqttClient.SubscribeClientToTopic(_frmMain._mqttClientName, _baslerTopic);
-            bool luxonisSubscribed = await _frmMain._mqttClient.SubscribeClientToTopic(_frmMain._mqttClientName, _luxonisTopic);
-
-            // logging
-            if (scaraSubscriberd) _frmMain.Log($"{_frmMain._mqttClientName} subscribed to {_scaraTopic}");
-            else _frmMain.Log($"Unable subscribing {_frmMain._mqttClientName} to {_scaraTopic}");
-
-            if (idsSubscribed) _frmMain.Log($"{_frmMain._mqttClientName} subscribed to {_idsTopic}");
-            else _frmMain.Log($"Unable subscribing {_frmMain._mqttClientName} to {_idsTopic}");
-
-            if (baslerSubscribed) _frmMain.Log($"{_frmMain._mqttClientName} subscribed to {_baslerTopic}");
-            else _frmMain.Log($"Unable subscribing {_frmMain._mqttClientName} to {_baslerTopic}");
-
-            if (luxonisSubscribed) _frmMain.Log($"{_frmMain._mqttClientName} subscribed to {_luxonisTopic}");
-            else _frmMain.Log($"Unable subscribing {_frmMain._mqttClientName} to {_luxonisTopic}");
-
-            // Subscribe user controls to the message received event
-            _frmMain._mqttClient.MessageReceived += _ucScara.OnMessageReceived;
-            _frmMain._mqttClient.MessageReceived += _ucCameraStream.OnMessageReceived;
-        }
+        
 
 
 

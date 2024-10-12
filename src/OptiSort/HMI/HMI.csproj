@@ -220,6 +220,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="userControls\ucConfiguration.resx">
+      <DependentUpon>ucConfiguration.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucProcessView.resx">
       <DependentUpon>ucProcessView.cs</DependentUpon>
     </EmbeddedResource>
