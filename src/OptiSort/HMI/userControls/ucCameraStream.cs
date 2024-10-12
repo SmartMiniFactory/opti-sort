@@ -21,7 +21,7 @@ namespace OptiSort
         private DateTime _lastFpsUpdate = DateTime.Now;
         private int _latencyMilliseconds = 0;
 
-        internal ucCameraStream(Program.Cameras camera)
+        internal ucCameraStream()
         {
             InitializeComponent();
 

@@ -1,6 +1,6 @@
 ﻿namespace OptiSort
 {
-    partial class ucScara
+    partial class ucScaraTargets
     {
         /// <summary> 
         /// Required designer variable.

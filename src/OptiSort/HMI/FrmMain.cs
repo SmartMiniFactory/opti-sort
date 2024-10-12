@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using OptiSort.userControls;
 using System.IO;
 using System.Text.Json;
+using System;
 
 namespace OptiSort
 {
@@ -95,10 +96,6 @@ namespace OptiSort
 
             if (luxonisSubscribed) Log($"{mqttClientName} subscribed to {topicLuxonisStream}");
             else Log($"Unable subscribing {mqttClientName} to {topicLuxonisStream}");
-
-            // Subscribe user controls to the message received event
-            //_mqttClient.MessageReceived += _ucScara.OnMessageReceived;
-            //_mqttClient.MessageReceived += _ucCameraStream.OnMessageReceived;
         }
 
 
@@ -115,7 +112,6 @@ namespace OptiSort
             pnlCurrentUc.Controls.Clear();
 
             previousControl.Dispose();
-            // TODO: detach active events
         }
 
         
@@ -130,8 +126,6 @@ namespace OptiSort
             btnProcess.Enabled = false;
             btnManual.Enabled = true;
             btnConfig.Enabled = true;
-
-            Log("Switched to automatic process view");
         }
 
         private void btnManual_Click(object sender, System.EventArgs e)
@@ -145,8 +139,6 @@ namespace OptiSort
             btnProcess.Enabled = true;
             btnManual.Enabled = false;
             btnConfig.Enabled = true;
-
-            Log("Switched to manual control view");
         }
 
         private void btnConfig_Click(object sender, System.EventArgs e)
@@ -160,8 +152,6 @@ namespace OptiSort
             btnProcess.Enabled = true;
             btnManual.Enabled = true;
             btnConfig.Enabled = false;
-
-            Log("Switched to configuration view");
         }
 
 
@@ -170,6 +160,7 @@ namespace OptiSort
         // -----------------------------------------------------------------------------------
         public void Log(string msg)
         {
+            msg = DateTime.Now.ToString() + " - " + msg;
             lstLog.Items.Add(msg);
             lstLog.TopIndex = lstLog.Items.Count - 1; // showing last row
         }

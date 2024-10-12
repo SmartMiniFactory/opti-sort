@@ -13,6 +13,11 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
+            // unsubscribe mqtt messages triggers
+            _frmMain._mqttClient.MessageReceived -= _ucScaraTargets.OnMessageReceived;
+            _frmMain._mqttClient.MessageReceived -= _ucCameraStream.OnMessageReceived;
+            _frmMain.Log("Process view detached from being triggered by MQTT messages");
+
             if (disposing && (components != null))
             {
                 components.Dispose();

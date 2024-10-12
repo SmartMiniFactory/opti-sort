@@ -17,10 +17,16 @@ namespace OptiSort.userControls
 
         private frmMain _frmMain;
 
+        private class Cameras
+        {
+            public int ID { get; set; }
+            public string Text { get; set; }
+            public string mqttTopic { get; set; }
+        }
         List<Cameras> _camerasList = new List<Cameras> { };
 
-        ucScara _ucScara;
-        ucCameraStream _ucCameraStream;
+        private ucCameraStream _ucCameraStream; 
+        private ucScaraTargets _ucScaraTargets;
 
         public ucProcessView(frmMain frmMain)
         {
@@ -28,59 +34,51 @@ namespace OptiSort.userControls
             _frmMain = frmMain;
 
             // init combobox
-            _frmMain.Log("Initializing cameras combobox");
             _camerasList.Add(new Cameras { ID = 0, Text = "Basler", mqttTopic = Properties.Settings.Default.mqttTopic_baslerStream });
             _camerasList.Add(new Cameras { ID = 1, Text = "IDS", mqttTopic = Properties.Settings.Default.mqttTopic_idsStream });
             _camerasList.Add(new Cameras { ID = 2, Text = "Luxonics", mqttTopic = Properties.Settings.Default.mqttTopic_luxonisStream });
             cmbCameras.DataSource = _camerasList;
             cmbCameras.DisplayMember = "Text";
             cmbCameras.ValueMember = "ID";
-
-
-            // init scara dgv
-            _frmMain.Log("Initializing scara datagridview");
-            Cobra cobra600 = new Cobra();
-            _ucScara = new ucScara(_frmMain);
-            _ucScara.ScaraTarget = Properties.Settings.Default.mqttTopic_scaraTarget;
-            _ucScara.Cobra600 = cobra600;
-            _ucScara.Dock = DockStyle.Fill;
-            pnlScara.Controls.Clear();
-            pnlScara.Controls.Add(_ucScara);
-
-
-            // init robot3D view
-            _frmMain.Log("Initializing scara 3D View");
-            ucRobotView ucRobotView = new ucRobotView(_frmMain);
-            ucRobotView.Dock = DockStyle.Fill;
-            pnlRobot3D.Controls.Clear();
-            pnlRobot3D.Controls.Add(ucRobotView);
-
-            _ucScara.RobotConnected += ucRobotView.Create3DDisplay;
-
-
-            // init flexibowl
-            _frmMain.Log("Initializing flexibowl");
-            ucFlexibowl ucFlexibowl = new ucFlexibowl();
-            ucFlexibowl.Dock = DockStyle.Fill;
-            pnlFlexibowl.Controls.Clear();
-            pnlFlexibowl.Controls.Add(ucFlexibowl);
-
+            
 
             // init camera view
-            _frmMain.Log("Initializing cameras view");
-            _ucCameraStream = new ucCameraStream(_camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex));
+            _ucCameraStream = new ucCameraStream();
             _ucCameraStream.StreamTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
             _ucCameraStream.Dock = DockStyle.Fill;
             pnlCameraStream.Controls.Clear();
             pnlCameraStream.Controls.Add(_ucCameraStream);
+            _frmMain._mqttClient.MessageReceived += _ucCameraStream.OnMessageReceived; // enable MQTT messages to trigger the user control
+            _frmMain.Log("Camera stream attached to MQTT messages");
 
-            _frmMain.Log("Initialization complete");
+            // init scara dgv
+            _ucScaraTargets = new ucScaraTargets(_frmMain); // using log function
+            _ucScaraTargets.Dock = DockStyle.Fill;
+            pnlScara.Controls.Clear();
+            pnlScara.Controls.Add(_ucScaraTargets);
+            _frmMain._mqttClient.MessageReceived += _ucScaraTargets.OnMessageReceived; // enable MQTT messages to trigger the user control
+            _frmMain.Log("Scara targets dgv attached to MQTT messages");
 
+            // init robot3D view
+            ucRobotView ucRobotView = new ucRobotView();
+            ucRobotView.Dock = DockStyle.Fill;
+            pnlRobot3D.Controls.Clear();
+            pnlRobot3D.Controls.Add(ucRobotView);
+
+            // connect scara and 3D view (TO REVIEW)
+            _ucScaraTargets.RobotConnected += ucRobotView.Create3DDisplay;
+
+
+            // init flexibowl
+            ucFlexibowl ucFlexibowl = new ucFlexibowl();
+            ucFlexibowl.Dock = DockStyle.Fill;
+            pnlFlexibowl.Controls.Clear();
+            pnlFlexibowl.Controls.Add(ucFlexibowl);
         }
 
 
-
         
+
 
 
 

@@ -69,6 +69,10 @@ namespace OptiSort.userControls
                     Properties.Settings.Default[settingName] = newValue;
                     Properties.Settings.Default.Save();
                 }
+
+                // TODO: if a mqtt topic is changed, automate unsubscription and subscription of the client
+                // TODO: if mqtt client name is changed, automate client destruction and rebuild
+
             }
         }
     }

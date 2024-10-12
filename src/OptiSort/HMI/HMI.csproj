@@ -199,11 +199,11 @@
     <Compile Include="userControls\ucRobotView.Designer.cs">
       <DependentUpon>ucRobotView.cs</DependentUpon>
     </Compile>
-    <Compile Include="userControls\ucScara.cs">
+    <Compile Include="userControls\ucScaraTargets.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="userControls\ucScara.Designer.cs">
-      <DependentUpon>ucScara.cs</DependentUpon>
+    <Compile Include="userControls\ucScaraTargets.Designer.cs">
+      <DependentUpon>ucScaraTargets.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="userControls\ucCameraStream.resx">
       <DependentUpon>ucCameraStream.cs</DependentUpon>
@@ -223,14 +223,17 @@
     <EmbeddedResource Include="userControls\ucConfiguration.resx">
       <DependentUpon>ucConfiguration.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="userControls\ucFlexibowl.resx">
+      <DependentUpon>ucFlexibowl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucProcessView.resx">
       <DependentUpon>ucProcessView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucRobotView.resx">
       <DependentUpon>ucRobotView.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="userControls\ucScara.resx">
-      <DependentUpon>ucScara.cs</DependentUpon>
+    <EmbeddedResource Include="userControls\ucScaraTargets.resx">
+      <DependentUpon>ucScaraTargets.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

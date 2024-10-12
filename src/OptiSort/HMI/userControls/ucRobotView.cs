@@ -20,11 +20,10 @@ namespace OptiSort
 {
     public partial class ucRobotView : UserControl
     {
-        public Cobra Cobra600 { get; set; }
-        private frmMain _frmMain;
+
         private SimulationContainerControl _simulationControl;
 
-        public ucRobotView(frmMain frmMain)
+        public ucRobotView()
         {
             InitializeComponent();
         }
