@@ -1,30 +1,16 @@
 ﻿using Ace.Adept.Server.Controls;
-using Ace.Adept.Server.Device;
-using Ace.Adept.Server.Motion.Robots;
 using Ace.Adept.Server.Motion;
 using Ace.Core.Client;
 using Ace.Core.Server;
-using Ace.Core.Server.Device;
 using Ace.Core.Util;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Ace.Core.Server.Event;
 using CobraLibrary;
-using Ace.Core.Client.Sim3d.Controls;
-using System.Drawing.Text;
-using OptiSort;
 using System.Diagnostics;
 using System.Text.Json;
-using Ace.Core.Server.Motion;
-using System.Net.Sockets;
+
 
 namespace OptiSort
 {
@@ -175,9 +161,17 @@ namespace OptiSort
 
         private void btnDisconnect_Click(object sender, EventArgs e)
         {
-            // TODO: add disconnection check
             _frmMain.Log("Disconnecting from Cobra600");
-            _cobra600.Disconnect(_controller, _server);
+            bool disconnect = _cobra600.Disconnect(_controller, _server);
+            if (disconnect)
+            {
+                _frmMain.Log("Cobra600 disconnected");
+            }
+        }
+
+        private void btnJog_Click(object sender, EventArgs e)
+        {
+            _cobra600.pendantManager.LaunchControlForm(this, _client, _robot);
         }
 
 

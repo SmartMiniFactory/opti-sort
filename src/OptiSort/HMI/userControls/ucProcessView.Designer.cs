@@ -34,10 +34,10 @@
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.pnlScara = new System.Windows.Forms.Panel();
-            this.pnlRobot3D = new System.Windows.Forms.Panel();
-            this.cmbCameras = new System.Windows.Forms.ComboBox();
             this.pnlCameraStream = new System.Windows.Forms.Panel();
+            this.cmbCameras = new System.Windows.Forms.ComboBox();
+            this.pnlRobot3D = new System.Windows.Forms.Panel();
+            this.pnlScara = new System.Windows.Forms.Panel();
             this.pnlFlexibowl = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
@@ -62,21 +62,13 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1537, 1034);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
-            // pnlScara
+            // pnlCameraStream
             // 
-            this.pnlScara.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlScara.Location = new System.Drawing.Point(3, 461);
-            this.pnlScara.Name = "pnlScara";
-            this.pnlScara.Size = new System.Drawing.Size(993, 570);
-            this.pnlScara.TabIndex = 20;
-            // 
-            // pnlRobot3D
-            // 
-            this.pnlRobot3D.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlRobot3D.Location = new System.Drawing.Point(1002, 461);
-            this.pnlRobot3D.Name = "pnlRobot3D";
-            this.pnlRobot3D.Size = new System.Drawing.Size(532, 570);
-            this.pnlRobot3D.TabIndex = 21;
+            this.pnlCameraStream.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlCameraStream.Location = new System.Drawing.Point(1002, 63);
+            this.pnlCameraStream.Name = "pnlCameraStream";
+            this.pnlCameraStream.Size = new System.Drawing.Size(532, 392);
+            this.pnlCameraStream.TabIndex = 23;
             // 
             // cmbCameras
             // 
@@ -89,16 +81,26 @@
             this.cmbCameras.TabIndex = 22;
             this.cmbCameras.SelectedIndexChanged += new System.EventHandler(this.cmbCameras_SelectedIndexChanged);
             // 
-            // pnlCameraStream
+            // pnlRobot3D
             // 
-            this.pnlCameraStream.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlCameraStream.Location = new System.Drawing.Point(1002, 63);
-            this.pnlCameraStream.Name = "pnlCameraStream";
-            this.pnlCameraStream.Size = new System.Drawing.Size(532, 392);
-            this.pnlCameraStream.TabIndex = 23;
+            this.pnlRobot3D.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlRobot3D.Location = new System.Drawing.Point(1002, 461);
+            this.pnlRobot3D.Name = "pnlRobot3D";
+            this.pnlRobot3D.Size = new System.Drawing.Size(532, 570);
+            this.pnlRobot3D.TabIndex = 21;
+            // 
+            // pnlScara
+            // 
+            this.pnlScara.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlScara.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlScara.Location = new System.Drawing.Point(3, 461);
+            this.pnlScara.Name = "pnlScara";
+            this.pnlScara.Size = new System.Drawing.Size(993, 570);
+            this.pnlScara.TabIndex = 20;
             // 
             // pnlFlexibowl
             // 
+            this.pnlFlexibowl.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnlFlexibowl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlFlexibowl.Location = new System.Drawing.Point(3, 3);
             this.pnlFlexibowl.Name = "pnlFlexibowl";

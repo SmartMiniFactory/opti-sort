@@ -42,6 +42,7 @@
             // 
             // dgvTargetQueue
             // 
+            this.dgvTargetQueue.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgvTargetQueue.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.tableLayoutPanel1.SetColumnSpan(this.dgvTargetQueue, 5);
             this.dgvTargetQueue.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -132,6 +133,7 @@
             this.btnJog.TabIndex = 5;
             this.btnJog.Text = "JOG";
             this.btnJog.UseVisualStyleBackColor = true;
+            this.btnJog.Click += new System.EventHandler(this.btnJog_Click);
             // 
             // label1
             // 
@@ -146,12 +148,12 @@
             this.label1.Text = "MQTT locations backlog";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // ucScara
+            // ucScaraTargets
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Name = "ucScara";
+            this.Name = "ucScaraTargets";
             this.Size = new System.Drawing.Size(1436, 764);
             this.Load += new System.EventHandler(this.ucScara_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvTargetQueue)).EndInit();
