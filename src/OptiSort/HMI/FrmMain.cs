@@ -5,35 +5,74 @@ using OptiSort.userControls;
 using System.IO;
 using System.Text.Json;
 using System;
+using Ace.HSVision.Client.Wizard.Calibrations.Sequencers;
+using System.ComponentModel;
 
 namespace OptiSort
 {
-    public partial class frmMain : Form
+    public partial class frmMain : Form, INotifyPropertyChanged
     {
 
-        /// <summary
-        /// single MQTT broker where at least two topics are present: 
-        /// 1. image streaming (one per camera, incoming); python file
-        /// 2. scara's pick location streaming (incoming); same python file that operates with openCV on image
-        /// 
-        /// UDP protocol for flexibowl's communication (outgoing); flexibowl library
-        /// 
-        /// TCP connection with scara robot (in/out); cobra library
-        /// </summary>
-        /// 
-
         public MQTT _mqttClient;
+
+        // status
+        public event PropertyChangedEventHandler PropertyChanged; // declare propertyChanged event (required by the associated interface)
+        private bool _statusScara = false;
+        private bool _statusFelxibowl = false;
+        private bool _statusMqttClient = false;
+
+        // custom defined properties to trigger events on status changed
+        public bool StatusScara
+        {
+            get { return _statusScara; }
+            set
+            {
+                if (_statusScara != value) // setting value different from actual value -> store new value and trigger event
+                {
+                    _statusScara = value;
+                    OnPropertyChanged(nameof(StatusScara));
+                }
+            }
+        }
+        public bool StatusFlexibowl
+        {
+            get { return _statusFelxibowl; }
+            set
+            {
+                if (_statusFelxibowl != value) // setting value different from actual value -> store new value and trigger event
+                {
+                    _statusFelxibowl = value;
+                    OnPropertyChanged(nameof(StatusFlexibowl));
+                }
+            }
+        }
+        public bool StatusMqttClient
+        {
+            get { return _statusMqttClient; }
+            set
+            {
+                if (_statusMqttClient != value) // setting value different from actual value -> store new value and trigger event
+                {
+                    _statusMqttClient = value;
+                    OnPropertyChanged(nameof(StatusMqttClient));
+                }
+            }
+        }
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
 
         public frmMain()
         {
             InitializeComponent();
 
-
             // Initialize MQTT connection
             _mqttClient = new MQTT();
-            InitializeMQTTClient();
 
+            // Subscribe to PropertyChanged event
+            this.PropertyChanged += RefreshStatusBar;
 
             // Display default user control
             ucProcessView ucProcessView = new ucProcessView(this);
@@ -49,21 +88,116 @@ namespace OptiSort
 
 
         // -----------------------------------------------------------------------------------
+        // ------------------------------------- CONNECTIONS ---------------------------------
+        // -----------------------------------------------------------------------------------
+
+        private void RefreshStatusBar(object sender, PropertyChangedEventArgs e)
+        {
+            // Check which property changed and trigger corresponding logic
+
+            if (e.PropertyName == nameof(StatusScara))
+            {
+                if (StatusScara == true)
+                {
+                    this.lblScaraStatusValue.Text = "Online";
+                    this.btnScaraConnect.Enabled = false;
+                    this.btnScaraDisconnect.Enabled = true;
+                }
+                else
+                {
+                    this.lblScaraStatusValue.Text = "Offline";
+                    this.btnScaraConnect.Enabled = true;
+                    this.btnScaraDisconnect.Enabled = false;
+                }
+            }
+
+            if (e.PropertyName == nameof(StatusFlexibowl))
+            {
+                if (StatusFlexibowl == true)
+                {
+                    this.lblFlexibowlStatusValue.Text = "Online";
+                    this.btnFlexibowlConnect.Enabled = false;
+                    this.btnFlexibowlDisconnect.Enabled = true;
+                }
+                else
+                {
+                    this.lblFlexibowlStatusValue.Text = "Offline";
+                    this.btnFlexibowlConnect.Enabled = true;
+                    this.btnFlexibowlDisconnect.Enabled = false;
+                }
+            }
+
+            if (e.PropertyName == nameof(StatusMqttClient))
+            {
+                if (StatusMqttClient == true)
+                {
+                    this.lblMqttStatusValue.Text = "Online";
+                    this.btnMqttConnect.Enabled = false;
+                    this.btnMqttDisconnect.Enabled = true;
+                }
+                else
+                {
+                    this.lblMqttStatusValue.Text = "Offline";
+                    this.btnMqttConnect.Enabled = true;
+                    this.btnMqttDisconnect.Enabled = false;
+                }
+            }
+        }
+
+        private void btnScaraConnect_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnScaraDisconnect_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnFlexibowlConnect_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnFlexibowlDisconnect_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnMqttConnect_Click(object sender, EventArgs e)
+        {
+            Cursor = Cursors.WaitCursor; // mouse cursor to loading wheel
+            ConnectMQTTClient();
+        }
+
+        private void btnMqttDisconnect_Click(object sender, EventArgs e)
+        {
+            Cursor = Cursors.WaitCursor; // mouse cursor to loading wheel
+            DisconnectMqttClient(Properties.Settings.Default.mqttClientName);
+        }
+
+
+
+        // -----------------------------------------------------------------------------------
         // -------------------------------------- MQTT ---------------------------------------
         // -----------------------------------------------------------------------------------
 
-        private async void InitializeMQTTClient()
+        private async void ConnectMQTTClient()
         {
             string mqttClientName = Properties.Settings.Default.mqttClientName;
             Task<bool> createClient = _mqttClient.CreateClient(mqttClientName);
 
             if (await createClient)
             {
+                StatusMqttClient = true;
                 Log($"MQTT client '{mqttClientName}' created");
                 subscribeMqttTopics();
             }
             else
+            {
                 Log($"Failed to create '{mqttClientName}' MQTT client");
+                Cursor = Cursors.Default;
+            }
         }
 
 
@@ -96,10 +230,30 @@ namespace OptiSort
 
             if (luxonisSubscribed) Log($"{mqttClientName} subscribed to {topicLuxonisStream}");
             else Log($"Unable subscribing {mqttClientName} to {topicLuxonisStream}");
+
+            Cursor = Cursors.Default;
         }
 
 
-        
+        private async void DisconnectMqttClient(string clientName)
+        {
+            Task<bool> destroyClient = _mqttClient.DestroyClient(clientName);
+            if (destroyClient != null)
+            {
+                StatusMqttClient = false;
+                _mqttClient = null;
+                Log($"MQTT client '{clientName}' destroyed");
+                Cursor = Cursors.Default;
+            }
+            else
+            {
+                Log($"Error destroying '{clientName}'");
+                Cursor = Cursors.Default;
+            }
+        }
+
+
+
 
         // -----------------------------------------------------------------------------------
         // ---------------------------- CHANGING USER CONTROL --------------------------------
@@ -114,11 +268,11 @@ namespace OptiSort
             previousControl.Dispose();
         }
 
-        
+
         private void btnProcess_Click(object sender, System.EventArgs e)
         {
             CleanPnlCurrentUc();
-                        
+
             ucProcessView ucProcessView = new ucProcessView(this);
             ucProcessView.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Add(ucProcessView);
@@ -156,14 +310,16 @@ namespace OptiSort
 
 
         // -----------------------------------------------------------------------------------
-        // -------------------------------- SUPPORT FUNCTIONS --------------------------------
+        // ---------------------------------------- LOG --------------------------------------
         // -----------------------------------------------------------------------------------
+
         public void Log(string msg)
         {
             msg = DateTime.Now.ToString() + " - " + msg;
             lstLog.Items.Add(msg);
             lstLog.TopIndex = lstLog.Items.Count - 1; // showing last row
         }
+
 
     }
 }
