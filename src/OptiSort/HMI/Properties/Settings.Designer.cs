@@ -106,5 +106,41 @@ namespace OptiSort.Properties {
                 this["mqttTopic_luxonisStream"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("OptiSort")]
+        public string scara_controllerName {
+            get {
+                return ((string)(this["scara_controllerName"]));
+            }
+            set {
+                this["scara_controllerName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("R1 Cobra600")]
+        public string scara_robotName {
+            get {
+                return ((string)(this["scara_robotName"]));
+            }
+            set {
+                this["scara_robotName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Suction Cup")]
+        public string scara_endEffectorName {
+            get {
+                return ((string)(this["scara_endEffectorName"]));
+            }
+            set {
+                this["scara_endEffectorName"] = value;
+            }
+        }
     }
 }

@@ -23,5 +23,14 @@
     <Setting Name="mqttTopic_luxonisStream" Type="System.String" Scope="User">
       <Value Profile="(Default)">optisort/luxonis/stream</Value>
     </Setting>
+    <Setting Name="scara_controllerName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">OptiSort</Value>
+    </Setting>
+    <Setting Name="scara_robotName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">R1 Cobra600</Value>
+    </Setting>
+    <Setting Name="scara_endEffectorName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Suction Cup</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

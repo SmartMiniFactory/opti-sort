@@ -30,8 +30,6 @@
         {
             this.dgvTargetQueue = new System.Windows.Forms.DataGridView();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnConnect = new System.Windows.Forms.Button();
-            this.btnDisconnect = new System.Windows.Forms.Button();
             this.chkEmulate = new System.Windows.Forms.CheckBox();
             this.btnPower = new System.Windows.Forms.Button();
             this.btnJog = new System.Windows.Forms.Button();
@@ -62,8 +60,6 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.Controls.Add(this.dgvTargetQueue, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.btnConnect, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.btnDisconnect, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.chkEmulate, 2, 2);
             this.tableLayoutPanel1.Controls.Add(this.btnPower, 3, 2);
             this.tableLayoutPanel1.Controls.Add(this.btnJog, 4, 2);
@@ -77,28 +73,6 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1436, 764);
             this.tableLayoutPanel1.TabIndex = 1;
-            // 
-            // btnConnect
-            // 
-            this.btnConnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnConnect.Location = new System.Drawing.Point(3, 652);
-            this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(281, 109);
-            this.btnConnect.TabIndex = 1;
-            this.btnConnect.Text = "Connect";
-            this.btnConnect.UseVisualStyleBackColor = true;
-            this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
-            // 
-            // btnDisconnect
-            // 
-            this.btnDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnDisconnect.Location = new System.Drawing.Point(290, 652);
-            this.btnDisconnect.Name = "btnDisconnect";
-            this.btnDisconnect.Size = new System.Drawing.Size(281, 109);
-            this.btnDisconnect.TabIndex = 2;
-            this.btnDisconnect.Text = "Disconnect";
-            this.btnDisconnect.UseVisualStyleBackColor = true;
-            this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
             // 
             // chkEmulate
             // 
@@ -167,8 +141,6 @@
 
         private System.Windows.Forms.DataGridView dgvTargetQueue;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.Button btnConnect;
-        private System.Windows.Forms.Button btnDisconnect;
         private System.Windows.Forms.CheckBox chkEmulate;
         private System.Windows.Forms.Button btnPower;
         private System.Windows.Forms.Button btnJog;

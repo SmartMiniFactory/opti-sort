@@ -2,18 +2,19 @@
 using System.Windows.Forms;
 using System.Threading.Tasks;
 using OptiSort.userControls;
-using System.IO;
-using System.Text.Json;
 using System;
-using Ace.HSVision.Client.Wizard.Calibrations.Sequencers;
 using System.ComponentModel;
+using Ace.Core.Util;
+using System.Drawing;
+using System.Diagnostics;
 
 namespace OptiSort
 {
     public partial class frmMain : Form, INotifyPropertyChanged
     {
 
-        public MQTT _mqttClient;
+        public MQTT MqttClient { get; set; }
+        public Cobra600 Cobra600 { get; set; }
 
         // status
         public event PropertyChangedEventHandler PropertyChanged; // declare propertyChanged event (required by the associated interface)
@@ -64,12 +65,24 @@ namespace OptiSort
         }
 
 
+        // TODO : change and restrict ucProcessview to contain only coordinate table (rename ucscaratarget) and flexibowl commands??
+        // > change buttons from "auto, manual, config" into "process, config"
+        // > add two buttons below the 3D view called "auto, manual", to make left side switch with manual commands
+        // > when switching to manual process display everyting grayed out if automatic process is inprogress. Maybe some play and stop buttons may be helpful
+       
+
         public frmMain()
         {
             InitializeComponent();
 
             // Initialize MQTT connection
-            _mqttClient = new MQTT();
+            MqttClient = new MQTT();
+
+            // Initialize cobra class
+            Cobra600 = new Cobra600("ace", "localhost", 43434);
+
+            // Initialize the remoting subsystem
+            RemotingUtil.InitializeRemotingSubsystem(true, 0);
 
             // Subscribe to PropertyChanged event
             this.PropertyChanged += RefreshStatusBar;
@@ -99,15 +112,17 @@ namespace OptiSort
             {
                 if (StatusScara == true)
                 {
-                    this.lblScaraStatusValue.Text = "Online";
-                    this.btnScaraConnect.Enabled = false;
-                    this.btnScaraDisconnect.Enabled = true;
+                    lblScaraStatusValue.Text = "Online";
+                    lblScaraStatusValue.ForeColor = Color.Green;
+                    btnScaraConnect.Enabled = false;
+                    btnScaraDisconnect.Enabled = true;
                 }
                 else
                 {
-                    this.lblScaraStatusValue.Text = "Offline";
-                    this.btnScaraConnect.Enabled = true;
-                    this.btnScaraDisconnect.Enabled = false;
+                    lblScaraStatusValue.Text = "Offline";
+                    lblScaraStatusValue.ForeColor = SystemColors.Desktop;
+                    btnScaraConnect.Enabled = true;
+                    btnScaraDisconnect.Enabled = false;
                 }
             }
 
@@ -115,15 +130,17 @@ namespace OptiSort
             {
                 if (StatusFlexibowl == true)
                 {
-                    this.lblFlexibowlStatusValue.Text = "Online";
-                    this.btnFlexibowlConnect.Enabled = false;
-                    this.btnFlexibowlDisconnect.Enabled = true;
+                    lblFlexibowlStatusValue.Text = "Online";
+                    lblFlexibowlStatusValue.ForeColor = Color.Green;
+                    btnFlexibowlConnect.Enabled = false;
+                    btnFlexibowlDisconnect.Enabled = true;
                 }
                 else
                 {
-                    this.lblFlexibowlStatusValue.Text = "Offline";
-                    this.btnFlexibowlConnect.Enabled = true;
-                    this.btnFlexibowlDisconnect.Enabled = false;
+                    lblFlexibowlStatusValue.Text = "Offline";
+                    lblFlexibowlStatusValue.ForeColor = SystemColors.Desktop;
+                    btnFlexibowlConnect.Enabled = true;
+                    btnFlexibowlDisconnect.Enabled = false;
                 }
             }
 
@@ -131,27 +148,40 @@ namespace OptiSort
             {
                 if (StatusMqttClient == true)
                 {
-                    this.lblMqttStatusValue.Text = "Online";
-                    this.btnMqttConnect.Enabled = false;
-                    this.btnMqttDisconnect.Enabled = true;
+                    lblMqttStatusValue.Text = "Online";
+                    lblMqttStatusValue.ForeColor = Color.Green;
+                    btnMqttConnect.Enabled = false;
+                    btnMqttDisconnect.Enabled = true;
                 }
                 else
                 {
-                    this.lblMqttStatusValue.Text = "Offline";
-                    this.btnMqttConnect.Enabled = true;
-                    this.btnMqttDisconnect.Enabled = false;
+                    lblMqttStatusValue.Text = "Offline";
+                    lblMqttStatusValue.ForeColor = SystemColors.Desktop;
+                    btnMqttConnect.Enabled = true;
+                    btnMqttDisconnect.Enabled = false;
                 }
             }
         }
 
         private void btnScaraConnect_Click(object sender, EventArgs e)
         {
-
+            // check if ACE is running
+            Process[] ProcessList = Process.GetProcessesByName("Ace");
+            if (ProcessList.Length != 1)
+            {
+                MessageBox.Show("ACE is not running: please open the robot server");
+                return;
+            }
+            Cursor = Cursors.WaitCursor;
+            Log("Trying to connect to robot");
+            ConnectScara();
         }
 
         private void btnScaraDisconnect_Click(object sender, EventArgs e)
         {
-
+            Cursor = Cursors.WaitCursor;
+            Log("Trying to disconnect from robot");
+            DisconnectScara();
         }
 
         private void btnFlexibowlConnect_Click(object sender, EventArgs e)
@@ -166,17 +196,62 @@ namespace OptiSort
 
         private void btnMqttConnect_Click(object sender, EventArgs e)
         {
-            Cursor = Cursors.WaitCursor; // mouse cursor to loading wheel
+            Cursor = Cursors.WaitCursor;
+            Log("Trying to create new MQTT client");
             ConnectMQTTClient();
         }
 
         private void btnMqttDisconnect_Click(object sender, EventArgs e)
         {
-            Cursor = Cursors.WaitCursor; // mouse cursor to loading wheel
+            Cursor = Cursors.WaitCursor;
+            Log("Trying to destroy MQTT client");
             DisconnectMqttClient(Properties.Settings.Default.mqttClientName);
         }
 
 
+        // -----------------------------------------------------------------------------------
+        // -------------------------------------- SCARA --------------------------------------
+        // -----------------------------------------------------------------------------------
+
+        // TODO: is possible to do these async?
+
+        private void ConnectScara()
+        {
+            string controllerName = Properties.Settings.Default.scara_controllerName;
+            string robotName = Properties.Settings.Default.scara_robotName;
+            string endEffectorName = Properties.Settings.Default.scara_endEffectorName;
+
+            if (Cobra600.Connect(true, controllerName, robotName, endEffectorName))
+            {
+                Log("Robot successfully connected");
+                btnScaraConnect.Enabled = false;
+                btnScaraDisconnect.Enabled = true;
+                StatusScara = true;
+                Cursor = Cursors.Default;
+            }
+            else
+            {
+                Log("Failed to connect to robot");
+                Cursor = Cursors.Default;
+            }
+        }
+
+        private void DisconnectScara()
+        {
+            if (Cobra600.Disconnect())
+            {
+                Log("Robot succesfully disconnected");
+                btnScaraConnect.Enabled = true;
+                btnScaraDisconnect.Enabled = false;
+                StatusScara = false;
+                Cursor = Cursors.Default;
+            }
+            else
+            {
+                Log("Failed to disconnect from Cobra");
+                Cursor = Cursors.Default;
+            }
+        }
 
         // -----------------------------------------------------------------------------------
         // -------------------------------------- MQTT ---------------------------------------
@@ -185,13 +260,13 @@ namespace OptiSort
         private async void ConnectMQTTClient()
         {
             string mqttClientName = Properties.Settings.Default.mqttClientName;
-            Task<bool> createClient = _mqttClient.CreateClient(mqttClientName);
+            Task<bool> createClient = MqttClient.CreateClient(mqttClientName);
 
             if (await createClient)
             {
                 StatusMqttClient = true;
                 Log($"MQTT client '{mqttClientName}' created");
-                subscribeMqttTopics();
+                SubscribeMqttTopics();
             }
             else
             {
@@ -201,7 +276,7 @@ namespace OptiSort
         }
 
 
-        private async void subscribeMqttTopics()
+        private async void SubscribeMqttTopics()
         {
 
             // Retreive topics from configuration file
@@ -213,10 +288,10 @@ namespace OptiSort
 
 
             // Subscribe to the necessary topics
-            bool scaraSubscriberd = await _mqttClient.SubscribeClientToTopic(mqttClientName, topicScaraTarget);
-            bool idsSubscribed = await _mqttClient.SubscribeClientToTopic(mqttClientName, topicIdsStream);
-            bool baslerSubscribed = await _mqttClient.SubscribeClientToTopic(mqttClientName, topicBaslerStream);
-            bool luxonisSubscribed = await _mqttClient.SubscribeClientToTopic(mqttClientName, topicLuxonisStream);
+            bool scaraSubscriberd = await MqttClient.SubscribeClientToTopic(mqttClientName, topicScaraTarget);
+            bool idsSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicIdsStream);
+            bool baslerSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicBaslerStream);
+            bool luxonisSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicLuxonisStream);
 
             // logging
             if (scaraSubscriberd) Log($"{mqttClientName} subscribed to {topicScaraTarget}");
@@ -237,11 +312,11 @@ namespace OptiSort
 
         private async void DisconnectMqttClient(string clientName)
         {
-            Task<bool> destroyClient = _mqttClient.DestroyClient(clientName);
-            if (destroyClient != null)
+            Task<bool> destroyClient = MqttClient.DestroyClient(clientName);
+            if (await destroyClient)
             {
                 StatusMqttClient = false;
-                _mqttClient = null;
+                MqttClient = null;
                 Log($"MQTT client '{clientName}' destroyed");
                 Cursor = Cursors.Default;
             }

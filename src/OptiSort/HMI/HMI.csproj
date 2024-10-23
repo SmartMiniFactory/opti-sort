@@ -154,7 +154,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MQTT.cs" />
+    <Compile Include="systems\Cobra600.cs" />
+    <Compile Include="systems\MQTT.cs" />
     <Compile Include="userControls\ucCameraStream.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -193,12 +194,6 @@
     <Compile Include="userControls\ucProcessView.Designer.cs">
       <DependentUpon>ucProcessView.cs</DependentUpon>
     </Compile>
-    <Compile Include="userControls\ucRobotView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="userControls\ucRobotView.Designer.cs">
-      <DependentUpon>ucRobotView.cs</DependentUpon>
-    </Compile>
     <Compile Include="userControls\ucScaraTargets.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -231,9 +226,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucProcessView.resx">
       <DependentUpon>ucProcessView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="userControls\ucRobotView.resx">
-      <DependentUpon>ucRobotView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucScaraTargets.resx">
       <DependentUpon>ucScaraTargets.cs</DependentUpon>

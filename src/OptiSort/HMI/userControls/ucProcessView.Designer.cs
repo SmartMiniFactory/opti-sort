@@ -14,8 +14,8 @@
         protected override void Dispose(bool disposing)
         {
             // unsubscribe mqtt messages triggers
-            _frmMain._mqttClient.MessageReceived -= _ucScaraTargets.OnMessageReceived;
-            _frmMain._mqttClient.MessageReceived -= _ucCameraStream.OnMessageReceived;
+            _frmMain.MqttClient.MessageReceived -= _ucScaraTargets.OnMessageReceived;
+            _frmMain.MqttClient.MessageReceived -= _ucCameraStream.OnMessageReceived;
             _frmMain.Log("Process view detached from being triggered by MQTT messages");
 
             if (disposing && (components != null))
@@ -88,6 +88,7 @@
             this.pnlRobot3D.Name = "pnlRobot3D";
             this.pnlRobot3D.Size = new System.Drawing.Size(532, 570);
             this.pnlRobot3D.TabIndex = 21;
+            this.pnlRobot3D.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pnlRobot3D_MouseClick);
             // 
             // pnlScara
             // 

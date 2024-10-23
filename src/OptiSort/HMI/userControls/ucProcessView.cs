@@ -40,7 +40,6 @@ namespace OptiSort.userControls
             cmbCameras.DataSource = _camerasList;
             cmbCameras.DisplayMember = "Text";
             cmbCameras.ValueMember = "ID";
-            
 
             // init camera view
             _ucCameraStream = new ucCameraStream();
@@ -48,7 +47,7 @@ namespace OptiSort.userControls
             _ucCameraStream.Dock = DockStyle.Fill;
             pnlCameraStream.Controls.Clear();
             pnlCameraStream.Controls.Add(_ucCameraStream);
-            _frmMain._mqttClient.MessageReceived += _ucCameraStream.OnMessageReceived; // enable MQTT messages to trigger the user control
+            _frmMain.MqttClient.MessageReceived += _ucCameraStream.OnMessageReceived; // enable MQTT messages to trigger the user control
             _frmMain.Log("Camera stream attached to MQTT messages");
 
             // init scara dgv
@@ -56,18 +55,8 @@ namespace OptiSort.userControls
             _ucScaraTargets.Dock = DockStyle.Fill;
             pnlScara.Controls.Clear();
             pnlScara.Controls.Add(_ucScaraTargets);
-            _frmMain._mqttClient.MessageReceived += _ucScaraTargets.OnMessageReceived; // enable MQTT messages to trigger the user control
+            _frmMain.MqttClient.MessageReceived += _ucScaraTargets.OnMessageReceived; // enable MQTT messages to trigger the user control
             _frmMain.Log("Scara targets dgv attached to MQTT messages");
-
-            // init robot3D view
-            ucRobotView ucRobotView = new ucRobotView();
-            ucRobotView.Dock = DockStyle.Fill;
-            pnlRobot3D.Controls.Clear();
-            pnlRobot3D.Controls.Add(ucRobotView);
-
-            // connect scara and 3D view (TO REVIEW)
-            _ucScaraTargets.RobotConnected += ucRobotView.Create3DDisplay;
-
 
             // init flexibowl
             ucFlexibowl ucFlexibowl = new ucFlexibowl();
@@ -92,5 +81,12 @@ namespace OptiSort.userControls
             }
         }
 
+        private void pnlRobot3D_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (_frmMain.Cobra600.Create3DDisplay())
+            {
+                pnlRobot3D.Controls.Add(_frmMain.Cobra600.SimulationControl);
+            }
+        }
     }
 }
