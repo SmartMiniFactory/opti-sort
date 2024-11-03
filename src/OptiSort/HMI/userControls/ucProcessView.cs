@@ -16,39 +16,12 @@ namespace OptiSort.userControls
     {
 
         private frmMain _frmMain;
-
-        private class Cameras
-        {
-            public int ID { get; set; }
-            public string Text { get; set; }
-            public string mqttTopic { get; set; }
-        }
-        List<Cameras> _camerasList = new List<Cameras> { };
-
-        private ucCameraStream _ucCameraStream; 
         private ucScaraTargets _ucScaraTargets;
 
         public ucProcessView(frmMain frmMain)
         {
             InitializeComponent();
             _frmMain = frmMain;
-
-            // init combobox
-            _camerasList.Add(new Cameras { ID = 0, Text = "Basler", mqttTopic = Properties.Settings.Default.mqttTopic_baslerStream });
-            _camerasList.Add(new Cameras { ID = 1, Text = "IDS", mqttTopic = Properties.Settings.Default.mqttTopic_idsStream });
-            _camerasList.Add(new Cameras { ID = 2, Text = "Luxonics", mqttTopic = Properties.Settings.Default.mqttTopic_luxonisStream });
-            cmbCameras.DataSource = _camerasList;
-            cmbCameras.DisplayMember = "Text";
-            cmbCameras.ValueMember = "ID";
-
-            // init camera view
-            _ucCameraStream = new ucCameraStream();
-            _ucCameraStream.StreamTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
-            _ucCameraStream.Dock = DockStyle.Fill;
-            pnlCameraStream.Controls.Clear();
-            pnlCameraStream.Controls.Add(_ucCameraStream);
-            _frmMain.MqttClient.MessageReceived += _ucCameraStream.OnMessageReceived; // enable MQTT messages to trigger the user control
-            _frmMain.Log("Camera stream attached to MQTT messages");
 
             // init scara dgv
             _ucScaraTargets = new ucScaraTargets(_frmMain); // using log function
@@ -65,28 +38,5 @@ namespace OptiSort.userControls
             pnlFlexibowl.Controls.Add(ucFlexibowl);
         }
 
-
-        
-
-
-
-
-        private void cmbCameras_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (_ucCameraStream != null)
-            {
-                var newTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
-                _ucCameraStream.StreamTopic = newTopic;
-                _frmMain.Log($"Streaming topic updated to '{newTopic}'");
-            }
-        }
-
-        private void pnlRobot3D_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (_frmMain.Cobra600.Create3DDisplay())
-            {
-                pnlRobot3D.Controls.Add(_frmMain.Cobra600.SimulationControl);
-            }
-        }
     }
 }

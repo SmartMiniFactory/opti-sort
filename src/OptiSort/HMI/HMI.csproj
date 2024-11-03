@@ -214,6 +214,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="userControls\ucConfiguration.resx">
       <DependentUpon>ucConfiguration.cs</DependentUpon>
@@ -249,6 +250,18 @@
       <Project>{efdce63d-f10d-46bf-b928-20d25a5581ac}</Project>
       <Name>CobraLibrary</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="icons\connectedDisabled_2x2_pptx.png" />
+    <Content Include="icons\connectedEnabled_2x2_pptx.png" />
+    <Content Include="icons\disconnectedDisabled_2x2_pptx.png" />
+    <Content Include="icons\disconnectedEnabled_2x2_pptx.png" />
+    <Content Include="icons\emulation_2x2_pptx.png" />
+    <Content Include="icons\off_2x2_pptx.png" />
+    <Content Include="icons\on_2x2_pptx.png" />
+    <Content Include="icons\play_2x2_pptx.png" />
+    <Content Include="icons\robot_2x2_pptx.png" />
+    <Content Include="icons\stop_2x2_pptx.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

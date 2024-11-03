@@ -7,6 +7,7 @@ using System.ComponentModel;
 using Ace.Core.Util;
 using System.Drawing;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace OptiSort
 {
@@ -15,10 +16,20 @@ namespace OptiSort
 
         public MQTT MqttClient { get; set; }
         public Cobra600 Cobra600 { get; set; }
+        private class Cameras
+        {
+            public int ID { get; set; }
+            public string Text { get; set; }
+            public string mqttTopic { get; set; }
+        }
+        List<Cameras> _camerasList = new List<Cameras> { };
+
+        private ucCameraStream _ucCameraStream;
 
         // status
         public event PropertyChangedEventHandler PropertyChanged; // declare propertyChanged event (required by the associated interface)
         private bool _statusScara = false;
+        private bool _statusScaraEmulation = true;
         private bool _statusFelxibowl = false;
         private bool _statusMqttClient = false;
 
@@ -59,16 +70,23 @@ namespace OptiSort
                 }
             }
         }
+        public bool StatusScaraEmulation
+        {
+            get { return _statusScaraEmulation; }
+            set
+            {
+                if (_statusScaraEmulation != value) // setting value different from actual value -> store new value and trigger event
+                {
+                    _statusScaraEmulation = value;
+                    OnPropertyChanged(nameof(StatusScaraEmulation));
+                }
+            }
+        }
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-
-        // TODO : change and restrict ucProcessview to contain only coordinate table (rename ucscaratarget) and flexibowl commands??
-        // > change buttons from "auto, manual, config" into "process, config"
-        // > add two buttons below the 3D view called "auto, manual", to make left side switch with manual commands
-        // > when switching to manual process display everyting grayed out if automatic process is inprogress. Maybe some play and stop buttons may be helpful
        
 
         public frmMain()
@@ -87,11 +105,30 @@ namespace OptiSort
             // Subscribe to PropertyChanged event
             this.PropertyChanged += RefreshStatusBar;
 
+
             // Display default user control
             ucProcessView ucProcessView = new ucProcessView(this);
             ucProcessView.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Clear();
             pnlCurrentUc.Controls.Add(ucProcessView);
+
+            // init combobox
+            _camerasList.Add(new Cameras { ID = 0, Text = "Basler", mqttTopic = Properties.Settings.Default.mqttTopic_baslerStream });
+            _camerasList.Add(new Cameras { ID = 1, Text = "IDS", mqttTopic = Properties.Settings.Default.mqttTopic_idsStream });
+            _camerasList.Add(new Cameras { ID = 2, Text = "Luxonics", mqttTopic = Properties.Settings.Default.mqttTopic_luxonisStream });
+            cmbCameras.DataSource = _camerasList;
+            cmbCameras.DisplayMember = "Text";
+            cmbCameras.ValueMember = "ID";
+
+
+            // init camera view
+            _ucCameraStream = new ucCameraStream();
+            _ucCameraStream.StreamTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
+            _ucCameraStream.Dock = DockStyle.Fill;
+            pnlCameraStream.Controls.Clear();
+            pnlCameraStream.Controls.Add(_ucCameraStream);
+            MqttClient.MessageReceived += _ucCameraStream.OnMessageReceived; // enable MQTT messages to trigger the user control
+            Log("Camera stream attached to MQTT messages");
 
             // Activate default pushbuttons
             btnProcess.Enabled = false;
@@ -208,6 +245,22 @@ namespace OptiSort
             DisconnectMqttClient(Properties.Settings.Default.mqttClientName);
         }
 
+        private void btnEmulateScara_Click(object sender, EventArgs e)
+        {
+            if (StatusScaraEmulation)
+            {
+                btnEmulateScara.BackgroundImage = Properties.Resources.robot_2x2_pptx;
+                StatusScaraEmulation = false;
+                Log("Scara emulation mode disabled");
+            }
+            else
+            {
+                btnEmulateScara.BackgroundImage = Properties.Resources.emulation_2x2_pptx;
+                StatusScaraEmulation= true;
+                Log("Scara emulation mode enabled");
+            }
+        }
+
 
         // -----------------------------------------------------------------------------------
         // -------------------------------------- SCARA --------------------------------------
@@ -221,11 +274,14 @@ namespace OptiSort
             string robotName = Properties.Settings.Default.scara_robotName;
             string endEffectorName = Properties.Settings.Default.scara_endEffectorName;
 
-            if (Cobra600.Connect(true, controllerName, robotName, endEffectorName))
+            if (Cobra600.Connect(StatusScaraEmulation, controllerName, robotName, endEffectorName))
             {
                 Log("Robot successfully connected");
                 btnScaraConnect.Enabled = false;
+                btnScaraConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                 btnScaraDisconnect.Enabled = true;
+                btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
+                btnEmulateScara.Enabled = false;
                 StatusScara = true;
                 Cursor = Cursors.Default;
             }
@@ -242,7 +298,10 @@ namespace OptiSort
             {
                 Log("Robot succesfully disconnected");
                 btnScaraConnect.Enabled = true;
+                btnScaraConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                 btnScaraDisconnect.Enabled = false;
+                btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
+                btnEmulateScara.Enabled = true;
                 StatusScara = false;
                 Cursor = Cursors.Default;
             }
@@ -265,6 +324,10 @@ namespace OptiSort
             if (await createClient)
             {
                 StatusMqttClient = true;
+                btnMqttConnect.Enabled = false;
+                btnMqttConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
+                btnMqttDisconnect.Enabled = true;
+                btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
                 Log($"MQTT client '{mqttClientName}' created");
                 SubscribeMqttTopics();
             }
@@ -316,6 +379,10 @@ namespace OptiSort
             if (await destroyClient)
             {
                 StatusMqttClient = false;
+                btnMqttConnect.Enabled = true;
+                btnMqttConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
+                btnMqttDisconnect.Enabled = false;
+                btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                 MqttClient = null;
                 Log($"MQTT client '{clientName}' destroyed");
                 Cursor = Cursors.Default;
@@ -385,6 +452,29 @@ namespace OptiSort
 
 
         // -----------------------------------------------------------------------------------
+        // ------------------------------- FIXED PANELS --------------------------------------
+        // -----------------------------------------------------------------------------------
+
+        private void cmbCameras_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_ucCameraStream != null)
+            {
+                var newTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
+                _ucCameraStream.StreamTopic = newTopic;
+                Log($"Streaming topic updated to '{newTopic}'");
+            }
+        }
+
+
+        private void pnlRobotView_MouseClick(object sender, EventArgs e)
+        {
+            if (Cobra600.Create3DDisplay())
+            {
+                pnlRobotView.Controls.Add(Cobra600.SimulationControl);
+            }
+        }
+
+        // -----------------------------------------------------------------------------------
         // ---------------------------------------- LOG --------------------------------------
         // -----------------------------------------------------------------------------------
 
@@ -395,6 +485,6 @@ namespace OptiSort
             lstLog.TopIndex = lstLog.Items.Count - 1; // showing last row
         }
 
-
+        
     }
 }
