@@ -154,6 +154,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="systems\Cobra600.cs" />
     <Compile Include="systems\MQTT.cs" />
     <Compile Include="userControls\ucCameraStream.cs">
@@ -208,14 +213,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <EmbeddedResource Include="userControls\ucConfiguration.resx">
       <DependentUpon>ucConfiguration.cs</DependentUpon>
     </EmbeddedResource>
@@ -259,9 +259,11 @@
     <Content Include="icons\emulation_2x2_pptx.png" />
     <Content Include="icons\off_2x2_pptx.png" />
     <Content Include="icons\on_2x2_pptx.png" />
-    <Content Include="icons\play_2x2_pptx.png" />
+    <None Include="icons\stopEnabled_2x2_pptx.png" />
+    <None Include="icons\stopDisabled_2x2_pptx.png" />
+    <None Include="icons\playEnabled_2x2_pptx.png" />
+    <None Include="icons\playDisabled_2x2_pptx.png" />
     <Content Include="icons\robot_2x2_pptx.png" />
-    <Content Include="icons\stop_2x2_pptx.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -133,9 +133,19 @@ namespace OptiSort.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap play_2x2_pptx {
+        internal static System.Drawing.Bitmap playDisabled_2x2_pptx {
             get {
-                object obj = ResourceManager.GetObject("play_2x2_pptx", resourceCulture);
+                object obj = ResourceManager.GetObject("playDisabled_2x2_pptx", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap playEnabled_2x2_pptx {
+            get {
+                object obj = ResourceManager.GetObject("playEnabled_2x2_pptx", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -153,9 +163,19 @@ namespace OptiSort.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap stop_2x2_pptx {
+        internal static System.Drawing.Bitmap stopDisabled_2x2_pptx {
             get {
-                object obj = ResourceManager.GetObject("stop_2x2_pptx", resourceCulture);
+                object obj = ResourceManager.GetObject("stopDisabled_2x2_pptx", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap stopEnabled_2x2_pptx {
+            get {
+                object obj = ResourceManager.GetObject("stopEnabled_2x2_pptx", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

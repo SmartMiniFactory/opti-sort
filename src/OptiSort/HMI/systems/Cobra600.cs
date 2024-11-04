@@ -26,16 +26,16 @@ namespace OptiSort
         public IAdeptController Controller { get; private set; }
         public IAdeptRobot Robot { get; private set; }
         public IAbstractEndEffector EndEffector { get; private set; }
-        public SimulationContainerControl SimulationControl { get; private set; }
 
         // TODO: useful??
         private string _remotingName;
         private string _address;
         private int _remotingPort;
 
-        private RemoteAceObjectEventHandler _generalEventHandler;
-        private RemoteApplicationEventHandler _applicationEventHandler;
-        private ControlPanelManager _pendantManager;
+        private RemoteAceObjectEventHandler generalEventHandler;
+        private RemoteApplicationEventHandler applicationEventHandler;
+        private ControlPanelManager pendantManager;
+        private SimulationContainerControl simulationContainerControl;
 
         public Cobra600(string remotingName, string address, int remotingPort)
         {
@@ -107,12 +107,9 @@ namespace OptiSort
                 Robot.EndEffectorGripSignal = 98;
                 Robot.EndEffectorReleaseSignal = 97;
 
-
                 Controller.Enabled = true;
 
-
                 // If not calibrated, calibrate the robot
-
                 if (Robot.IsCalibrated == false)
                 {
                     Robot.Power = true;
@@ -137,10 +134,10 @@ namespace OptiSort
             try
             {
                 // Release all event handlers before we clear the workspace.				
-                _generalEventHandler.Dispose();
-                _generalEventHandler = null;
-                _applicationEventHandler.Dispose();
-                _applicationEventHandler = null;
+                generalEventHandler.Dispose();
+                generalEventHandler = null;
+                applicationEventHandler.Dispose();
+                applicationEventHandler = null;
 
                 // Clear the workspace
                 Controller.Enabled = false;
@@ -160,29 +157,35 @@ namespace OptiSort
         }
 
 
-
-        public bool Create3DDisplay()
+        public SimulationContainerControl Create3DDisplay()
         {
             try
             {
-                SimulationControl = new SimulationContainerControl();
-                SimulationControl.Dock = DockStyle.Fill;
-                SimulationControl.Client = Client;
-                SimulationControl.Visible = false;
-                SimulationControl.Visible = true;
-                SimulationControl.AddToScene(Robot);
-                SimulationControl.CameraPositions = new Transform3D[] { SimulationControl.DefaultIsometricViewPosition };
-                return true;
+                SimulationContainerControl simulationContainer = new SimulationContainerControl();
+
+                simulationContainer = new SimulationContainerControl();
+                simulationContainer.Dock = DockStyle.Fill;
+                simulationContainer.Client = Client;
+                simulationContainer.Visible = false;
+                simulationContainer.Visible = true;
+                simulationContainer.AddToScene(Robot);
+                simulationContainer.CameraPositions = new Transform3D[] { simulationContainer.DefaultIsometricViewPosition };
+                return simulationContainer;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return false;
+                return null;
 
             }
         }
 
 
+        public void OpenJobControl(IWin32Window form)
+        {
+            ControlPanelManager pendantManager = new ControlPanelManager();
+            pendantManager.LaunchControlForm(form, Client, null);
+        }
 
     }
 }

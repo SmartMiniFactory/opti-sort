@@ -8,6 +8,11 @@ using Ace.Core.Util;
 using System.Drawing;
 using System.Diagnostics;
 using System.Collections.Generic;
+using Ace.Adept.Server.Motion;
+using Ace.Core.Client.Sim3d.Controls;
+using Ace.Core.Client;
+using Ace.Core.Server;
+using Ace.Core.Server.Motion;
 
 namespace OptiSort
 {
@@ -87,7 +92,7 @@ namespace OptiSort
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-       
+
 
         public frmMain()
         {
@@ -107,10 +112,15 @@ namespace OptiSort
 
 
             // Display default user control
-            ucProcessView ucProcessView = new ucProcessView(this);
-            ucProcessView.Dock = DockStyle.Fill;
+            ucManualControl ucManualControl = new ucManualControl(this);
+            ucManualControl.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Clear();
-            pnlCurrentUc.Controls.Add(ucProcessView);
+            pnlCurrentUc.Controls.Add(ucManualControl);
+
+            // Activate default pushbuttons
+            btnAuto.Enabled = true;
+            btnManual.Enabled = false;
+            btnConfig.Enabled = true;
 
             // init combobox
             _camerasList.Add(new Cameras { ID = 0, Text = "Basler", mqttTopic = Properties.Settings.Default.mqttTopic_baslerStream });
@@ -129,11 +139,6 @@ namespace OptiSort
             pnlCameraStream.Controls.Add(_ucCameraStream);
             MqttClient.MessageReceived += _ucCameraStream.OnMessageReceived; // enable MQTT messages to trigger the user control
             Log("Camera stream attached to MQTT messages");
-
-            // Activate default pushbuttons
-            btnProcess.Enabled = false;
-            btnManual.Enabled = true;
-            btnConfig.Enabled = true;
         }
 
 
@@ -256,7 +261,7 @@ namespace OptiSort
             else
             {
                 btnEmulateScara.BackgroundImage = Properties.Resources.emulation_2x2_pptx;
-                StatusScaraEmulation= true;
+                StatusScaraEmulation = true;
                 Log("Scara emulation mode enabled");
             }
         }
@@ -283,6 +288,23 @@ namespace OptiSort
                 btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
                 btnEmulateScara.Enabled = false;
                 StatusScara = true;
+
+
+                Log($"Robot is enabled: {Cobra600.Robot.Enabled}");
+                Log($"Robot number: {Cobra600.Robot.RobotNumber}");
+                Log($"Robot joint count: {Cobra600.Robot.JointCount}");
+                Log($"Robot motor count: {Cobra600.Robot.MotorCount}");
+                Log($"Robot controller: {Cobra600.Robot.Controller}");
+                Log($"Robot visible: {Cobra600.Robot.Visible}");
+
+                Log($"Controller enabled: {Cobra600.Controller.Enabled}");
+                Log($"Controller full path: {Cobra600.Controller.FullPath}");
+                Log($"Controller calibrated: {Cobra600.Controller.IsCalibrated}");
+                Log($"Controller robot count: {Cobra600.Controller.RobotCount}");
+
+                SimulationContainerControl simulationControl = Cobra600.Create3DDisplay();
+                pnlRobotView.Controls.Add(simulationControl);
+
                 Cursor = Cursors.Default;
             }
             else
@@ -312,6 +334,7 @@ namespace OptiSort
             }
         }
 
+
         // -----------------------------------------------------------------------------------
         // -------------------------------------- MQTT ---------------------------------------
         // -----------------------------------------------------------------------------------
@@ -337,7 +360,6 @@ namespace OptiSort
                 Cursor = Cursors.Default;
             }
         }
-
 
         private async void SubscribeMqttTopics()
         {
@@ -372,7 +394,6 @@ namespace OptiSort
             Cursor = Cursors.Default;
         }
 
-
         private async void DisconnectMqttClient(string clientName)
         {
             Task<bool> destroyClient = MqttClient.DestroyClient(clientName);
@@ -395,8 +416,6 @@ namespace OptiSort
         }
 
 
-
-
         // -----------------------------------------------------------------------------------
         // ---------------------------- CHANGING USER CONTROL --------------------------------
         // -----------------------------------------------------------------------------------
@@ -410,16 +429,22 @@ namespace OptiSort
             previousControl.Dispose();
         }
 
-
-        private void btnProcess_Click(object sender, System.EventArgs e)
+        private void btnAuto_Click(object sender, System.EventArgs e)
         {
+
+            if (!StatusScara || !StatusMqttClient || !StatusFlexibowl)
+            {
+                MessageBox.Show("You should connect all the entities (Scara robot, Flexibowl, MQTT Client) to start the automatic process");
+                return;
+            }
+
             CleanPnlCurrentUc();
 
             ucProcessView ucProcessView = new ucProcessView(this);
             ucProcessView.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Add(ucProcessView);
 
-            btnProcess.Enabled = false;
+            btnAuto.Enabled = false;
             btnManual.Enabled = true;
             btnConfig.Enabled = true;
         }
@@ -428,11 +453,11 @@ namespace OptiSort
         {
             CleanPnlCurrentUc();
 
-            ucManualControl ucManualControl = new ucManualControl();
+            ucManualControl ucManualControl = new ucManualControl(this);
             ucManualControl.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Add(ucManualControl);
 
-            btnProcess.Enabled = true;
+            btnAuto.Enabled = true;
             btnManual.Enabled = false;
             btnConfig.Enabled = true;
         }
@@ -445,11 +470,10 @@ namespace OptiSort
             ucConfiguration.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Add(ucConfiguration);
 
-            btnProcess.Enabled = true;
+            btnAuto.Enabled = true;
             btnManual.Enabled = true;
             btnConfig.Enabled = false;
         }
-
 
         // -----------------------------------------------------------------------------------
         // ------------------------------- FIXED PANELS --------------------------------------
@@ -465,15 +489,6 @@ namespace OptiSort
             }
         }
 
-
-        private void pnlRobotView_MouseClick(object sender, EventArgs e)
-        {
-            if (Cobra600.Create3DDisplay())
-            {
-                pnlRobotView.Controls.Add(Cobra600.SimulationControl);
-            }
-        }
-
         // -----------------------------------------------------------------------------------
         // ---------------------------------------- LOG --------------------------------------
         // -----------------------------------------------------------------------------------
@@ -485,6 +500,5 @@ namespace OptiSort
             lstLog.TopIndex = lstLog.Items.Count - 1; // showing last row
         }
 
-        
     }
 }

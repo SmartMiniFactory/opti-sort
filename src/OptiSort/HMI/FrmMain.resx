@@ -121,7 +121,7 @@
   <data name="btnMqttDisconnect.BackgroundImage" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAEsAAABMCAYAAAAlS0pSAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wgAADsIBFShKgAAABL1JREFUeF7tm0+IVVUcxwcbUFJSyYWLIKkwURcGbgQDwRZKfwjKcOmihQsXooFK
+        vgAADr4B6kKxwAAABL1JREFUeF7tm0+IVVUcxwcbUFJSyYWLIKkwURcGbgQDwRZKfwjKcOmihQsXooFK
         Ck8kk9SUjFq4iBwqmIIWIw+G5s1fhggHWygOmOYixEVISIugkOnzld8b7pw59713597FnPPOFz7cefee
         e879/uacc889956epKSkpKSkpKSkpEWhkZGRLbDPeA02wxo7nJRVo9GoEZwZD//BDfgYtlvy7laLYLk8
         gAuw1k7tPmH+oAWjU25DbXh4+GXLontUoGa5qKa9bdl0hzCc7eCPg5paH/wM6rd8gWqi4wctq+4WgVgD
@@ -147,7 +147,7 @@
   <data name="btnFlexibowlDisconnect.BackgroundImage" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAEsAAABMCAYAAAAlS0pSAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wgAADsIBFShKgAAABL1JREFUeF7tm0+IVVUcxwcbUFJSyYWLIKkwURcGbgQDwRZKfwjKcOmihQsXooFK
+        vgAADr4B6kKxwAAABL1JREFUeF7tm0+IVVUcxwcbUFJSyYWLIKkwURcGbgQDwRZKfwjKcOmihQsXooFK
         Ck8kk9SUjFq4iBwqmIIWIw+G5s1fhggHWygOmOYixEVISIugkOnzld8b7pw59713597FnPPOFz7cefee
         e879/uacc889956epKSkpKSkpKSkpEWhkZGRLbDPeA02wxo7nJRVo9GoEZwZD//BDfgYtlvy7laLYLk8
         gAuw1k7tPmH+oAWjU25DbXh4+GXLontUoGa5qKa9bdl0hzCc7eCPg5paH/wM6rd8gWqi4wctq+4WgVgD
@@ -173,7 +173,7 @@
   <data name="btnMqttConnect.BackgroundImage" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAEwAAABMCAYAAADHl1ErAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wgAADsIBFShKgAAAAzVJREFUeF7tmg1tHDEQhQ9CIBRCIBRCIRRCIJRBIRRCIBRCIRRCIKT+pFqyRm+8
+        vgAADr4B6kKxwAAAAzVJREFUeF7tmg1tHDEQhQ9CIBRCIBRCIRRCIJRBIRRCIBRCIRRCIKT+pFqyRm+8
         vjtfsmPPk57ukuxt5C/zZ28uqVQqlUqlUqlUKjWsp+Iv/19TQoD5Vvyr+K343fi1+EcxELcWoF6K/xZb
         SJ5/Fm8ZeSyayFFQjkwUPhdvI2D9KVYwrvHX4uXVi6zfxaQcaUpN45W6pq6tXh4aEOyiSTG+79Wmo/Rd
         FhoLt12Qr4mmEdEp28+2XhKaii4gXKOtoNm0Ypzw0rCnbaDZdKTA36rloTGl24V9L75HHjT+MOF3BQya
@@ -193,7 +193,7 @@
   <data name="btnFlexibowlConnect.BackgroundImage" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAEwAAABMCAYAAADHl1ErAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wgAADsIBFShKgAAAAzVJREFUeF7tmg1tHDEQhQ9CIBRCIBRCIRRCIJRBIRRCIBRCIRRCIKT+pFqyRm+8
+        vgAADr4B6kKxwAAAAzVJREFUeF7tmg1tHDEQhQ9CIBRCIBRCIRRCIJRBIRRCIBRCIRRCIKT+pFqyRm+8
         vjtfsmPPk57ukuxt5C/zZ28uqVQqlUqlUqlUKjWsp+Iv/19TQoD5Vvyr+K343fi1+EcxELcWoF6K/xZb
         SJ5/Fm8ZeSyayFFQjkwUPhdvI2D9KVYwrvHX4uXVi6zfxaQcaUpN45W6pq6tXh4aEOyiSTG+79Wmo/Rd
         FhoLt12Qr4mmEdEp28+2XhKaii4gXKOtoNm0Ypzw0rCnbaDZdKTA36rloTGl24V9L75HHjT+MOF3BQya
