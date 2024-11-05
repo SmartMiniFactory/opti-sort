@@ -46,6 +46,7 @@
             this.dgvConfig.RowTemplate.Height = 28;
             this.dgvConfig.Size = new System.Drawing.Size(974, 442);
             this.dgvConfig.TabIndex = 0;
+            this.dgvConfig.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataGridView_CellBeginEdit);
             this.dgvConfig.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvConfig_CellValueChanged);
             // 
             // ucConfiguration

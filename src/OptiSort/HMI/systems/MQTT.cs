@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Collections.Generic;
 
 namespace OptiSort
 {
@@ -69,6 +70,22 @@ namespace OptiSort
             }
         }
 
+
+        /// <summary>
+        /// Checks if there is a connected client and returns its client ID.
+        /// </summary>
+        /// <returns>The client ID if a connected client is found; otherwise, null.</returns>
+        public string GetConnectedClientName()
+        {
+            foreach (var client in _clients)
+            {
+                if (client.Value.IsConnected)
+                {
+                    return client.Key;
+                }
+            }
+            return null;
+        }
 
 
         /// <summary>

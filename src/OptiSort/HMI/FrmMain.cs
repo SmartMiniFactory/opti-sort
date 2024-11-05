@@ -19,6 +19,8 @@ namespace OptiSort
     public partial class frmMain : Form, INotifyPropertyChanged
     {
 
+        //NOTE: remember to reactivate exception settings > managed debugging assistant > loader lock for release to prod
+
         public MQTT MqttClient { get; set; }
         public Cobra600 Cobra600 { get; set; }
         private class Cameras
@@ -305,7 +307,7 @@ namespace OptiSort
                 SimulationContainerControl simulationControl = Cobra600.Create3DDisplay();
                 pnlRobotView.Controls.Add(simulationControl);
 
-                Cursor = Cursors.Default;
+                 Cursor = Cursors.Default;
             }
             else
             {
@@ -361,7 +363,7 @@ namespace OptiSort
             }
         }
 
-        private async void SubscribeMqttTopics()
+        public async void SubscribeMqttTopics()
         {
 
             // Retreive topics from configuration file
@@ -466,7 +468,7 @@ namespace OptiSort
         {
             CleanPnlCurrentUc();
 
-            ucConfiguration ucConfiguration = new ucConfiguration();
+            ucConfiguration ucConfiguration = new ucConfiguration(this);
             ucConfiguration.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Add(ucConfiguration);
 

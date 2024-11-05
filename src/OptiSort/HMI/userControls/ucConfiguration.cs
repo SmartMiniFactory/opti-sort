@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
@@ -13,10 +14,15 @@ namespace OptiSort.userControls
 {
     public partial class ucConfiguration : UserControl
     {
-        public ucConfiguration()
+
+        private frmMain _frmMain;
+        private string _oldValue; // storing value that are about to be changed
+
+        public ucConfiguration(frmMain frmMain)
         {
             InitializeComponent();
             LoadConfigToDgv();
+            _frmMain = frmMain;
 
             // NOTE: access the configuration menu: right click on HMI > properties > settings tab
         }
@@ -55,6 +61,11 @@ namespace OptiSort.userControls
             }
         }
 
+        private void dataGridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            _oldValue = dgvConfig[e.ColumnIndex, e.RowIndex].Value.ToString(); // Store the old value before editing starts
+        }
+
         private void dgvConfig_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             // Ensure that the edited cell is from the Value column (index 1)
@@ -70,9 +81,35 @@ namespace OptiSort.userControls
                     Properties.Settings.Default.Save();
                 }
 
-                // TODO: if a mqtt topic is changed, automate unsubscription and subscription of the client
-                // TODO: if mqtt client name is changed, automate client destruction and rebuild
+                HandleMqttConnections(settingName, newValue);  
+            }
+        }
 
+        private async void HandleMqttConnections(string name, string newValue)
+        {
+            if (name.IndexOf("mqtt", StringComparison.OrdinalIgnoreCase) >= 0) // case-insensitive check if property name contains "mqtt"
+            {
+                string clientID = _frmMain.MqttClient.GetConnectedClientName();
+                
+                if (name.IndexOf("client", StringComparison.OrdinalIgnoreCase) >= 0) 
+                {
+                    await _frmMain.MqttClient.DestroyClient(clientID);
+                    _frmMain.Log($"Previous MqttClient {clientID} destroyed");
+
+                    await _frmMain.MqttClient.CreateClient(newValue);
+                    _frmMain.Log($"New MqttClient {newValue} created");
+
+                    _frmMain.SubscribeMqttTopics();
+                }
+                
+                else if (name.IndexOf("topic", StringComparison.OrdinalIgnoreCase)>=0) 
+                {
+                    await _frmMain.MqttClient.UnsubscribeClientFromTopic(clientID, _oldValue);
+                    _frmMain.Log($"Topic {_oldValue} unsubscribed");
+
+                    await _frmMain.MqttClient.SubscribeClientToTopic(clientID, newValue);
+                    _frmMain.Log($"Topic {newValue} subscribed");
+                }
             }
         }
     }
