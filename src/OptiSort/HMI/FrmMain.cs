@@ -100,10 +100,10 @@ namespace OptiSort
         {
             InitializeComponent();
 
-            // Initialize MQTT connection
+            // Instance MQTT class
             MqttClient = new MQTT();
 
-            // Initialize cobra class
+            // Instance cobra class
             Cobra600 = new Cobra600("ace", "localhost", 43434);
 
             // Initialize the remoting subsystem
@@ -409,7 +409,6 @@ namespace OptiSort
                 btnMqttConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                 btnMqttDisconnect.Enabled = false;
                 btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
-                MqttClient = null;
                 Log($"MQTT client '{clientName}' destroyed");
                 Cursor = Cursors.Default;
             }
