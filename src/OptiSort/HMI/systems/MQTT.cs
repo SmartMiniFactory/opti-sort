@@ -11,16 +11,19 @@ namespace OptiSort
 {
     public class MQTT
     {
-        byte[] _byteReceived = new byte[1];
-        string _msgReceived = string.Empty;
-        string _broker = "localhost";
-        int _port = 1883;
+        public string Broker { get; set; }
+        public int Port { get; set; }
 
-        // Use ConcurrentDictionary for thread-safe access to MQTT clients
-        private ConcurrentDictionary<string, IMqttClient> _clients = new ConcurrentDictionary<string, IMqttClient>();
-
-        // Define an event for message received
+        private ConcurrentDictionary<string, IMqttClient> _clients = new ConcurrentDictionary<string, IMqttClient>(); // Use ConcurrentDictionary for thread-safe access to MQTT clients
         public event Action<string, JsonElement> MessageReceived; // topic, message
+        private byte[] _byteReceived = new byte[1];
+        private string _msgReceived = string.Empty;
+
+        public MQTT(string broker, string port) 
+        { 
+            Broker = broker;
+            Port = int.Parse(port);
+        }
 
 
         /// <summary>
@@ -43,7 +46,7 @@ namespace OptiSort
                 var mqttClient = mqttFactory.CreateMqttClient();
                 var options = new MqttClientOptionsBuilder()
                     .WithClientId(clientId)
-                    .WithTcpServer(_broker, _port)
+                    .WithTcpServer(Broker, Port)
                     .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                     .WithCleanSession()
                     .Build();

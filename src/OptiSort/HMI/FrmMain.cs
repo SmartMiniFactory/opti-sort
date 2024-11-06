@@ -13,6 +13,8 @@ using Ace.Core.Client.Sim3d.Controls;
 using Ace.Core.Client;
 using Ace.Core.Server;
 using Ace.Core.Server.Motion;
+using FlexibowlLibrary;
+using ActiproSoftware.SyntaxEditor;
 
 namespace OptiSort
 {
@@ -23,6 +25,8 @@ namespace OptiSort
 
         public MQTT MqttClient { get; set; }
         public Cobra600 Cobra600 { get; set; }
+        public Flexibowl Flexibowl { get; set; }
+
         private class Cameras
         {
             public int ID { get; set; }
@@ -101,10 +105,20 @@ namespace OptiSort
             InitializeComponent();
 
             // Instance MQTT class
-            MqttClient = new MQTT();
+            string mqttBroker = Properties.Settings.Default.mqtt_broker;
+            string mqttPort = Properties.Settings.Default.mqtt_port;
+            MqttClient = new MQTT(mqttBroker, mqttPort);
 
             // Instance cobra class
-            Cobra600 = new Cobra600("ace", "localhost", 43434);
+            string serverIP = "localhost"; // because the initial status of the emulation mode is enabled
+            string remotingPort = Properties.Settings.Default.scara_port;
+            Cobra600 = new Cobra600("ace", serverIP, remotingPort);
+
+            // Instance flexibowl class
+            string flexibowlIP = Properties.Settings.Default.flexibowl_IP;
+            string flexibowlPort = Properties.Settings.Default.flexibowl_port;
+            Flexibowl = new Flexibowl(flexibowlIP, flexibowlPort);
+
 
             // Initialize the remoting subsystem
             RemotingUtil.InitializeRemotingSubsystem(true, 0);
@@ -125,9 +139,9 @@ namespace OptiSort
             btnConfig.Enabled = true;
 
             // init combobox
-            _camerasList.Add(new Cameras { ID = 0, Text = "Basler", mqttTopic = Properties.Settings.Default.mqttTopic_baslerStream });
-            _camerasList.Add(new Cameras { ID = 1, Text = "IDS", mqttTopic = Properties.Settings.Default.mqttTopic_idsStream });
-            _camerasList.Add(new Cameras { ID = 2, Text = "Luxonics", mqttTopic = Properties.Settings.Default.mqttTopic_luxonisStream });
+            _camerasList.Add(new Cameras { ID = 0, Text = "Basler", mqttTopic = Properties.Settings.Default.mqtt_topic_baslerStream });
+            _camerasList.Add(new Cameras { ID = 1, Text = "IDS", mqttTopic = Properties.Settings.Default.mqtt_topic_idsStream });
+            _camerasList.Add(new Cameras { ID = 2, Text = "Luxonics", mqttTopic = Properties.Settings.Default.mqtt_topic_luxonisStream });
             cmbCameras.DataSource = _camerasList;
             cmbCameras.DisplayMember = "Text";
             cmbCameras.ValueMember = "ID";
@@ -230,12 +244,16 @@ namespace OptiSort
 
         private void btnFlexibowlConnect_Click(object sender, EventArgs e)
         {
-
+            Cursor = Cursors.WaitCursor;
+            Log("Trying to connect to flexibowl");
+            ConnectFlexibowl();
         }
 
         private void btnFlexibowlDisconnect_Click(object sender, EventArgs e)
         {
-
+            Cursor = Cursors.WaitCursor;
+            Log("Trying to disconnect to flexibowl");
+            DisconnectFlexibowl();
         }
 
         private void btnMqttConnect_Click(object sender, EventArgs e)
@@ -249,7 +267,7 @@ namespace OptiSort
         {
             Cursor = Cursors.WaitCursor;
             Log("Trying to destroy MQTT client");
-            DisconnectMqttClient(Properties.Settings.Default.mqttClientName);
+            DisconnectMqttClient(Properties.Settings.Default.mqtt_client);
         }
 
         private void btnEmulateScara_Click(object sender, EventArgs e)
@@ -320,7 +338,7 @@ namespace OptiSort
         {
             pnlRobotView.Controls.Remove(Cobra600.SimulationContainerControl);
             pnlRobotView.Controls.Clear();
-            
+
             if (Cobra600.Disconnect())
             {
                 Log("Robot succesfully disconnected");
@@ -341,12 +359,55 @@ namespace OptiSort
 
 
         // -----------------------------------------------------------------------------------
+        // -------------------------------------- FLEXI --------------------------------------
+        // -----------------------------------------------------------------------------------
+
+        private void ConnectFlexibowl()
+        {
+            if (Flexibowl.Connect())
+            {
+                btnFlexibowlConnect.Enabled = false;
+                btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
+                btnFlexibowlDisconnect.Enabled = true;
+                btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
+                StatusFlexibowl = true;
+                Log("Connected to Flexibowl");
+                Cursor = Cursors.Default;
+            }
+            else
+            {
+                Log("Failed to connect to Flexibowl");
+                Cursor = Cursors.Default;
+            }
+        }
+
+        private void DisconnectFlexibowl()
+        {
+            if (Flexibowl.Disconnect())
+            {
+                btnFlexibowlConnect.Enabled = true;
+                btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
+                btnFlexibowlDisconnect.Enabled = false;
+                btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
+                StatusFlexibowl = false;
+                Cursor = Cursors.Default;
+                Log("Disconnected from Flexibowl");
+            }
+            else
+            {
+                Cursor = Cursors.Default;
+                Log("Failed to disconnect from Flexibowl");
+            }
+        }
+
+
+        // -----------------------------------------------------------------------------------
         // -------------------------------------- MQTT ---------------------------------------
         // -----------------------------------------------------------------------------------
 
         private async void ConnectMQTTClient()
         {
-            string mqttClientName = Properties.Settings.Default.mqttClientName;
+            string mqttClientName = Properties.Settings.Default.mqtt_client;
             Task<bool> createClient = MqttClient.CreateClient(mqttClientName);
 
             if (await createClient)
@@ -370,11 +431,11 @@ namespace OptiSort
         {
 
             // Retreive topics from configuration file
-            string mqttClientName = Properties.Settings.Default.mqttClientName;
-            string topicScaraTarget = Properties.Settings.Default.mqttTopic_scaraTarget;
-            string topicIdsStream = Properties.Settings.Default.mqttTopic_idsStream;
-            string topicLuxonisStream = Properties.Settings.Default.mqttTopic_luxonisStream;
-            string topicBaslerStream = Properties.Settings.Default.mqttTopic_baslerStream;
+            string mqttClientName = Properties.Settings.Default.mqtt_client;
+            string topicScaraTarget = Properties.Settings.Default.mqtt_topic_scaraTarget;
+            string topicIdsStream = Properties.Settings.Default.mqtt_topic_idsStream;
+            string topicLuxonisStream = Properties.Settings.Default.mqtt_topic_luxonisStream;
+            string topicBaslerStream = Properties.Settings.Default.mqtt_topic_baslerStream;
 
 
             // Subscribe to the necessary topics

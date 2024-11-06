@@ -185,7 +185,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 13.33333F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 105F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 108F));
             this.tableLayoutPanel1.Controls.Add(this.btnEmulateScara, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnMqttDisconnect, 9, 1);
             this.tableLayoutPanel1.Controls.Add(this.btnFlexibowlDisconnect, 6, 1);
@@ -213,7 +213,7 @@
             this.btnEmulateScara.BackgroundImage = global::OptiSort.Properties.Resources.emulation_2x2_pptx;
             this.btnEmulateScara.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnEmulateScara.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnEmulateScara.Location = new System.Drawing.Point(513, 3);
+            this.btnEmulateScara.Location = new System.Drawing.Point(512, 3);
             this.btnEmulateScara.Name = "btnEmulateScara";
             this.tableLayoutPanel1.SetRowSpan(this.btnEmulateScara, 2);
             this.btnEmulateScara.Size = new System.Drawing.Size(94, 123);
@@ -227,9 +227,9 @@
             this.btnMqttDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnMqttDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnMqttDisconnect.Enabled = false;
-            this.btnMqttDisconnect.Location = new System.Drawing.Point(1793, 67);
+            this.btnMqttDisconnect.Location = new System.Drawing.Point(1790, 67);
             this.btnMqttDisconnect.Name = "btnMqttDisconnect";
-            this.btnMqttDisconnect.Size = new System.Drawing.Size(102, 59);
+            this.btnMqttDisconnect.Size = new System.Drawing.Size(105, 59);
             this.btnMqttDisconnect.TabIndex = 11;
             this.btnMqttDisconnect.UseVisualStyleBackColor = true;
             this.btnMqttDisconnect.Click += new System.EventHandler(this.btnMqttDisconnect_Click);
@@ -240,7 +240,7 @@
             this.btnFlexibowlDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnFlexibowlDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFlexibowlDisconnect.Enabled = false;
-            this.btnFlexibowlDisconnect.Location = new System.Drawing.Point(1203, 67);
+            this.btnFlexibowlDisconnect.Location = new System.Drawing.Point(1201, 67);
             this.btnFlexibowlDisconnect.Name = "btnFlexibowlDisconnect";
             this.btnFlexibowlDisconnect.Size = new System.Drawing.Size(74, 59);
             this.btnFlexibowlDisconnect.TabIndex = 10;
@@ -253,7 +253,7 @@
             this.btnScaraDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnScaraDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnScaraDisconnect.Enabled = false;
-            this.btnScaraDisconnect.Location = new System.Drawing.Point(613, 67);
+            this.btnScaraDisconnect.Location = new System.Drawing.Point(612, 67);
             this.btnScaraDisconnect.Name = "btnScaraDisconnect";
             this.btnScaraDisconnect.Size = new System.Drawing.Size(74, 59);
             this.btnScaraDisconnect.TabIndex = 9;
@@ -265,9 +265,9 @@
             this.btnMqttConnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnMqttConnect.BackgroundImage")));
             this.btnMqttConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnMqttConnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnMqttConnect.Location = new System.Drawing.Point(1793, 3);
+            this.btnMqttConnect.Location = new System.Drawing.Point(1790, 3);
             this.btnMqttConnect.Name = "btnMqttConnect";
-            this.btnMqttConnect.Size = new System.Drawing.Size(102, 58);
+            this.btnMqttConnect.Size = new System.Drawing.Size(105, 58);
             this.btnMqttConnect.TabIndex = 8;
             this.btnMqttConnect.UseVisualStyleBackColor = true;
             this.btnMqttConnect.Click += new System.EventHandler(this.btnMqttConnect_Click);
@@ -277,7 +277,7 @@
             this.btnFlexibowlConnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnFlexibowlConnect.BackgroundImage")));
             this.btnFlexibowlConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnFlexibowlConnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnFlexibowlConnect.Location = new System.Drawing.Point(1203, 3);
+            this.btnFlexibowlConnect.Location = new System.Drawing.Point(1201, 3);
             this.btnFlexibowlConnect.Name = "btnFlexibowlConnect";
             this.btnFlexibowlConnect.Size = new System.Drawing.Size(74, 58);
             this.btnFlexibowlConnect.TabIndex = 7;
@@ -290,10 +290,10 @@
             this.lblMqttStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblMqttStatusValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMqttStatusValue.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.lblMqttStatusValue.Location = new System.Drawing.Point(1589, 0);
+            this.lblMqttStatusValue.Location = new System.Drawing.Point(1587, 0);
             this.lblMqttStatusValue.Name = "lblMqttStatusValue";
             this.tableLayoutPanel1.SetRowSpan(this.lblMqttStatusValue, 2);
-            this.lblMqttStatusValue.Size = new System.Drawing.Size(198, 129);
+            this.lblMqttStatusValue.Size = new System.Drawing.Size(197, 129);
             this.lblMqttStatusValue.TabIndex = 5;
             this.lblMqttStatusValue.Text = "Offline";
             this.lblMqttStatusValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -303,7 +303,7 @@
             this.lblMqttStatus.AutoSize = true;
             this.lblMqttStatus.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblMqttStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMqttStatus.Location = new System.Drawing.Point(1283, 0);
+            this.lblMqttStatus.Location = new System.Drawing.Point(1281, 0);
             this.lblMqttStatus.Name = "lblMqttStatus";
             this.tableLayoutPanel1.SetRowSpan(this.lblMqttStatus, 2);
             this.lblMqttStatus.Size = new System.Drawing.Size(300, 129);
@@ -317,10 +317,10 @@
             this.lblFlexibowlStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblFlexibowlStatusValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblFlexibowlStatusValue.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.lblFlexibowlStatusValue.Location = new System.Drawing.Point(999, 0);
+            this.lblFlexibowlStatusValue.Location = new System.Drawing.Point(998, 0);
             this.lblFlexibowlStatusValue.Name = "lblFlexibowlStatusValue";
             this.tableLayoutPanel1.SetRowSpan(this.lblFlexibowlStatusValue, 2);
-            this.lblFlexibowlStatusValue.Size = new System.Drawing.Size(198, 129);
+            this.lblFlexibowlStatusValue.Size = new System.Drawing.Size(197, 129);
             this.lblFlexibowlStatusValue.TabIndex = 3;
             this.lblFlexibowlStatusValue.Text = "Offline";
             this.lblFlexibowlStatusValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -330,7 +330,7 @@
             this.lblFlexibowlStatus.AutoSize = true;
             this.lblFlexibowlStatus.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblFlexibowlStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFlexibowlStatus.Location = new System.Drawing.Point(693, 0);
+            this.lblFlexibowlStatus.Location = new System.Drawing.Point(692, 0);
             this.lblFlexibowlStatus.Name = "lblFlexibowlStatus";
             this.tableLayoutPanel1.SetRowSpan(this.lblFlexibowlStatus, 2);
             this.lblFlexibowlStatus.Size = new System.Drawing.Size(300, 129);
@@ -347,7 +347,7 @@
             this.lblScaraStatusValue.Location = new System.Drawing.Point(309, 0);
             this.lblScaraStatusValue.Name = "lblScaraStatusValue";
             this.tableLayoutPanel1.SetRowSpan(this.lblScaraStatusValue, 2);
-            this.lblScaraStatusValue.Size = new System.Drawing.Size(198, 129);
+            this.lblScaraStatusValue.Size = new System.Drawing.Size(197, 129);
             this.lblScaraStatusValue.TabIndex = 1;
             this.lblScaraStatusValue.Text = "Offline";
             this.lblScaraStatusValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -370,7 +370,7 @@
             this.btnScaraConnect.BackgroundImage = global::OptiSort.Properties.Resources.connectedEnabled_2x2_pptx;
             this.btnScaraConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnScaraConnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnScaraConnect.Location = new System.Drawing.Point(613, 3);
+            this.btnScaraConnect.Location = new System.Drawing.Point(612, 3);
             this.btnScaraConnect.Name = "btnScaraConnect";
             this.btnScaraConnect.Size = new System.Drawing.Size(74, 58);
             this.btnScaraConnect.TabIndex = 6;
