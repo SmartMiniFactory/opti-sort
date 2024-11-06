@@ -291,23 +291,23 @@ namespace OptiSort
                 btnEmulateScara.Enabled = false;
                 StatusScara = true;
 
+                // TODO: remove following debug logs
+                //Log($"Robot is enabled: {Cobra600.Robot.Enabled}");
+                //Log($"Robot number: {Cobra600.Robot.RobotNumber}");
+                //Log($"Robot joint count: {Cobra600.Robot.JointCount}");
+                //Log($"Robot motor count: {Cobra600.Robot.MotorCount}");
+                //Log($"Robot controller: {Cobra600.Robot.Controller}");
+                //Log($"Robot visible: {Cobra600.Robot.Visible}");
 
-                Log($"Robot is enabled: {Cobra600.Robot.Enabled}");
-                Log($"Robot number: {Cobra600.Robot.RobotNumber}");
-                Log($"Robot joint count: {Cobra600.Robot.JointCount}");
-                Log($"Robot motor count: {Cobra600.Robot.MotorCount}");
-                Log($"Robot controller: {Cobra600.Robot.Controller}");
-                Log($"Robot visible: {Cobra600.Robot.Visible}");
+                //Log($"Controller enabled: {Cobra600.Controller.Enabled}");
+                //Log($"Controller full path: {Cobra600.Controller.FullPath}");
+                //Log($"Controller calibrated: {Cobra600.Controller.IsCalibrated}");
+                //Log($"Controller robot count: {Cobra600.Controller.RobotCount}");
 
-                Log($"Controller enabled: {Cobra600.Controller.Enabled}");
-                Log($"Controller full path: {Cobra600.Controller.FullPath}");
-                Log($"Controller calibrated: {Cobra600.Controller.IsCalibrated}");
-                Log($"Controller robot count: {Cobra600.Controller.RobotCount}");
+                // add robot rendering to panel
+                pnlRobotView.Controls.Add(Cobra600.SimulationContainerControl);
 
-                SimulationContainerControl simulationControl = Cobra600.Create3DDisplay();
-                pnlRobotView.Controls.Add(simulationControl);
-
-                 Cursor = Cursors.Default;
+                Cursor = Cursors.Default;
             }
             else
             {
@@ -318,6 +318,9 @@ namespace OptiSort
 
         private void DisconnectScara()
         {
+            pnlRobotView.Controls.Remove(Cobra600.SimulationContainerControl);
+            pnlRobotView.Controls.Clear();
+            
             if (Cobra600.Disconnect())
             {
                 Log("Robot succesfully disconnected");

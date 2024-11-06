@@ -29,6 +29,8 @@ namespace OptiSort
         public IAdeptController Controller { get; private set; }
         public IAdeptRobot Robot { get; private set; }
         public IAbstractEndEffector EndEffector { get; private set; }
+        public SimulationContainerControl SimulationContainerControl { get; private set; }
+
 
         // TODO: useful??
         private string _remotingName;
@@ -38,7 +40,6 @@ namespace OptiSort
         private RemoteAceObjectEventHandler generalEventHandler;
         private RemoteApplicationEventHandler applicationEventHandler;
         private ControlPanelManager pendantManager;
-        private SimulationContainerControl simulationContainerControl;
 
         public Cobra600(string remotingName, string address, int remotingPort)
         {
@@ -121,6 +122,8 @@ namespace OptiSort
                     Robot.Calibrate();
                     Controller.Calibrate();
                 }
+
+                Create3DDisplay();
             }
             catch (Exception ex)
             {
@@ -137,10 +140,13 @@ namespace OptiSort
             try
             {
                 // Release all event handlers before we clear the workspace.				
-                generalEventHandler.Dispose();
-                generalEventHandler = null;
-                applicationEventHandler.Dispose();
-                applicationEventHandler = null;
+                //generalEventHandler.Dispose();
+                //generalEventHandler = null;
+                //applicationEventHandler.Dispose();
+                //applicationEventHandler = null;
+
+                SimulationContainerControl.Dispose();
+                SimulationContainerControl = null;
 
                 // Clear the workspace
                 Controller.Enabled = false;
@@ -154,36 +160,31 @@ namespace OptiSort
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                //GuiUtil.ShowExceptionDialog(this, ex);
+                GuiUtil.ShowExceptionDialog((IWin32Window)this, ex);
                 return false;
             }
         }
 
 
-        public SimulationContainerControl Create3DDisplay()
+        public void Create3DDisplay()
         {
             try
             {
-                SimulationContainerControl simulationContainer = new SimulationContainerControl();
-
-                simulationContainer = new SimulationContainerControl();
-                simulationContainer.Dock = DockStyle.Fill;
-                simulationContainer.Client = Client;
-                simulationContainer.Visible = false;
-                simulationContainer.Visible = true;
-                var robotSimObject = simulationContainer.AddToScene(Robot);
+                SimulationContainerControl = new SimulationContainerControl();
+                SimulationContainerControl.Dock = DockStyle.Fill;
+                SimulationContainerControl.Client = Client;
+                SimulationContainerControl.Visible = false;
+                SimulationContainerControl.Visible = true;
+                var robotSimObject = SimulationContainerControl.AddToScene(Robot);
                
                 Debug.Assert(robotSimObject != null, "Robot object was not added to the scene.");
                 Debug.Assert(robotSimObject.Visible == true, "Robot not visible.");
 
-                simulationContainer.CameraPositions = new Transform3D[] { simulationContainer.DefaultIsometricViewPosition };
-
-                return simulationContainer;
+                SimulationContainerControl.CameraPositions = new Transform3D[] { SimulationContainerControl.DefaultIsometricViewPosition };
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return null;
             }
         }
 
