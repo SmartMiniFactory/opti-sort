@@ -3,10 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="scara_serverIP" Type="System.String" Scope="User">
-      <Value Profile="(Default)">10.90.90.60</Value>
+      <Value Profile="(Default)">10.90.90.91</Value>
     </Setting>
     <Setting Name="scara_controllerIP" Type="System.String" Scope="User">
-      <Value Profile="(Default)">127.0.0.1</Value>
+      <Value Profile="(Default)">10.90.90.60</Value>
     </Setting>
     <Setting Name="mqtt_client" Type="System.String" Scope="User">
       <Value Profile="(Default)">OptiSort</Value>
@@ -33,7 +33,7 @@
       <Value Profile="(Default)">Suction Cup</Value>
     </Setting>
     <Setting Name="flexibowl_IP" Type="System.String" Scope="User">
-      <Value Profile="(Default)">127.0.0.1</Value>
+      <Value Profile="(Default)">10.90.90.20</Value>
     </Setting>
     <Setting Name="flexibowl_port" Type="System.String" Scope="User">
       <Value Profile="(Default)">7775</Value>

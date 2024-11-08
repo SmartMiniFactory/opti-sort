@@ -299,6 +299,9 @@ namespace OptiSort
             string robotName = Properties.Settings.Default.scara_robotName;
             string endEffectorName = Properties.Settings.Default.scara_endEffectorName;
 
+            if (!StatusScaraEmulation)
+                Cobra600.ServerIP = Properties.Settings.Default.scara_serverIP;
+            
             if (Cobra600.Connect(StatusScaraEmulation, controllerName, robotName, endEffectorName))
             {
                 Log("Robot successfully connected");

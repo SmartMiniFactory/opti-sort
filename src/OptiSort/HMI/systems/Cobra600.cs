@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,9 @@ namespace OptiSort
 {
     public class Cobra600
     {
+
+        public string ServerIP {  get; set; }
+
         public IAceServer Server { get; private set; }
         public IAceClient Client { get; private set; }
         public IAdeptController Controller { get; private set; }
@@ -34,7 +38,6 @@ namespace OptiSort
 
         // TODO: should think about using singletones or properties. For the MQTT class properties are useful because config may change. But the ace server in theroy cannot change easily...Must standardize. Then think about how to handle property changes in general
         private string _remotingName;
-        private string _serverAddress;
         private int _remotingPort;
 
         private RemoteAceObjectEventHandler generalEventHandler;
@@ -44,7 +47,7 @@ namespace OptiSort
         public Cobra600(string remotingName, string serverAddress, string remotingPort)
         {
             _remotingName = remotingName;
-            _serverAddress = serverAddress;
+            ServerIP = serverAddress;
             _remotingPort = int.Parse(remotingPort);
         }
 
@@ -54,7 +57,7 @@ namespace OptiSort
             try
             {
                 // Connect to ACE
-                Server = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, _serverAddress, _remotingPort);
+                Server = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, ServerIP, _remotingPort);
                 Client = new AceClient(Server);
                 Client.InitializePlugins(null);
 
@@ -77,7 +80,7 @@ namespace OptiSort
                     Controller = availableControllers.FirstOrDefault() as IAdeptController; // connect to first available
                 }
 
-                Controller.Address = _serverAddress;
+                Controller.Address = ServerIP;
 
                 // Get the available robots
                 IList<IAceObject> availableRobots = Server.Root.Filter(new ObjectTypeFilter(typeof(IAdeptRobot)), true);

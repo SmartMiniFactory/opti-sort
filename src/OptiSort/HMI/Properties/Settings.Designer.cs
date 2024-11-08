@@ -25,7 +25,7 @@ namespace OptiSort.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10.90.90.60")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10.90.90.91")]
         public string scara_serverIP {
             get {
                 return ((string)(this["scara_serverIP"]));
@@ -37,7 +37,7 @@ namespace OptiSort.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10.90.90.60")]
         public string scara_controllerIP {
             get {
                 return ((string)(this["scara_controllerIP"]));
@@ -145,7 +145,7 @@ namespace OptiSort.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10.90.90.20")]
         public string flexibowl_IP {
             get {
                 return ((string)(this["flexibowl_IP"]));
