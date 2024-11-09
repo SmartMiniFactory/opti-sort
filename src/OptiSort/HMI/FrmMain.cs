@@ -311,23 +311,7 @@ namespace OptiSort
                 btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
                 btnEmulateScara.Enabled = false;
                 StatusScara = true;
-
-                // TODO: remove following debug logs
-                //Log($"Robot is enabled: {Cobra600.Robot.Enabled}");
-                //Log($"Robot number: {Cobra600.Robot.RobotNumber}");
-                //Log($"Robot joint count: {Cobra600.Robot.JointCount}");
-                //Log($"Robot motor count: {Cobra600.Robot.MotorCount}");
-                //Log($"Robot controller: {Cobra600.Robot.Controller}");
-                //Log($"Robot visible: {Cobra600.Robot.Visible}");
-
-                //Log($"Controller enabled: {Cobra600.Controller.Enabled}");
-                //Log($"Controller full path: {Cobra600.Controller.FullPath}");
-                //Log($"Controller calibrated: {Cobra600.Controller.IsCalibrated}");
-                //Log($"Controller robot count: {Cobra600.Controller.RobotCount}");
-
-                // add robot rendering to panel
-                pnlRobotView.Controls.Add(Cobra600.SimulationContainerControl);
-
+                pnlRobotView.Controls.Add(Cobra600.SimulationContainerControl); // add robot rendering to panel
                 Cursor = Cursors.Default;
             }
             else
@@ -513,8 +497,32 @@ namespace OptiSort
             pnlCurrentUc.Controls.Add(ucProcessView);
 
             btnAuto.Enabled = false;
+            btnAuto.BackgroundImage = Properties.Resources.autoEnabled_2x2_pptx;
             btnManual.Enabled = true;
+            btnManual.BackgroundImage = Properties.Resources.manualDisabled_2x2_pptx;
             btnConfig.Enabled = true;
+            btnConfig.BackgroundImage = Properties.Resources.configDisabled_2x2_pptx;
+
+            btnRun.Enabled = true;
+            btnRun.BackgroundImage = Properties.Resources.playPassivated_2x2_pptx;
+            btnStop.Enabled = false;
+            btnStop.BackgroundImage = Properties.Resources.stopEnabled_2x2_pptx;
+        }
+
+        private void btnRun_Click(object sender, EventArgs e)
+        {
+            btnRun.Enabled = false;
+            btnRun.BackgroundImage = Properties.Resources.playEnabled_2x2_pptx;
+            btnStop.Enabled = true;
+            btnStop.BackgroundImage = Properties.Resources.stopPassivated_2x2_pptx;
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            btnRun.Enabled = true;
+            btnRun.BackgroundImage = Properties.Resources.playPassivated_2x2_pptx;
+            btnStop.Enabled = false;
+            btnStop.BackgroundImage = Properties.Resources.stopEnabled_2x2_pptx;
         }
 
         private void btnManual_Click(object sender, System.EventArgs e)
@@ -526,8 +534,16 @@ namespace OptiSort
             pnlCurrentUc.Controls.Add(ucManualControl);
 
             btnAuto.Enabled = true;
+            btnAuto.BackgroundImage = Properties.Resources.autoDisabled_2x2_pptx;
             btnManual.Enabled = false;
+            btnManual.BackgroundImage = Properties.Resources.manualEnabled_2x2_pptx;
             btnConfig.Enabled = true;
+            btnConfig.BackgroundImage = Properties.Resources.configDisabled_2x2_pptx;
+
+            btnRun.Enabled = false;
+            btnRun.BackgroundImage = Properties.Resources.playDisabled_2x2_pptx;
+            btnStop.Enabled = false;
+            btnStop.BackgroundImage = Properties.Resources.stopDisabled_2x2_pptx;
         }
 
         private void btnConfig_Click(object sender, System.EventArgs e)
@@ -539,8 +555,16 @@ namespace OptiSort
             pnlCurrentUc.Controls.Add(ucConfiguration);
 
             btnAuto.Enabled = true;
+            btnAuto.BackgroundImage = Properties.Resources.autoDisabled_2x2_pptx;
             btnManual.Enabled = true;
+            btnManual.BackgroundImage = Properties.Resources.manualDisabled_2x2_pptx;
             btnConfig.Enabled = false;
+            btnConfig.BackgroundImage = Properties.Resources.configEnabled_2x2_pptx;
+
+            btnRun.Enabled = false;
+            btnRun.BackgroundImage = Properties.Resources.playDisabled_2x2_pptx;
+            btnStop.Enabled = false;
+            btnStop.BackgroundImage = Properties.Resources.stopDisabled_2x2_pptx;
         }
 
         // -----------------------------------------------------------------------------------
@@ -567,6 +591,5 @@ namespace OptiSort
             lstLog.Items.Add(msg);
             lstLog.TopIndex = lstLog.Items.Count - 1; // showing last row
         }
-
     }
 }
