@@ -15,7 +15,6 @@
         {
             // unsubscribe mqtt messages triggers
             _frmMain.MqttClient.MessageReceived -= _ucScaraTargets.OnMessageReceived;
-            _frmMain.Log("Process view detached from being triggered by MQTT messages");
 
             if (disposing && (components != null))
             {

@@ -29,7 +29,6 @@ namespace OptiSort.userControls
             pnlScara.Controls.Clear();
             pnlScara.Controls.Add(_ucScaraTargets);
             _frmMain.MqttClient.MessageReceived += _ucScaraTargets.OnMessageReceived; // enable MQTT messages to trigger the user control
-            _frmMain.Log("Scara targets dgv attached to MQTT messages");
 
             // init flexibowl
             ucFlexibowl ucFlexibowl = new ucFlexibowl();

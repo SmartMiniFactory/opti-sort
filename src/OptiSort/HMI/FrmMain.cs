@@ -8,18 +8,21 @@ using Ace.Core.Util;
 using System.Drawing;
 using System.Diagnostics;
 using System.Collections.Generic;
-using Ace.Adept.Server.Motion;
-using Ace.Core.Client.Sim3d.Controls;
-using Ace.Core.Client;
-using Ace.Core.Server;
-using Ace.Core.Server.Motion;
 using FlexibowlLibrary;
-using ActiproSoftware.SyntaxEditor;
+using Ace.UIBuilder.Client.Controls.Tools.WindowsForms;
+using static System.Net.Mime.MediaTypeNames;
+using Ace.Adept.Server.Motion;
 
 namespace OptiSort
 {
     public partial class frmMain : Form, INotifyPropertyChanged
     {
+
+        // -----------------------------------------------------------------------------------
+        // ---------------------------------- DECLARATIONS -----------------------------------
+        // -----------------------------------------------------------------------------------
+
+        #region declarations
 
         //NOTE: remember to reactivate exception settings > managed debugging assistant > loader lock for release to prod
 
@@ -33,9 +36,10 @@ namespace OptiSort
             public string Text { get; set; }
             public string mqttTopic { get; set; }
         }
-        List<Cameras> _camerasList = new List<Cameras> { };
+        List<Cameras> _camerasList = new List<Cameras> { }; // TODO: review definition
 
-        private ucCameraStream _ucCameraStream;
+        private ucCameraStream _ucCameraStream; // TODO: review definition
+
 
         // status
         public event PropertyChangedEventHandler PropertyChanged; // declare propertyChanged event (required by the associated interface)
@@ -98,7 +102,11 @@ namespace OptiSort
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        #endregion
 
+        // -----------------------------------------------------------------------------------
+        // ---------------------------------- CONSTRUCTOR ------------------------------------
+        // -----------------------------------------------------------------------------------
 
         public frmMain()
         {
@@ -123,10 +131,7 @@ namespace OptiSort
             // Initialize the remoting subsystem
             RemotingUtil.InitializeRemotingSubsystem(true, 0);
 
-            // Subscribe to PropertyChanged event
-            this.PropertyChanged += RefreshStatusBar;
-
-
+            
             // Display default user control
             ucManualControl ucManualControl = new ucManualControl(this);
             ucManualControl.Dock = DockStyle.Fill;
@@ -146,21 +151,29 @@ namespace OptiSort
             cmbCameras.DisplayMember = "Text";
             cmbCameras.ValueMember = "ID";
 
-
             // init camera view
-            _ucCameraStream = new ucCameraStream();
+            _ucCameraStream = new ucCameraStream(this);
             _ucCameraStream.StreamTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
             _ucCameraStream.Dock = DockStyle.Fill;
             pnlCameraStream.Controls.Clear();
             pnlCameraStream.Controls.Add(_ucCameraStream);
+
+            // attach events
+            this.PropertyChanged += RefreshStatusBar; // trigger statusbar buttons refresh
             MqttClient.MessageReceived += _ucCameraStream.OnMessageReceived; // enable MQTT messages to trigger the user control
-            Log("Camera stream attached to MQTT messages");
+
+            // Initialize robot panel view
+            PaintIndicationRobot3DView();
+
+            Log("OptiSort ready for operation: please connect systems (Scara robot, flexibowl, MQTT service) to begin");
+
         }
 
+        // -----------------------------------------------------------------------------------
+        // ---------------------------------- STATUS BAR -------------------------------------
+        // -----------------------------------------------------------------------------------
 
-        // -----------------------------------------------------------------------------------
-        // ------------------------------------- CONNECTIONS ---------------------------------
-        // -----------------------------------------------------------------------------------
+        #region connection buttons (statusbar)
 
         private void RefreshStatusBar(object sender, PropertyChangedEventArgs e)
         {
@@ -286,191 +299,13 @@ namespace OptiSort
             }
         }
 
+        #endregion
 
         // -----------------------------------------------------------------------------------
-        // -------------------------------------- SCARA --------------------------------------
+        // -------------------------------- FORM NAVIGATION ----------------------------------
         // -----------------------------------------------------------------------------------
 
-        // TODO: is possible to do these async?
-
-        private void ConnectScara()
-        {
-            string controllerName = Properties.Settings.Default.scara_controllerName;
-            string robotName = Properties.Settings.Default.scara_robotName;
-            string endEffectorName = Properties.Settings.Default.scara_endEffectorName;
-
-            if (!StatusScaraEmulation)
-                Cobra600.ServerIP = Properties.Settings.Default.scara_serverIP;
-            
-            if (Cobra600.Connect(StatusScaraEmulation, controllerName, robotName, endEffectorName))
-            {
-                Log("Robot successfully connected");
-                btnScaraConnect.Enabled = false;
-                btnScaraConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
-                btnScaraDisconnect.Enabled = true;
-                btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
-                btnEmulateScara.Enabled = false;
-                StatusScara = true;
-                pnlRobotView.Controls.Add(Cobra600.SimulationContainerControl); // add robot rendering to panel
-                Cursor = Cursors.Default;
-            }
-            else
-            {
-                Log("Failed to connect to robot");
-                Cursor = Cursors.Default;
-            }
-        }
-
-        private void DisconnectScara()
-        {
-            pnlRobotView.Controls.Remove(Cobra600.SimulationContainerControl);
-            pnlRobotView.Controls.Clear();
-
-            if (Cobra600.Disconnect())
-            {
-                Log("Robot succesfully disconnected");
-                btnScaraConnect.Enabled = true;
-                btnScaraConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
-                btnScaraDisconnect.Enabled = false;
-                btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
-                btnEmulateScara.Enabled = true;
-                StatusScara = false;
-                Cursor = Cursors.Default;
-            }
-            else
-            {
-                Log("Failed to disconnect from Cobra");
-                Cursor = Cursors.Default;
-            }
-        }
-
-
-        // -----------------------------------------------------------------------------------
-        // -------------------------------------- FLEXI --------------------------------------
-        // -----------------------------------------------------------------------------------
-
-        private void ConnectFlexibowl()
-        {
-            if (Flexibowl.Connect())
-            {
-                btnFlexibowlConnect.Enabled = false;
-                btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
-                btnFlexibowlDisconnect.Enabled = true;
-                btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
-                StatusFlexibowl = true;
-                Log("Connected to Flexibowl");
-                Cursor = Cursors.Default;
-            }
-            else
-            {
-                Log("Failed to connect to Flexibowl");
-                Cursor = Cursors.Default;
-            }
-        }
-
-        private void DisconnectFlexibowl()
-        {
-            if (Flexibowl.Disconnect())
-            {
-                btnFlexibowlConnect.Enabled = true;
-                btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
-                btnFlexibowlDisconnect.Enabled = false;
-                btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
-                StatusFlexibowl = false;
-                Cursor = Cursors.Default;
-                Log("Disconnected from Flexibowl");
-            }
-            else
-            {
-                Cursor = Cursors.Default;
-                Log("Failed to disconnect from Flexibowl");
-            }
-        }
-
-
-        // -----------------------------------------------------------------------------------
-        // -------------------------------------- MQTT ---------------------------------------
-        // -----------------------------------------------------------------------------------
-
-        private async void ConnectMQTTClient()
-        {
-            string mqttClientName = Properties.Settings.Default.mqtt_client;
-            Task<bool> createClient = MqttClient.CreateClient(mqttClientName);
-
-            if (await createClient)
-            {
-                StatusMqttClient = true;
-                btnMqttConnect.Enabled = false;
-                btnMqttConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
-                btnMqttDisconnect.Enabled = true;
-                btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
-                Log($"MQTT client '{mqttClientName}' created");
-                SubscribeMqttTopics();
-            }
-            else
-            {
-                Log($"Failed to create '{mqttClientName}' MQTT client");
-                Cursor = Cursors.Default;
-            }
-        }
-
-        public async void SubscribeMqttTopics()
-        {
-
-            // Retreive topics from configuration file
-            string mqttClientName = Properties.Settings.Default.mqtt_client;
-            string topicScaraTarget = Properties.Settings.Default.mqtt_topic_scaraTarget;
-            string topicIdsStream = Properties.Settings.Default.mqtt_topic_idsStream;
-            string topicLuxonisStream = Properties.Settings.Default.mqtt_topic_luxonisStream;
-            string topicBaslerStream = Properties.Settings.Default.mqtt_topic_baslerStream;
-
-
-            // Subscribe to the necessary topics
-            bool scaraSubscriberd = await MqttClient.SubscribeClientToTopic(mqttClientName, topicScaraTarget);
-            bool idsSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicIdsStream);
-            bool baslerSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicBaslerStream);
-            bool luxonisSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicLuxonisStream);
-
-            // logging
-            if (scaraSubscriberd) Log($"{mqttClientName} subscribed to {topicScaraTarget}");
-            else Log($"Unable subscribing {mqttClientName} to {topicScaraTarget}");
-
-            if (idsSubscribed) Log($"{mqttClientName} subscribed to {topicIdsStream}");
-            else Log($"Unable subscribing {mqttClientName} to {topicIdsStream}");
-
-            if (baslerSubscribed) Log($"{mqttClientName} subscribed to {topicBaslerStream}");
-            else Log($"Unable subscribing {mqttClientName} to {topicBaslerStream}");
-
-            if (luxonisSubscribed) Log($"{mqttClientName} subscribed to {topicLuxonisStream}");
-            else Log($"Unable subscribing {mqttClientName} to {topicLuxonisStream}");
-
-            Cursor = Cursors.Default;
-        }
-
-        private async void DisconnectMqttClient(string clientName)
-        {
-            Task<bool> destroyClient = MqttClient.DestroyClient(clientName);
-            if (await destroyClient)
-            {
-                StatusMqttClient = false;
-                btnMqttConnect.Enabled = true;
-                btnMqttConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
-                btnMqttDisconnect.Enabled = false;
-                btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
-                Log($"MQTT client '{clientName}' destroyed");
-                Cursor = Cursors.Default;
-            }
-            else
-            {
-                Log($"Error destroying '{clientName}'");
-                Cursor = Cursors.Default;
-            }
-        }
-
-
-        // -----------------------------------------------------------------------------------
-        // ---------------------------- CHANGING USER CONTROL --------------------------------
-        // -----------------------------------------------------------------------------------
+        #region navigation buttons (form bottom)
 
         private void CleanPnlCurrentUc()
         {
@@ -567,8 +402,245 @@ namespace OptiSort
             btnStop.BackgroundImage = Properties.Resources.stopDisabled_2x2_pptx;
         }
 
+        #endregion
+
         // -----------------------------------------------------------------------------------
-        // ------------------------------- FIXED PANELS --------------------------------------
+        // ------------------------------------ SCARA ----------------------------------------
+        // -----------------------------------------------------------------------------------
+
+        #region ACE scara
+
+        // TODO: is possible to use async?
+
+        private void ConnectScara()
+        {
+            string controllerName = Properties.Settings.Default.scara_controllerName;
+            string robotName = Properties.Settings.Default.scara_robotName;
+            string endEffectorName = Properties.Settings.Default.scara_endEffectorName;
+
+            if (!StatusScaraEmulation)
+                Cobra600.ServerIP = Properties.Settings.Default.scara_serverIP;
+
+            if (Cobra600.Connect(StatusScaraEmulation, controllerName, robotName, endEffectorName))
+            {
+                Log("Robot successfully connected");
+                btnScaraConnect.Enabled = false;
+                btnScaraConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
+                btnScaraDisconnect.Enabled = true;
+                btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
+                btnEmulateScara.Enabled = false;
+                StatusScara = true;
+                pnlRobotView.Controls.Clear();
+                pnlRobotView.Controls.Add(Cobra600.SimulationContainerControl); // add robot rendering to panel
+                pnlRobotView.Refresh();
+                Cursor = Cursors.Default;
+            }
+            else
+            {
+                Log("Failed to connect to robot");
+                Cursor = Cursors.Default;
+            }
+        }
+
+        private void DisconnectScara()
+        {
+            pnlRobotView.Controls.Remove(Cobra600.SimulationContainerControl);
+            pnlRobotView.Controls.Clear();
+
+            if (Cobra600.Disconnect())
+            {
+                Log("Robot succesfully disconnected");
+                btnScaraConnect.Enabled = true;
+                btnScaraConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
+                btnScaraDisconnect.Enabled = false;
+                btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
+                btnEmulateScara.Enabled = true;
+                StatusScara = false;
+                Cursor = Cursors.Default;
+                PaintIndicationRobot3DView();
+            }
+            else
+            {
+                Log("Failed to disconnect from Cobra");
+                Cursor = Cursors.Default;
+            }
+        }
+
+        private void PaintIndicationRobot3DView()
+        {
+            // Create a bitmap to draw on, using the panel's size
+            Bitmap bmp = new Bitmap(pnlRobotView.Width, pnlRobotView.Height);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.Clear(Color.Transparent); // Clear with transparent background
+
+                // Draw the semi-transparent black background rectangle
+                using (Brush backgroundBrush = new SolidBrush(Color.FromArgb(128, Color.Black)))
+                {
+                    g.FillRectangle(backgroundBrush, new Rectangle(0, (bmp.Height - 40) / 2, bmp.Width, 40));
+                }
+
+                // Set up font and brush for the message
+                using (Font font = new Font("Arial", 12, FontStyle.Bold))
+                using (Brush textBrush = new SolidBrush(Color.White))
+                {
+                    string message = "Connect ACE Server for 3D render";
+
+                    // Measure the size of the message to center it
+                    SizeF textSize = g.MeasureString(message, font);
+                    PointF textLocation = new PointF((bmp.Width - textSize.Width) / 2, (bmp.Height - textSize.Height) / 2);
+
+                    // Draw the message centered on the bitmap
+                    g.DrawString(message, font, textBrush, textLocation);
+                }
+            }
+
+            // Create a PictureBox to display the bitmap
+            System.Windows.Forms.PictureBox pictureBox = new System.Windows.Forms.PictureBox
+            {
+                Dock = DockStyle.Fill,   // Fill the panel
+                BackColor = Color.Transparent,
+                Image = bmp,
+                SizeMode = PictureBoxSizeMode.Zoom
+            };
+
+            // Add the PictureBox to the panel's controls
+            pnlRobotView.Controls.Add(pictureBox);
+        }
+
+        #endregion
+
+        // -----------------------------------------------------------------------------------
+        // ---------------------------------- FLEXIBOWL --------------------------------------
+        // -----------------------------------------------------------------------------------
+
+        #region flexibowl
+
+        private void ConnectFlexibowl()
+        {
+            if (Flexibowl.Connect())
+            {
+                btnFlexibowlConnect.Enabled = false;
+                btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
+                btnFlexibowlDisconnect.Enabled = true;
+                btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
+                StatusFlexibowl = true;
+                Log("Connected to Flexibowl");
+                Cursor = Cursors.Default;
+            }
+            else
+            {
+                Log("Failed to connect to Flexibowl");
+                Cursor = Cursors.Default;
+            }
+        }
+
+        private void DisconnectFlexibowl()
+        {
+            if (Flexibowl.Disconnect())
+            {
+                btnFlexibowlConnect.Enabled = true;
+                btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
+                btnFlexibowlDisconnect.Enabled = false;
+                btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
+                StatusFlexibowl = false;
+                Cursor = Cursors.Default;
+                Log("Disconnected from Flexibowl");
+            }
+            else
+            {
+                Cursor = Cursors.Default;
+                Log("Failed to disconnect from Flexibowl");
+            }
+        }
+
+        #endregion
+
+        // -----------------------------------------------------------------------------------
+        // ------------------------------------ MQTT -----------------------------------------
+        // -----------------------------------------------------------------------------------
+
+        #region MQTT
+
+        private async void ConnectMQTTClient()
+        {
+            string mqttClientName = Properties.Settings.Default.mqtt_client;
+            Task<bool> createClient = MqttClient.CreateClient(mqttClientName);
+
+            if (await createClient)
+            {
+                StatusMqttClient = true;
+                btnMqttConnect.Enabled = false;
+                btnMqttConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
+                btnMqttDisconnect.Enabled = true;
+                btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
+                Log($"MQTT client '{mqttClientName}' created");
+                SubscribeMqttTopics();
+            }
+            else
+            {
+                Log($"Failed to create '{mqttClientName}' MQTT client");
+                Cursor = Cursors.Default;
+            }
+        }
+
+        public async void SubscribeMqttTopics()
+        {
+
+            // Retreive topics from configuration file
+            string mqttClientName = Properties.Settings.Default.mqtt_client;
+            string topicScaraTarget = Properties.Settings.Default.mqtt_topic_scaraTarget;
+            string topicIdsStream = Properties.Settings.Default.mqtt_topic_idsStream;
+            string topicLuxonisStream = Properties.Settings.Default.mqtt_topic_luxonisStream;
+            string topicBaslerStream = Properties.Settings.Default.mqtt_topic_baslerStream;
+
+
+            // Subscribe to the necessary topics
+            bool scaraSubscriberd = await MqttClient.SubscribeClientToTopic(mqttClientName, topicScaraTarget);
+            bool idsSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicIdsStream);
+            bool baslerSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicBaslerStream);
+            bool luxonisSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicLuxonisStream);
+
+            // logging
+            if (scaraSubscriberd) Log($"{mqttClientName} subscribed to {topicScaraTarget}");
+            else Log($"Unable subscribing {mqttClientName} to {topicScaraTarget}");
+
+            if (idsSubscribed) Log($"{mqttClientName} subscribed to {topicIdsStream}");
+            else Log($"Unable subscribing {mqttClientName} to {topicIdsStream}");
+
+            if (baslerSubscribed) Log($"{mqttClientName} subscribed to {topicBaslerStream}");
+            else Log($"Unable subscribing {mqttClientName} to {topicBaslerStream}");
+
+            if (luxonisSubscribed) Log($"{mqttClientName} subscribed to {topicLuxonisStream}");
+            else Log($"Unable subscribing {mqttClientName} to {topicLuxonisStream}");
+
+            Cursor = Cursors.Default;
+        }
+
+        private async void DisconnectMqttClient(string clientName)
+        {
+            Task<bool> destroyClient = MqttClient.DestroyClient(clientName);
+            if (await destroyClient)
+            {
+                StatusMqttClient = false;
+                btnMqttConnect.Enabled = true;
+                btnMqttConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
+                btnMqttDisconnect.Enabled = false;
+                btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
+                Log($"MQTT client '{clientName}' destroyed");
+                Cursor = Cursors.Default;
+            }
+            else
+            {
+                Log($"Error destroying '{clientName}'");
+                Cursor = Cursors.Default;
+            }
+        }
+
+        #endregion
+
+        // -----------------------------------------------------------------------------------
+        // ------------------------------- CAMERA STREAM -------------------------------------
         // -----------------------------------------------------------------------------------
 
         private void cmbCameras_SelectedIndexChanged(object sender, EventArgs e)
@@ -582,7 +654,7 @@ namespace OptiSort
         }
 
         // -----------------------------------------------------------------------------------
-        // ---------------------------------------- LOG --------------------------------------
+        // ----------------------------------- OTHERS ----------------------------------------
         // -----------------------------------------------------------------------------------
 
         public void Log(string msg)
