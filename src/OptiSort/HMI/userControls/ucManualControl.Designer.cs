@@ -101,6 +101,7 @@
             this.btnFlexibowlShake.TabIndex = 4;
             this.btnFlexibowlShake.Text = "Shake";
             this.btnFlexibowlShake.UseVisualStyleBackColor = true;
+            this.btnFlexibowlShake.Click += new System.EventHandler(this.btnFlexibowlShake_Click);
             // 
             // btnFlexibowlFlip
             // 
@@ -113,6 +114,7 @@
             this.btnFlexibowlFlip.TabIndex = 3;
             this.btnFlexibowlFlip.Text = "Filp";
             this.btnFlexibowlFlip.UseVisualStyleBackColor = true;
+            this.btnFlexibowlFlip.Click += new System.EventHandler(this.btnFlexibowlFlip_Click);
             // 
             // btnFlexibowlBw
             // 
@@ -125,6 +127,7 @@
             this.btnFlexibowlBw.TabIndex = 2;
             this.btnFlexibowlBw.Text = "Backward";
             this.btnFlexibowlBw.UseVisualStyleBackColor = true;
+            this.btnFlexibowlBw.Click += new System.EventHandler(this.btnFlexibowlBw_Click);
             // 
             // lblFlexibowl
             // 
@@ -150,6 +153,7 @@
             this.btnFlexibowlFw.TabIndex = 1;
             this.btnFlexibowlFw.Text = "Forward";
             this.btnFlexibowlFw.UseVisualStyleBackColor = true;
+            this.btnFlexibowlFw.Click += new System.EventHandler(this.btnFlexibowlFw_Click);
             // 
             // ucManualControl
             // 

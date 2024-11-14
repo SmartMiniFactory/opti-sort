@@ -1,4 +1,5 @@
 ﻿using Ace.Core.Client;
+using FlexibowlLibrary;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,6 +32,59 @@ namespace OptiSort.userControls
             }
 
             _frmMain.Cobra600.OpenJobControl(this);
+        }
+
+        private void btnFlexibowlFw_Click(object sender, EventArgs e)
+        {
+            if (!_frmMain.StatusFlexibowl)
+            {
+                MessageBox.Show("You should connect to the Flexibowl first");
+                return;
+            }
+
+            Flexibowl.Move.Forward();
+            _frmMain.Log("Flexibowl: forward command sent");
+
+        }
+
+        private void btnFlexibowlBw_Click(object sender, EventArgs e)
+        {
+            if (!_frmMain.StatusFlexibowl)
+            {
+                MessageBox.Show("You should connect to the Flexibowl first");
+                return;
+            }
+
+            Flexibowl.Move.Forward();
+            _frmMain.Log("Flexibowl: (wrong) backward command sent");
+
+            // TODO: a backward method does not exist, should I set velocity? Negative numbers cannot be set...
+        }
+
+        private void btnFlexibowlFlip_Click(object sender, EventArgs e)
+        {
+            if (!_frmMain.StatusFlexibowl)
+            {
+                MessageBox.Show("You should connect to the Flexibowl first");
+                return;
+            }
+
+            Flexibowl.Move.Flip(1); // TODO: 1 or 2?
+            _frmMain.Log("Flexibowl: piston 1 activated (flip)");
+
+        }
+
+        private void btnFlexibowlShake_Click(object sender, EventArgs e)
+        {
+            if (!_frmMain.StatusFlexibowl)
+            {
+                MessageBox.Show("You should connect to the Flexibowl first");
+                return;
+            }
+
+            Flexibowl.Move.Shake();
+            _frmMain.Log("Flexibowl: shake command sent");
+
         }
     }
 }

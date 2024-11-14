@@ -524,13 +524,17 @@ namespace OptiSort
                 btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                 btnFlexibowlDisconnect.Enabled = true;
                 btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
+                Log("Flexibowl UDP client connected");
+
+                Flexibowl.Set.Servo(true);
+                Log("Flexibowl: turning servo on");
+
                 StatusFlexibowl = true;
-                Log("Connected to Flexibowl");
                 Cursor = Cursors.Default;
             }
             else
             {
-                Log("Failed to connect to Flexibowl");
+                Log("Failed to connect Flexibowl UDP client");
                 Cursor = Cursors.Default;
             }
         }
@@ -545,12 +549,12 @@ namespace OptiSort
                 btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                 StatusFlexibowl = false;
                 Cursor = Cursors.Default;
-                Log("Disconnected from Flexibowl");
+                Log("Flexibowl UDP client disconnected");
             }
             else
             {
                 Cursor = Cursors.Default;
-                Log("Failed to disconnect from Flexibowl");
+                Log("Failed to disconnect from Flexibowl UDP Client");
             }
         }
 
