@@ -55,10 +55,8 @@ namespace OptiSort.userControls
                 return;
             }
 
-            Flexibowl.Move.Forward();
-            _frmMain.Log("Flexibowl: (wrong) backward command sent");
-
-            // TODO: a backward method does not exist, should I set velocity? Negative numbers cannot be set...
+            Flexibowl.Move.Backward();
+            _frmMain.Log("Flexibowl: backward command sent");
         }
 
         private void btnFlexibowlFlip_Click(object sender, EventArgs e)

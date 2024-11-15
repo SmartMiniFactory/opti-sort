@@ -131,7 +131,7 @@ namespace OptiSort
             // Initialize the remoting subsystem
             RemotingUtil.InitializeRemotingSubsystem(true, 0);
 
-            
+
             // Display default user control
             ucManualControl ucManualControl = new ucManualControl(this);
             ucManualControl.Dock = DockStyle.Fill;
@@ -518,25 +518,23 @@ namespace OptiSort
 
         private void ConnectFlexibowl()
         {
-            if (Flexibowl.Connect())
+            Flexibowl.Connect();
+            try
             {
+                Flexibowl.Set.Servo(true);
                 btnFlexibowlConnect.Enabled = false;
                 btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                 btnFlexibowlDisconnect.Enabled = true;
                 btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
-                Log("Flexibowl UDP client connected");
-
-                Flexibowl.Set.Servo(true);
-                Log("Flexibowl: turning servo on");
-
                 StatusFlexibowl = true;
-                Cursor = Cursors.Default;
+                Log("Flexibowl connected and servo ON");
             }
-            else
+            catch (Exception ex)
             {
-                Log("Failed to connect Flexibowl UDP client");
-                Cursor = Cursors.Default;
+                Log($"Failed to connect Flexibowl UDP client");
+                MessageBox.Show($"{ex}");
             }
+            Cursor = Cursors.Default;
         }
 
         private void DisconnectFlexibowl()

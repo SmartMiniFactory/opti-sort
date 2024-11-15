@@ -152,7 +152,7 @@ namespace FlexibowlLibrary
         /// <param name="endpoint"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        public static string SendCommand(UdpClient client, IPEndPoint endpoint, string command) 
+        public static string SendCommand(string command) 
         {
             string receiveString = "";
             int byteSent = 0;
@@ -165,11 +165,12 @@ namespace FlexibowlLibrary
             sendBytes[sendBytes.Length - 1] = 13; // CR
 
             // Send the command to the server
-            byteSent = client.Send(sendBytes, sendBytes.Length);
+            byteSent = UdpClient.Send(sendBytes, sendBytes.Length);
             //Console.WriteLine("\nCommand sent");
 
             // Receive data from the server
-            Byte[] receivedData = client.Receive(ref endpoint);
+            IPEndPoint ep = Endpoint;
+            Byte[] receivedData = UdpClient.Receive(ref ep);
 
             receiveString = Encoding.ASCII.GetString(receivedData);
 
@@ -195,7 +196,7 @@ namespace FlexibowlLibrary
                 else
                     cmd = "servo=0";
 
-                string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                string rsp = SendCommand(cmd);
                 Console.WriteLine("\nFlexibowl: setting servo to " + status.ToString());
                 
                 while (isBusy(UdpClient, Endpoint))
@@ -217,7 +218,7 @@ namespace FlexibowlLibrary
                 else
                     cmd = "light=0";
 
-                string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                string rsp = SendCommand(cmd);
                 Console.WriteLine("\nFlexibowl: setting light to " + status.ToString());
                 
                 while (isBusy(UdpClient, Endpoint))
@@ -240,7 +241,7 @@ namespace FlexibowlLibrary
                     else
                     {
                         string cmd = "speed=" + speed.ToString();
-                        string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                        string rsp = SendCommand(cmd);
                         Console.WriteLine("\nFlexibowl: setting rotational speed");
                     }
                     System.Threading.Thread.Sleep(50);
@@ -258,7 +259,7 @@ namespace FlexibowlLibrary
                     else
                     {
                         string cmd = "acc=" + acc.ToString();
-                        string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                        string rsp = SendCommand(cmd);
                         Console.WriteLine("\nFlexibowl: setting rotational acceleration");
                     }
                     System.Threading.Thread.Sleep(50);
@@ -276,7 +277,7 @@ namespace FlexibowlLibrary
                     else
                     {
                         string cmd = "dec=" + dec.ToString();
-                        string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                        string rsp = SendCommand(cmd);
                         Console.WriteLine("\nFlexibowl: setting rotational deceleration");
                     }
                     System.Threading.Thread.Sleep(50);
@@ -290,7 +291,7 @@ namespace FlexibowlLibrary
                 public static void Angle(int angle)
                 {
                     string cmd = "angle=" + angle.ToString();
-                    string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                    string rsp = SendCommand(cmd);
                     Console.WriteLine("\nFlexibowl: setting rotational angle");
                     System.Threading.Thread.Sleep(50);
                 }
@@ -309,7 +310,7 @@ namespace FlexibowlLibrary
                     else
                     {
                         string cmd = "sh_speed=" + speed.ToString();
-                        string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                        string rsp = SendCommand(cmd);
                         Console.WriteLine("\nFlexibowl: setting shaking speed");
                         System.Threading.Thread.Sleep(50);
                     }
@@ -327,7 +328,7 @@ namespace FlexibowlLibrary
                     else
                     {
                         string cmd = "acc=" + acc.ToString();
-                        string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                        string rsp = SendCommand(cmd);
                         Console.WriteLine("\nFlexibowl: setting shaking acceleration");
                     }
                     System.Threading.Thread.Sleep(50);
@@ -345,7 +346,7 @@ namespace FlexibowlLibrary
                     else
                     {
                         string cmd = "dec=" + dec.ToString();
-                        string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                        string rsp = SendCommand(cmd);
                         Console.WriteLine("\nFlexibowl: setting shaking deceleration");
                     }
                     System.Threading.Thread.Sleep(50);
@@ -363,7 +364,7 @@ namespace FlexibowlLibrary
                     else
                     {
                         string cmd = "sh_count=" + cnt.ToString();
-                        string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                        string rsp = SendCommand(cmd);
                         Console.WriteLine("\nFlexibowl: setting shake count");
                     }
                     System.Threading.Thread.Sleep(50);
@@ -377,7 +378,7 @@ namespace FlexibowlLibrary
                 public static void Angle(int angle)
                 {
                     string cmd = "sh_angle=" + angle.ToString();
-                    string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                    string rsp = SendCommand(cmd);
                     Console.WriteLine("\nFlexibowl: setting shake angle");
                     System.Threading.Thread.Sleep(50);
                 }
@@ -396,7 +397,7 @@ namespace FlexibowlLibrary
                     else
                     {
                         string cmd = "Blow_time=" + blw_time.ToString();
-                        string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                        string rsp = SendCommand(cmd);
                         Console.WriteLine("\nFlexibowl: setting blow time");
                     }
                     System.Threading.Thread.Sleep(50);
@@ -416,7 +417,7 @@ namespace FlexibowlLibrary
                     else
                     {
                         string cmd = "fl_count=" + cnt.ToString();
-                        string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                        string rsp = SendCommand(cmd);
                         Console.WriteLine("\nFlexibowl: setting flip count");
                     }
                     System.Threading.Thread.Sleep(50);
@@ -434,7 +435,7 @@ namespace FlexibowlLibrary
                     else
                     {
                         string cmd = "fl_delayt=" + delay.ToString();
-                        string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                        string rsp = SendCommand(cmd);
                         Console.WriteLine("\nFlexibowl: setting flip delay");
                     }
                     System.Threading.Thread.Sleep(50);
@@ -450,7 +451,7 @@ namespace FlexibowlLibrary
             public static void Forward() 
             {
                 string cmd = "forward=1";
-                string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                string rsp = SendCommand(cmd);
                 Console.WriteLine("\nFlexibowl: moving forward");
                 while (isBusy(UdpClient, Endpoint))
                 {
@@ -460,12 +461,26 @@ namespace FlexibowlLibrary
 
 
             /// <summary>
+            /// Moves the feeder backward with the current parameters
+            /// </summary>
+            public static void Backward()
+            {
+                string cmd = "backward=1";
+                string rsp = SendCommand(cmd);
+                Console.WriteLine("\nFlexibowl: moving backward");
+                while (isBusy(UdpClient, Endpoint))
+                {
+                    System.Threading.Thread.Sleep(50);
+                }
+            }
+
+            /// <summary>
             /// Shakes the feeder with the current parameters
             /// </summary>
             public static void Shake()
             {
                 string cmd = "shake=1";
-                string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                string rsp = SendCommand(cmd);
                 Console.WriteLine("\nFlexibowl: shaking");
                 while (isBusy(UdpClient, Endpoint))
                 {
@@ -484,13 +499,13 @@ namespace FlexibowlLibrary
                 if (piston == 1)
                 {
                     cmd = "flip=1";
-                    string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                    string rsp = SendCommand(cmd);
                     Console.WriteLine("\nFlexibowl: flipping piston 1");
                 }
                 else if (piston == 2)
                 {
                     cmd = "flip2=1";
-                    string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                    string rsp = SendCommand(cmd);
                     Console.WriteLine("\nFlexibowl: flipping piston 2");
                 }
                 else
@@ -511,7 +526,7 @@ namespace FlexibowlLibrary
             public static void Blow() 
             {
                 string cmd = "Blow=1";
-                string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                string rsp = SendCommand(cmd);
                 Console.WriteLine("Flexibowl: blowing");
                 while (isBusy(UdpClient, Endpoint))
                 {
@@ -526,7 +541,7 @@ namespace FlexibowlLibrary
             public static void FlipBlow() 
             {
                 string cmd = "flip_Blow=1";
-                string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                string rsp = SendCommand(cmd);
                 Console.WriteLine("\nFlexibowl: flipping piston 1 and blowing");
                 while (isBusy(UdpClient, Endpoint))
                 {
@@ -541,7 +556,7 @@ namespace FlexibowlLibrary
             public static void ForwardFlipBlow() 
             {
                 string cmd = "fwd_fl_bw=1";
-                string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                string rsp = SendCommand(cmd);
                 Console.WriteLine("\nFlexibowl: moving forward, flipping piston 1 and 2, blowing");
                 while (isBusy(UdpClient, Endpoint))
                 {
@@ -556,7 +571,7 @@ namespace FlexibowlLibrary
             public static void ForwardBlow() 
             {
                 string cmd = "fwd_blw=1";
-                string rsp = SendCommand(UdpClient, Endpoint, cmd);
+                string rsp = SendCommand(cmd);
                 Console.WriteLine("\nFlexibowl: moving forward and blowing");
                 while (isBusy(UdpClient, Endpoint))
                 {

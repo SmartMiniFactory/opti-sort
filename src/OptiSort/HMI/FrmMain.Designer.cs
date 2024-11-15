@@ -126,7 +126,7 @@
             // btnConfig
             // 
             this.btnConfig.BackgroundImage = global::OptiSort.Properties.Resources.configDisabled_2x2_pptx;
-            this.btnConfig.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.btnConfig.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnConfig.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnConfig.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnConfig.Location = new System.Drawing.Point(1772, 3);
@@ -141,7 +141,7 @@
             // btnManual
             // 
             this.btnManual.BackgroundImage = global::OptiSort.Properties.Resources.manualEnabled_2x2_pptx;
-            this.btnManual.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.btnManual.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnManual.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnManual.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnManual.Location = new System.Drawing.Point(1646, 3);
@@ -156,7 +156,7 @@
             // btnAuto
             // 
             this.btnAuto.BackgroundImage = global::OptiSort.Properties.Resources.autoDisabled_2x2_pptx;
-            this.btnAuto.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.btnAuto.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnAuto.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnAuto.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAuto.Location = new System.Drawing.Point(1520, 3);
