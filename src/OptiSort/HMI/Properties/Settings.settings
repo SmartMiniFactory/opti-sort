@@ -35,9 +35,6 @@
     <Setting Name="flexibowl_IP" Type="System.String" Scope="User">
       <Value Profile="(Default)">10.90.90.20</Value>
     </Setting>
-    <Setting Name="flexibowl_port" Type="System.String" Scope="User">
-      <Value Profile="(Default)">7775</Value>
-    </Setting>
     <Setting Name="scara_port" Type="System.String" Scope="User">
       <Value Profile="(Default)">43434</Value>
     </Setting>

@@ -159,6 +159,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Settings.cs" />
     <Compile Include="systems\Cobra600.cs" />
     <Compile Include="systems\Flexibowl.cs" />
     <Compile Include="systems\MQTT.cs" />

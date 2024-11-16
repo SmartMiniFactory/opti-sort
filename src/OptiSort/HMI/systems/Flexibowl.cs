@@ -15,14 +15,12 @@ namespace FlexibowlLibrary
         public static UdpClient UdpClient {  get; private set; }
         public static IPEndPoint Endpoint { get; private set; }
         public IPAddress IP { get; set; }
-        public int Port { get; set; }
 
 
-        public Flexibowl(string flexibowlIp, string flexibowlPort)
+        public Flexibowl(string flexibowlIp)
         {
-            UdpClient = new UdpClient();
+            UdpClient = new UdpClient(7777);
             IP = IPAddress.Parse(flexibowlIp);
-            Port = int.Parse(flexibowlPort);
         }
 
 
@@ -33,7 +31,7 @@ namespace FlexibowlLibrary
         /// <returns></returns>
         public bool Connect()
         {
-            Endpoint = new IPEndPoint(IP, Port);
+            Endpoint = new IPEndPoint(IP, 7775);
 
             try
             {

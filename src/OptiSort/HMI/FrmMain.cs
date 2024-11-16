@@ -124,8 +124,7 @@ namespace OptiSort
 
             // Instance flexibowl class
             string flexibowlIP = Properties.Settings.Default.flexibowl_IP;
-            string flexibowlPort = Properties.Settings.Default.flexibowl_port;
-            Flexibowl = new Flexibowl(flexibowlIP, flexibowlPort);
+            Flexibowl = new Flexibowl(flexibowlIP);
 
 
             // Initialize the remoting subsystem
@@ -412,7 +411,7 @@ namespace OptiSort
 
         // TODO: is possible to use async?
 
-        private void ConnectScara()
+        public void ConnectScara()
         {
             string controllerName = Properties.Settings.Default.scara_controllerName;
             string robotName = Properties.Settings.Default.scara_robotName;
@@ -442,7 +441,7 @@ namespace OptiSort
             }
         }
 
-        private void DisconnectScara()
+        public void DisconnectScara()
         {
             pnlRobotView.Controls.Remove(Cobra600.SimulationContainerControl);
             pnlRobotView.Controls.Clear();
@@ -516,7 +515,7 @@ namespace OptiSort
 
         #region flexibowl
 
-        private void ConnectFlexibowl()
+        public void ConnectFlexibowl()
         {
             Flexibowl.Connect();
             try
@@ -537,7 +536,7 @@ namespace OptiSort
             Cursor = Cursors.Default;
         }
 
-        private void DisconnectFlexibowl()
+        public void DisconnectFlexibowl()
         {
             if (Flexibowl.Disconnect())
             {
@@ -564,7 +563,7 @@ namespace OptiSort
 
         #region MQTT
 
-        private async void ConnectMQTTClient()
+        public async void ConnectMQTTClient()
         {
             string mqttClientName = Properties.Settings.Default.mqtt_client;
             Task<bool> createClient = MqttClient.CreateClient(mqttClientName);
@@ -619,7 +618,7 @@ namespace OptiSort
             Cursor = Cursors.Default;
         }
 
-        private async void DisconnectMqttClient(string clientName)
+        public async void DisconnectMqttClient(string clientName)
         {
             Task<bool> destroyClient = MqttClient.DestroyClient(clientName);
             if (await destroyClient)

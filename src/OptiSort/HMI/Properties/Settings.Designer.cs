@@ -157,18 +157,6 @@ namespace OptiSort.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("7775")]
-        public string flexibowl_port {
-            get {
-                return ((string)(this["flexibowl_port"]));
-            }
-            set {
-                this["flexibowl_port"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("43434")]
         public string scara_port {
             get {

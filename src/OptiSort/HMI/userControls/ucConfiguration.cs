@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace OptiSort.userControls
 {
@@ -20,13 +21,15 @@ namespace OptiSort.userControls
 
         public ucConfiguration(frmMain frmMain)
         {
+            // NOTE: access the settings menu: right click on HMI > properties > settings tab
             InitializeComponent();
-            LoadConfigToDgv();
+            LoadConfigToDgv(); 
             _frmMain = frmMain;
-
-            // NOTE: access the configuration menu: right click on HMI > properties > settings tab
         }
 
+        /// <summary>
+        /// Initial load of the dgv
+        /// </summary>
         private void LoadConfigToDgv()
         {
             // create columns
@@ -37,10 +40,6 @@ namespace OptiSort.userControls
             dgvConfig.Columns["SettingName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             dgvConfig.Columns["SettingValue"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             dgvConfig.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvConfig.AutoResizeColumns();
-
-            // clear rows
-            dgvConfig.Rows.Clear();
 
             // create a list storing all configuration parameters
             var settingsList = new List<KeyValuePair<string, object>>();
@@ -59,12 +58,24 @@ namespace OptiSort.userControls
             {
                 dgvConfig.Rows.Add(setting.Key, setting.Value?.ToString());
             }
+
+            dgvConfig.Columns[0].Width = dgvConfig.Width / 2;
+            dgvConfig.Columns[1].Width = dgvConfig.Width / 2;
         }
 
+        
+        
         private void dataGridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
+            // cancel edit if someone tries to modify settings name column
+            if (e.ColumnIndex == 0)
+            {
+                e.Cancel = true;
+                return;
+            }
             _oldValue = dgvConfig[e.ColumnIndex, e.RowIndex].Value.ToString(); // Store the old value before editing starts
         }
+
 
         private void dgvConfig_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
@@ -79,37 +90,93 @@ namespace OptiSort.userControls
                 {
                     Properties.Settings.Default[settingName] = newValue;
                     Properties.Settings.Default.Save();
+                    _frmMain.Log($"Setting {settingName} updated");
                 }
 
-                HandleMqttConnections(settingName, newValue);  
+                // Reconnect services based on which setting changed
+                // MQTT
+                if (settingName.IndexOf("mqtt", StringComparison.OrdinalIgnoreCase) >= 0 && _frmMain.StatusMqttClient)
+                {
+                    string clientID = _frmMain.MqttClient.GetConnectedClientName();
+
+                    if (settingName.IndexOf("client", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        Cursor = Cursors.WaitCursor;
+                        _frmMain.DisconnectMqttClient(clientID);
+                        Cursor = Cursors.WaitCursor;
+                        _frmMain.ConnectMQTTClient();
+                    }
+
+                    else if (settingName.IndexOf("topic", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        _frmMain.MqttClient.UnsubscribeClientFromTopic(clientID, _oldValue);
+                        _frmMain.Log($"Topic {_oldValue} unsubscribed");
+
+                        _frmMain.MqttClient.SubscribeClientToTopic(clientID, newValue);
+                        _frmMain.Log($"Topic {newValue} subscribed");
+                    }
+                }
+
+                // SCARA
+                else if (settingName.IndexOf("scara", StringComparison.OrdinalIgnoreCase) >= 0 && _frmMain.StatusScara)
+                {
+                    _frmMain.Log("Reconnection to cobra in progress...");
+                    Cursor = Cursors.WaitCursor;
+                    _frmMain.DisconnectScara();
+                    Cursor = Cursors.WaitCursor;
+                    _frmMain.ConnectScara();
+                }
+
+                // FLEXIBOWL
+                else if (settingName.IndexOf("flexibowl", StringComparison.OrdinalIgnoreCase) >= 0 && _frmMain.StatusFlexibowl)
+                {
+                    _frmMain.Log("Reconnection to flexibowl in progress...");
+                    Cursor = Cursors.WaitCursor;
+                    _frmMain.DisconnectFlexibowl();
+                    Cursor = Cursors.WaitCursor;
+                    _frmMain.ConnectFlexibowl();
+                }
             }
         }
 
-        private async void HandleMqttConnections(string name, string newValue)
+        
+
+        /// <summary>
+        /// load predetermined values in case of messing up with settings during testing
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnLoadDefaults_Click(object sender, EventArgs e)
         {
-            if (name.IndexOf("mqtt", StringComparison.OrdinalIgnoreCase) >= 0) // case-insensitive check if property name contains "mqtt"
+            DialogResult result = MessageBox.Show("Are you sure you want to load default settings? You will lose all table contents", "Load defaults", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
             {
-                string clientID = _frmMain.MqttClient.GetConnectedClientName();
+                // FLEXIBOWL
+                Properties.Settings.Default.flexibowl_IP = "10.90.90.20";
                 
-                if (name.IndexOf("client", StringComparison.OrdinalIgnoreCase) >= 0) 
-                {
-                    await _frmMain.MqttClient.DestroyClient(clientID);
-                    _frmMain.Log($"Previous MqttClient {clientID} destroyed");
+                // MQTT
+                Properties.Settings.Default.mqtt_broker = "localhost";
+                Properties.Settings.Default.mqtt_client = "OptiSort";
+                Properties.Settings.Default.mqtt_port = "1883";
+                Properties.Settings.Default.mqtt_topic_baslerStream = "optisort/basler/stream";
+                Properties.Settings.Default.mqtt_topic_idsStream = "optisort/ids/stream";
+                Properties.Settings.Default.mqtt_topic_luxonisStream = "optisort/luxonis/stream";
+                Properties.Settings.Default.mqtt_topic_scaraTarget = "optisort/scara/target";
 
-                    await _frmMain.MqttClient.CreateClient(newValue);
-                    _frmMain.Log($"New MqttClient {newValue} created");
+                // SCARA
+                Properties.Settings.Default.scara_controllerIP = "10.90.90.60";
+                Properties.Settings.Default.scara_controllerName = "OptiSort";
+                Properties.Settings.Default.scara_endEffectorName = "Suction Cup";
+                Properties.Settings.Default.scara_port = "43434";
+                Properties.Settings.Default.scara_robotName = "R1 Cobra600";
+                Properties.Settings.Default.scara_serverIP = "10.90.90.91";
 
-                    _frmMain.SubscribeMqttTopics();
-                }
-                
-                else if (name.IndexOf("topic", StringComparison.OrdinalIgnoreCase)>=0) 
-                {
-                    await _frmMain.MqttClient.UnsubscribeClientFromTopic(clientID, _oldValue);
-                    _frmMain.Log($"Topic {_oldValue} unsubscribed");
+                Properties.Settings.Default.Save();
+                _frmMain.Log("Settings restored to development defaults");
 
-                    await _frmMain.MqttClient.SubscribeClientToTopic(clientID, newValue);
-                    _frmMain.Log($"Topic {newValue} subscribed");
-                }
+                dgvConfig.Rows.Clear();
+                dgvConfig.Columns.Clear();
+                LoadConfigToDgv();
             }
         }
     }
