@@ -43,7 +43,7 @@ namespace OptiSort.userControls
             }
 
             Flexibowl.Move.Forward();
-            _frmMain.Log("Flexibowl: forward command sent");
+            _frmMain.Log("Flexibowl: forward command sent", false);
 
         }
 
@@ -56,7 +56,7 @@ namespace OptiSort.userControls
             }
 
             Flexibowl.Move.Backward();
-            _frmMain.Log("Flexibowl: backward command sent");
+            _frmMain.Log("Flexibowl: backward command sent", false);
         }
 
         private void btnFlexibowlFlip_Click(object sender, EventArgs e)
@@ -68,7 +68,7 @@ namespace OptiSort.userControls
             }
 
             Flexibowl.Move.Flip(1); // TODO: 1 or 2?
-            _frmMain.Log("Flexibowl: piston 1 activated (flip)");
+            _frmMain.Log("Flexibowl: piston 1 activated (flip)", false);
 
         }
 
@@ -81,7 +81,7 @@ namespace OptiSort.userControls
             }
 
             Flexibowl.Move.Shake();
-            _frmMain.Log("Flexibowl: shake command sent");
+            _frmMain.Log("Flexibowl: shake command sent", false);
 
         }
     }

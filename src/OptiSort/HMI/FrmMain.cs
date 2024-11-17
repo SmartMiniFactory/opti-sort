@@ -12,6 +12,7 @@ using FlexibowlLibrary;
 using Ace.UIBuilder.Client.Controls.Tools.WindowsForms;
 using static System.Net.Mime.MediaTypeNames;
 using Ace.Adept.Server.Motion;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Header;
 
 namespace OptiSort
 {
@@ -160,145 +161,19 @@ namespace OptiSort
             // attach events
             this.PropertyChanged += RefreshStatusBar; // trigger statusbar buttons refresh
             MqttClient.MessageReceived += _ucCameraStream.OnMessageReceived; // enable MQTT messages to trigger the user control
+            lstLog.DrawItem += LstLog_DrawItem;
+
+
+            // log box setup
+            lstLog.ItemHeight = 15; // adjusting interline between log rows
 
             // Initialize robot panel view
             PaintIndicationRobot3DView();
 
-            Log("OptiSort ready for operation: please connect systems (Scara robot, flexibowl, MQTT service) to begin");
-
+            Log("OptiSort ready for operation: please connect systems (Scara robot, flexibowl, MQTT service) to begin", false);
+            
         }
 
-        // -----------------------------------------------------------------------------------
-        // ---------------------------------- STATUS BAR -------------------------------------
-        // -----------------------------------------------------------------------------------
-
-        #region connection buttons (statusbar)
-
-        private void RefreshStatusBar(object sender, PropertyChangedEventArgs e)
-        {
-            // Check which property changed and trigger corresponding logic
-
-            if (e.PropertyName == nameof(StatusScara))
-            {
-                if (StatusScara == true)
-                {
-                    lblScaraStatusValue.Text = "Online";
-                    lblScaraStatusValue.ForeColor = Color.Green;
-                    btnScaraConnect.Enabled = false;
-                    btnScaraDisconnect.Enabled = true;
-                }
-                else
-                {
-                    lblScaraStatusValue.Text = "Offline";
-                    lblScaraStatusValue.ForeColor = SystemColors.Desktop;
-                    btnScaraConnect.Enabled = true;
-                    btnScaraDisconnect.Enabled = false;
-                }
-            }
-
-            if (e.PropertyName == nameof(StatusFlexibowl))
-            {
-                if (StatusFlexibowl == true)
-                {
-                    lblFlexibowlStatusValue.Text = "Online";
-                    lblFlexibowlStatusValue.ForeColor = Color.Green;
-                    btnFlexibowlConnect.Enabled = false;
-                    btnFlexibowlDisconnect.Enabled = true;
-                }
-                else
-                {
-                    lblFlexibowlStatusValue.Text = "Offline";
-                    lblFlexibowlStatusValue.ForeColor = SystemColors.Desktop;
-                    btnFlexibowlConnect.Enabled = true;
-                    btnFlexibowlDisconnect.Enabled = false;
-                }
-            }
-
-            if (e.PropertyName == nameof(StatusMqttClient))
-            {
-                if (StatusMqttClient == true)
-                {
-                    lblMqttStatusValue.Text = "Online";
-                    lblMqttStatusValue.ForeColor = Color.Green;
-                    btnMqttConnect.Enabled = false;
-                    btnMqttDisconnect.Enabled = true;
-                }
-                else
-                {
-                    lblMqttStatusValue.Text = "Offline";
-                    lblMqttStatusValue.ForeColor = SystemColors.Desktop;
-                    btnMqttConnect.Enabled = true;
-                    btnMqttDisconnect.Enabled = false;
-                }
-            }
-        }
-
-        private void btnScaraConnect_Click(object sender, EventArgs e)
-        {
-            // check if ACE is running
-            Process[] ProcessList = Process.GetProcessesByName("Ace");
-            if (ProcessList.Length != 1)
-            {
-                MessageBox.Show("ACE is not running: please open the robot server");
-                return;
-            }
-            Cursor = Cursors.WaitCursor;
-            Log("Trying to connect to robot");
-            ConnectScara();
-        }
-
-        private void btnScaraDisconnect_Click(object sender, EventArgs e)
-        {
-            Cursor = Cursors.WaitCursor;
-            Log("Trying to disconnect from robot");
-            DisconnectScara();
-        }
-
-        private void btnFlexibowlConnect_Click(object sender, EventArgs e)
-        {
-            Cursor = Cursors.WaitCursor;
-            Log("Trying to connect to flexibowl");
-            ConnectFlexibowl();
-        }
-
-        private void btnFlexibowlDisconnect_Click(object sender, EventArgs e)
-        {
-            Cursor = Cursors.WaitCursor;
-            Log("Trying to disconnect to flexibowl");
-            DisconnectFlexibowl();
-        }
-
-        private void btnMqttConnect_Click(object sender, EventArgs e)
-        {
-            Cursor = Cursors.WaitCursor;
-            Log("Trying to create new MQTT client");
-            ConnectMQTTClient();
-        }
-
-        private void btnMqttDisconnect_Click(object sender, EventArgs e)
-        {
-            Cursor = Cursors.WaitCursor;
-            Log("Trying to destroy MQTT client");
-            DisconnectMqttClient(Properties.Settings.Default.mqtt_client);
-        }
-
-        private void btnEmulateScara_Click(object sender, EventArgs e)
-        {
-            if (StatusScaraEmulation)
-            {
-                btnEmulateScara.BackgroundImage = Properties.Resources.robot_2x2_pptx;
-                StatusScaraEmulation = false;
-                Log("Scara emulation mode disabled");
-            }
-            else
-            {
-                btnEmulateScara.BackgroundImage = Properties.Resources.emulation_2x2_pptx;
-                StatusScaraEmulation = true;
-                Log("Scara emulation mode enabled");
-            }
-        }
-
-        #endregion
 
         // -----------------------------------------------------------------------------------
         // -------------------------------- FORM NAVIGATION ----------------------------------
@@ -404,7 +279,133 @@ namespace OptiSort
         #endregion
 
         // -----------------------------------------------------------------------------------
-        // ------------------------------------ SCARA ----------------------------------------
+        // ---------------------------------- STATUS BAR -------------------------------------
+        // -----------------------------------------------------------------------------------
+
+        #region connection buttons (statusbar)
+
+        private void RefreshStatusBar(object sender, PropertyChangedEventArgs e)
+        {
+            // Check which property changed and trigger corresponding logic
+
+            if (e.PropertyName == nameof(StatusScara))
+            {
+                if (StatusScara == true)
+                {
+                    lblScaraStatusValue.Text = "Online";
+                    lblScaraStatusValue.ForeColor = Color.Green;
+                    btnScaraConnect.Enabled = false;
+                    btnScaraDisconnect.Enabled = true;
+                }
+                else
+                {
+                    lblScaraStatusValue.Text = "Offline";
+                    lblScaraStatusValue.ForeColor = SystemColors.Desktop;
+                    btnScaraConnect.Enabled = true;
+                    btnScaraDisconnect.Enabled = false;
+                }
+            }
+
+            if (e.PropertyName == nameof(StatusFlexibowl))
+            {
+                if (StatusFlexibowl == true)
+                {
+                    lblFlexibowlStatusValue.Text = "Online";
+                    lblFlexibowlStatusValue.ForeColor = Color.Green;
+                    btnFlexibowlConnect.Enabled = false;
+                    btnFlexibowlDisconnect.Enabled = true;
+                }
+                else
+                {
+                    lblFlexibowlStatusValue.Text = "Offline";
+                    lblFlexibowlStatusValue.ForeColor = SystemColors.Desktop;
+                    btnFlexibowlConnect.Enabled = true;
+                    btnFlexibowlDisconnect.Enabled = false;
+                }
+            }
+
+            if (e.PropertyName == nameof(StatusMqttClient))
+            {
+                if (StatusMqttClient == true)
+                {
+                    lblMqttStatusValue.Text = "Online";
+                    lblMqttStatusValue.ForeColor = Color.Green;
+                    btnMqttConnect.Enabled = false;
+                    btnMqttDisconnect.Enabled = true;
+                }
+                else
+                {
+                    lblMqttStatusValue.Text = "Offline";
+                    lblMqttStatusValue.ForeColor = SystemColors.Desktop;
+                    btnMqttConnect.Enabled = true;
+                    btnMqttDisconnect.Enabled = false;
+                }
+            }
+        }
+
+        private void btnScaraConnect_Click(object sender, EventArgs e)
+        {
+            // check if ACE is running
+            Process[] ProcessList = Process.GetProcessesByName("Ace");
+            if (ProcessList.Length != 1)
+            {
+                MessageBox.Show("ACE is not running: please open the robot server");
+                return;
+            }
+            Log("Trying to connect to robot", false);
+            ConnectScara();
+        }
+
+        private void btnScaraDisconnect_Click(object sender, EventArgs e)
+        {
+            Log("Trying to disconnect from robot", false);
+            DisconnectScara();
+        }
+
+        private void btnFlexibowlConnect_Click(object sender, EventArgs e)
+        {
+            Log("Trying to connect to flexibowl", false);
+            ConnectFlexibowl();
+        }
+
+        private void btnFlexibowlDisconnect_Click(object sender, EventArgs e)
+        {
+            Log("Trying to disconnect to flexibowl", false);
+            DisconnectFlexibowl();
+        }
+
+        private void btnMqttConnect_Click(object sender, EventArgs e)
+        {
+            Log("Trying to create new MQTT client", false);
+            ConnectMQTTClient();
+        }
+
+        private void btnMqttDisconnect_Click(object sender, EventArgs e)
+        {
+            Log("Trying to destroy MQTT client", false);
+            DisconnectMqttClient(Properties.Settings.Default.mqtt_client);
+        }
+
+        private void btnEmulateScara_Click(object sender, EventArgs e)
+        {
+            if (StatusScaraEmulation)
+            {
+                btnEmulateScara.BackgroundImage = Properties.Resources.robot_2x2_pptx;
+                StatusScaraEmulation = false;
+                Log("Scara emulation mode disabled", false);
+            }
+            else
+            {
+                btnEmulateScara.BackgroundImage = Properties.Resources.emulation_2x2_pptx;
+                StatusScaraEmulation = true;
+                Log("Scara emulation mode enabled", false);
+            }
+        }
+
+        #endregion
+
+        // -----------------------------------------------------------------------------------
+        // ---------------------------------- CONNECTIONS ------------------------------------
         // -----------------------------------------------------------------------------------
 
         #region ACE scara
@@ -413,6 +414,8 @@ namespace OptiSort
 
         public void ConnectScara()
         {
+            Cursor = Cursors.WaitCursor;
+
             string controllerName = Properties.Settings.Default.scara_controllerName;
             string robotName = Properties.Settings.Default.scara_robotName;
             string endEffectorName = Properties.Settings.Default.scara_endEffectorName;
@@ -422,7 +425,7 @@ namespace OptiSort
 
             if (Cobra600.Connect(StatusScaraEmulation, controllerName, robotName, endEffectorName))
             {
-                Log("Robot successfully connected");
+                Log("Robot successfully connected", false);
                 btnScaraConnect.Enabled = false;
                 btnScaraConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                 btnScaraDisconnect.Enabled = true;
@@ -432,37 +435,39 @@ namespace OptiSort
                 pnlRobotView.Controls.Clear();
                 pnlRobotView.Controls.Add(Cobra600.SimulationContainerControl); // add robot rendering to panel
                 pnlRobotView.Refresh();
-                Cursor = Cursors.Default;
             }
             else
             {
-                Log("Failed to connect to robot");
-                Cursor = Cursors.Default;
+                Log("Failed to connect to robot", true);
             }
+
+            Cursor = Cursors.Default;
         }
 
         public void DisconnectScara()
         {
+            Cursor = Cursors.WaitCursor;
+
             pnlRobotView.Controls.Remove(Cobra600.SimulationContainerControl);
             pnlRobotView.Controls.Clear();
 
             if (Cobra600.Disconnect())
             {
-                Log("Robot succesfully disconnected");
+                Log("Robot succesfully disconnected", false);
                 btnScaraConnect.Enabled = true;
                 btnScaraConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                 btnScaraDisconnect.Enabled = false;
                 btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                 btnEmulateScara.Enabled = true;
                 StatusScara = false;
-                Cursor = Cursors.Default;
                 PaintIndicationRobot3DView();
             }
             else
             {
-                Log("Failed to disconnect from Cobra");
-                Cursor = Cursors.Default;
+                Log("Failed to disconnect from Cobra", true);
             }
+
+            Cursor = Cursors.Default;
         }
 
         private void PaintIndicationRobot3DView()
@@ -509,14 +514,11 @@ namespace OptiSort
 
         #endregion
 
-        // -----------------------------------------------------------------------------------
-        // ---------------------------------- FLEXIBOWL --------------------------------------
-        // -----------------------------------------------------------------------------------
-
         #region flexibowl
 
         public void ConnectFlexibowl()
         {
+            Cursor = Cursors.WaitCursor;
             Flexibowl.Connect();
             try
             {
@@ -526,11 +528,11 @@ namespace OptiSort
                 btnFlexibowlDisconnect.Enabled = true;
                 btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
                 StatusFlexibowl = true;
-                Log("Flexibowl connected and servo ON");
+                Log("Flexibowl connected and servo ON", false);
             }
             catch (Exception ex)
             {
-                Log($"Failed to connect Flexibowl UDP client");
+                Log($"Failed to connect Flexibowl UDP client", true);
                 MessageBox.Show($"{ex}");
             }
             Cursor = Cursors.Default;
@@ -538,6 +540,7 @@ namespace OptiSort
 
         public void DisconnectFlexibowl()
         {
+            Cursor = Cursors.WaitCursor;
             if (Flexibowl.Disconnect())
             {
                 btnFlexibowlConnect.Enabled = true;
@@ -545,21 +548,16 @@ namespace OptiSort
                 btnFlexibowlDisconnect.Enabled = false;
                 btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                 StatusFlexibowl = false;
-                Cursor = Cursors.Default;
-                Log("Flexibowl UDP client disconnected");
+                Log("Flexibowl UDP client disconnected", false);
             }
             else
             {
-                Cursor = Cursors.Default;
-                Log("Failed to disconnect from Flexibowl UDP Client");
+                Log("Failed to disconnect from Flexibowl UDP Client", true);
             }
+            Cursor = Cursors.Default;
         }
 
         #endregion
-
-        // -----------------------------------------------------------------------------------
-        // ------------------------------------ MQTT -----------------------------------------
-        // -----------------------------------------------------------------------------------
 
         #region MQTT
 
@@ -575,47 +573,45 @@ namespace OptiSort
                 btnMqttConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                 btnMqttDisconnect.Enabled = true;
                 btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
-                Log($"MQTT client '{mqttClientName}' created");
-                SubscribeMqttTopics();
+                Log($"MQTT client '{mqttClientName}' created", false);
+
+                List<string> topics = new List<string>
+                {
+                    // Retreive topics from configuration file
+                    Properties.Settings.Default.mqtt_topic_scaraTarget,
+                    Properties.Settings.Default.mqtt_topic_idsStream,
+                    Properties.Settings.Default.mqtt_topic_luxonisStream,
+                    Properties.Settings.Default.mqtt_topic_baslerStream
+                };
+
+                foreach (string topic in topics)
+                {
+                    SubscribeMqttTopic(mqttClientName, topic);
+                }
+
             }
             else
             {
-                Log($"Failed to create '{mqttClientName}' MQTT client");
-                Cursor = Cursors.Default;
+                Log($"Failed to create '{mqttClientName}' MQTT client", true);
             }
         }
 
-        public async void SubscribeMqttTopics()
+        public async void SubscribeMqttTopic(string client, string topic)
         {
+            bool subscribed = await MqttClient.SubscribeClientToTopic(client, topic);
+            if (subscribed) 
+                Log($"{client} subscribed to {topic}", false);
+            else 
+                Log($"Unable subscribing {client} to {topic}", true);
+        }
 
-            // Retreive topics from configuration file
-            string mqttClientName = Properties.Settings.Default.mqtt_client;
-            string topicScaraTarget = Properties.Settings.Default.mqtt_topic_scaraTarget;
-            string topicIdsStream = Properties.Settings.Default.mqtt_topic_idsStream;
-            string topicLuxonisStream = Properties.Settings.Default.mqtt_topic_luxonisStream;
-            string topicBaslerStream = Properties.Settings.Default.mqtt_topic_baslerStream;
-
-
-            // Subscribe to the necessary topics
-            bool scaraSubscriberd = await MqttClient.SubscribeClientToTopic(mqttClientName, topicScaraTarget);
-            bool idsSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicIdsStream);
-            bool baslerSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicBaslerStream);
-            bool luxonisSubscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topicLuxonisStream);
-
-            // logging
-            if (scaraSubscriberd) Log($"{mqttClientName} subscribed to {topicScaraTarget}");
-            else Log($"Unable subscribing {mqttClientName} to {topicScaraTarget}");
-
-            if (idsSubscribed) Log($"{mqttClientName} subscribed to {topicIdsStream}");
-            else Log($"Unable subscribing {mqttClientName} to {topicIdsStream}");
-
-            if (baslerSubscribed) Log($"{mqttClientName} subscribed to {topicBaslerStream}");
-            else Log($"Unable subscribing {mqttClientName} to {topicBaslerStream}");
-
-            if (luxonisSubscribed) Log($"{mqttClientName} subscribed to {topicLuxonisStream}");
-            else Log($"Unable subscribing {mqttClientName} to {topicLuxonisStream}");
-
-            Cursor = Cursors.Default;
+        public async void UnsubscribeMqttTopic(string client, string topic)
+        {
+            bool unsubscribed = await MqttClient.UnsubscribeClientFromTopic(client, topic);
+            if (unsubscribed) 
+                Log($"{client} unsubscribed to {topic}", false);
+            else 
+                Log($"Unable unsubscribing {client} to {topic}", true);
         }
 
         public async void DisconnectMqttClient(string clientName)
@@ -628,13 +624,11 @@ namespace OptiSort
                 btnMqttConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                 btnMqttDisconnect.Enabled = false;
                 btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
-                Log($"MQTT client '{clientName}' destroyed");
-                Cursor = Cursors.Default;
+                Log($"MQTT client '{clientName}' destroyed", false);
             }
             else
             {
-                Log($"Error destroying '{clientName}'");
-                Cursor = Cursors.Default;
+                Log($"Error destroying '{clientName}'", true);
             }
         }
 
@@ -650,7 +644,7 @@ namespace OptiSort
             {
                 var newTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
                 _ucCameraStream.StreamTopic = newTopic;
-                Log($"Streaming topic updated to '{newTopic}'");
+                Log($"Streaming topic updated to '{newTopic}'", false);
             }
         }
 
@@ -658,11 +652,43 @@ namespace OptiSort
         // ----------------------------------- OTHERS ----------------------------------------
         // -----------------------------------------------------------------------------------
 
-        public void Log(string msg)
+        //public void Log(string msg)
+        //{
+        //    msg = DateTime.Now.ToString() + " - " + msg;
+        //    lstLog.Items.Add(msg);
+        //    lstLog.TopIndex = lstLog.Items.Count - 1; // showing last row
+        //}
+
+        private class LogEntry
         {
-            msg = DateTime.Now.ToString() + " - " + msg;
-            lstLog.Items.Add(msg);
-            lstLog.TopIndex = lstLog.Items.Count - 1; // showing last row
+            public string Message { get; set; }
+            public bool IsError { get; set; }
+            public override string ToString() => Message; // Fallback for ListBox's default behavior
         }
+
+        public void Log(string msg, bool isError)
+        {
+            msg = DateTime.Now.ToString() + " - " + msg; // Prepend timestamp to the message
+            lstLog.Items.Add(new LogEntry { Message = msg, IsError = isError }); // Store the error flag alongside the message
+            lstLog.TopIndex = lstLog.Items.Count - 1; // Ensure the last row is visible
+        }
+
+        private void LstLog_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0) return;
+
+            // Retrieve the LogEntry object
+            var logEntry = lstLog.Items[e.Index] as LogEntry;
+            if (logEntry == null) return;
+
+            // Set the text color based on IsError
+            Brush textBrush = logEntry.IsError ? Brushes.Red : Brushes.Black;
+
+            // Draw the background and text
+            e.DrawBackground();
+            e.Graphics.DrawString(logEntry.Message, e.Font, textBrush, e.Bounds);
+            e.DrawFocusRectangle();
+        }
+
     }
 }

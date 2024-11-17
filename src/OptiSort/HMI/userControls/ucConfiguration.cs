@@ -90,7 +90,7 @@ namespace OptiSort.userControls
                 {
                     Properties.Settings.Default[settingName] = newValue;
                     Properties.Settings.Default.Save();
-                    _frmMain.Log($"Setting {settingName} updated");
+                    _frmMain.Log($"Setting {settingName} updated", false);
                 }
 
                 // Reconnect services based on which setting changed
@@ -101,39 +101,30 @@ namespace OptiSort.userControls
 
                     if (settingName.IndexOf("client", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        Cursor = Cursors.WaitCursor;
                         _frmMain.DisconnectMqttClient(clientID);
-                        Cursor = Cursors.WaitCursor;
-                        _frmMain.ConnectMQTTClient();
+                        _frmMain.ConnectMQTTClient();   
                     }
 
                     else if (settingName.IndexOf("topic", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        _frmMain.MqttClient.UnsubscribeClientFromTopic(clientID, _oldValue);
-                        _frmMain.Log($"Topic {_oldValue} unsubscribed");
-
-                        _frmMain.MqttClient.SubscribeClientToTopic(clientID, newValue);
-                        _frmMain.Log($"Topic {newValue} subscribed");
+                        _frmMain.UnsubscribeMqttTopic(clientID, _oldValue);
+                        _frmMain.SubscribeMqttTopic(clientID, newValue);   
                     }
                 }
 
                 // SCARA
                 else if (settingName.IndexOf("scara", StringComparison.OrdinalIgnoreCase) >= 0 && _frmMain.StatusScara)
                 {
-                    _frmMain.Log("Reconnection to cobra in progress...");
-                    Cursor = Cursors.WaitCursor;
+                    _frmMain.Log("Reconnection to cobra in progress...", false);
                     _frmMain.DisconnectScara();
-                    Cursor = Cursors.WaitCursor;
                     _frmMain.ConnectScara();
                 }
 
                 // FLEXIBOWL
                 else if (settingName.IndexOf("flexibowl", StringComparison.OrdinalIgnoreCase) >= 0 && _frmMain.StatusFlexibowl)
                 {
-                    _frmMain.Log("Reconnection to flexibowl in progress...");
-                    Cursor = Cursors.WaitCursor;
+                    _frmMain.Log("Reconnection to flexibowl in progress...", false);
                     _frmMain.DisconnectFlexibowl();
-                    Cursor = Cursors.WaitCursor;
                     _frmMain.ConnectFlexibowl();
                 }
             }
@@ -151,6 +142,24 @@ namespace OptiSort.userControls
             DialogResult result = MessageBox.Show("Are you sure you want to load default settings? You will lose all table contents", "Load defaults", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
+                dgvConfig.Rows.Clear();
+                dgvConfig.Columns.Clear();
+
+                // storing to reconnect after change
+                bool wasMqttConnected = _frmMain.StatusMqttClient;
+                bool wasFlexibowlConnected = _frmMain.StatusFlexibowl;
+                bool wasScaraConnected = _frmMain.StatusScara;
+
+                // Disconnect services before changing 
+                if (_frmMain.StatusMqttClient)
+                    _frmMain.DisconnectMqttClient(Properties.Settings.Default.mqtt_client);
+
+                if (_frmMain.StatusFlexibowl)
+                    _frmMain.DisconnectFlexibowl();
+
+                if(_frmMain.StatusScara)
+                    _frmMain.DisconnectScara();
+
                 // FLEXIBOWL
                 Properties.Settings.Default.flexibowl_IP = "10.90.90.20";
                 
@@ -172,11 +181,19 @@ namespace OptiSort.userControls
                 Properties.Settings.Default.scara_serverIP = "10.90.90.91";
 
                 Properties.Settings.Default.Save();
-                _frmMain.Log("Settings restored to development defaults");
 
-                dgvConfig.Rows.Clear();
-                dgvConfig.Columns.Clear();
+                // Reconnect to services after changing 
+                if (wasMqttConnected)
+                    _frmMain.ConnectMQTTClient();
+
+                if (wasFlexibowlConnected)
+                    _frmMain.ConnectFlexibowl();
+
+                if (wasScaraConnected)
+                    _frmMain.ConnectScara();
+
                 LoadConfigToDgv();
+                _frmMain.Log("Settings restored to development defaults", false);
             }
         }
     }

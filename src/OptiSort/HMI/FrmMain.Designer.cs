@@ -64,6 +64,7 @@
             // 
             this.lstLog.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lstLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstLog.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.lstLog.FormattingEnabled = true;
             this.lstLog.ItemHeight = 20;
             this.lstLog.Location = new System.Drawing.Point(3, 3);
