@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace OptiSort
 {
@@ -68,7 +69,7 @@ namespace OptiSort
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating client '{clientId}': {ex.Message}");
+                MessageBox.Show($"Error creating client '{clientId}': {ex.Message}");
                 return false;
             }
         }
@@ -157,7 +158,7 @@ namespace OptiSort
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error destroying client '{clientId}': {ex.Message}");
+                MessageBox.Show($"Error destroying client '{clientId}': {ex.Message}");
                 return false;
             }
         }

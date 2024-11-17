@@ -563,6 +563,15 @@ namespace OptiSort
 
         public async void ConnectMQTTClient()
         {
+            Cursor = Cursors.WaitCursor;
+
+            if (StatusMqttClient)
+            {
+                Log("MQTT client already connected, cannot connect another", true);
+                Cursor = Cursors.Default;
+                return;
+            }
+
             string mqttClientName = Properties.Settings.Default.mqtt_client;
             Task<bool> createClient = MqttClient.CreateClient(mqttClientName);
 
@@ -594,6 +603,30 @@ namespace OptiSort
             {
                 Log($"Failed to create '{mqttClientName}' MQTT client", true);
             }
+            Cursor = Cursors.Default;
+        }
+
+        public async Task<bool> DisconnectMqttClient(string clientName)
+        {
+            Cursor = Cursors.WaitCursor;
+            Task<bool> destroyClient = MqttClient.DestroyClient(clientName);
+            if (await destroyClient)
+            {
+                StatusMqttClient = false;
+                btnMqttConnect.Enabled = true;
+                btnMqttConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
+                btnMqttDisconnect.Enabled = false;
+                btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
+                Cursor = Cursors.Default;
+                Log($"MQTT client '{clientName}' destroyed", false);
+                return true;
+            }
+            else
+            {
+                Cursor = Cursors.Default;
+                Log($"Error destroying '{clientName}'", true);
+                return false;
+            }
         }
 
         public async void SubscribeMqttTopic(string client, string topic)
@@ -612,24 +645,6 @@ namespace OptiSort
                 Log($"{client} unsubscribed to {topic}", false);
             else 
                 Log($"Unable unsubscribing {client} to {topic}", true);
-        }
-
-        public async void DisconnectMqttClient(string clientName)
-        {
-            Task<bool> destroyClient = MqttClient.DestroyClient(clientName);
-            if (await destroyClient)
-            {
-                StatusMqttClient = false;
-                btnMqttConnect.Enabled = true;
-                btnMqttConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
-                btnMqttDisconnect.Enabled = false;
-                btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
-                Log($"MQTT client '{clientName}' destroyed", false);
-            }
-            else
-            {
-                Log($"Error destroying '{clientName}'", true);
-            }
         }
 
         #endregion
@@ -651,13 +666,6 @@ namespace OptiSort
         // -----------------------------------------------------------------------------------
         // ----------------------------------- OTHERS ----------------------------------------
         // -----------------------------------------------------------------------------------
-
-        //public void Log(string msg)
-        //{
-        //    msg = DateTime.Now.ToString() + " - " + msg;
-        //    lstLog.Items.Add(msg);
-        //    lstLog.TopIndex = lstLog.Items.Count - 1; // showing last row
-        //}
 
         private class LogEntry
         {

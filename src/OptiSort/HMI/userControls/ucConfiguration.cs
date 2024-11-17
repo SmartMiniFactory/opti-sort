@@ -18,6 +18,7 @@ namespace OptiSort.userControls
 
         private frmMain _frmMain;
         private string _oldValue; // storing value that are about to be changed
+        private bool _mqttClientDisconnected;
 
         public ucConfiguration(frmMain frmMain)
         {
@@ -101,8 +102,8 @@ namespace OptiSort.userControls
 
                     if (settingName.IndexOf("client", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        _frmMain.DisconnectMqttClient(clientID);
-                        _frmMain.ConnectMQTTClient();   
+                        DisconnectAsync(clientID);
+                        ConnectAsync();
                     }
 
                     else if (settingName.IndexOf("topic", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -130,8 +131,6 @@ namespace OptiSort.userControls
             }
         }
 
-        
-
         /// <summary>
         /// load predetermined values in case of messing up with settings during testing
         /// </summary>
@@ -152,7 +151,7 @@ namespace OptiSort.userControls
 
                 // Disconnect services before changing 
                 if (_frmMain.StatusMqttClient)
-                    _frmMain.DisconnectMqttClient(Properties.Settings.Default.mqtt_client);
+                    DisconnectAsync(Properties.Settings.Default.mqtt_client);
 
                 if (_frmMain.StatusFlexibowl)
                     _frmMain.DisconnectFlexibowl();
@@ -183,17 +182,51 @@ namespace OptiSort.userControls
                 Properties.Settings.Default.Save();
 
                 // Reconnect to services after changing 
-                if (wasMqttConnected)
-                    _frmMain.ConnectMQTTClient();
-
                 if (wasFlexibowlConnected)
                     _frmMain.ConnectFlexibowl();
 
                 if (wasScaraConnected)
                     _frmMain.ConnectScara();
 
+                if (wasMqttConnected)
+                    ConnectAsync();
+                
+
                 LoadConfigToDgv();
                 _frmMain.Log("Settings restored to development defaults", false);
+            }
+        }
+
+
+        public async Task DisconnectAsync(string client)
+        {
+            try
+            {
+                _mqttClientDisconnected = false; 
+                await _frmMain.DisconnectMqttClient(client);
+                _mqttClientDisconnected = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during disconnection: {ex.Message}");
+            }
+        }
+
+        public async Task ConnectAsync()
+        {
+            // Wait until disconnect is completed
+            while (!_mqttClientDisconnected)
+            {
+                await Task.Delay(10); // Check periodically (10ms)
+            }
+
+            try
+            {
+                _frmMain.ConnectMQTTClient();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during connection: {ex.Message}");
             }
         }
     }
