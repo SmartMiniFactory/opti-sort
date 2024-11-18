@@ -19,7 +19,7 @@ namespace FlexibowlLibrary
 
         public Flexibowl(string flexibowlIp)
         {
-            UdpClient = new UdpClient(7777);
+            UdpClient = new UdpClient(5001);
             IP = IPAddress.Parse(flexibowlIp);
         }
 
@@ -31,7 +31,7 @@ namespace FlexibowlLibrary
         /// <returns></returns>
         public bool Connect()
         {
-            Endpoint = new IPEndPoint(IP, 7775);
+            Endpoint = new IPEndPoint(IP, 5001);
 
             try
             {
