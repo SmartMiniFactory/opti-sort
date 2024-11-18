@@ -27,6 +27,7 @@ namespace OptiSort
     {
 
         public string ServerIP {  get; set; }
+        public string RobotIP { get; set; }
 
         public IAceServer Server { get; private set; }
         public IAceClient Client { get; private set; }
@@ -57,7 +58,8 @@ namespace OptiSort
             try
             {
                 // Connect to ACE
-                Server = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, ServerIP, _remotingPort);
+                //Server = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, ServerIP, _remotingPort);
+                Server = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, "127.0.0.1", _remotingPort);
                 Client = new AceClient(Server);
                 Client.InitializePlugins(null);
 
@@ -80,7 +82,8 @@ namespace OptiSort
                     Controller = availableControllers.FirstOrDefault() as IAdeptController; // connect to first available
                 }
 
-                Controller.Address = ServerIP;
+                //Controller.Address = ServerIP;
+                Controller.Address = RobotIP;
 
                 // Get the available robots
                 IList<IAceObject> availableRobots = Server.Root.Filter(new ObjectTypeFilter(typeof(IAdeptRobot)), true);
