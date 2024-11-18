@@ -119,9 +119,8 @@ namespace OptiSort
             MqttClient = new MQTT(mqttBroker, mqttPort);
 
             // Instance cobra class
-            string serverIP = "localhost"; // because the initial status of the emulation mode is enabled
             string remotingPort = Properties.Settings.Default.scara_port;
-            Cobra600 = new Cobra600("ace", serverIP, remotingPort);
+            Cobra600 = new Cobra600("ace", remotingPort);
 
             // Instance flexibowl class
             string flexibowlIP = Properties.Settings.Default.flexibowl_IP;
@@ -170,7 +169,7 @@ namespace OptiSort
             // Initialize robot panel view
             PaintIndicationRobot3DView();
 
-            Log("OptiSort ready for operation: please connect systems (Scara robot, flexibowl, MQTT service) to begin", false);
+            Log("OptiSort ready for operation: please connect systems (Scara robot, flexibowl, MQTT service) to begin", false, false);
             
         }
 
@@ -352,38 +351,38 @@ namespace OptiSort
                 MessageBox.Show("ACE is not running: please open the robot server");
                 return;
             }
-            Log("Trying to connect to robot", false);
+            Log("Trying to connect to robot", false, false);
             ConnectScara();
         }
 
         private void btnScaraDisconnect_Click(object sender, EventArgs e)
         {
-            Log("Trying to disconnect from robot", false);
+            Log("Trying to disconnect from robot", false, false);
             DisconnectScara();
         }
 
         private void btnFlexibowlConnect_Click(object sender, EventArgs e)
         {
-            Log("Trying to connect to flexibowl", false);
+            Log("Trying to connect to flexibowl", false, false);
             ConnectFlexibowl();
         }
 
         private void btnFlexibowlDisconnect_Click(object sender, EventArgs e)
         {
-            Log("Trying to disconnect to flexibowl", false);
+            Log("Trying to disconnect to flexibowl", false, false);
             DisconnectFlexibowl();
         }
 
         private void btnMqttConnect_Click(object sender, EventArgs e)
         {
-            Log("Trying to create new MQTT client", false);
+            Log("Trying to create new MQTT client", false, false);
             ConnectMQTTClient();
         }
 
         private void btnMqttDisconnect_Click(object sender, EventArgs e)
         {
-            Log("Trying to destroy MQTT client", false);
-            DisconnectMqttClient(Properties.Settings.Default.mqtt_client);
+            Log("Trying to destroy MQTT client", false, false);
+            _ = DisconnectMqttClient(Properties.Settings.Default.mqtt_client);
         }
 
         private void btnEmulateScara_Click(object sender, EventArgs e)
@@ -392,13 +391,13 @@ namespace OptiSort
             {
                 btnEmulateScara.BackgroundImage = Properties.Resources.robot_2x2_pptx;
                 StatusScaraEmulation = false;
-                Log("Scara emulation mode disabled", false);
+                Log("Scara emulation mode disabled", false, false);
             }
             else
             {
                 btnEmulateScara.BackgroundImage = Properties.Resources.emulation_2x2_pptx;
                 StatusScaraEmulation = true;
-                Log("Scara emulation mode enabled", false);
+                Log("Scara emulation mode enabled", false, false);
             }
         }
 
@@ -422,12 +421,11 @@ namespace OptiSort
             
 
             if (!StatusScaraEmulation)
-                Cobra600.ServerIP = Properties.Settings.Default.scara_serverIP;
                 Cobra600.RobotIP = Properties.Settings.Default.scara_controllerIP;
 
             if (Cobra600.Connect(StatusScaraEmulation, controllerName, robotName, endEffectorName))
             {
-                Log("Robot successfully connected", false);
+                Log("Robot successfully connected", false, true);
                 btnScaraConnect.Enabled = false;
                 btnScaraConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                 btnScaraDisconnect.Enabled = true;
@@ -440,7 +438,7 @@ namespace OptiSort
             }
             else
             {
-                Log("Failed to connect to robot", true);
+                Log("Failed to connect to robot", true, false);
             }
 
             Cursor = Cursors.Default;
@@ -455,7 +453,7 @@ namespace OptiSort
 
             if (Cobra600.Disconnect())
             {
-                Log("Robot succesfully disconnected", false);
+                Log("Robot succesfully disconnected", false, true);
                 btnScaraConnect.Enabled = true;
                 btnScaraConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                 btnScaraDisconnect.Enabled = false;
@@ -466,7 +464,7 @@ namespace OptiSort
             }
             else
             {
-                Log("Failed to disconnect from Cobra", true);
+                Log("Failed to disconnect from Cobra", true, false);
             }
 
             Cursor = Cursors.Default;
@@ -530,11 +528,11 @@ namespace OptiSort
                 btnFlexibowlDisconnect.Enabled = true;
                 btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
                 StatusFlexibowl = true;
-                Log("Flexibowl connected and servo ON", false);
+                Log("Flexibowl connected and servo ON", false, true);
             }
             catch (Exception ex)
             {
-                Log($"Failed to connect Flexibowl UDP client", true);
+                Log($"Failed to connect Flexibowl UDP client", true, false);
                 MessageBox.Show($"{ex}");
             }
             Cursor = Cursors.Default;
@@ -550,11 +548,11 @@ namespace OptiSort
                 btnFlexibowlDisconnect.Enabled = false;
                 btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                 StatusFlexibowl = false;
-                Log("Flexibowl UDP client disconnected", false);
+                Log("Flexibowl UDP client disconnected", false, true);
             }
             else
             {
-                Log("Failed to disconnect from Flexibowl UDP Client", true);
+                Log("Failed to disconnect from Flexibowl UDP Client", true, false);
             }
             Cursor = Cursors.Default;
         }
@@ -569,7 +567,7 @@ namespace OptiSort
 
             if (StatusMqttClient)
             {
-                Log("MQTT client already connected, cannot connect another", true);
+                Log("MQTT client already connected, cannot connect another", true, false);
                 Cursor = Cursors.Default;
                 return;
             }
@@ -584,7 +582,7 @@ namespace OptiSort
                 btnMqttConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                 btnMqttDisconnect.Enabled = true;
                 btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
-                Log($"MQTT client '{mqttClientName}' created", false);
+                Log($"MQTT client '{mqttClientName}' created", false, true);
 
                 List<string> topics = new List<string>
                 {
@@ -603,7 +601,7 @@ namespace OptiSort
             }
             else
             {
-                Log($"Failed to create '{mqttClientName}' MQTT client", true);
+                Log($"Failed to create '{mqttClientName}' MQTT client", true, false);
             }
             Cursor = Cursors.Default;
         }
@@ -620,13 +618,13 @@ namespace OptiSort
                 btnMqttDisconnect.Enabled = false;
                 btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                 Cursor = Cursors.Default;
-                Log($"MQTT client '{clientName}' destroyed", false);
+                Log($"MQTT client '{clientName}' destroyed", false, true);
                 return true;
             }
             else
             {
                 Cursor = Cursors.Default;
-                Log($"Error destroying '{clientName}'", true);
+                Log($"Error destroying '{clientName}'", true, false);
                 return false;
             }
         }
@@ -635,18 +633,18 @@ namespace OptiSort
         {
             bool subscribed = await MqttClient.SubscribeClientToTopic(client, topic);
             if (subscribed) 
-                Log($"{client} subscribed to {topic}", false);
+                Log($"{client} subscribed to {topic}", false, true);
             else 
-                Log($"Unable subscribing {client} to {topic}", true);
+                Log($"Unable subscribing {client} to {topic}", true, false);
         }
 
         public async void UnsubscribeMqttTopic(string client, string topic)
         {
             bool unsubscribed = await MqttClient.UnsubscribeClientFromTopic(client, topic);
             if (unsubscribed) 
-                Log($"{client} unsubscribed to {topic}", false);
+                Log($"{client} unsubscribed to {topic}", false, true);
             else 
-                Log($"Unable unsubscribing {client} to {topic}", true);
+                Log($"Unable unsubscribing {client} to {topic}", true, false);
         }
 
         #endregion
@@ -661,7 +659,7 @@ namespace OptiSort
             {
                 var newTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
                 _ucCameraStream.StreamTopic = newTopic;
-                Log($"Streaming topic updated to '{newTopic}'", false);
+                Log($"Streaming topic updated to '{newTopic}'", false, false);
             }
         }
 
@@ -673,13 +671,14 @@ namespace OptiSort
         {
             public string Message { get; set; }
             public bool IsError { get; set; }
+            public bool IsSuccess { get; set; }
             public override string ToString() => Message; // Fallback for ListBox's default behavior
         }
 
-        public void Log(string msg, bool isError)
+        public void Log(string msg, bool isError, bool isSuccess)
         {
             msg = DateTime.Now.ToString() + " - " + msg; // Prepend timestamp to the message
-            lstLog.Items.Add(new LogEntry { Message = msg, IsError = isError }); // Store the error flag alongside the message
+            lstLog.Items.Add(new LogEntry { Message = msg, IsError = isError , IsSuccess = isSuccess}); // Store the error flag alongside the message
             lstLog.TopIndex = lstLog.Items.Count - 1; // Ensure the last row is visible
         }
 
@@ -691,8 +690,8 @@ namespace OptiSort
             var logEntry = lstLog.Items[e.Index] as LogEntry;
             if (logEntry == null) return;
 
-            // Set the text color based on IsError
-            Brush textBrush = logEntry.IsError ? Brushes.Red : Brushes.Black;
+            // Set the text color based on IsError or isSuccess
+            Brush textBrush = logEntry.IsError ? Brushes.Red : logEntry.IsSuccess ? Brushes.Green : Brushes.Black;
 
             // Draw the background and text
             e.DrawBackground();

@@ -91,7 +91,7 @@ namespace OptiSort.userControls
                 {
                     Properties.Settings.Default[settingName] = newValue;
                     Properties.Settings.Default.Save();
-                    _frmMain.Log($"Setting {settingName} updated", false);
+                    _frmMain.Log($"Setting {settingName} updated", false, true);
                 }
 
                 // Reconnect services based on which setting changed
@@ -102,8 +102,8 @@ namespace OptiSort.userControls
 
                     if (settingName.IndexOf("client", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        DisconnectAsync(clientID);
-                        ConnectAsync();
+                        _ = DisconnectAsync(clientID);
+                        _ = ConnectAsync();
                     }
 
                     else if (settingName.IndexOf("topic", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -116,7 +116,7 @@ namespace OptiSort.userControls
                 // SCARA
                 else if (settingName.IndexOf("scara", StringComparison.OrdinalIgnoreCase) >= 0 && _frmMain.StatusScara)
                 {
-                    _frmMain.Log("Reconnection to cobra in progress...", false);
+                    _frmMain.Log("Reconnection to cobra in progress...", false, false);
                     _frmMain.DisconnectScara();
                     _frmMain.ConnectScara();
                 }
@@ -124,7 +124,7 @@ namespace OptiSort.userControls
                 // FLEXIBOWL
                 else if (settingName.IndexOf("flexibowl", StringComparison.OrdinalIgnoreCase) >= 0 && _frmMain.StatusFlexibowl)
                 {
-                    _frmMain.Log("Reconnection to flexibowl in progress...", false);
+                    _frmMain.Log("Reconnection to flexibowl in progress...", false, false);
                     _frmMain.DisconnectFlexibowl();
                     _frmMain.ConnectFlexibowl();
                 }
@@ -151,7 +151,7 @@ namespace OptiSort.userControls
 
                 // Disconnect services before changing 
                 if (_frmMain.StatusMqttClient)
-                    DisconnectAsync(Properties.Settings.Default.mqtt_client);
+                    _ = DisconnectAsync(Properties.Settings.Default.mqtt_client);
 
                 if (_frmMain.StatusFlexibowl)
                     _frmMain.DisconnectFlexibowl();
@@ -177,7 +177,6 @@ namespace OptiSort.userControls
                 Properties.Settings.Default.scara_endEffectorName = "Suction Cup";
                 Properties.Settings.Default.scara_port = "43434";
                 Properties.Settings.Default.scara_robotName = "R1 Cobra600";
-                Properties.Settings.Default.scara_serverIP = "10.90.90.91";
 
                 Properties.Settings.Default.Save();
 
@@ -189,11 +188,11 @@ namespace OptiSort.userControls
                     _frmMain.ConnectScara();
 
                 if (wasMqttConnected)
-                    ConnectAsync();
+                    _ = ConnectAsync();
                 
 
                 LoadConfigToDgv();
-                _frmMain.Log("Settings restored to development defaults", false);
+                _frmMain.Log("Settings restored to development defaults", false, true);
             }
         }
 

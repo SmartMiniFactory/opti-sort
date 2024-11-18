@@ -2,9 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="OptiSort.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="scara_serverIP" Type="System.String" Scope="User">
-      <Value Profile="(Default)">127.0.0.1</Value>
-    </Setting>
     <Setting Name="scara_controllerIP" Type="System.String" Scope="User">
       <Value Profile="(Default)">10.90.90.60</Value>
     </Setting>

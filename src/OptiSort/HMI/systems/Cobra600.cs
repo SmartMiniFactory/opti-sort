@@ -25,10 +25,7 @@ namespace OptiSort
 {
     public class Cobra600
     {
-
-        public string ServerIP {  get; set; }
         public string RobotIP { get; set; }
-
         public IAceServer Server { get; private set; }
         public IAceClient Client { get; private set; }
         public IAdeptController Controller { get; private set; }
@@ -41,14 +38,13 @@ namespace OptiSort
         private string _remotingName;
         private int _remotingPort;
 
-        private RemoteAceObjectEventHandler generalEventHandler;
-        private RemoteApplicationEventHandler applicationEventHandler;
-        private ControlPanelManager pendantManager;
+        //private RemoteAceObjectEventHandler generalEventHandler;
+        //private RemoteApplicationEventHandler applicationEventHandler;
+        //private ControlPanelManager pendantManager;
 
-        public Cobra600(string remotingName, string serverAddress, string remotingPort)
+        public Cobra600(string remotingName, string remotingPort)
         {
             _remotingName = remotingName;
-            ServerIP = serverAddress;
             _remotingPort = int.Parse(remotingPort);
         }
 
@@ -58,7 +54,6 @@ namespace OptiSort
             try
             {
                 // Connect to ACE
-                //Server = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, ServerIP, _remotingPort);
                 Server = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, "127.0.0.1", _remotingPort);
                 Client = new AceClient(Server);
                 Client.InitializePlugins(null);
@@ -82,7 +77,6 @@ namespace OptiSort
                     Controller = availableControllers.FirstOrDefault() as IAdeptController; // connect to first available
                 }
 
-                //Controller.Address = ServerIP;
                 Controller.Address = RobotIP;
 
                 // Get the available robots
