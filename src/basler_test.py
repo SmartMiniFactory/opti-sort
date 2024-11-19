@@ -6,6 +6,8 @@ import base64
 import time
 import numpy as np
 from pypylon import pylon
+import json
+import datetime
 
 ####################################################### VARIABLES #######################################################
 

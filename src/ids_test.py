@@ -7,6 +7,7 @@ import time
 import numpy as np
 from pyueye import ueye
 import json
+import datetime
 
 ####################################################### VARIABLES #######################################################
 
