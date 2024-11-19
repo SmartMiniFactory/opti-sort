@@ -37,7 +37,9 @@ namespace OptiSort
             InitializeComponent();
 
             _frmMain = ucOptiSort;
-            
+
+            _thReachLocation = new Thread(MoveToLoc);
+
         }
 
         private void ucScara_Load(object sender, EventArgs e)
@@ -116,78 +118,72 @@ namespace OptiSort
 
         // ---------------------------------------------------------------------------
 
-
-        private void btnJog_Click(object sender, EventArgs e)
-        {
-            //_cobra600.pendantManager.LaunchControlForm(this, _client, _robot);
-        }
-
-
         //// TODO: REVIEW
-        //private void MoveToLoc()
-        //{
-        //    int busy = 0;
-        //    while (_stop == false)
-        //    {
-        //        try
-        //        {
-        //            if (_targetQueueList.Count > 0 && _robotIsMoving == false)
-        //            {
-        //                _robotIsMoving = true;
-        //                if (busy == 0)
-        //                {
-        //                    // Get the first element of the queue
-        //                    Transform3D _locTarget = _targetQueueList[0];
+        private void MoveToLoc()
+        {
+            int busy = 0;
+            while (_stop == false)
+            {
+                try
+                {
+                    if (_targetQueueList.Count > 0 && _robotIsMoving == false)
+                    {
+                        _robotIsMoving = true;
+                        if (busy == 0)
+                        {
+                            // Get the first element of the queue
+                            Transform3D _locTarget = _targetQueueList[0];
 
-        //                    // TODO: anzichè fare questo, evidenziare la row sulla dgv
-        //                    //textBoxX.Text = _locTarget.DX.ToString();
-        //                    //textBoxY.Text = _locTarget.DY.ToString();
-        //                    //textBoxZ.Text = _locTarget.DZ.ToString();
-        //                    //textBoxRoll.Text = _locTarget.Roll.ToString();
-        //                    //textBoxPitch.Text = _locTarget.Pitch.ToString();
-        //                    //textBoxYaw.Text = _locTarget.Yaw.ToString();
+                            // TODO: anzichè fare questo, evidenziare la row sulla dgv
+                            //textBoxX.Text = _locTarget.DX.ToString();
+                            //textBoxY.Text = _locTarget.DY.ToString();
+                            //textBoxZ.Text = _locTarget.DZ.ToString();
+                            //textBoxRoll.Text = _locTarget.Roll.ToString();
+                            //textBoxPitch.Text = _locTarget.Pitch.ToString();
+                            //textBoxYaw.Text = _locTarget.Yaw.ToString();
 
-        //                    // TODO: can't log like this because of a cross-thread conflict
-        //                    //_frmMain.Log("Moving to target: " + _locTarget);
+                            // TODO: can't log like this because of a cross-thread conflict
+                            //_frmMain.Log("Moving to target: " + _locTarget);
 
 
-        //                    Cobra.Motion.Approach(_server, _robot, _locTarget, 20);
-        //                    Cobra.Motion.CartesianMove(_server, _robot, _locTarget, true);
-        //                    Cobra.Motion.Approach(_server, _robot, _locTarget, 20);
+                                                           
+                            Cobra600.Motion.Approach(_frmMain.Cobra600.Server, _frmMain.Cobra600.Robot, _locTarget, 20);
+                            Cobra.Motion.CartesianMove(_frmMain.Cobra600.Server, _frmMain.Cobra600.Robot, _locTarget, true);
+                            Cobra.Motion.Approach(_frmMain.Cobra600.Server, _frmMain.Cobra600.Robot, _locTarget, 20);
 
-        //                    Thread.Sleep(1000);
+                            Thread.Sleep(1000);
 
-        //                    lock (_targetQueueList)
-        //                    {
-        //                        try
-        //                        {
-        //                            _targetQueueList.RemoveAt(0);
-        //                        }
-        //                        catch (Exception ex)
-        //                        {
-        //                            MessageBox.Show($"Error removing an entry: " + ex.ToString());
-        //                        }
-        //                    }
+                            lock (_targetQueueList)
+                            {
+                                try
+                                {
+                                    _targetQueueList.RemoveAt(0);
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show($"Error removing an entry: " + ex.ToString());
+                                }
+                            }
 
-        //                    // TODO: can't log like this because of a cross-thread conflict
-        //                    //_frmMain.Log("Target reached");
-        //                    busy++;
-        //                }
-        //                _robotIsMoving = false;
-        //            }
-        //            if (busy > 20)
-        //                busy = 0;
-        //            else if (busy > 0)
-        //                busy++;
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            if (ex is System.ObjectDisposedException)
-        //                break;
-        //        }
-        //        Thread.Sleep(10);
-        //    }
-        //}
+                            // TODO: can't log like this because of a cross-thread conflict
+                            //_frmMain.Log("Target reached");
+                            busy++;
+                        }
+                        _robotIsMoving = false;
+                    }
+                    if (busy > 20)
+                        busy = 0;
+                    else if (busy > 0)
+                        busy++;
+                }
+                catch (Exception ex)
+                {
+                    if (ex is System.ObjectDisposedException)
+                        break;
+                }
+                Thread.Sleep(10);
+            }
+        }
 
     }
 }

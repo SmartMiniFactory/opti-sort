@@ -192,11 +192,11 @@ namespace OptiSort
         private void btnAuto_Click(object sender, System.EventArgs e)
         {
 
-            if (!StatusScara || !StatusMqttClient || !StatusFlexibowl)
-            {
-                MessageBox.Show("You should connect all the entities (Scara robot, Flexibowl, MQTT Client) to start the automatic process");
-                return;
-            }
+            //if (!StatusScara || !StatusMqttClient || !StatusFlexibowl)
+            //{
+            //    MessageBox.Show("You should connect all the entities (Scara robot, Flexibowl, MQTT Client) to start the automatic process");
+            //    return;
+            //}
 
             CleanPnlCurrentUc();
 
@@ -435,6 +435,9 @@ namespace OptiSort
                 pnlRobotView.Controls.Clear();
                 pnlRobotView.Controls.Add(Cobra600.SimulationContainerControl); // add robot rendering to panel
                 pnlRobotView.Refresh();
+
+                MessageBox.Show("Scara connected, enabling power. Please press the physical button on the front panel!");
+
             }
             else
             {

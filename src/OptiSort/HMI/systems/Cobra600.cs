@@ -77,7 +77,10 @@ namespace OptiSort
                     Controller = availableControllers.FirstOrDefault() as IAdeptController; // connect to first available
                 }
 
-                Controller.Address = RobotIP;
+                if (emulation)
+                    Controller.Address = "127.0.0.1";
+                else
+                    Controller.Address = RobotIP;
 
                 // Get the available robots
                 IList<IAceObject> availableRobots = Server.Root.Filter(new ObjectTypeFilter(typeof(IAdeptRobot)), true);
@@ -194,6 +197,115 @@ namespace OptiSort
             ControlPanelManager pendantManager = new ControlPanelManager();
             pendantManager.LaunchControlForm(form, Client, null);
         }
+
+
+
+        public class Motion
+        {
+            public static double[] GetJointPositions(IAdeptRobot robot)
+            {
+                // Initialise an array to store the joint positions
+                double[] jointPositions = robot.JointPosition;
+
+                return jointPositions;
+            }
+            public static double[] GetRobotPosition(IAdeptRobot robot)
+            {
+                // Get the current joint positions
+                double[] jointPositions = robot.JointPosition;
+
+                // Convert them into world coordinates
+                Transform3D loc = robot.JointToWorld(jointPositions);
+
+                double[] robotPosition = { Math.Round(loc.DX, 3), Math.Round(loc.DY, 3), Math.Round(loc.DZ, 3) };
+
+                return robotPosition;
+            }
+            public static void CartesianMove(IAceServer _ace, IAdeptRobot _robot, Transform3D _destinationLoc, bool _linear, int _speed = 50, int _accel = 100, int _decel = 100)
+            {
+                // Make sure the robot controller communications is enabled
+                if (_robot.IsAlive == false)
+                    throw new InvalidOperationException();
+
+                // Make sure power is enabled
+                if (_robot.Power == false)
+                    _robot.Power = true;
+
+                // Make sure the robot is calibrated
+                if (_robot.IsCalibrated == false)
+                    _robot.Calibrate();
+
+                // Calculate a position close to the current position of the robot
+                int inRange = _robot.InRange(_destinationLoc);
+
+                if (inRange == 0)
+                {
+                    // Create a cartesian move command for the robot
+                    CartesianMove cartesianMove = _ace.CreateObject(typeof(CartesianMove)) as CartesianMove;
+                    cartesianMove.Robot = _robot;
+                    cartesianMove.WorldLocation = CoordinateUtils.RobotToWorkspace(_destinationLoc, _robot);
+                    cartesianMove.Param.Accel = _accel;
+                    cartesianMove.Param.Decel = _decel;
+                    cartesianMove.Param.Speed = _speed;
+                    cartesianMove.Param.Straight = _linear;
+                    cartesianMove.Param.MotionEnd = MotionEnd.Blend;
+                    cartesianMove.Param.SCurveProfile = 0;
+
+                    // Issue the motion and wait until the motion is done
+                    _robot.Move(cartesianMove);
+                    _robot.WaitMoveDone();
+                    cartesianMove.Dispose();
+                }
+                else
+                {
+                    throw new InvalidOperationException("Destination location is out of range");
+                }
+            }
+            public static void Approach(IAceServer _ace, IAdeptRobot _robot, Transform3D _destinationLoc, double _approDist, int _speed = 50, int _accel = 100, int _decel = 100)
+            {
+                // Make sure the robot controller communications is enabled
+                if (_robot.IsAlive == false)
+                    throw new InvalidOperationException();
+
+                // Make sure power is enabled
+                if (_robot.Power == false)
+                    _robot.Power = true;
+
+                // Make sure the robot is calibrated
+                if (_robot.IsCalibrated == false)
+                    _robot.Calibrate();
+
+                // Shift the destination location up by the approach distance
+                _destinationLoc = _destinationLoc.Shift(0, 0, _approDist);
+
+                // Calculate a position close to the current position of the robot
+                int inRange = _robot.InRange(_destinationLoc);
+
+                if (inRange == 0)
+                {
+                    // Create a cartesian move command for the robot
+                    CartesianMove cartesianMove = _ace.CreateObject(typeof(CartesianMove)) as CartesianMove;
+                    cartesianMove.Robot = _robot;
+                    cartesianMove.WorldLocation = CoordinateUtils.RobotToWorkspace(_destinationLoc, _robot);
+                    cartesianMove.Param.Accel = _accel;
+                    cartesianMove.Param.Decel = _decel;
+                    cartesianMove.Param.Speed = _speed;
+                    cartesianMove.Param.Straight = false;
+                    cartesianMove.Param.MotionEnd = MotionEnd.Blend;
+                    cartesianMove.Param.SCurveProfile = 0;
+
+                    // Issue the motion and wait until the motion is done
+                    _robot.Move(cartesianMove);
+                    _robot.WaitMoveDone();
+                    cartesianMove.Dispose();
+                }
+                else
+                {
+                    throw new InvalidOperationException("Destination location is out of range");
+                }
+            }
+        }
+
 
     }
 }

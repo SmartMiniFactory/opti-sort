@@ -55,6 +55,8 @@ namespace FlexibowlLibrary
         /// <param name="client"></param>
         public bool Disconnect()
         {
+            Endpoint = null;
+
             try
             {
                 UdpClient.Dispose();
