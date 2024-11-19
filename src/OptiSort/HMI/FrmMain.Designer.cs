@@ -295,7 +295,7 @@
             this.lblMqttStatusValue.AutoSize = true;
             this.lblMqttStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblMqttStatusValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMqttStatusValue.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.lblMqttStatusValue.ForeColor = System.Drawing.Color.Red;
             this.lblMqttStatusValue.Location = new System.Drawing.Point(1705, 0);
             this.lblMqttStatusValue.Name = "lblMqttStatusValue";
             this.tableLayoutPanel1.SetRowSpan(this.lblMqttStatusValue, 2);
@@ -322,7 +322,7 @@
             this.lblFlexibowlStatusValue.AutoSize = true;
             this.lblFlexibowlStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblFlexibowlStatusValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFlexibowlStatusValue.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.lblFlexibowlStatusValue.ForeColor = System.Drawing.Color.Red;
             this.lblFlexibowlStatusValue.Location = new System.Drawing.Point(962, 0);
             this.lblFlexibowlStatusValue.Name = "lblFlexibowlStatusValue";
             this.tableLayoutPanel1.SetRowSpan(this.lblFlexibowlStatusValue, 2);
@@ -349,7 +349,7 @@
             this.lblScaraStatusValue.AutoSize = true;
             this.lblScaraStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblScaraStatusValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblScaraStatusValue.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.lblScaraStatusValue.ForeColor = System.Drawing.Color.Red;
             this.lblScaraStatusValue.Location = new System.Drawing.Point(119, 0);
             this.lblScaraStatusValue.Name = "lblScaraStatusValue";
             this.tableLayoutPanel1.SetRowSpan(this.lblScaraStatusValue, 2);

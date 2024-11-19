@@ -299,7 +299,7 @@ namespace OptiSort
                 else
                 {
                     lblScaraStatusValue.Text = "Offline";
-                    lblScaraStatusValue.ForeColor = SystemColors.Desktop;
+                    lblScaraStatusValue.ForeColor = Color.Red;
                     btnScaraConnect.Enabled = true;
                     btnScaraDisconnect.Enabled = false;
                 }
@@ -317,7 +317,7 @@ namespace OptiSort
                 else
                 {
                     lblFlexibowlStatusValue.Text = "Offline";
-                    lblFlexibowlStatusValue.ForeColor = SystemColors.Desktop;
+                    lblFlexibowlStatusValue.ForeColor = Color.Red;
                     btnFlexibowlConnect.Enabled = true;
                     btnFlexibowlDisconnect.Enabled = false;
                 }
@@ -335,7 +335,7 @@ namespace OptiSort
                 else
                 {
                     lblMqttStatusValue.Text = "Offline";
-                    lblMqttStatusValue.ForeColor = SystemColors.Desktop;
+                    lblMqttStatusValue.ForeColor = Color.Red;
                     btnMqttConnect.Enabled = true;
                     btnMqttDisconnect.Enabled = false;
                 }
