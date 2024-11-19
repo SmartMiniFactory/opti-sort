@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34916.146
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlexibowlLibrary", "FlexibowlLibrary\FlexibowlLibrary.csproj", "{AAC12BF3-80CA-4CCF-837E-9822AB62732F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMI", "HMI\HMI.csproj", "{2B171215-A859-4653-B100-5732412066C4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CobraLibrary", "CobraLibrary\CobraLibrary.csproj", "{EFDCE63D-F10D-46BF-B928-20D25A5581AC}"
@@ -17,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AAC12BF3-80CA-4CCF-837E-9822AB62732F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AAC12BF3-80CA-4CCF-837E-9822AB62732F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AAC12BF3-80CA-4CCF-837E-9822AB62732F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AAC12BF3-80CA-4CCF-837E-9822AB62732F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2B171215-A859-4653-B100-5732412066C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2B171215-A859-4653-B100-5732412066C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B171215-A859-4653-B100-5732412066C4}.Release|Any CPU.ActiveCfg = Release|Any CPU

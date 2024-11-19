@@ -107,11 +107,11 @@
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
-    <Reference Include="MQTTnet, Version=4.3.6.1152, Culture=neutral, PublicKeyToken=fdb7629f2e364a63, processorArchitecture=MSIL">
-      <HintPath>..\packages\MQTTnet.4.3.6.1152\lib\net48\MQTTnet.dll</HintPath>
+    <Reference Include="MQTTnet, Version=4.3.7.1207, Culture=neutral, PublicKeyToken=fdb7629f2e364a63, processorArchitecture=MSIL">
+      <HintPath>..\packages\MQTTnet.4.3.7.1207\lib\net48\MQTTnet.dll</HintPath>
     </Reference>
-    <Reference Include="MQTTnet.Extensions.ManagedClient, Version=4.3.6.1152, Culture=neutral, PublicKeyToken=fdb7629f2e364a63, processorArchitecture=MSIL">
-      <HintPath>..\packages\MQTTnet.Extensions.ManagedClient.4.3.6.1152\lib\net48\MQTTnet.Extensions.ManagedClient.dll</HintPath>
+    <Reference Include="MQTTnet.Extensions.ManagedClient, Version=4.3.7.1207, Culture=neutral, PublicKeyToken=fdb7629f2e364a63, processorArchitecture=MSIL">
+      <HintPath>..\packages\MQTTnet.Extensions.ManagedClient.4.3.7.1207\lib\net48\MQTTnet.Extensions.ManagedClient.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -134,8 +134,8 @@
     <Reference Include="System.Text.Encodings.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Text.Encodings.Web.8.0.0\lib\net462\System.Text.Encodings.Web.dll</HintPath>
     </Reference>
-    <Reference Include="System.Text.Json, Version=8.0.0.4, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Text.Json.8.0.4\lib\net462\System.Text.Json.dll</HintPath>
+    <Reference Include="System.Text.Json, Version=8.0.0.5, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Json.8.0.5\lib\net462\System.Text.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
@@ -154,7 +154,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MQTT.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Settings.cs" />
+    <Compile Include="systems\Cobra600.cs" />
+    <Compile Include="systems\Flexibowl.cs" />
+    <Compile Include="systems\MQTT.cs" />
     <Compile Include="userControls\ucCameraStream.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -169,17 +177,35 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="userControls\ucRobotView.cs">
+    <Compile Include="userControls\ucConfiguration.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="userControls\ucRobotView.Designer.cs">
-      <DependentUpon>ucRobotView.cs</DependentUpon>
+    <Compile Include="userControls\ucConfiguration.Designer.cs">
+      <DependentUpon>ucConfiguration.cs</DependentUpon>
     </Compile>
-    <Compile Include="userControls\ucScara.cs">
+    <Compile Include="userControls\ucFlexibowl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="userControls\ucScara.Designer.cs">
-      <DependentUpon>ucScara.cs</DependentUpon>
+    <Compile Include="userControls\ucFlexibowl.Designer.cs">
+      <DependentUpon>ucFlexibowl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="userControls\ucManualControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucManualControl.Designer.cs">
+      <DependentUpon>ucManualControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="userControls\ucProcessView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucProcessView.Designer.cs">
+      <DependentUpon>ucProcessView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="userControls\ucScaraTargets.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucScaraTargets.Designer.cs">
+      <DependentUpon>ucScaraTargets.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="userControls\ucCameraStream.resx">
       <DependentUpon>ucCameraStream.cs</DependentUpon>
@@ -189,18 +215,23 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="userControls\ucRobotView.resx">
-      <DependentUpon>ucRobotView.cs</DependentUpon>
+    <EmbeddedResource Include="userControls\ucConfiguration.resx">
+      <DependentUpon>ucConfiguration.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="userControls\ucScara.resx">
-      <DependentUpon>ucScara.cs</DependentUpon>
+    <EmbeddedResource Include="userControls\ucFlexibowl.resx">
+      <DependentUpon>ucFlexibowl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="userControls\ucManualControl.resx">
+      <DependentUpon>ucManualControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="userControls\ucProcessView.resx">
+      <DependentUpon>ucProcessView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="userControls\ucScaraTargets.resx">
+      <DependentUpon>ucScaraTargets.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -221,6 +252,28 @@
       <Project>{efdce63d-f10d-46bf-b928-20d25a5581ac}</Project>
       <Name>CobraLibrary</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icons\stopPassivated_2x2_pptx.png" />
+    <None Include="icons\autoDisabled_2x2_pptx.png" />
+    <None Include="icons\autoEnabled_2x2_pptx.png" />
+    <None Include="icons\configDisabled_2x2_pptx.png" />
+    <None Include="icons\configEnabled_2x2_pptx.png" />
+    <Content Include="icons\connectedDisabled_2x2_pptx.png" />
+    <Content Include="icons\connectedEnabled_2x2_pptx.png" />
+    <Content Include="icons\disconnectedDisabled_2x2_pptx.png" />
+    <Content Include="icons\disconnectedEnabled_2x2_pptx.png" />
+    <Content Include="icons\emulation_2x2_pptx.png" />
+    <None Include="icons\manualDisabled_2x2_pptx.png" />
+    <None Include="icons\manualEnabled_2x2_pptx.png" />
+    <Content Include="icons\off_2x2_pptx.png" />
+    <Content Include="icons\on_2x2_pptx.png" />
+    <None Include="icons\stopEnabled_2x2_pptx.png" />
+    <None Include="icons\stopDisabled_2x2_pptx.png" />
+    <None Include="icons\playEnabled_2x2_pptx.png" />
+    <None Include="icons\playDisabled_2x2_pptx.png" />
+    <None Include="icons\playPassivated_2x2_pptx.png" />
+    <Content Include="icons\robot_2x2_pptx.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

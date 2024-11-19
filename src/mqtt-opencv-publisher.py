@@ -20,7 +20,7 @@ MQTT_USER = "dgalli" # Username for the MQTT Broker
 MQTT_PASSWORD = "dgalli" # Password for the MQTT Broker
 
 # OpenCV
-WEBCAM_ID = 0  # Change this to the index of the desired webcam
+WEBCAM_ID = 1  # Change this to the index of the desired webcam
 encode_param_png = [cv2.IMWRITE_PNG_COMPRESSION, 0]
 encode_param_jpg = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 

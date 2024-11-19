@@ -1,7 +1,45 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="OptiSort.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="scara_controllerIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">10.90.90.60</Value>
+    </Setting>
+    <Setting Name="mqtt_client" Type="System.String" Scope="User">
+      <Value Profile="(Default)">OptiSort</Value>
+    </Setting>
+    <Setting Name="mqtt_topic_scaraTarget" Type="System.String" Scope="User">
+      <Value Profile="(Default)">optisort/scara/target</Value>
+    </Setting>
+    <Setting Name="mqtt_topic_baslerStream" Type="System.String" Scope="User">
+      <Value Profile="(Default)">optisort/basler/stream</Value>
+    </Setting>
+    <Setting Name="mqtt_topic_idsStream" Type="System.String" Scope="User">
+      <Value Profile="(Default)">optisort/ids/stream</Value>
+    </Setting>
+    <Setting Name="mqtt_topic_luxonisStream" Type="System.String" Scope="User">
+      <Value Profile="(Default)">optisort/luxonis/stream</Value>
+    </Setting>
+    <Setting Name="scara_controllerName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">OptiSort</Value>
+    </Setting>
+    <Setting Name="scara_robotName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">R1 Cobra600</Value>
+    </Setting>
+    <Setting Name="scara_endEffectorName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Suction Cup</Value>
+    </Setting>
+    <Setting Name="flexibowl_IP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">10.90.90.20</Value>
+    </Setting>
+    <Setting Name="scara_port" Type="System.String" Scope="User">
+      <Value Profile="(Default)">43434</Value>
+    </Setting>
+    <Setting Name="mqtt_port" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1883</Value>
+    </Setting>
+    <Setting Name="mqtt_broker" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

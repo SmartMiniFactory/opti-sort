@@ -8,22 +8,174 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace OptiSort.Properties
-{
-
-
+namespace OptiSort.Properties {
+    
+    
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "11.0.0.0")]
-    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase
-    {
-
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.12.0.0")]
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
+        
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
-
-        public static Settings Default
-        {
-            get
-            {
+        
+        public static Settings Default {
+            get {
                 return defaultInstance;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10.90.90.60")]
+        public string scara_controllerIP {
+            get {
+                return ((string)(this["scara_controllerIP"]));
+            }
+            set {
+                this["scara_controllerIP"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("OptiSort")]
+        public string mqtt_client {
+            get {
+                return ((string)(this["mqtt_client"]));
+            }
+            set {
+                this["mqtt_client"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("optisort/scara/target")]
+        public string mqtt_topic_scaraTarget {
+            get {
+                return ((string)(this["mqtt_topic_scaraTarget"]));
+            }
+            set {
+                this["mqtt_topic_scaraTarget"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("optisort/basler/stream")]
+        public string mqtt_topic_baslerStream {
+            get {
+                return ((string)(this["mqtt_topic_baslerStream"]));
+            }
+            set {
+                this["mqtt_topic_baslerStream"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("optisort/ids/stream")]
+        public string mqtt_topic_idsStream {
+            get {
+                return ((string)(this["mqtt_topic_idsStream"]));
+            }
+            set {
+                this["mqtt_topic_idsStream"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("optisort/luxonis/stream")]
+        public string mqtt_topic_luxonisStream {
+            get {
+                return ((string)(this["mqtt_topic_luxonisStream"]));
+            }
+            set {
+                this["mqtt_topic_luxonisStream"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("OptiSort")]
+        public string scara_controllerName {
+            get {
+                return ((string)(this["scara_controllerName"]));
+            }
+            set {
+                this["scara_controllerName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("R1 Cobra600")]
+        public string scara_robotName {
+            get {
+                return ((string)(this["scara_robotName"]));
+            }
+            set {
+                this["scara_robotName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Suction Cup")]
+        public string scara_endEffectorName {
+            get {
+                return ((string)(this["scara_endEffectorName"]));
+            }
+            set {
+                this["scara_endEffectorName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10.90.90.20")]
+        public string flexibowl_IP {
+            get {
+                return ((string)(this["flexibowl_IP"]));
+            }
+            set {
+                this["flexibowl_IP"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("43434")]
+        public string scara_port {
+            get {
+                return ((string)(this["scara_port"]));
+            }
+            set {
+                this["scara_port"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1883")]
+        public string mqtt_port {
+            get {
+                return ((string)(this["mqtt_port"]));
+            }
+            set {
+                this["mqtt_port"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
+        public string mqtt_broker {
+            get {
+                return ((string)(this["mqtt_broker"]));
+            }
+            set {
+                this["mqtt_broker"] = value;
             }
         }
     }

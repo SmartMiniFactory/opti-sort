@@ -453,3 +453,9 @@ FodyWeavers.xsd
 /src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.csproj.FileListAbsolute.txt
 /src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.dll
 /src/OptiSort/FlexibowlLibrary/obj/Debug/FlexibowlLibrary.pdb
+/src/OptiSort/CobraLibrary/bin/Debug/CobraLibrary.dll
+/src/OptiSort/CobraLibrary/bin/Debug/CobraLibrary.pdb
+/src/OptiSort/CobraLibrary/obj/Debug/CobraLibrary.dll
+/src/OptiSort/CobraLibrary/obj/Debug/CobraLibrary.pdb
+/src/OptiSort/HMI/bin/Debug/CobraLibrary.dll
+/src/OptiSort/HMI/bin/Debug/CobraLibrary.pdb
