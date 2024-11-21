@@ -8,8 +8,12 @@ namespace OptiSort
 {
     public partial class ucCameraStream : UserControl
     {
-        // streaming
+
         public string StreamTopic { get; set; }
+
+        private frmMain _frmMain;
+
+        // streaming
         private readonly object _lock = new object(); // should be used each time different threads try access (write or read) shared resources
         private Bitmap _image;
         private DateTime _imgDate = DateTime.MinValue;
@@ -21,9 +25,10 @@ namespace OptiSort
         private DateTime _lastFpsUpdate = DateTime.Now;
         private int _latencyMilliseconds = 0;
 
-        internal ucCameraStream(Program.Cameras camera)
+        internal ucCameraStream(frmMain frmMain)
         {
             InitializeComponent();
+            _frmMain = frmMain;
 
             // Create a transparent placeholder Bitmap
             _image = CreateTransparentBitmap(pictureBox.Width, pictureBox.Height);
@@ -33,8 +38,11 @@ namespace OptiSort
         }
 
 
-
-        // This method will be called when a new MQTT message is received
+        /// <summary>
+        /// Called each time a new MQTT message is received, based on the topic reconstructs the image streaming and paints the control
+        /// </summary>
+        /// <param name="topic"></param>
+        /// <param name="message"></param>
         public void OnMessageReceived(string topic, JsonElement message)
         {
             if (topic == StreamTopic)
@@ -89,10 +97,32 @@ namespace OptiSort
             // Check for timeout condition
             if (_imgDate.AddSeconds(2) < DateTime.Now)
             {
-                // Painting red cross on black background
-                g.Clear(Color.Black);
-                g.DrawLine(new Pen(Color.Red, 10), pictureBox.Width / 3, pictureBox.Height / 3, pictureBox.Width * 2 / 3, pictureBox.Height * 2 / 3);
-                g.DrawLine(new Pen(Color.Red, 10), pictureBox.Width / 3, pictureBox.Height * 2 / 3, pictureBox.Width * 2 / 3, pictureBox.Height / 3);
+                if (_frmMain.StatusMqttClient)
+                {
+                    // Painting red cross on black background
+                    g.Clear(Color.Black);
+                    g.DrawLine(new Pen(Color.Red, 10), pictureBox.Width / 3, pictureBox.Height / 3, pictureBox.Width * 2 / 3, pictureBox.Height * 2 / 3);
+                    g.DrawLine(new Pen(Color.Red, 10), pictureBox.Width / 3, pictureBox.Height * 2 / 3, pictureBox.Width * 2 / 3, pictureBox.Height / 3);
+
+                }
+                else
+                {
+                    // drawing indication to connect MQTT client
+                    g.DrawImage(image, new Rectangle(0, 0, pictureBox.Width, pictureBox.Height));
+                    using (Brush backgroundBrush = new SolidBrush(Color.FromArgb(128, Color.Black)))
+                    {
+                        g.FillRectangle(backgroundBrush, new Rectangle(0, (pictureBox.Height - 40) / 2, pictureBox.Width, 40)); // Adjust height as needed
+                    }
+
+                    using (Font font = new Font("Arial", 12, FontStyle.Bold))
+                    using (Brush textBrush = new SolidBrush(Color.White))
+                    {
+                        string message = "Connect MQTT client for camera streaming";
+                        SizeF textSize = g.MeasureString(message, font);
+                        PointF textLocation = new PointF((pictureBox.Width - textSize.Width) / 2, (pictureBox.Height - textSize.Height) / 2); // Center horizontally and vertically
+                        g.DrawString(message, font, textBrush, textLocation);
+                    }
+                }
             }
             else
             {
@@ -100,7 +130,7 @@ namespace OptiSort
                 {
                     g.DrawImage(image, new Rectangle(0, 0, pictureBox.Width, pictureBox.Height));
                     g.DrawString($"FPS: {_fps}", new Font("Arial", 16), Brushes.White, new PointF(10, 10)); // Draw FPS overlay
-                    g.DrawString($"Latency: {_latencyMilliseconds} ms", new Font("Arial", 16), Brushes.White, new PointF(10, 40)); // Draw Latency overlay
+                    g.DrawString($"Latency: {_latencyMilliseconds} ms", new Font("Arial", 16), Brushes.White, new PointF(10, 40)); // Draw Latency overlay 
                 }
             }
         }
@@ -117,6 +147,7 @@ namespace OptiSort
         {
             pictureBox.Invalidate(); // Trigger re-paint
         }
+
 
         /// <summary>
         /// Converts the image MQTT image (base64) to a bitmap
@@ -138,6 +169,7 @@ namespace OptiSort
                 return new Bitmap(ms);
             }
         }
+
 
         /// <summary>
         /// Creates bitmap placeholder to instance an empty pictureBox for the constructor

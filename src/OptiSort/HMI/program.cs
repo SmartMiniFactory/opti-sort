@@ -17,14 +17,6 @@ namespace OptiSort
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new frmMain());
-        }
-
-        internal class Cameras
-        {
-            public int ID { get; set; }
-            public string Text { get; set; }
-            public string mqttTopic { get; set; }
-
-        }
+        }        
     }
 }

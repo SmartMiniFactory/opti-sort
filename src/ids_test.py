@@ -6,6 +6,8 @@ import base64
 import time
 import numpy as np
 from pyueye import ueye
+import json
+import datetime
 
 ####################################################### VARIABLES #######################################################
 
@@ -127,6 +129,12 @@ print("Start streaming")
 
 print("Press 'Q' to quit")
 
+# Encode image to Json format
+def im2json(imdata):
+    jstr = json.dumps({"image": base64.b64encode(imdata).decode('ascii'), "timestamp": datetime.datetime.now().isoformat()})
+    return jstr
+
+
 while(nRet == ueye.IS_SUCCESS):
 
     start = time.time() # Start time
@@ -142,8 +150,12 @@ while(nRet == ueye.IS_SUCCESS):
 
     # Encode image to PNG format
     _frame = cv2.imencode('.png', frame, encode_param_png)[1].tobytes()
-    client.publish(MQTT_TOPIC, _frame) # Publish the Frame on the Topic home/server
-    cv2.imshow("IDS Camera Stream", frame) # Show the frame
+    
+    # Publish the Frame on the Topic
+    client.publish(MQTT_TOPIC, im2json(_frame))
+     
+    # Show the frame
+    cv2.imshow("IDS Camera Stream", frame) 
     end = time.time() # End time
     t = end - start
     if t != 0:

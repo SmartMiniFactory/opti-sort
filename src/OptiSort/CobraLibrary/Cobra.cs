@@ -41,8 +41,8 @@ namespace CobraLibrary
 
         private RemoteAceObjectEventHandler generalEventHandler;
         private RemoteApplicationEventHandler applicationEventHandler;
-        private SimulationContainerControl simulationControl;
-        private ControlPanelManager pendantManager;
+        //private SimulationContainerControl simulationControl;
+        public ControlPanelManager pendantManager;
 
 
         public (IAdeptController controller, IAdeptRobot robot, IAceServer aceServer, IAceClient aceClient) Connect(bool emulate)
@@ -131,7 +131,7 @@ namespace CobraLibrary
         }
 
 
-        public void Disconnect(IAdeptController controller, IAceServer server)
+        public bool Disconnect(IAdeptController controller, IAceServer server)
         {
             try
             {
@@ -149,11 +149,13 @@ namespace CobraLibrary
                 controller.Enabled = false;
                 server.Clear();
                 server = null;
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 //GuiUtil.ShowExceptionDialog(this, ex);
+                return false;
             }
         }
 
@@ -268,8 +270,6 @@ namespace CobraLibrary
         // Handles the execution of external V+ programs
         public class Program
         {
-            private ControlPanelManager pendantManager;
-
             bool _programRunning = false;
 
             public static IVPlusModuleProgram Load(IAceServer ace, IAdeptController controller, IAdeptRobot robot, string _programFile)
