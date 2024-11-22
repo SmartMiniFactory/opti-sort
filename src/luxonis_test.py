@@ -1,82 +1,104 @@
-# first, import all necessary modules
-from pathlib import Path
-
-import blobconverter
+#!/usr/bin/env python3
+####################################################### LIBRARIES #######################################################
 import cv2
-import depthai
+import depthai as dai
 import numpy as np
+import time
+import keyboard
+import paho.mqtt.client as mqtt
+import base64
+import json
+import datetime
 
+####################################################### VARIABLES #######################################################
 
-pipeline = depthai.Pipeline()
+# MQTT
+MQTT_BROKER = "localhost" # IP address of the MQTTT broker
+MQTT_PORT = 1883 # Port of the MQTT Broker
+MQTT_TOPIC = "optisort/luxonis/stream" # Topic on which frame will be published
 
-# First, we want the Color camera as the output
-cam_rgb = pipeline.createColorCamera()
-cam_rgb.setPreviewSize(300, 300)  # 300x300 will be the preview frame size, available as 'preview' output of the node
-cam_rgb.setInterleaved(False)
+# OpenCV
+encode_param_png = [cv2.IMWRITE_PNG_COMPRESSION, 0]
+encode_param_jpg = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
-detection_nn = pipeline.createMobileNetDetectionNetwork()
-# Blob is the Neural Network file, compiled for MyriadX. It contains both the definition and weights of the model
-# We're using a blobconverter tool to retreive the MobileNetSSD blob automatically from OpenVINO Model Zoo
-detection_nn.setBlobPath(blobconverter.from_zoo(name='mobilenet-ssd', shaves=6))
-# Next, we filter out the detections that are below a confidence threshold. Confidence can be anywhere between <0..1>
-detection_nn.setConfidenceThreshold(0.5)
+########################################### USER-DEFINED FUNCTIONS ######################################################
 
-# XLinkOut is a "way out" from the device. Any data you want to transfer to host need to be send via XLink
-xout_rgb = pipeline.createXLinkOut()
-xout_rgb.setStreamName("rgb")
+# Encode image to Json format
+def im2json(imdata):
+    jstr = json.dumps({"image": base64.b64encode(imdata).decode('ascii'), "timestamp": datetime.datetime.now().isoformat()})
+    return jstr
 
-xout_nn = pipeline.createXLinkOut()
-xout_nn.setStreamName("nn")
+################################################## MAIN PROGRAM #########################################################
 
-cam_rgb.preview.link(xout_rgb.input)
-cam_rgb.preview.link(detection_nn.input)
-detection_nn.out.link(xout_nn.input)
+print("Connecting to MQTT broker")
+client = mqtt.Client() # Create the MQTT Client
+client.connect(MQTT_BROKER, MQTT_PORT) # Establishing Connection with the Broker
+print("Connected to MQTT broker")
 
-# Pipeline is now finished, and we need to find an available device to run our pipeline
-# we are using context manager here that will dispose the device after we stop using it
-with depthai.Device(pipeline) as device:
-    # From this point, the Device will be in "running" mode and will start sending data via XLink
+print("Connecting to Luxonis OAK-D camera")
+# Create pipeline for the Luxonis OAK-D camera
+pipeline = dai.Pipeline()
 
-    # To consume the device results, we get two output queues from the device, with stream names we assigned earlier
-    q_rgb = device.getOutputQueue("rgb")
-    q_nn = device.getOutputQueue("nn")
-    # Here, some of the default values are defined. Frame will be an image from "rgb" stream, detections will contain nn results
-    frame = None
-    detections = []
+# Define sources and outputs
+monoLeft = pipeline.create(dai.node.MonoCamera)
+xoutLeft = pipeline.create(dai.node.XLinkOut)
+xoutLeft.setStreamName('left')
 
-    # Since the detections returned by nn have values from <0..1> range, they need to be multiplied by frame width/height to
-    # receive the actual position of the bounding box on the image
-    def frameNorm(frame, bbox):
-        normVals = np.full(len(bbox), frame.shape[0])
-        normVals[::2] = frame.shape[1]
-        return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
+# Properties
+monoLeft.setCamera("left")
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 
+# Linking
+monoLeft.out.link(xoutLeft.input)
+print("Creating the pipeline...")
+
+# Connect to device and start pipeline
+with dai.Device(pipeline) as device:
+
+    # Output queues will be used to get the grayscale frames from the outputs defined above
+    qLeft = device.getOutputQueue(name="left", maxSize=4, blocking=False)
+    print("Connected to Luxonis OAK-D camera")
+    print("Start streaming")
+    print("Press 'Q' to quit")
 
     while True:
-        # we try to fetch the data from nn/rgb queues. tryGet will return either the data packet or None if there isn't any
-        in_rgb = q_rgb.tryGet()
-        in_nn = q_nn.tryGet()
+        start = time.time() # Start time
+        
+        # Instead of get (blocking), we use tryGet (non-blocking) which will return the available data or None otherwise
+        inLeft = qLeft.tryGet()
 
-        if in_rgb is not None:
-            # If the packet from RGB camera is present, we're retrieving the frame in OpenCV format using getCvFrame
-            frame = in_rgb.getCvFrame()
+        if inLeft is not None:
+            frame_left = inLeft.getCvFrame()
+            
+            # Resize the image by a half
+            frame = cv2.resize(frame_left,(0,0),fx=0.5, fy=0.5)
+        
+            # Encode image to PNG format
+            _frame = cv2.imencode('.png', frame, encode_param_png)[1].tobytes()
+    
+            # Publish the Frame on the Topic
+            client.publish(MQTT_TOPIC, im2json(_frame))
+     
+            # Show the frame
+            cv2.imshow("Luxonis Left Camera Stream", frame)
+            
+            end = time.time() # End time
+            t = end - start
+            if t != 0:
+                fps = 1/t
+            else :
+                fps = 0
+            
+            print("FPS Luxonis: ", np.round(fps, 0), end="\r") # Print the FPS
 
-        if in_nn is not None:
-            # when data from nn is received, we take the detections array that contains mobilenet-ssd results
-            detections = in_nn.detections
-
-
-        if frame is not None:
-            for detection in detections:
-                # for each bounding box, we first normalize it to match the frame size
-                bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                # and then draw a rectangle on the frame to show the actual result
-                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
-            # After all the drawing is finished, we show the frame on the screen
-            cv2.imshow("preview", frame)
-
-        # at any time, you can press "q" and exit the main loop, therefore exiting the program itself
-        if cv2.waitKey(1) == ord('q'):
+    
+        # Press q if you want to end the loop
+        if cv2.waitKey(1) & keyboard.is_pressed('q'):
+            print("\nqQuitting...")
             break
 
+cv2.destroyAllWindows()
+
+client.disconnect()
+print("\nStopped streaming")
 
