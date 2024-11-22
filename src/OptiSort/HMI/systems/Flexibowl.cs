@@ -78,7 +78,7 @@ namespace FlexibowlLibrary
 
 
         /// <summary>
-        /// Check Flexible availability to receive commands
+        /// Check Flexibowl availability to receive commands
         /// </summary>
         /// <param name="client"></param>
         /// <param name="endpoint"></param>
@@ -142,6 +142,73 @@ namespace FlexibowlLibrary
             } while (available == true);
 
             return available;
+        }
+
+        /// <summary>
+        /// Check if Flexibowl is in fault status
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="endpoint"></param>
+        /// <returns></returns>
+        public static bool isFault(UdpClient client, IPEndPoint endpoint)
+        {
+            string receiveString = "";
+            int byteSent = 0;
+            bool fault = true;
+            do
+            {
+                // Convert the command to bytes
+                Byte[] SCLstring = Encoding.ASCII.GetBytes("ob[16]");
+                Byte[] sendBytes = new Byte[SCLstring.Length + 1];
+
+                Array.Copy(SCLstring, 0, sendBytes, 0, SCLstring.Length);
+                sendBytes[sendBytes.Length - 1] = 13; // CR
+
+                // Send the command to the server
+                byteSent = client.Send(sendBytes, sendBytes.Length);
+
+                // Receive data from the server
+                Byte[] receivedData = client.Receive(ref endpoint);
+                receiveString = Encoding.ASCII.GetString(receivedData);
+
+                // Define a separator byte
+                byte separator = 13;
+
+                // Convert byte array to a list of bytes
+                List<byte> byteList = new List<byte>(receivedData);
+
+                // Create a list to hold the divided byte arrays
+                List<byte[]> dividedByteArrays = new List<byte[]>();
+
+                int lastSeparatorIndex = 0;
+                for (int i = 0; i < byteList.Count; i++)
+                {
+                    if (byteList[i] == separator)
+                    {
+                        // Get the range of bytes from the last separator index to the current index
+                        byte[] dividedArray = byteList.GetRange(lastSeparatorIndex, i - lastSeparatorIndex).ToArray();
+                        dividedByteArrays.Add(dividedArray);
+
+                        // Update the last separator index
+                        lastSeparatorIndex = i + 1;
+                    }
+                }
+
+                // Handle the case where the byte array does not end with a separator
+                if (lastSeparatorIndex != byteList.Count)
+                {
+                    byte[] dividedArray = byteList.GetRange(lastSeparatorIndex, byteList.Count - lastSeparatorIndex).ToArray();
+                    dividedByteArrays.Add(dividedArray);
+                }
+
+                // Convert the second byte array to a string
+                string answer = Encoding.ASCII.GetString(dividedByteArrays[1]);
+
+                bool.TryParse(answer, out fault);
+
+            } while (fault == false);
+
+            return fault;
         }
 
 
