@@ -15,6 +15,8 @@ namespace OptiSort.userControls
     public partial class ucProcessView : UserControl
     {
 
+        public bool AutomaticProcess { get; set; }
+
         private frmMain _frmMain;
         private ucScaraTargets _ucScaraTargets;
 
@@ -36,6 +38,8 @@ namespace OptiSort.userControls
             pnlFlexibowl.Controls.Clear();
             pnlFlexibowl.Controls.Add(ucFlexibowl);
         }
+
+
 
     }
 }

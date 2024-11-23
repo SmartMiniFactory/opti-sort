@@ -35,11 +35,7 @@ namespace OptiSort
         public ucScaraTargets(frmMain ucOptiSort)
         {
             InitializeComponent();
-
             _frmMain = ucOptiSort;
-
-            _thReachLocation = new Thread(MoveToLoc);
-
         }
 
         private void ucScara_Load(object sender, EventArgs e)
@@ -68,6 +64,10 @@ namespace OptiSort
             dgvTargetQueue.Columns.Add(rollColumn);
             dgvTargetQueue.DataSource = _targetQueueList;
             dgvTargetQueue.Rows.Clear();
+
+            // instance and start thread to control robot movement
+            _thReachLocation = new Thread(MoveToLoc);
+            _thReachLocation.Start();
         }
 
 
@@ -116,9 +116,26 @@ namespace OptiSort
             }
         }
 
-        // ---------------------------------------------------------------------------
+        private void RemoveFirstRow()
+        {
+            if (InvokeRequired)
+            {
+                // Marshal to the UI thread (needed to avoid cross-thread error)
+                Invoke(new Action(RemoveFirstRow));
+            }
+            else
+            {
+                try
+                {
+                    _targetQueueList.RemoveAt(0);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error removing an entry: " + ex.ToString());
+                }
+            }
+        }
 
-        //// TODO: REVIEW
         private void MoveToLoc()
         {
             int busy = 0;
@@ -131,42 +148,14 @@ namespace OptiSort
                         _robotIsMoving = true;
                         if (busy == 0)
                         {
-                            // Get the first element of the queue
                             Transform3D _locTarget = _targetQueueList[0];
-
-                            // TODO: anzichè fare questo, evidenziare la row sulla dgv
-                            //textBoxX.Text = _locTarget.DX.ToString();
-                            //textBoxY.Text = _locTarget.DY.ToString();
-                            //textBoxZ.Text = _locTarget.DZ.ToString();
-                            //textBoxRoll.Text = _locTarget.Roll.ToString();
-                            //textBoxPitch.Text = _locTarget.Pitch.ToString();
-                            //textBoxYaw.Text = _locTarget.Yaw.ToString();
-
-                            // TODO: can't log like this because of a cross-thread conflict
-                            //_frmMain.Log("Moving to target: " + _locTarget);
-
-
                                                            
                             Cobra600.Motion.Approach(_frmMain.Cobra600.Server, _frmMain.Cobra600.Robot, _locTarget, 20);
-                            Cobra.Motion.CartesianMove(_frmMain.Cobra600.Server, _frmMain.Cobra600.Robot, _locTarget, true);
-                            Cobra.Motion.Approach(_frmMain.Cobra600.Server, _frmMain.Cobra600.Robot, _locTarget, 20);
+                            Cobra600.Motion.CartesianMove(_frmMain.Cobra600.Server, _frmMain.Cobra600.Robot, _locTarget, true);
+                            Cobra600.Motion.Approach(_frmMain.Cobra600.Server, _frmMain.Cobra600.Robot, _locTarget, 20);
 
-                            Thread.Sleep(1000);
+                            RemoveFirstRow();
 
-                            lock (_targetQueueList)
-                            {
-                                try
-                                {
-                                    _targetQueueList.RemoveAt(0);
-                                }
-                                catch (Exception ex)
-                                {
-                                    MessageBox.Show($"Error removing an entry: " + ex.ToString());
-                                }
-                            }
-
-                            // TODO: can't log like this because of a cross-thread conflict
-                            //_frmMain.Log("Target reached");
                             busy++;
                         }
                         _robotIsMoving = false;

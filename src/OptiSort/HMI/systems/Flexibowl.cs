@@ -85,6 +85,9 @@ namespace FlexibowlLibrary
         /// <returns></returns>
         public static bool isBusy(UdpClient client, IPEndPoint endpoint) 
         {
+
+            // TODO: is this repeating the "send command" method??
+
             string receiveString = "";
             int byteSent = 0;
             bool available = false;
@@ -180,6 +183,8 @@ namespace FlexibowlLibrary
         // ----------------------------------------------------------------------------------
         // --------------------------------- SUPPORT ----------------------------------------
         // ----------------------------------------------------------------------------------
+
+        // TODO: improve with return strings instead of voids
 
         public static class Set
         {

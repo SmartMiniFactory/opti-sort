@@ -170,7 +170,7 @@ namespace OptiSort
             PaintIndicationRobot3DView();
 
             Log("OptiSort ready for operation: please connect systems (Scara robot, flexibowl, MQTT service) to begin", false, false);
-            
+
         }
 
 
@@ -215,6 +215,12 @@ namespace OptiSort
             btnRun.BackgroundImage = Properties.Resources.playPassivated_2x2_pptx;
             btnStop.Enabled = false;
             btnStop.BackgroundImage = Properties.Resources.stopEnabled_2x2_pptx;
+
+            if (!ucProcessView.AutomaticProcess)
+            {
+                MessageBox.Show("Click the start button to activate automatic process");
+            }
+
         }
 
         private void btnRun_Click(object sender, EventArgs e)
@@ -418,7 +424,7 @@ namespace OptiSort
             string controllerName = Properties.Settings.Default.scara_controllerName;
             string robotName = Properties.Settings.Default.scara_robotName;
             string endEffectorName = Properties.Settings.Default.scara_endEffectorName;
-            
+
 
             if (!StatusScaraEmulation)
                 Cobra600.RobotIP = Properties.Settings.Default.scara_controllerIP;
@@ -635,18 +641,18 @@ namespace OptiSort
         public async void SubscribeMqttTopic(string client, string topic)
         {
             bool subscribed = await MqttClient.SubscribeClientToTopic(client, topic);
-            if (subscribed) 
+            if (subscribed)
                 Log($"{client} subscribed to {topic}", false, true);
-            else 
+            else
                 Log($"Unable subscribing {client} to {topic}", true, false);
         }
 
         public async void UnsubscribeMqttTopic(string client, string topic)
         {
             bool unsubscribed = await MqttClient.UnsubscribeClientFromTopic(client, topic);
-            if (unsubscribed) 
+            if (unsubscribed)
                 Log($"{client} unsubscribed to {topic}", false, true);
-            else 
+            else
                 Log($"Unable unsubscribing {client} to {topic}", true, false);
         }
 
@@ -681,7 +687,7 @@ namespace OptiSort
         public void Log(string msg, bool isError, bool isSuccess)
         {
             msg = DateTime.Now.ToString() + " - " + msg; // Prepend timestamp to the message
-            lstLog.Items.Add(new LogEntry { Message = msg, IsError = isError , IsSuccess = isSuccess}); // Store the error flag alongside the message
+            lstLog.Items.Add(new LogEntry { Message = msg, IsError = isError, IsSuccess = isSuccess }); // Store the error flag alongside the message
             lstLog.TopIndex = lstLog.Items.Count - 1; // Ensure the last row is visible
         }
 
