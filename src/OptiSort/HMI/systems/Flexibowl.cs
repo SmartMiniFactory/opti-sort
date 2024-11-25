@@ -12,15 +12,13 @@ namespace FlexibowlLibrary
     public class Flexibowl
     {
 
-        public static UdpClient UdpClient {  get; private set; }
+        public static UdpClient UdpClient { get; private set; }
         public static IPEndPoint Endpoint { get; private set; }
         public IPAddress IP { get; set; }
 
 
         public Flexibowl(string flexibowlIp)
         {
-            UdpClient = new UdpClient(5001);
-            Endpoint = new IPEndPoint(IP, 5001);
             IP = IPAddress.Parse(flexibowlIp);
         }
 
@@ -34,6 +32,8 @@ namespace FlexibowlLibrary
         {
             try
             {
+                UdpClient = new UdpClient(5001);
+                Endpoint = new IPEndPoint(IP, 5001);
                 UdpClient.Connect(Endpoint);
                 UdpClient.Client.SendTimeout = 500;
                 UdpClient.Client.ReceiveTimeout = 500;
@@ -58,6 +58,7 @@ namespace FlexibowlLibrary
             {
                 UdpClient.Dispose();
                 UdpClient.Close();
+                UdpClient = null;
                 Endpoint = null;
                 Console.Write("Disconnected from FlexiBowl");
                 return true;
@@ -80,7 +81,7 @@ namespace FlexibowlLibrary
         /// <param name="client"></param>
         /// <param name="endpoint"></param>
         /// <returns></returns>
-        public static bool isBusy(UdpClient client, IPEndPoint endpoint) 
+        public static bool isBusy(UdpClient client, IPEndPoint endpoint)
         {
 
             // TODO: is this repeating the "send command" method??
@@ -153,7 +154,7 @@ namespace FlexibowlLibrary
         {
 
             int byteSent = 0;
-            
+
             // Convert the "kl" command to bytes
             Byte[] SCLstring = Encoding.ASCII.GetBytes("kl");
             Byte[] sendBytes = new Byte[SCLstring.Length + 1];
@@ -190,7 +191,7 @@ namespace FlexibowlLibrary
         /// <param name="endpoint"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        public static string SendCommand(string command) 
+        public static string SendCommand(string command)
         {
             string receiveString = "";
             int byteSent = 0;
@@ -238,7 +239,7 @@ namespace FlexibowlLibrary
 
                 string rsp = SendCommand(cmd);
                 Console.WriteLine("\nFlexibowl: setting servo to " + status.ToString());
-                
+
                 while (isBusy(UdpClient, Endpoint))
                 {
                     System.Threading.Thread.Sleep(50);
@@ -249,7 +250,7 @@ namespace FlexibowlLibrary
             /// Turn on or off the backlight for contrast enhancement
             /// </summary>
             /// <param name="status">true = on; false = off</param>
-            public static void Light(bool status) 
+            public static void Light(bool status)
             {
                 string cmd;
 
@@ -260,7 +261,7 @@ namespace FlexibowlLibrary
 
                 string rsp = SendCommand(cmd);
                 Console.WriteLine("\nFlexibowl: setting light to " + status.ToString());
-                
+
                 while (isBusy(UdpClient, Endpoint))
                 {
                     System.Threading.Thread.Sleep(50);
@@ -274,7 +275,7 @@ namespace FlexibowlLibrary
                 /// Set the rotational speed in RPM, at which the feeder will advance at each subsequent “forward=1” instruction.
                 /// </summary>
                 /// <param name="speed">RPM, between 1 and 130</param>
-                public static void Speed(int speed) 
+                public static void Speed(int speed)
                 {
                     if ((speed < 1) && (speed > 130))
                         Console.WriteLine("Error: rotational speed out of range (1-130)");
@@ -292,7 +293,7 @@ namespace FlexibowlLibrary
                 /// Set the rotational acceleration used for each subsequent “forward=1” instruction
                 /// </summary>
                 /// <param name="acc">Between 10 and 10000</param>
-                public static void Acceleration(int acc) 
+                public static void Acceleration(int acc)
                 {
                     if ((acc < 10) && (acc > 10000))
                         Console.WriteLine("Error: rotational acceleration out of range (10-10000)");
@@ -379,7 +380,7 @@ namespace FlexibowlLibrary
                 /// Set the shaking deceleration used for each subsequent movement of the “shake=1” instruction
                 /// </summary>
                 /// <param name="dec">Between 10 and 10000</param>
-                public static void Deceleration(int dec) 
+                public static void Deceleration(int dec)
                 {
                     if ((dec < 10) && (dec > 10000))
                         Console.WriteLine("Error: shaking deceleration out of range (10-10000)");
@@ -397,7 +398,7 @@ namespace FlexibowlLibrary
                 /// Set the number of shaking movements in alternate directions to be performed at subsequent “shake=1” instructions
                 /// </summary>
                 /// <param name="cnt">must be positive</param>
-                public static void Count(int cnt) 
+                public static void Count(int cnt)
                 {
                     if (cnt <= 0)
                         Console.WriteLine("Error: shake count must be positive");
@@ -430,7 +431,7 @@ namespace FlexibowlLibrary
                 /// Set the blowing time in milliseconds
                 /// </summary>
                 /// <param name="blw_time">must be positive [ms]</param>
-                public static void Time(int blw_time) 
+                public static void Time(int blw_time)
                 {
                     if (blw_time <= 0)
                         Console.WriteLine("Error: blow time must be positive");
@@ -450,7 +451,7 @@ namespace FlexibowlLibrary
                 /// Set the number of flipping movements (ON/OFF cycles that the piston will perform) at each subsequent “flip=1” instruction.
                 /// </summary>
                 /// <param name="cnt">Must be positive</param>
-                public static void Count(int cnt) 
+                public static void Count(int cnt)
                 {
                     if (cnt <= 0)
                         Console.WriteLine("Error: flip count must be positive");
@@ -488,7 +489,7 @@ namespace FlexibowlLibrary
             /// <summary>
             /// Moves the feeder forward with the current parameters
             /// </summary>
-            public static void Forward() 
+            public static void Forward()
             {
                 string cmd = "forward=1";
                 string rsp = SendCommand(cmd);
@@ -533,7 +534,7 @@ namespace FlexibowlLibrary
             /// Activates the flipping unit
             /// </summary>
             /// <param name="piston">select piston 1 or 2</param>
-            public static void Flip(int piston) 
+            public static void Flip(int piston)
             {
                 string cmd;
                 if (piston == 1)
@@ -563,7 +564,7 @@ namespace FlexibowlLibrary
             /// <summary>
             /// Activates the blowing unit
             /// </summary>
-            public static void Blow() 
+            public static void Blow()
             {
                 string cmd = "Blow=1";
                 string rsp = SendCommand(cmd);
@@ -578,7 +579,7 @@ namespace FlexibowlLibrary
             /// <summary>
             /// Activates the flipping and blowing units simultaneously; activates valves 1 and 2 simultaneously
             /// </summary>
-            public static void FlipBlow() 
+            public static void FlipBlow()
             {
                 string cmd = "flip_Blow=1";
                 string rsp = SendCommand(cmd);
@@ -593,7 +594,7 @@ namespace FlexibowlLibrary
             /// <summary>
             /// Moves the feeder forward and activates the flipping and blowing units simultaneously
             /// </summary>
-            public static void ForwardFlipBlow() 
+            public static void ForwardFlipBlow()
             {
                 string cmd = "fwd_fl_bw=1";
                 string rsp = SendCommand(cmd);
@@ -608,7 +609,7 @@ namespace FlexibowlLibrary
             /// <summary>
             /// Moves the feeder forward and activates the blowing unit
             /// </summary>
-            public static void ForwardBlow() 
+            public static void ForwardBlow()
             {
                 string cmd = "fwd_blw=1";
                 string rsp = SendCommand(cmd);
