@@ -147,6 +147,45 @@ namespace FlexibowlLibrary
             return available;
         }
 
+        /// <summary>
+        /// Reset Flexibowl from fault status
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="endpoint"></param>
+        /// <returns></returns>
+        public static void resetFault(UdpClient client, IPEndPoint endpoint)
+        {
+
+            int byteSent = 0;
+            
+            // Convert the "kl" command to bytes
+            Byte[] SCLstring = Encoding.ASCII.GetBytes("kl");
+            Byte[] sendBytes = new Byte[SCLstring.Length + 1];
+
+            Array.Copy(SCLstring, 0, sendBytes, 0, SCLstring.Length);
+            sendBytes[sendBytes.Length - 1] = 13; // CR
+
+            // Send the "kl" command to the server
+            byteSent = client.Send(sendBytes, sendBytes.Length);
+
+            // Wait 0.1 seconds
+            System.Threading.Thread.Sleep(100);
+
+            byteSent = 0;
+
+            // Convert the "xq##init" command to bytes
+            SCLstring = Encoding.ASCII.GetBytes("xq##init");
+            sendBytes = new Byte[SCLstring.Length + 1];
+
+            Array.Copy(SCLstring, 0, sendBytes, 0, SCLstring.Length);
+            sendBytes[sendBytes.Length - 1] = 13; // CR
+
+            // Send the "xq##init" command to the server
+            byteSent = client.Send(sendBytes, sendBytes.Length);
+
+            // Wait 0.1 seconds
+            System.Threading.Thread.Sleep(100);
+        }
 
         /// <summary>
         /// Send a command to the Flexibowl over UDP protocol
