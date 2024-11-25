@@ -84,5 +84,10 @@ namespace OptiSort.userControls
             _frmMain.Log("Flexibowl: shake command sent", false, false);
 
         }
+
+        private void btnFaultReset_Click(object sender, EventArgs e)
+        {
+            Flexibowl.resetFault();
+        }
     }
 }

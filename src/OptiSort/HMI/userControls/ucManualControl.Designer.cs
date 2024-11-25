@@ -36,6 +36,7 @@
             this.btnFlexibowlBw = new System.Windows.Forms.Button();
             this.lblFlexibowl = new System.Windows.Forms.Label();
             this.btnFlexibowlFw = new System.Windows.Forms.Button();
+            this.btnFaultReset = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -44,8 +45,9 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Controls.Add(this.btnScaraJog, 0, 4);
-            this.tableLayoutPanel1.Controls.Add(this.lblScara, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.btnFaultReset, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.btnScaraJog, 0, 5);
+            this.tableLayoutPanel1.Controls.Add(this.lblScara, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.btnFlexibowlShake, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.btnFlexibowlFlip, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.btnFlexibowlBw, 1, 1);
@@ -54,13 +56,14 @@
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 6;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
+            this.tableLayoutPanel1.RowCount = 7;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1166, 677);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
@@ -68,10 +71,10 @@
             // 
             this.btnScaraJog.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnScaraJog.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnScaraJog.Location = new System.Drawing.Point(100, 468);
+            this.btnScaraJog.Location = new System.Drawing.Point(100, 500);
             this.btnScaraJog.Margin = new System.Windows.Forms.Padding(100, 20, 100, 20);
             this.btnScaraJog.Name = "btnScaraJog";
-            this.btnScaraJog.Size = new System.Drawing.Size(383, 72);
+            this.btnScaraJog.Size = new System.Drawing.Size(383, 56);
             this.btnScaraJog.TabIndex = 6;
             this.btnScaraJog.Text = "Open form";
             this.btnScaraJog.UseVisualStyleBackColor = true;
@@ -83,9 +86,9 @@
             this.tableLayoutPanel1.SetColumnSpan(this.lblScara, 2);
             this.lblScara.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblScara.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblScara.Location = new System.Drawing.Point(3, 336);
+            this.lblScara.Location = new System.Drawing.Point(3, 384);
             this.lblScara.Name = "lblScara";
-            this.lblScara.Size = new System.Drawing.Size(1160, 112);
+            this.lblScara.Size = new System.Drawing.Size(1160, 96);
             this.lblScara.TabIndex = 5;
             this.lblScara.Text = "Scara control";
             this.lblScara.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -94,10 +97,10 @@
             // 
             this.btnFlexibowlShake.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFlexibowlShake.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnFlexibowlShake.Location = new System.Drawing.Point(683, 244);
+            this.btnFlexibowlShake.Location = new System.Drawing.Point(683, 212);
             this.btnFlexibowlShake.Margin = new System.Windows.Forms.Padding(100, 20, 100, 20);
             this.btnFlexibowlShake.Name = "btnFlexibowlShake";
-            this.btnFlexibowlShake.Size = new System.Drawing.Size(383, 72);
+            this.btnFlexibowlShake.Size = new System.Drawing.Size(383, 56);
             this.btnFlexibowlShake.TabIndex = 4;
             this.btnFlexibowlShake.Text = "Shake";
             this.btnFlexibowlShake.UseVisualStyleBackColor = true;
@@ -107,10 +110,10 @@
             // 
             this.btnFlexibowlFlip.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFlexibowlFlip.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnFlexibowlFlip.Location = new System.Drawing.Point(100, 244);
+            this.btnFlexibowlFlip.Location = new System.Drawing.Point(100, 212);
             this.btnFlexibowlFlip.Margin = new System.Windows.Forms.Padding(100, 20, 100, 20);
             this.btnFlexibowlFlip.Name = "btnFlexibowlFlip";
-            this.btnFlexibowlFlip.Size = new System.Drawing.Size(383, 72);
+            this.btnFlexibowlFlip.Size = new System.Drawing.Size(383, 56);
             this.btnFlexibowlFlip.TabIndex = 3;
             this.btnFlexibowlFlip.Text = "Filp";
             this.btnFlexibowlFlip.UseVisualStyleBackColor = true;
@@ -120,10 +123,10 @@
             // 
             this.btnFlexibowlBw.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFlexibowlBw.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnFlexibowlBw.Location = new System.Drawing.Point(683, 132);
+            this.btnFlexibowlBw.Location = new System.Drawing.Point(683, 116);
             this.btnFlexibowlBw.Margin = new System.Windows.Forms.Padding(100, 20, 100, 20);
             this.btnFlexibowlBw.Name = "btnFlexibowlBw";
-            this.btnFlexibowlBw.Size = new System.Drawing.Size(383, 72);
+            this.btnFlexibowlBw.Size = new System.Drawing.Size(383, 56);
             this.btnFlexibowlBw.TabIndex = 2;
             this.btnFlexibowlBw.Text = "Backward";
             this.btnFlexibowlBw.UseVisualStyleBackColor = true;
@@ -137,7 +140,7 @@
             this.lblFlexibowl.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblFlexibowl.Location = new System.Drawing.Point(3, 0);
             this.lblFlexibowl.Name = "lblFlexibowl";
-            this.lblFlexibowl.Size = new System.Drawing.Size(1160, 112);
+            this.lblFlexibowl.Size = new System.Drawing.Size(1160, 96);
             this.lblFlexibowl.TabIndex = 0;
             this.lblFlexibowl.Text = "Flexibowl control";
             this.lblFlexibowl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -146,14 +149,27 @@
             // 
             this.btnFlexibowlFw.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFlexibowlFw.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnFlexibowlFw.Location = new System.Drawing.Point(100, 132);
+            this.btnFlexibowlFw.Location = new System.Drawing.Point(100, 116);
             this.btnFlexibowlFw.Margin = new System.Windows.Forms.Padding(100, 20, 100, 20);
             this.btnFlexibowlFw.Name = "btnFlexibowlFw";
-            this.btnFlexibowlFw.Size = new System.Drawing.Size(383, 72);
+            this.btnFlexibowlFw.Size = new System.Drawing.Size(383, 56);
             this.btnFlexibowlFw.TabIndex = 1;
             this.btnFlexibowlFw.Text = "Forward";
             this.btnFlexibowlFw.UseVisualStyleBackColor = true;
             this.btnFlexibowlFw.Click += new System.EventHandler(this.btnFlexibowlFw_Click);
+            // 
+            // btnFaultReset
+            // 
+            this.btnFaultReset.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnFaultReset.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnFaultReset.Location = new System.Drawing.Point(100, 308);
+            this.btnFaultReset.Margin = new System.Windows.Forms.Padding(100, 20, 100, 20);
+            this.btnFaultReset.Name = "btnFaultReset";
+            this.btnFaultReset.Size = new System.Drawing.Size(383, 56);
+            this.btnFaultReset.TabIndex = 7;
+            this.btnFaultReset.Text = "Fault reset";
+            this.btnFaultReset.UseVisualStyleBackColor = true;
+            this.btnFaultReset.Click += new System.EventHandler(this.btnFaultReset_Click);
             // 
             // ucManualControl
             // 
@@ -178,5 +194,6 @@
         private System.Windows.Forms.Button btnFlexibowlBw;
         private System.Windows.Forms.Label lblFlexibowl;
         private System.Windows.Forms.Button btnFlexibowlFw;
+        private System.Windows.Forms.Button btnFaultReset;
     }
 }

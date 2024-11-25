@@ -151,9 +151,8 @@ namespace FlexibowlLibrary
         /// Reset Flexibowl from fault status
         /// </summary>
         /// <param name="client"></param>
-        /// <param name="endpoint"></param>
         /// <returns></returns>
-        public static void resetFault(UdpClient client, IPEndPoint endpoint)
+        public static void resetFault()
         {
 
             int byteSent = 0;
@@ -166,7 +165,7 @@ namespace FlexibowlLibrary
             sendBytes[sendBytes.Length - 1] = 13; // CR
 
             // Send the "kl" command to the server
-            byteSent = client.Send(sendBytes, sendBytes.Length);
+            byteSent = UdpClient.Send(sendBytes, sendBytes.Length);
 
             // Wait 0.1 seconds
             System.Threading.Thread.Sleep(100);
@@ -181,7 +180,7 @@ namespace FlexibowlLibrary
             sendBytes[sendBytes.Length - 1] = 13; // CR
 
             // Send the "xq##init" command to the server
-            byteSent = client.Send(sendBytes, sendBytes.Length);
+            byteSent = UdpClient.Send(sendBytes, sendBytes.Length);
 
             // Wait 0.1 seconds
             System.Threading.Thread.Sleep(100);
