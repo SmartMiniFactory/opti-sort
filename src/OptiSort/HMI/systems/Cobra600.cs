@@ -49,14 +49,14 @@ namespace OptiSort
         }
 
 
-        public bool Connect(bool emulation, string controllerName, string robotName, string endEffectorName)
+        public Exception Connect(bool emulation, string controllerName, string robotName, string endEffectorName)
         {
             try
             {
                 // Connect to ACE
                 Server = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, "127.0.0.1", _remotingPort);
                 Client = new AceClient(Server);
-                Client.InitializePlugins(null);
+                //Client.InitializePlugins(null);
 
                 // Clear workspace
                 Server.Clear();
@@ -130,10 +130,9 @@ namespace OptiSort
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return false;
+                return ex;
             }
-            return true;
+            return null;
         }
 
 

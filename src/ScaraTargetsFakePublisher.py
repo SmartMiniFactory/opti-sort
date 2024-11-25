@@ -37,18 +37,19 @@ def create_message(values):
     }
     return json.dumps(message_dict)
 
+time.sleep(3)
 
 while True:
 
     match i:
         case 1:
-            message = [300.07, -0.959, 302.12, 0.0, 180.0, 180.0]
+            message = [450.00, -320.00, 375.00, 0.0, 180.0, -90.0]
 
         case 2:
-            message = [250.07, -50.959, 302.12, 0.0, 180.0, 180.0]
+            message = [500.00, -270.00, 375.00, 0.0, 180.0, -90.0]
 
         case 3:
-            message = [200.07, -50.959, 302.12, 0.0, 180.0, 180.0]
+            message = [330.00, -225.00, 375.00, 0.0, 180.0, -90.0]
 
     i += 1
     if i == 4:
@@ -60,7 +61,7 @@ while True:
     client.publish(topic, str(json_message))
     print("Message sent: ")
 
-    time.sleep(1)
+    time.sleep(10)
     # Wait for user input to quit
     if keyboard.is_pressed('q'):
         print("\nqQuitting...")

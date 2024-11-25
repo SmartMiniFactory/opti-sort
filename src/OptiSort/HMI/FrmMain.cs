@@ -429,7 +429,8 @@ namespace OptiSort
             if (!StatusScaraEmulation)
                 Cobra600.RobotIP = Properties.Settings.Default.scara_controllerIP;
 
-            if (Cobra600.Connect(StatusScaraEmulation, controllerName, robotName, endEffectorName))
+            var ex = Cobra600.Connect(StatusScaraEmulation, controllerName, robotName, endEffectorName);
+            if (ex == null)
             {
                 Log("Robot successfully connected", false, true);
                 btnScaraConnect.Enabled = false;
@@ -447,6 +448,7 @@ namespace OptiSort
             }
             else
             {
+                MessageBox.Show($"{ex}");
                 Log("Failed to connect to robot", true, false);
             }
 
