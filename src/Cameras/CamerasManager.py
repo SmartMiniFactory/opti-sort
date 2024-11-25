@@ -201,7 +201,7 @@ with dai.Device(pipeline) as device:
         start = time.time()
         frame = inRgb.getCvFrame()
         _frame = cv2.imencode('.png', frame, encode_param_png)[1].tobytes()
-        client.publish(MQTT_LUXONIS_TOPIC, _frame)  # Publish the Frame on the Topic home/server
+        client.publish(MQTT_LUXONIS_TOPIC, im2json(_frame))  # Publish the Frame on the Topic home/server
         cv2.imshow("Stream input", frame)  # Show the frame
         end = time.time()  # End time
         t = end - start
