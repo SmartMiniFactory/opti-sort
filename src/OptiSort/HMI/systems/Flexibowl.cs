@@ -20,6 +20,7 @@ namespace FlexibowlLibrary
         public Flexibowl(string flexibowlIp)
         {
             UdpClient = new UdpClient(5001);
+            Endpoint = new IPEndPoint(IP, 5001);
             IP = IPAddress.Parse(flexibowlIp);
         }
 
@@ -31,8 +32,6 @@ namespace FlexibowlLibrary
         /// <returns></returns>
         public bool Connect()
         {
-            Endpoint = new IPEndPoint(IP, 5001);
-
             try
             {
                 UdpClient.Connect(Endpoint);
@@ -55,8 +54,6 @@ namespace FlexibowlLibrary
         /// <param name="client"></param>
         public bool Disconnect()
         {
-            Endpoint = null;
-
             try
             {
                 UdpClient.Dispose();
