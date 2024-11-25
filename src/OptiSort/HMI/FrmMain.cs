@@ -395,13 +395,13 @@ namespace OptiSort
         {
             if (StatusScaraEmulation)
             {
-                btnEmulateScara.BackgroundImage = Properties.Resources.robot_2x2_pptx;
+                btnEmulateScara.BackgroundImage = Properties.Resources.robotEnabled_2x2_pptx;
                 StatusScaraEmulation = false;
                 Log("Scara emulation mode disabled", false, false);
             }
             else
             {
-                btnEmulateScara.BackgroundImage = Properties.Resources.emulation_2x2_pptx;
+                btnEmulateScara.BackgroundImage = Properties.Resources.emulationEnabled_2x2_pptx;
                 StatusScaraEmulation = true;
                 Log("Scara emulation mode enabled", false, false);
             }
@@ -438,6 +438,10 @@ namespace OptiSort
                 btnScaraDisconnect.Enabled = true;
                 btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
                 btnEmulateScara.Enabled = false;
+                if (StatusScaraEmulation)
+                    btnEmulateScara.BackgroundImage = Properties.Resources.emulationDisabled_2x2_pptx;
+                else
+                    btnEmulateScara.BackgroundImage = Properties.Resources.robotDisabled_2x2_pptx;
                 StatusScara = true;
                 pnlRobotView.Controls.Clear();
                 pnlRobotView.Controls.Add(Cobra600.SimulationContainerControl); // add robot rendering to panel
@@ -470,6 +474,10 @@ namespace OptiSort
                 btnScaraDisconnect.Enabled = false;
                 btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                 btnEmulateScara.Enabled = true;
+                if (StatusScaraEmulation)
+                    btnEmulateScara.BackgroundImage = Properties.Resources.emulationEnabled_2x2_pptx;
+                else
+                    btnEmulateScara.BackgroundImage = Properties.Resources.robotEnabled_2x2_pptx;
                 StatusScara = false;
                 PaintIndicationRobot3DView();
             }

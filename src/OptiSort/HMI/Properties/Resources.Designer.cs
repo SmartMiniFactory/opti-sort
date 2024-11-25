@@ -143,9 +143,19 @@ namespace OptiSort.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap emulation_2x2_pptx {
+        internal static System.Drawing.Bitmap emulationDisabled_2x2_pptx {
             get {
-                object obj = ResourceManager.GetObject("emulation_2x2_pptx", resourceCulture);
+                object obj = ResourceManager.GetObject("emulationDisabled_2x2_pptx", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap emulationEnabled_2x2_pptx {
+            get {
+                object obj = ResourceManager.GetObject("emulationEnabled_2x2_pptx", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -223,9 +233,29 @@ namespace OptiSort.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap robot_2x2_pptx {
+        internal static System.Drawing.Bitmap robot_2x2_pptx1 {
             get {
-                object obj = ResourceManager.GetObject("robot_2x2_pptx", resourceCulture);
+                object obj = ResourceManager.GetObject("robot_2x2_pptx1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap robotDisabled_2x2_pptx {
+            get {
+                object obj = ResourceManager.GetObject("robotDisabled_2x2_pptx", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap robotEnabled_2x2_pptx {
+            get {
+                object obj = ResourceManager.GetObject("robotEnabled_2x2_pptx", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

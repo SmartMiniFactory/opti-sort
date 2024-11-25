@@ -31,30 +31,30 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.lstLog = new System.Windows.Forms.ListBox();
             this.tblPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.btnStop = new System.Windows.Forms.Button();
-            this.btnRun = new System.Windows.Forms.Button();
-            this.btnConfig = new System.Windows.Forms.Button();
-            this.btnManual = new System.Windows.Forms.Button();
-            this.btnAuto = new System.Windows.Forms.Button();
             this.pnlCurrentUc = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnEmulateScara = new System.Windows.Forms.Button();
-            this.btnMqttDisconnect = new System.Windows.Forms.Button();
-            this.btnFlexibowlDisconnect = new System.Windows.Forms.Button();
-            this.btnScaraDisconnect = new System.Windows.Forms.Button();
-            this.btnMqttConnect = new System.Windows.Forms.Button();
-            this.btnFlexibowlConnect = new System.Windows.Forms.Button();
             this.lblMqttStatusValue = new System.Windows.Forms.Label();
             this.lblMqttStatus = new System.Windows.Forms.Label();
             this.lblFlexibowlStatusValue = new System.Windows.Forms.Label();
             this.lblFlexibowlStatus = new System.Windows.Forms.Label();
             this.lblScaraStatusValue = new System.Windows.Forms.Label();
             this.lblScaraStatus = new System.Windows.Forms.Label();
-            this.btnScaraConnect = new System.Windows.Forms.Button();
             this.tblMainStructure = new System.Windows.Forms.TableLayoutPanel();
             this.pnlRobotView = new System.Windows.Forms.Panel();
             this.cmbCameras = new System.Windows.Forms.ComboBox();
             this.pnlCameraStream = new System.Windows.Forms.Panel();
+            this.btnStop = new System.Windows.Forms.Button();
+            this.btnRun = new System.Windows.Forms.Button();
+            this.btnConfig = new System.Windows.Forms.Button();
+            this.btnManual = new System.Windows.Forms.Button();
+            this.btnAuto = new System.Windows.Forms.Button();
+            this.btnEmulateScara = new System.Windows.Forms.Button();
+            this.btnMqttDisconnect = new System.Windows.Forms.Button();
+            this.btnFlexibowlDisconnect = new System.Windows.Forms.Button();
+            this.btnScaraDisconnect = new System.Windows.Forms.Button();
+            this.btnMqttConnect = new System.Windows.Forms.Button();
+            this.btnFlexibowlConnect = new System.Windows.Forms.Button();
+            this.btnScaraConnect = new System.Windows.Forms.Button();
             this.tblPanel.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tblMainStructure.SuspendLayout();
@@ -95,79 +95,6 @@
             this.tblPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tblPanel.Size = new System.Drawing.Size(1898, 113);
             this.tblPanel.TabIndex = 1;
-            // 
-            // btnStop
-            // 
-            this.btnStop.BackgroundImage = global::OptiSort.Properties.Resources.stopDisabled_2x2_pptx;
-            this.btnStop.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnStop.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnStop.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnStop.Location = new System.Drawing.Point(1426, 59);
-            this.btnStop.Name = "btnStop";
-            this.btnStop.Size = new System.Drawing.Size(88, 51);
-            this.btnStop.TabIndex = 5;
-            this.btnStop.TabStop = false;
-            this.btnStop.UseVisualStyleBackColor = true;
-            this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
-            // 
-            // btnRun
-            // 
-            this.btnRun.BackgroundImage = global::OptiSort.Properties.Resources.playDisabled_2x2_pptx;
-            this.btnRun.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnRun.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnRun.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRun.Location = new System.Drawing.Point(1426, 3);
-            this.btnRun.Name = "btnRun";
-            this.btnRun.Size = new System.Drawing.Size(88, 50);
-            this.btnRun.TabIndex = 4;
-            this.btnRun.TabStop = false;
-            this.btnRun.UseVisualStyleBackColor = true;
-            this.btnRun.Click += new System.EventHandler(this.btnRun_Click);
-            // 
-            // btnConfig
-            // 
-            this.btnConfig.BackgroundImage = global::OptiSort.Properties.Resources.configDisabled_2x2_pptx;
-            this.btnConfig.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnConfig.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnConfig.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnConfig.Location = new System.Drawing.Point(1772, 3);
-            this.btnConfig.Name = "btnConfig";
-            this.tblPanel.SetRowSpan(this.btnConfig, 2);
-            this.btnConfig.Size = new System.Drawing.Size(123, 107);
-            this.btnConfig.TabIndex = 3;
-            this.btnConfig.TabStop = false;
-            this.btnConfig.UseVisualStyleBackColor = true;
-            this.btnConfig.Click += new System.EventHandler(this.btnConfig_Click);
-            // 
-            // btnManual
-            // 
-            this.btnManual.BackgroundImage = global::OptiSort.Properties.Resources.manualEnabled_2x2_pptx;
-            this.btnManual.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnManual.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnManual.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnManual.Location = new System.Drawing.Point(1646, 3);
-            this.btnManual.Name = "btnManual";
-            this.tblPanel.SetRowSpan(this.btnManual, 2);
-            this.btnManual.Size = new System.Drawing.Size(120, 107);
-            this.btnManual.TabIndex = 2;
-            this.btnManual.TabStop = false;
-            this.btnManual.UseVisualStyleBackColor = true;
-            this.btnManual.Click += new System.EventHandler(this.btnManual_Click);
-            // 
-            // btnAuto
-            // 
-            this.btnAuto.BackgroundImage = global::OptiSort.Properties.Resources.autoDisabled_2x2_pptx;
-            this.btnAuto.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnAuto.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnAuto.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAuto.Location = new System.Drawing.Point(1520, 3);
-            this.btnAuto.Name = "btnAuto";
-            this.tblPanel.SetRowSpan(this.btnAuto, 2);
-            this.btnAuto.Size = new System.Drawing.Size(120, 107);
-            this.btnAuto.TabIndex = 1;
-            this.btnAuto.TabStop = false;
-            this.btnAuto.UseVisualStyleBackColor = true;
-            this.btnAuto.Click += new System.EventHandler(this.btnAuto_Click);
             // 
             // pnlCurrentUc
             // 
@@ -213,82 +140,6 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1898, 129);
             this.tableLayoutPanel1.TabIndex = 2;
-            // 
-            // btnEmulateScara
-            // 
-            this.btnEmulateScara.BackgroundImage = global::OptiSort.Properties.Resources.emulation_2x2_pptx;
-            this.btnEmulateScara.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnEmulateScara.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnEmulateScara.Location = new System.Drawing.Point(234, 3);
-            this.btnEmulateScara.Name = "btnEmulateScara";
-            this.tableLayoutPanel1.SetRowSpan(this.btnEmulateScara, 2);
-            this.btnEmulateScara.Size = new System.Drawing.Size(94, 123);
-            this.btnEmulateScara.TabIndex = 12;
-            this.btnEmulateScara.UseVisualStyleBackColor = true;
-            this.btnEmulateScara.Click += new System.EventHandler(this.btnEmulateScara_Click);
-            // 
-            // btnMqttDisconnect
-            // 
-            this.btnMqttDisconnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnMqttDisconnect.BackgroundImage")));
-            this.btnMqttDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnMqttDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnMqttDisconnect.Enabled = false;
-            this.btnMqttDisconnect.Location = new System.Drawing.Point(1820, 67);
-            this.btnMqttDisconnect.Name = "btnMqttDisconnect";
-            this.btnMqttDisconnect.Size = new System.Drawing.Size(75, 59);
-            this.btnMqttDisconnect.TabIndex = 11;
-            this.btnMqttDisconnect.UseVisualStyleBackColor = true;
-            this.btnMqttDisconnect.Click += new System.EventHandler(this.btnMqttDisconnect_Click);
-            // 
-            // btnFlexibowlDisconnect
-            // 
-            this.btnFlexibowlDisconnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnFlexibowlDisconnect.BackgroundImage")));
-            this.btnFlexibowlDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnFlexibowlDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnFlexibowlDisconnect.Enabled = false;
-            this.btnFlexibowlDisconnect.Location = new System.Drawing.Point(1077, 67);
-            this.btnFlexibowlDisconnect.Name = "btnFlexibowlDisconnect";
-            this.btnFlexibowlDisconnect.Size = new System.Drawing.Size(74, 59);
-            this.btnFlexibowlDisconnect.TabIndex = 10;
-            this.btnFlexibowlDisconnect.UseVisualStyleBackColor = true;
-            this.btnFlexibowlDisconnect.Click += new System.EventHandler(this.btnFlexibowlDisconnect_Click);
-            // 
-            // btnScaraDisconnect
-            // 
-            this.btnScaraDisconnect.BackgroundImage = global::OptiSort.Properties.Resources.disconnectedDisabled_2x2_pptx;
-            this.btnScaraDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnScaraDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnScaraDisconnect.Enabled = false;
-            this.btnScaraDisconnect.Location = new System.Drawing.Point(334, 67);
-            this.btnScaraDisconnect.Name = "btnScaraDisconnect";
-            this.btnScaraDisconnect.Size = new System.Drawing.Size(74, 59);
-            this.btnScaraDisconnect.TabIndex = 9;
-            this.btnScaraDisconnect.UseVisualStyleBackColor = true;
-            this.btnScaraDisconnect.Click += new System.EventHandler(this.btnScaraDisconnect_Click);
-            // 
-            // btnMqttConnect
-            // 
-            this.btnMqttConnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnMqttConnect.BackgroundImage")));
-            this.btnMqttConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnMqttConnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnMqttConnect.Location = new System.Drawing.Point(1820, 3);
-            this.btnMqttConnect.Name = "btnMqttConnect";
-            this.btnMqttConnect.Size = new System.Drawing.Size(75, 58);
-            this.btnMqttConnect.TabIndex = 8;
-            this.btnMqttConnect.UseVisualStyleBackColor = true;
-            this.btnMqttConnect.Click += new System.EventHandler(this.btnMqttConnect_Click);
-            // 
-            // btnFlexibowlConnect
-            // 
-            this.btnFlexibowlConnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnFlexibowlConnect.BackgroundImage")));
-            this.btnFlexibowlConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnFlexibowlConnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnFlexibowlConnect.Location = new System.Drawing.Point(1077, 3);
-            this.btnFlexibowlConnect.Name = "btnFlexibowlConnect";
-            this.btnFlexibowlConnect.Size = new System.Drawing.Size(74, 58);
-            this.btnFlexibowlConnect.TabIndex = 7;
-            this.btnFlexibowlConnect.UseVisualStyleBackColor = true;
-            this.btnFlexibowlConnect.Click += new System.EventHandler(this.btnFlexibowlConnect_Click);
             // 
             // lblMqttStatusValue
             // 
@@ -371,18 +222,6 @@
             this.lblScaraStatus.Text = "Scara:";
             this.lblScaraStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // btnScaraConnect
-            // 
-            this.btnScaraConnect.BackgroundImage = global::OptiSort.Properties.Resources.connectedEnabled_2x2_pptx;
-            this.btnScaraConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnScaraConnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnScaraConnect.Location = new System.Drawing.Point(334, 3);
-            this.btnScaraConnect.Name = "btnScaraConnect";
-            this.btnScaraConnect.Size = new System.Drawing.Size(74, 58);
-            this.btnScaraConnect.TabIndex = 6;
-            this.btnScaraConnect.UseVisualStyleBackColor = true;
-            this.btnScaraConnect.Click += new System.EventHandler(this.btnScaraConnect_Click);
-            // 
             // tblMainStructure
             // 
             this.tblMainStructure.ColumnCount = 2;
@@ -430,6 +269,167 @@
             this.pnlCameraStream.Name = "pnlCameraStream";
             this.pnlCameraStream.Size = new System.Drawing.Size(469, 345);
             this.pnlCameraStream.TabIndex = 5;
+            // 
+            // btnStop
+            // 
+            this.btnStop.BackgroundImage = global::OptiSort.Properties.Resources.stopDisabled_2x2_pptx;
+            this.btnStop.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnStop.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnStop.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnStop.Location = new System.Drawing.Point(1426, 59);
+            this.btnStop.Name = "btnStop";
+            this.btnStop.Size = new System.Drawing.Size(88, 51);
+            this.btnStop.TabIndex = 5;
+            this.btnStop.TabStop = false;
+            this.btnStop.UseVisualStyleBackColor = true;
+            this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
+            // 
+            // btnRun
+            // 
+            this.btnRun.BackgroundImage = global::OptiSort.Properties.Resources.playDisabled_2x2_pptx;
+            this.btnRun.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnRun.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnRun.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnRun.Location = new System.Drawing.Point(1426, 3);
+            this.btnRun.Name = "btnRun";
+            this.btnRun.Size = new System.Drawing.Size(88, 50);
+            this.btnRun.TabIndex = 4;
+            this.btnRun.TabStop = false;
+            this.btnRun.UseVisualStyleBackColor = true;
+            this.btnRun.Click += new System.EventHandler(this.btnRun_Click);
+            // 
+            // btnConfig
+            // 
+            this.btnConfig.BackgroundImage = global::OptiSort.Properties.Resources.configDisabled_2x2_pptx;
+            this.btnConfig.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnConfig.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnConfig.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnConfig.Location = new System.Drawing.Point(1772, 3);
+            this.btnConfig.Name = "btnConfig";
+            this.tblPanel.SetRowSpan(this.btnConfig, 2);
+            this.btnConfig.Size = new System.Drawing.Size(123, 107);
+            this.btnConfig.TabIndex = 3;
+            this.btnConfig.TabStop = false;
+            this.btnConfig.UseVisualStyleBackColor = true;
+            this.btnConfig.Click += new System.EventHandler(this.btnConfig_Click);
+            // 
+            // btnManual
+            // 
+            this.btnManual.BackgroundImage = global::OptiSort.Properties.Resources.manualEnabled_2x2_pptx;
+            this.btnManual.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnManual.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnManual.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnManual.Location = new System.Drawing.Point(1646, 3);
+            this.btnManual.Name = "btnManual";
+            this.tblPanel.SetRowSpan(this.btnManual, 2);
+            this.btnManual.Size = new System.Drawing.Size(120, 107);
+            this.btnManual.TabIndex = 2;
+            this.btnManual.TabStop = false;
+            this.btnManual.UseVisualStyleBackColor = true;
+            this.btnManual.Click += new System.EventHandler(this.btnManual_Click);
+            // 
+            // btnAuto
+            // 
+            this.btnAuto.BackgroundImage = global::OptiSort.Properties.Resources.autoDisabled_2x2_pptx;
+            this.btnAuto.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnAuto.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnAuto.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAuto.Location = new System.Drawing.Point(1520, 3);
+            this.btnAuto.Name = "btnAuto";
+            this.tblPanel.SetRowSpan(this.btnAuto, 2);
+            this.btnAuto.Size = new System.Drawing.Size(120, 107);
+            this.btnAuto.TabIndex = 1;
+            this.btnAuto.TabStop = false;
+            this.btnAuto.UseVisualStyleBackColor = true;
+            this.btnAuto.Click += new System.EventHandler(this.btnAuto_Click);
+            // 
+            // btnEmulateScara
+            // 
+            this.btnEmulateScara.BackgroundImage = global::OptiSort.Properties.Resources.emulationEnabled_2x2_pptx;
+            this.btnEmulateScara.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnEmulateScara.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnEmulateScara.Location = new System.Drawing.Point(234, 3);
+            this.btnEmulateScara.Name = "btnEmulateScara";
+            this.tableLayoutPanel1.SetRowSpan(this.btnEmulateScara, 2);
+            this.btnEmulateScara.Size = new System.Drawing.Size(94, 123);
+            this.btnEmulateScara.TabIndex = 12;
+            this.btnEmulateScara.UseVisualStyleBackColor = true;
+            this.btnEmulateScara.Click += new System.EventHandler(this.btnEmulateScara_Click);
+            // 
+            // btnMqttDisconnect
+            // 
+            this.btnMqttDisconnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnMqttDisconnect.BackgroundImage")));
+            this.btnMqttDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnMqttDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnMqttDisconnect.Enabled = false;
+            this.btnMqttDisconnect.Location = new System.Drawing.Point(1820, 67);
+            this.btnMqttDisconnect.Name = "btnMqttDisconnect";
+            this.btnMqttDisconnect.Size = new System.Drawing.Size(75, 59);
+            this.btnMqttDisconnect.TabIndex = 11;
+            this.btnMqttDisconnect.UseVisualStyleBackColor = true;
+            this.btnMqttDisconnect.Click += new System.EventHandler(this.btnMqttDisconnect_Click);
+            // 
+            // btnFlexibowlDisconnect
+            // 
+            this.btnFlexibowlDisconnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnFlexibowlDisconnect.BackgroundImage")));
+            this.btnFlexibowlDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnFlexibowlDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnFlexibowlDisconnect.Enabled = false;
+            this.btnFlexibowlDisconnect.Location = new System.Drawing.Point(1077, 67);
+            this.btnFlexibowlDisconnect.Name = "btnFlexibowlDisconnect";
+            this.btnFlexibowlDisconnect.Size = new System.Drawing.Size(74, 59);
+            this.btnFlexibowlDisconnect.TabIndex = 10;
+            this.btnFlexibowlDisconnect.UseVisualStyleBackColor = true;
+            this.btnFlexibowlDisconnect.Click += new System.EventHandler(this.btnFlexibowlDisconnect_Click);
+            // 
+            // btnScaraDisconnect
+            // 
+            this.btnScaraDisconnect.BackgroundImage = global::OptiSort.Properties.Resources.disconnectedDisabled_2x2_pptx;
+            this.btnScaraDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnScaraDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnScaraDisconnect.Enabled = false;
+            this.btnScaraDisconnect.Location = new System.Drawing.Point(334, 67);
+            this.btnScaraDisconnect.Name = "btnScaraDisconnect";
+            this.btnScaraDisconnect.Size = new System.Drawing.Size(74, 59);
+            this.btnScaraDisconnect.TabIndex = 9;
+            this.btnScaraDisconnect.UseVisualStyleBackColor = true;
+            this.btnScaraDisconnect.Click += new System.EventHandler(this.btnScaraDisconnect_Click);
+            // 
+            // btnMqttConnect
+            // 
+            this.btnMqttConnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnMqttConnect.BackgroundImage")));
+            this.btnMqttConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnMqttConnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnMqttConnect.Location = new System.Drawing.Point(1820, 3);
+            this.btnMqttConnect.Name = "btnMqttConnect";
+            this.btnMqttConnect.Size = new System.Drawing.Size(75, 58);
+            this.btnMqttConnect.TabIndex = 8;
+            this.btnMqttConnect.UseVisualStyleBackColor = true;
+            this.btnMqttConnect.Click += new System.EventHandler(this.btnMqttConnect_Click);
+            // 
+            // btnFlexibowlConnect
+            // 
+            this.btnFlexibowlConnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnFlexibowlConnect.BackgroundImage")));
+            this.btnFlexibowlConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnFlexibowlConnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnFlexibowlConnect.Location = new System.Drawing.Point(1077, 3);
+            this.btnFlexibowlConnect.Name = "btnFlexibowlConnect";
+            this.btnFlexibowlConnect.Size = new System.Drawing.Size(74, 58);
+            this.btnFlexibowlConnect.TabIndex = 7;
+            this.btnFlexibowlConnect.UseVisualStyleBackColor = true;
+            this.btnFlexibowlConnect.Click += new System.EventHandler(this.btnFlexibowlConnect_Click);
+            // 
+            // btnScaraConnect
+            // 
+            this.btnScaraConnect.BackgroundImage = global::OptiSort.Properties.Resources.connectedEnabled_2x2_pptx;
+            this.btnScaraConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnScaraConnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnScaraConnect.Location = new System.Drawing.Point(334, 3);
+            this.btnScaraConnect.Name = "btnScaraConnect";
+            this.btnScaraConnect.Size = new System.Drawing.Size(74, 58);
+            this.btnScaraConnect.TabIndex = 6;
+            this.btnScaraConnect.UseVisualStyleBackColor = true;
+            this.btnScaraConnect.Click += new System.EventHandler(this.btnScaraConnect_Click);
             // 
             // frmMain
             // 

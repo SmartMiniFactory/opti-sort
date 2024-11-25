@@ -263,6 +263,8 @@
     <Content Include="icons\connectedEnabled_2x2_pptx.png" />
     <Content Include="icons\disconnectedDisabled_2x2_pptx.png" />
     <Content Include="icons\disconnectedEnabled_2x2_pptx.png" />
+    <None Include="icons\emulationDisabled_2x2_pptx.png" />
+    <None Include="icons\emulationEnabled_2x2_pptx.png" />
     <Content Include="icons\emulation_2x2_pptx.png" />
     <None Include="icons\manualDisabled_2x2_pptx.png" />
     <None Include="icons\manualEnabled_2x2_pptx.png" />
@@ -273,6 +275,8 @@
     <None Include="icons\playEnabled_2x2_pptx.png" />
     <None Include="icons\playDisabled_2x2_pptx.png" />
     <None Include="icons\playPassivated_2x2_pptx.png" />
+    <None Include="icons\robotDisabled_2x2_pptx.png" />
+    <None Include="icons\robotEnabled_2x2_pptx.png" />
     <Content Include="icons\robot_2x2_pptx.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
