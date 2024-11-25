@@ -1,6 +1,3 @@
-# first, import all necessary modules
-from pathlib import Path
-
 import blobconverter
 import cv2
 import depthai

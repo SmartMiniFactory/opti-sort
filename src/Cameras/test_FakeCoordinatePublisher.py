@@ -1,4 +1,5 @@
 # Description: This script publishes messages to a MQTT broker.
+# The published message represent a set of fake coordinates as one of the cameras were detecting some object
 
 import paho.mqtt.client as mqtt
 import keyboard
@@ -39,26 +40,28 @@ def create_message(values):
 
 
 while True:
-    if 0 <= i < 200:
-        message = [300.07, -0.959, 302.12, 0.0, 180.0, 180.0]
 
-        i += 1
-    elif 200 <= i < 400:
-        message = [250.07, -50.959, 302.12, 0.0, 180.0, 180.0]
-        i += 1
-    elif 400 <= i < 600:
-        message = [200.07, -50.959, 302.12, 0.0, 180.0, 180.0]
-        i += 1
-    else:
+    match i:
+        case 1:
+            message = [300.07, -0.959, 302.12, 0.0, 180.0, 180.0]
+
+        case 2:
+            message = [250.07, -50.959, 302.12, 0.0, 180.0, 180.0]
+
+        case 3:
+            message = [200.07, -50.959, 302.12, 0.0, 180.0, 180.0]
+
+    i += 1
+    if i == 4:
         i = 0
 
     json_message = create_message(message)
 
     # Publish message to topic
     client.publish(topic, str(json_message))
-    print("Message sent: " + str(json_message), end="\r")
+    print("Message sent: ")
 
-    time.sleep(0.01)
+    time.sleep(1)
     # Wait for user input to quit
     if keyboard.is_pressed('q'):
         print("\nqQuitting...")
