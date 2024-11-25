@@ -460,3 +460,5 @@ FodyWeavers.xsd
 /src/OptiSort/HMI/bin/Debug/CobraLibrary.dll
 /src/OptiSort/HMI/bin/Debug/CobraLibrary.pdb
 /src/OptiSort/HMI/bin/Debug/stdole.dll
+/src/.idea
+/.idea
