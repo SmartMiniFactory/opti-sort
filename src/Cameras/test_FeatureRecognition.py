@@ -3,8 +3,8 @@ import keyboard
 
 
 # Import the images
-imgFront = cv2.imread("C:\\Users\\DGalli\\source\\repos\\opti-sort\\samples\\3D printed case\\Basler\\img1.bmp")
-imgBack = cv2.imread("C:\\Users\\DGalli\\source\\repos\\opti-sort\\samples\\3D printed case\\Basler\\img2.bmp")
+imgFront = cv2.imread("C:\\Users\\Davide Galli\\source\\repos\\opti-sort\\samples\\3D printed case\\Basler\\img1.bmp")
+imgBack = cv2.imread("C:\\Users\\Davide Galli\\source\\repos\\opti-sort\\samples\\3D printed case\\Basler\\img2.bmp")
 
 # Convert the images to grayscale
 imgFront = cv2.cvtColor(imgFront, cv2.COLOR_BGR2GRAY)
