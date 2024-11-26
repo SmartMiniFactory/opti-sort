@@ -11,7 +11,7 @@ broker_port = 1883
 
 # Define topic and message
 topic = "optisort/scara/target"
-message = [300.07, -0.959, 302.12, 0.0, 180.0, 180.0]
+
 
 
 # Create MQTT client
@@ -22,7 +22,7 @@ client.connect(broker_address, broker_port)
 print("Connected to MQTT broker")
 print("Press 'q' to quit")
 
-i = 0
+i = 1
 j = 0
 
 
@@ -43,17 +43,19 @@ while True:
 
     match i:
         case 1:
-            message = [450.00, -320.00, 375.00, 0.0, 180.0, -90.0]
+            message = [425.00, 120.00, 340.00, 0.0, 180.0, -145.0]
 
         case 2:
-            message = [500.00, -270.00, 375.00, 0.0, 180.0, -90.0]
+            message = [375.00, 290.00, 340.00, 0.0, 180.0, -145.0]
 
         case 3:
-            message = [330.00, -225.00, 375.00, 0.0, 180.0, -90.0]
+            message = [375.00, 290.00, 340.00, 0.0, 180.0, -145.0]
+            # message = [200.00, -430.00, 265.00, 0.0, 180.0, -145.0] # WARNING: this is very far and the robot hits flexibowl if is launched with the same approach
+
 
     i += 1
     if i == 4:
-        i = 0
+        i = 1
 
     json_message = create_message(message)
 
@@ -61,7 +63,7 @@ while True:
     client.publish(topic, str(json_message))
     print("Message sent: ")
 
-    time.sleep(10)
+    time.sleep(2)
     # Wait for user input to quit
     if keyboard.is_pressed('q'):
         print("\nqQuitting...")

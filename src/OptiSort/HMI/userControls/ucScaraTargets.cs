@@ -149,7 +149,7 @@ namespace OptiSort
                         if (busy == 0)
                         {
                             Transform3D _locTarget = _targetQueueList[0];
-                                                           
+
                             Cobra600.Motion.Approach(_frmMain.Cobra600.Server, _frmMain.Cobra600.Robot, _locTarget, 20);
                             Cobra600.Motion.CartesianMove(_frmMain.Cobra600.Server, _frmMain.Cobra600.Robot, _locTarget, true);
                             Cobra600.Motion.Approach(_frmMain.Cobra600.Server, _frmMain.Cobra600.Robot, _locTarget, 20);
@@ -167,6 +167,7 @@ namespace OptiSort
                 }
                 catch (Exception ex)
                 {
+                    MessageBox.Show($"Error moving: {ex}");
                     if (ex is System.ObjectDisposedException)
                         break;
                 }
