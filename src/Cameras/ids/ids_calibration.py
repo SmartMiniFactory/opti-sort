@@ -1,43 +1,15 @@
-# ===========================================================================#
-#                                                                           #
-#  Copyright (C) 2006 - 2018                                                #
-#  IDS Imaging Development Systems GmbH                                     #
-#  Dimbacher Str. 6-8                                                       #
-#  D-74182 Obersulm, Germany                                                #
-#                                                                           #
-#  The information in this document is subject to change without notice     #
-#  and should not be construed as a commitment by IDS Imaging Development   #
-#  Systems GmbH. IDS Imaging Development Systems GmbH does not assume any   #
-#  responsibility for any errors that may appear in this document.          #
-#                                                                           #
-#  This document, or source code, is provided solely as an example          #
-#  of how to utilize IDS software libraries in a sample application.        #
-#  IDS Imaging Development Systems GmbH does not assume any responsibility  #
-#  for the use or reliability of any portion of this document or the        #
-#  described software.                                                      #
-#                                                                           #
-#  General permission to copy or modify, but not for profit, is hereby      #
-#  granted, provided that the above copyright notice is included and        #
-#  reference made to the fact that reproduction privileges were granted     #
-#  by IDS Imaging Development Systems GmbH.                                 #
-#                                                                           #
-#  IDS Imaging Development Systems GmbH cannot assume any responsibility    #
-#  for the use or misuse of any portion of this software for other than     #
-#  its intended diagnostic purpose in calibrating and testing IDS           #
-#  manufactured cameras and software.                                       #
-#                                                                           #
-# ===========================================================================#
-import yaml
-# Developer Note: I tried to let it as simple as possible.
-# Therefore there are no functions asking for the newest driver software or freeing memory beforehand, etc.
-# The sole purpose of this program is to show one of the simplest ways to interact with an IDS camera via the uEye API.
-# (XS cameras are not supported)
+"""
+The script opens the camera, looks for the printed calibration grid and
+exports a yaml file containing the lens distortion coefficients that are to be imported when doing object recognition
+"""
 # ---------------------------------------------------------------------------------------------------------------------------------------
 
 # Libraries
 from pyueye import ueye
 import numpy as np
 import cv2
+import keyboard
+import yaml
 import yam
 import sys
 
@@ -51,8 +23,8 @@ pcImageMemory = ueye.c_mem_p()
 MemID = ueye.int()
 rectAOI = ueye.IS_RECT()
 pitch = ueye.INT()
-nBitsPerPixel = ueye.INT(24)  # 24: bits per pixel for color mode; take 8 bits per pixel for monochrome
-channels = 3  # 3: channels for color mode(RGB); take 1 channel for monochrome
+nBitsPerPixel = ueye.INT(8)  # 24: bits per pixel for color mode; take 8 bits per pixel for monochrome
+channels = 1  # 3: channels for color mode(RGB); take 1 channel for monochrome
 m_nColorMode = ueye.INT()  # Y8/RGB16/RGB24/REG32
 bytes_per_pixel = int(nBitsPerPixel / 8)
 # ---------------------------------------------------------------------------------------------------------------------------------------
@@ -168,104 +140,28 @@ else:
 # ---------------------------------------------------------------------------------------------------------------------------------------
 # CALIBRATION
 
-# termination criteria
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+# Define grid parameters
+pattern_size = (6, 20)  # (rows, columns)
 
-# Setup SimpleBlobDetector parameters.
-blobParams = cv2.SimpleBlobDetector_Params()
+# Define the real-world object points
+objp = []
+rows, cols = pattern_size
+spacing = 20  # Spacing between circles in millimeters (or any unit)
+for i in range(rows):
+    for j in range(cols):
+        # Offset alternate rows for the asymmetric pattern
+        x = j * spacing
+        y = i * spacing + (j % 2) * (spacing / 2)
+        objp.append((x, y, 0))
+objp = np.array(objp, dtype=np.float32)
 
-# Change thresholds
-blobParams.minThreshold = 8
-blobParams.maxThreshold = 255
-
-# Filter by Area.
-blobParams.filterByArea = True
-blobParams.minArea = 64     # minArea may be adjusted to suit for your experiment
-blobParams.maxArea = 2500   # maxArea may be adjusted to suit for your experiment
-
-# Filter by Circularity
-blobParams.filterByCircularity = True
-blobParams.minCircularity = 0.1
-
-# Filter by Convexity
-blobParams.filterByConvexity = True
-blobParams.minConvexity = 0.87
-
-# Filter by Inertia
-blobParams.filterByInertia = True
-blobParams.minInertiaRatio = 0.01
-
-# Create a detector with the parameters
-blobDetector = cv2.SimpleBlobDetector_create(blobParams)
-
-# Original blob coordinates, supposing all blobs are of z-coordinates 0
-# And, the distance between every two neighbour blob circle centers is 72 centimetres
-# In fact, any number can be used to replace 72.
-# Namely, the real size of the circle is pointless while calculating camera calibration parameters.
-objp = np.zeros((46, 3), np.float32)
-objp[0]  = (0  , 0.7, 0)
-objp[1]  = (0  , 1.4, 0)
-objp[2]  = (0  , 2.1, 0)
-objp[3]  = (0  , 2.8, 0)
-objp[4]  = (0 , 3.5 , 0)
-
-objp[5]  = (0.7 , 4.2, 0)
-objp[6]  = (0.7 , 4.9, 0)
-objp[7]  = (0.7 , 5.6, 0)
-objp[8]  = (0.7 , 6.3, 0)
-objp[9]  = (0.7 , 7, 0)
-
-objp[10] = (1.4 , 7.7, 0)
-objp[11] = (1.4 , 8.4, 0)
-objp[12] = (1.4, 9.1,  0)
-objp[13] = (1.4, 9.8, 0)
-objp[14] = (1.4, 10.5, 0)
-
-objp[15] = (2.1, 11.2, 0)
-objp[16] = (2.1, 11.9  , 0)
-objp[17] = (2.1, 12.6, 0)
-objp[18] = (2.1, 13.3, 0)
-objp[19] = (2.1, 14, 0)
-
-objp[20] = (2.8, 14.7 , 0)
-objp[21] = (2.8, 15.4, 0)
-objp[22] = (2.8, 16.1, 0)
-objp[23] = (2.8, 16.8, 0)
-objp[24] = (2.8, 17.5, 0)
-
-objp[25] = (3.5, 18.2 , 0)
-objp[26] = (3.5, 18.9, 0)
-objp[27] = (3.5, 19.6, 0)
-objp[28] = (3.5, 20.3, 0)
-objp[29] = (3.5, 21, 0)
-objp[30] = (3.5, 21.7, 0)
-
-objp[31] = (4.2, 22.4, 0)
-objp[32] = (4.2, 23.1, 0)
-objp[33] = (4.2, 23.8, 0)
-objp[34] = (4.2, 24.5, 0)
-objp[35] = (4.2, 25.2, 0)
-
-objp[36] = (4.9, 25.9, 0)
-objp[37] = (4.9, 26.6, 0)
-objp[38] = (4.9, 27.3, 0)
-objp[39] = (4.9, 28, 0)
-objp[40] = (4.9, 28.7, 0)
-
-objp[41] = (5.6, 29.4 , 0)
-objp[42] = (5.6, 30.1, 0)
-objp[43] = (5.6, 30.8, 0)
-objp[44] = (5.6, 31.5, 0)
-objp[45] = (5.6, 32.2, 0)
-
-objpoints = [] # 3d point in real world space
-imgpoints = [] # 2d points in image plane.
-found = 0
+object_points = []  # 3D points in real-world space
+image_points = []   # 2D points in image plane
 
 # ---------------------------------------------------------------------------------------------------------------------------------------
 
-# Continuous image display
-while (nRet == ueye.IS_SUCCESS):
+dataCollection = True;
+while (nRet == ueye.IS_SUCCESS and dataCollection):
 
     array = ueye.get_data(pcImageMemory, width, height, nBitsPerPixel, pitch, copy=False)
     # bytes_per_pixel = int(nBitsPerPixel / 8)
@@ -274,35 +170,39 @@ while (nRet == ueye.IS_SUCCESS):
 
     # ---------------------------------------------------------------------------------------------------------------------------------------
     # Include image data processing here
-    keypoints = blobDetector.detect(frame)  # Detect blobs.
-    # Draw detected blobs as red circles. This helps cv2.findCirclesGrid() .
-    im_with_keypoints = cv2.drawKeypoints(frame, keypoints, np.array([]), (0, 255, 0),
-                                          cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    im_with_keypoints_gray = cv2.cvtColor(im_with_keypoints, cv2.COLOR_BGR2GRAY)
+    # Find the circle grid
+    found, centers = cv2.findCirclesGrid(
+        frame,
+        pattern_size,
+        flags=cv2.CALIB_CB_ASYMMETRIC_GRID
+    )
 
-    ret, corners = cv2.findCirclesGrid(im_with_keypoints, (4, 11), None,
-                                       flags=cv2.CALIB_CB_ASYMMETRIC_GRID)  # Find the circle grid
+    if found:
+        print("Circle grid detected!")
 
-    if ret == True:
-        objpoints.append(objp)  # Certainly, every loop objp is the same, in 3D.
+        # Draw detected centers
+        vis_image = cv2.drawChessboardCorners(frame, pattern_size, centers, found)
+        cv2.imshow('Grid Detection', vis_image)
 
-        corners2 = cv2.cornerSubPix(im_with_keypoints_gray, corners, (11, 11), (-1, -1),
-                                    criteria)  # Refines the corner locations.
-        imgpoints.append(corners2)
+        # Ensure data types
+        object_points.append(objp.copy())  # Ensure a new numpy array is added
+        image_points.append(np.squeeze(centers).astype(np.float32))  # Flatten and convert to float32
 
-        # Draw and display the corners.
-        im_with_keypoints = cv2.drawChessboardCorners(frame, (4, 11), corners2, ret)
-        found += 1
+        # Optional: Debug shapes
+        print("Object points shape:", objp.shape)
+        print("Image points shape:", np.squeeze(centers).shape)
+
+        if len(object_points) > 10:
+            dataCollection = False
+
+
+    else:
+        print("Circle grid not found.")
+        cv2.imshow('Grid Detection', frame)
 
     # ---------------------------------------------------------------------------------------------------------------------------------------
 
-    # display image
-    cv2.imshow("Found keypoints", im_with_keypoints)
-
-    # Press q if you want to end the loop
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
 # ---------------------------------------------------------------------------------------------------------------------------------------
 
 ueye.is_FreeImageMem(hCam, pcImageMemory, MemID)
@@ -310,11 +210,36 @@ ueye.is_ExitCamera(hCam)
 cv2.destroyAllWindows()
 
 
-ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, frame.shape[::-1], None, None)
-# It's very important to transform the matrix to list.
-data = {'camera_matrix': np.asarray(mtx).tolist(), 'dist_coeff': np.asarray(dist).tolist()}
-with open("calibration.yaml", "w") as f:
-    yaml.dump(data, f)
+# Perform camera calibration after collecting points
+if object_points and image_points:
+    print("Performing calibration...")
+
+    print("Number of object points:", len(object_points))
+    print("Number of image points:", len(image_points))
+    print("First object points shape:", object_points[0].shape if object_points else "N/A")
+    print("First image points shape:", image_points[0].shape if image_points else "N/A")
+
+    ret, camera_matrix, distortion_coeffs, rvecs, tvecs = cv2.calibrateCamera(
+        object_points, image_points, frame.shape[::-1], None, None
+    )
+
+    if ret:
+        print("Calibration successful!")
+        print("Camera Matrix:\n", camera_matrix)
+        print("Distortion Coefficients:\n", distortion_coeffs)
+
+        # Save calibration results to a file
+        data = {
+            'camera_matrix': np.asarray(camera_matrix).tolist(),
+            'dist_coeff': np.asarray(distortion_coeffs).tolist()
+        }
+        with open("calibration.yaml", "w") as f:
+            yaml.dump(data, f)
+        print("Calibration data saved to 'calibration.yaml'")
+    else:
+        print("Calibration failed.")
+else:
+    print("No points collected. Calibration not possible.")
 
 print()
 print("END")
