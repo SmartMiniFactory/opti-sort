@@ -153,6 +153,7 @@ while nRet == ueye.IS_SUCCESS and recognition:
     # bytes_per_pixel = int(nBitsPerPixel / 8)
     frame = np.reshape(array, (height.value, width.value, bytes_per_pixel))
     frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+
     undistorted_frame = cv2.undistort(frame, camera_matrix, dist_coeff)
 
     # ---------------------------------------------------------------------------------------------------------------------------------------
@@ -163,9 +164,6 @@ while nRet == ueye.IS_SUCCESS and recognition:
     circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=20, param1=50, param2=30, minRadius=0,
                                maxRadius=0) # Apply Hough Circle Transform to detect circles
 
-    cv2.imshow('Circle Detection', undistorted_frame)
-    cv2.waitKey(500)
-
     # Check if any circles are detected
     if circles is not None:
         # Convert the coordinates and radius of the circles to integers
@@ -174,7 +172,14 @@ while nRet == ueye.IS_SUCCESS and recognition:
         # Loop over all detected circles
         for (x, y, r) in circles:
             # Draw the circle on the frame
-            cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
+            draw = cv2.circle(undistorted_frame, (x, y), r, (0, 255, 0), 2)
+            print("x: ", x, ", y: ", y, ", r: ", r)
+
+        cv2.imshow('circles', draw)
+        cv2.waitKey(500)
+
+
+
 
     # ---------------------------------------------------------------------------------------------------------------------------------------
 
