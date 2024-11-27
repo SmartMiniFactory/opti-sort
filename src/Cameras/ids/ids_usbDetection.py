@@ -1,17 +1,13 @@
 """
-The script opens the camera, looks for the printed calibration grid and
-exports a yaml file containing the lens distortion coefficients that are to be imported when doing object recognition
+...
 """
-import time
-
-import keyboard
+import yaml
 # ---------------------------------------------------------------------------------------------------------------------------------------
 
 # Libraries
 from pyueye import ueye
 import numpy as np
 import cv2
-import yaml
 
 # ---------------------------------------------------------------------------------------------------------------------------------------
 
@@ -138,108 +134,56 @@ else:
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------
-# CALIBRATION
+# IMPORT CAMERA CALIBRATION
 
-# Define grid parameters
-pattern_size = (4, 10)  # (rows, columns)
+# Load the calibration parameters from the YAML file
+with open("calibration.yaml", "r") as f:
+    calibration_data = yaml.safe_load(f)
 
-# Define the real-world object points
-objp = []
-rows, cols = pattern_size
-spacing = 20  # Spacing between circles in millimeters (or any unit)
-for i in range(rows):
-    for j in range(cols):
-        # Offset alternate rows for the asymmetric pattern
-        x = j * spacing
-        y = i * spacing + (j % 2) * (spacing / 2)
-        objp.append((x, y, 0))
-objp = np.array(objp, dtype=np.float32)
+camera_matrix = np.array(calibration_data['camera_matrix'])
+dist_coeff = np.array(calibration_data['dist_coeff'])
 
-object_points = []  # 3D points in real-world space
-image_points = []   # 2D points in image plane
+
 
 # ---------------------------------------------------------------------------------------------------------------------------------------
-
-collectedSample = 0
-toBeCollected = 1
-
-while nRet == ueye.IS_SUCCESS and collectedSample < 15:
+recognition = True
+while nRet == ueye.IS_SUCCESS and recognition:
 
     array = ueye.get_data(pcImageMemory, width, height, nBitsPerPixel, pitch, copy=False)
     # bytes_per_pixel = int(nBitsPerPixel / 8)
     frame = np.reshape(array, (height.value, width.value, bytes_per_pixel))
     frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+    undistorted_frame = cv2.undistort(frame, camera_matrix, dist_coeff)
 
     # ---------------------------------------------------------------------------------------------------------------------------------------
     # Include image data processing here
+    hist = cv2.equalizeHist(undistorted_frame) # Apply histogram equalization to correct the contrast
+    blurred = cv2.GaussianBlur(hist, (31, 31), cv2.BORDER_DEFAULT) # Apply Gaussian blur to reduce noise
 
-    # Find the circle grid
-    found, centers = cv2.findCirclesGrid(
-        frame,
-        pattern_size,
-        flags=cv2.CALIB_CB_ASYMMETRIC_GRID
-    )
+    circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=20, param1=50, param2=30, minRadius=0,
+                               maxRadius=0) # Apply Hough Circle Transform to detect circles
 
-    if found:
-        if collectedSample < toBeCollected:
-            # Draw detected centers
-            vis_image = cv2.drawChessboardCorners(frame, pattern_size, centers, found)
-            cv2.imshow('Calibration acquisition', vis_image)
-            cv2.waitKey(500)
+    cv2.imshow('Circle Detection', undistorted_frame)
+    cv2.waitKey(500)
 
-            # Ensure data types
-            object_points.append(objp.copy())  # Ensure a new numpy array is added
-            image_points.append(np.squeeze(centers).astype(np.float32))  # Flatten and convert to float32
-            collectedSample = len(object_points)
+    # Check if any circles are detected
+    if circles is not None:
+        # Convert the coordinates and radius of the circles to integers
+        circles = np.round(circles[0, :]).astype("int")
 
-            print("Sample collected (", collectedSample, "/ 14), press 'n' to acquire next")
-
-        # user must physically move calibration grid and acknowledge program to proceed
-        if cv2.waitKey(500) and keyboard.is_pressed('n') and (collectedSample == toBeCollected):
-            toBeCollected += 1
-
-    else:
-        print("Circle grid not found.")
-        cv2.imshow('Calibration acquisition', frame)
-        cv2.waitKey(500)
+        # Loop over all detected circles
+        for (x, y, r) in circles:
+            # Draw the circle on the frame
+            cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
 
     # ---------------------------------------------------------------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------------------------------------------------------------------
 
-print("Concluding calibration process...")
-
 ueye.is_FreeImageMem(hCam, pcImageMemory, MemID)
 ueye.is_ExitCamera(hCam)
 cv2.destroyAllWindows()
 
-# Perform camera calibration after collecting points
-if object_points and image_points:
-
-    print("First object points shape:", object_points[0].shape if object_points else "N/A")
-    print("First image points shape:", image_points[0].shape if image_points else "N/A")
-
-    ret, camera_matrix, distortion_coeffs, rvecs, tvecs = cv2.calibrateCamera(
-        object_points, image_points, frame.shape[::-1], None, None
-    )
-
-    if ret:
-        print("Calibration successful!")
-        print("Camera Matrix:\n", camera_matrix)
-        print("Distortion Coefficients:\n", distortion_coeffs)
-
-        # Save calibration results to a file
-        data = {
-            'camera_matrix': np.asarray(camera_matrix).tolist(),
-            'dist_coeff': np.asarray(distortion_coeffs).tolist()
-        }
-        with open("calibration.yaml", "w") as f:
-            yaml.dump(data, f)
-        print("Calibration data saved to 'calibration.yaml'")
-    else:
-        print("Calibration failed.")
-else:
-    print("No points collected. Calibration not possible.")
 
 print()
 print("END")
