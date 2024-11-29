@@ -1,6 +1,7 @@
-# Description: This script publishes messages to a MQTT broker.
-# The published message represent a set of fake coordinates as one of the cameras were detecting some object
-
+"""
+Description: This script publishes messages to a MQTT broker.
+The published message represent a set of fake coordinates as one of the cameras were detecting some object
+"""
 import paho.mqtt.client as mqtt
 import keyboard
 import time

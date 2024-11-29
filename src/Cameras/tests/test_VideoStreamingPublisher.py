@@ -1,3 +1,7 @@
+"""
+This file uses the PC webcam to test video streaming via MQTT
+"""
+
 ####################################################### LIBRARIES #######################################################
 import cv2
 import keyboard

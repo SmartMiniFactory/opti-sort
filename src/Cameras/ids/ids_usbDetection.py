@@ -1,16 +1,14 @@
 """
-...
+In this file the IDS camera is used in combination with the findings and tests done on the feature recognition file
+however here a live capture is used, while there the work is done on a fixed image
 """
-import yaml
 # ---------------------------------------------------------------------------------------------------------------------------------------
-
 # Libraries
 from pyueye import ueye
 import numpy as np
 import cv2
-
+import yaml
 # ---------------------------------------------------------------------------------------------------------------------------------------
-
 hCam = ueye.HIDS(0)  # 0: first available camera;  1-254: The camera with the specified camera ID
 sInfo = ueye.SENSORINFO()
 cInfo = ueye.CAMINFO()
@@ -179,7 +177,7 @@ while nRet == ueye.IS_SUCCESS and recognition:
         cv2.waitKey(500)
 
 
-
+    # TODO: now it checks for circles, but USB components are to be found
 
     # ---------------------------------------------------------------------------------------------------------------------------------------
 

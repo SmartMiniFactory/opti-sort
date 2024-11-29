@@ -1,3 +1,13 @@
+"""
+This file represents the final version merging all the tests done on other files
+This will be exported to a .exe and run on the machinery, controlled by and interacting with the HMI (C#)
+Overall, it merges:
+- three camera handling
+- calibrations
+- mqtt communication
+- feature recognition
+"""
+
 import paho.mqtt.client as mqtt
 import cv2
 import json

@@ -1,3 +1,9 @@
+"""
+This file was created to test the functionality of the ids_peak library, which is a more modern API for the
+use of the IDS camera. However, the current code is not working yet
+Consider looking at the sample files in the peak installation folder
+"""
+
 from operator import truediv
 import cv2
 import numpy as np
@@ -222,7 +228,7 @@ def main():
     # Grab and visualize frames
     grab_and_visualize()
 
-    # look at the installation folder examples....
+    # look at the peak installation folder examples....
 
     print("Closing")
     peak.Library.Close()
