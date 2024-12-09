@@ -160,6 +160,12 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="Splashscreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Splashscreen.Designer.cs">
+      <DependentUpon>Splashscreen.cs</DependentUpon>
+    </Compile>
     <Compile Include="systems\Cobra600.cs" />
     <Compile Include="systems\Flexibowl.cs" />
     <Compile Include="systems\MQTT.cs" />
@@ -207,6 +213,9 @@
     <Compile Include="userControls\ucScaraTargets.Designer.cs">
       <DependentUpon>ucScaraTargets.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Splashscreen.resx">
+      <DependentUpon>Splashscreen.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucCameraStream.resx">
       <DependentUpon>ucCameraStream.cs</DependentUpon>
     </EmbeddedResource>
@@ -254,6 +263,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\OptisortLogo.jpg" />
     <None Include="icons\stopPassivated_2x2_pptx.png" />
     <None Include="icons\autoDisabled_2x2_pptx.png" />
     <None Include="icons\autoEnabled_2x2_pptx.png" />
