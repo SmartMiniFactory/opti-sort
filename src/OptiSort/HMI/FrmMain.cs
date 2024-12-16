@@ -189,6 +189,13 @@ namespace OptiSort
             previousControl.Dispose();
         }
 
+        public void AddNewUc(Control control)
+        {
+            CleanPnlCurrentUc();
+            control.Dock = DockStyle.Fill;
+            pnlCurrentUc.Controls.Add(control);
+        }
+
         private void btnAuto_Click(object sender, System.EventArgs e)
         {
 

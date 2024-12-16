@@ -89,5 +89,11 @@ namespace OptiSort.userControls
         {
             Flexibowl.resetFault();
         }
+
+        private void btn_lensCalibration_Click(object sender, EventArgs e)
+        {
+            ucLensDistortionCalibration ucLensDistortionCalibration = new ucLensDistortionCalibration();
+            _frmMain.AddNewUc(ucLensDistortionCalibration);
+        }
     }
 }
