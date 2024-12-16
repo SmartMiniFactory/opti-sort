@@ -1,17 +1,18 @@
 import cv2
 
 
-def prepare_image(frame):
+def prepare_image(frame, sample):
     # Convert the frame to grayscale
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    """
-    # Apply Gaussian blur to reduce noise
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-    """
+    if sample:
+        _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+        return thresh
 
-    # Apply binary thresholding
-    _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+    else:
+        # Apply Gaussian blur to reduce noise
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        _, thresh = cv2.threshold(blurred, 127, 255, cv2.THRESH_BINARY)
 
     # Perform morphological operations to close gaps
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
@@ -20,7 +21,7 @@ def prepare_image(frame):
     # Perform edge detection using Canny
     edges = cv2.Canny(morphed, 50, 150)
 
-    return thresh
+    return edges
 
 
 def detect_shape(frame):
@@ -61,7 +62,6 @@ def detect_shape(frame):
     }
 
     for contour in contours:
-
         # skipping first cycle because findContours() function detects whole image as shape
         if i == 0:
             i = 1
@@ -109,8 +109,11 @@ def detect_shape(frame):
 
                 child_index = hierarchy[0][child_index][0]  # Next sibling
 
+            print(triangle_counter, quadrilateral_counter, circle_counter)
+
             # count hexagon's children shapes to associate component to detect
             if triangle_counter == 2 and quadrilateral_counter == 0 and circle_counter == 0:
+                print("a inside ok")
                 detected_shapes["A"]["inside"]["center"].append(x)
                 detected_shapes["A"]["inside"]["center"].append(y)
                 detected_shapes["A"]["inside"]["contour"].append(contour)
@@ -165,17 +168,28 @@ def main():
             print("Error: Could not read frame.")
             break
 
+        """
         # rule-based algorithm test
         ideal_shapes = cv2.imread("C:\\Users\\dylan\\Documents\\OpenCVTestShapes.png")
-        detected_components = detect_shape(prepare_image(ideal_shapes))
+        detected_components = detect_shape(prepare_image(ideal_shapes, True))
         modified_frame = draw_contour(ideal_shapes, detected_components)
         cv2.imshow('Rule-based algorithm test on ideal shapes', modified_frame)
+        """
 
         # camera acquisition
-        # SHOULD USE CANNY !!!
-        detected = detect_shape(prepare_image(frame))
-        modified = draw_contour(frame, detected)
-        cv2.imshow('Shape detection on camera stream', modified)
+        """
+        prep = prepare_image(frame, False)
+        cont, h = cv2.findContours(prep, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        for c in cont:
+            approx = cv2.approxPolyDP(c, 0.01 * cv2.arcLength(c, True), True)
+            cv2.drawContours(frame, [c], 0, (0, 0, 255), 2)
+
+        cv2.imshow('Shape AAA', frame)
+
+        detected = detect_shape(prep)
+        # modified = draw_contour(frame, detected)
+        # cv2.imshow('Shape detection on camera stream', modified)
+        """
 
         # Break the loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
