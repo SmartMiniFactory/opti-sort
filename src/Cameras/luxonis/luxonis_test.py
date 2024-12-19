@@ -1,4 +1,4 @@
-import blobconverter
+qimport blobconverter
 import cv2
 import depthai
 import numpy as np
