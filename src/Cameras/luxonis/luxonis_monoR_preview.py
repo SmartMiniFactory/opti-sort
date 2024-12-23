@@ -28,11 +28,12 @@ manipOutRight.setStreamName("right")
 
 # Crop range
 topLeft = dai.Point2f(0.2, 0.2)
-bottomRight = dai.Point2f(0.8, 0.8)
+bottomRight = dai.Point2f(0.7, 0.7)
 
 # Properties
 monoRight.setCamera("right")
 monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoRight.setFps(50) # Set framerate to 50 FPS
 manipRight.initialConfig.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
 manipRight.setMaxOutputFrameSize(monoRight.getResolutionHeight()*monoRight.getResolutionWidth()*3)
 
@@ -42,24 +43,10 @@ controlIn.out.link(monoRight.inputControl)
 configIn.out.link(manipRight.inputConfig)
 manipRight.out.link(manipOutRight.input)
 
-# Defaults and limits for manual focus/exposure controls
-expTime = 100 # [micro s]
-expMin = 1
-expMax = 33000
 
-sensIso = 500
-sensMin = 100
-sensMax = 1600
+print("Connected to Luxonis camera")
 
-isoRange = [100, 200, 300, 400, 500, 600,  700, 800, 900, 1000, 1100, 1200, 1300 , 1400, 1500, 1600]
-expRange = np.linspace(expMin, expMax, num=50)
-print("Connected to IDS camera")
-
-expTime = clamp(expTime, expMin, expMax)
-sensIso = clamp(sensIso, sensMin, sensMax)
-print("Setting manual exposure, time:", expTime, "iso:", sensIso)
-ctrl = dai.CameraControl()
-ctrl.setManualExposure(expTime, sensIso)
+cnt = 0
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
@@ -69,25 +56,31 @@ with dai.Device(pipeline) as device:
     configQueue = device.getInputQueue(configIn.getStreamName())
     controlQueue = device.getInputQueue(controlIn.getStreamName())
 
+    expTime = 500  # [microseconds] min 1, max 33000
+    sensIso = 300  # min 100, max 1600
+    ctrl = dai.CameraControl()
+    ctrl.setAutoExposureEnable()
+    ctrl.setAutoExposureLimit(500)
+    controlQueue.send(ctrl)
+
     print("Start streaming")
     print("Press 'Q' to quit")
+    print("Press 'S' to save the frame")
 
-    #while True:
-    for i in range(len(expRange)):
+
+    while True:
         inRight = qRight.get()
-        cv2.imshow("Mono R", inRight.getCvFrame())
-
-        expTime = clamp(expRange[i], expMin, expMax)
-        sensIso = clamp(sensIso, sensMin, sensMax)
-        print("Setting manual exposure, time:", expTime, "iso:", sensIso)
-        ctrl = dai.CameraControl()
-        ctrl.setManualExposure(expTime, sensIso)
-        controlQueue.send(ctrl)
-        time.sleep(1)  # Wait 2 seconds
-
-
+        frame =inRight.getCvFrame()
+        cv2.imshow("Mono R", frame)
 
         # Update screen (1ms pooling rate)
-        if cv2.waitKey(1) & keyboard.is_pressed('q'):
-            print("\nqQuitting...")
+        if cv2.waitKey(1) and keyboard.is_pressed('q'):
+            print("\nQuitting...")
             break
+
+
+        image_name = "image_"+str(cnt)+".bmp"
+        cv2.imwrite(image_name, frame)
+        print(image_name+" saved")
+        cnt += 1
+        time.sleep(5)
