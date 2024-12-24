@@ -92,7 +92,7 @@ namespace OptiSort.userControls
 
         private void btn_lensCalibration_Click(object sender, EventArgs e)
         {
-            ucLensDistortionCalibration ucLensDistortionCalibration = new ucLensDistortionCalibration();
+            ucLensDistortionCalibration ucLensDistortionCalibration = new ucLensDistortionCalibration(_frmMain);
             _frmMain.AddNewUc(ucLensDistortionCalibration);
         }
     }

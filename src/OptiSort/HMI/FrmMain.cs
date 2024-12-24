@@ -13,6 +13,7 @@ using Ace.UIBuilder.Client.Controls.Tools.WindowsForms;
 using static System.Net.Mime.MediaTypeNames;
 using Ace.Adept.Server.Motion;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Header;
+using System.Reflection.Emit;
 
 namespace OptiSort
 {
@@ -39,8 +40,9 @@ namespace OptiSort
         }
         List<Cameras> _camerasList = new List<Cameras> { }; // TODO: review definition
 
-        private ucCameraStream _ucCameraStream; // TODO: review definition
+        public ucCameraStream _ucCameraStream; // TODO: review definition
 
+        public int CameraIndex { get; set; }
 
         // status
         public event PropertyChangedEventHandler PropertyChanged; // declare propertyChanged event (required by the associated interface)
@@ -679,10 +681,18 @@ namespace OptiSort
         // ------------------------------- CAMERA STREAM -------------------------------------
         // -----------------------------------------------------------------------------------
 
+        public void ForceStreamingDropDownList(int cameraID)
+        {
+            cmbCameras.Invoke(new Action(() => cmbCameras.SelectedIndex = cameraID));
+            cmbCameras.Invalidate();
+        }
+
         private void cmbCameras_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (_ucCameraStream != null)
             {
+                CameraIndex = cmbCameras.SelectedIndex;
+
                 var newTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
                 _ucCameraStream.StreamTopic = newTopic;
                 Log($"Streaming topic updated to '{newTopic}'", false, false);
