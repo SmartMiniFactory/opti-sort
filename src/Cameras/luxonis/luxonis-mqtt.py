@@ -8,20 +8,25 @@ import base64
 import time
 import numpy as np
 import depthai as dai
+import json
+import datetime
 
 ####################################################### VARIABLES #######################################################
 
 # MQTT
-BOKER_ID = 2
-MQTT_BROKER = ["192.168.0.102", "localhost", "10.10.238.20"] # IP address of the MQTTT broker
+MQTT_BROKER = "localhost" # IP address of the MQTTT broker
 MQTT_PORT = 1883 # Port of the MQTT Broker
 MQTT_TOPIC = "optisort/luxonis/stream" # Topic on which frame will be published
-MQTT_USER = "dgalli" # Username for the MQTT Broker
-MQTT_PASSWORD = "dgalli" # Password for the MQTT Broker
 
 # OpenCv
 encode_param_jpg = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 encode_param_png = [cv2.IMWRITE_PNG_COMPRESSION, 0]
+
+# Encode image to Json format
+def im2json(imdata):
+    jstr = json.dumps({"image": base64.b64encode(imdata).decode('ascii'), "timestamp": datetime.datetime.now().isoformat()})
+    return jstr
+
 
 ########################################### USER-DEFINED FUNCTIONS ######################################################
 
@@ -29,9 +34,7 @@ encode_param_png = [cv2.IMWRITE_PNG_COMPRESSION, 0]
 
 print("Connecting to MQTT broker")
 client = mqtt.Client() # Create the MQTT Client
-if BOKER_ID == 0: # If the borker is autorized, set username and password
-    client.username_pw_set(MQTT_USER, MQTT_PASSWORD) # Setting username and password
-client.connect(MQTT_BROKER[BOKER_ID], MQTT_PORT) # Establishing Connection with the Broker
+client.connect(MQTT_BROKER, MQTT_PORT) # Establishing Connection with the Broker
 print("Connected to MQTT broker")
 
 print("Opening the camera")
@@ -70,7 +73,7 @@ with dai.Device(pipeline) as device:
 
         # Encode image to PNG format
         _frame = cv2.imencode('.png', frame, encode_param_png)[1].tobytes()
-        client.publish(MQTT_TOPIC, _frame) # Publish the Frame on the Topic home/server
+        client.publish(MQTT_TOPIC, im2json(_frame)) # Publish the Frame on the Topic home/server
         cv2.imshow("Stream input", frame) # Show the frame
 
         end = time.time() # End time

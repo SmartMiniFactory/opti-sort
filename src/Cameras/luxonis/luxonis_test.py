@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 ####################################################### LIBRARIES #######################################################
+
+import blobconverter
 import cv2
 import depthai as dai
 import numpy as np
