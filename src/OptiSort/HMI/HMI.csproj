@@ -160,6 +160,12 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="Splashscreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Splashscreen.Designer.cs">
+      <DependentUpon>Splashscreen.cs</DependentUpon>
+    </Compile>
     <Compile Include="systems\Cobra600.cs" />
     <Compile Include="systems\Flexibowl.cs" />
     <Compile Include="systems\MQTT.cs" />
@@ -189,6 +195,12 @@
     <Compile Include="userControls\ucFlexibowl.Designer.cs">
       <DependentUpon>ucFlexibowl.cs</DependentUpon>
     </Compile>
+    <Compile Include="userControls\ucLensDistortionCalibration.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucLensDistortionCalibration.Designer.cs">
+      <DependentUpon>ucLensDistortionCalibration.cs</DependentUpon>
+    </Compile>
     <Compile Include="userControls\ucManualControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -207,6 +219,9 @@
     <Compile Include="userControls\ucScaraTargets.Designer.cs">
       <DependentUpon>ucScaraTargets.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Splashscreen.resx">
+      <DependentUpon>Splashscreen.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucCameraStream.resx">
       <DependentUpon>ucCameraStream.cs</DependentUpon>
     </EmbeddedResource>
@@ -223,6 +238,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucFlexibowl.resx">
       <DependentUpon>ucFlexibowl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="userControls\ucLensDistortionCalibration.resx">
+      <DependentUpon>ucLensDistortionCalibration.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucManualControl.resx">
       <DependentUpon>ucManualControl.cs</DependentUpon>
@@ -254,6 +272,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\OptisortLogo.jpg" />
     <None Include="icons\stopPassivated_2x2_pptx.png" />
     <None Include="icons\autoDisabled_2x2_pptx.png" />
     <None Include="icons\autoEnabled_2x2_pptx.png" />
@@ -263,6 +282,8 @@
     <Content Include="icons\connectedEnabled_2x2_pptx.png" />
     <Content Include="icons\disconnectedDisabled_2x2_pptx.png" />
     <Content Include="icons\disconnectedEnabled_2x2_pptx.png" />
+    <None Include="icons\emulationDisabled_2x2_pptx.png" />
+    <None Include="icons\emulationEnabled_2x2_pptx.png" />
     <Content Include="icons\emulation_2x2_pptx.png" />
     <None Include="icons\manualDisabled_2x2_pptx.png" />
     <None Include="icons\manualEnabled_2x2_pptx.png" />
@@ -273,6 +294,8 @@
     <None Include="icons\playEnabled_2x2_pptx.png" />
     <None Include="icons\playDisabled_2x2_pptx.png" />
     <None Include="icons\playPassivated_2x2_pptx.png" />
+    <None Include="icons\robotDisabled_2x2_pptx.png" />
+    <None Include="icons\robotEnabled_2x2_pptx.png" />
     <Content Include="icons\robot_2x2_pptx.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

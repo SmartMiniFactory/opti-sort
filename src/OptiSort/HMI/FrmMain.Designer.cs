@@ -216,7 +216,7 @@
             // 
             // btnEmulateScara
             // 
-            this.btnEmulateScara.BackgroundImage = global::OptiSort.Properties.Resources.emulation_2x2_pptx;
+            this.btnEmulateScara.BackgroundImage = global::OptiSort.Properties.Resources.emulationEnabled_2x2_pptx;
             this.btnEmulateScara.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnEmulateScara.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnEmulateScara.Location = new System.Drawing.Point(234, 3);

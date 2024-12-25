@@ -16,6 +16,17 @@ namespace OptiSort
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            // Show the splash screen
+            using (Splashscreen splash = new Splashscreen())
+            {
+                splash.Show();
+                splash.Update();
+
+                // Simulate a loading process
+                System.Threading.Thread.Sleep(3000); // Replace with actual loading code
+            }
+
             Application.Run(new frmMain());
         }        
     }

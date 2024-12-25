@@ -118,64 +118,76 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="emulation_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\emulation_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="disconnectedEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\disconnectedEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="playEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\playEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="stopEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\stopEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="playDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\playDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="connectedDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\connectedDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="on_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\on_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="stopDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\stopDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="manualDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\manualDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="connectedEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icons\connectedEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="disconnectedDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\disconnectedDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="off_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\off_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="robot_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\robot_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="autoDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\autoDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="autoEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\autoEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="configDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\configDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="configEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\configEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="manualDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\manualDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="connectedDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\connectedDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="manualEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icons\manualEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="playPassivated_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\playPassivated_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="autoDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\autoDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="off_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\off_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="stopPassivated_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icons\stopPassivated_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="configEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\configEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="stopDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\stopDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="robotEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\robotEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="emulationEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\emulationEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="autoEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\autoEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="robot_2x2_pptx1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\robot_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="disconnectedDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\disconnectedDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="configDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\configDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="stopEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\stopEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="emulationDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\emulationDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="disconnectedEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\disconnectedEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="on_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\on_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="playPassivated_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\playPassivated_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="playEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\playEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="playDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\playDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="robotDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\robotDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OptisortLogo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OptisortLogo.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

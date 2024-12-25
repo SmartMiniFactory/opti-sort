@@ -32,15 +32,16 @@ namespace OptiSort
         public IAdeptRobot Robot { get; private set; }
         public IAbstractEndEffector EndEffector { get; private set; }
         public SimulationContainerControl SimulationContainerControl { get; private set; }
+        //private ControlPanelManager PendantManager { get; set; }
 
 
         // TODO: should think about using singletones or properties. For the MQTT class properties are useful because config may change. But the ace server in theroy cannot change easily...Must standardize. Then think about how to handle property changes in general
         private string _remotingName;
         private int _remotingPort;
+        private ControlPanelManager pendantManager;
 
         //private RemoteAceObjectEventHandler generalEventHandler;
         //private RemoteApplicationEventHandler applicationEventHandler;
-        //private ControlPanelManager pendantManager;
 
         public Cobra600(string remotingName, string remotingPort)
         {
@@ -49,20 +50,19 @@ namespace OptiSort
         }
 
 
-        public bool Connect(bool emulation, string controllerName, string robotName, string endEffectorName)
+        public Exception Connect(bool emulation, string controllerName, string robotName, string endEffectorName)
         {
             try
             {
                 // Connect to ACE
                 Server = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, "127.0.0.1", _remotingPort);
                 Client = new AceClient(Server);
-                Client.InitializePlugins(null);
+                Client.InitializePlugins(null); // WARNING: For some reason, this makes the connection to the robot fail at first. While at the second try it works. Cannot be removed otherwise manual control does not work.
+                
 
                 // Clear workspace
                 Server.Clear();
-
                 Server.EmulationMode = emulation;
-
 
                 // Get the available controllers
                 IList<IAceObject> availableControllers = Server.Root.Filter(new ObjectTypeFilter(typeof(IAdeptController)), true);
@@ -130,10 +130,9 @@ namespace OptiSort
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return false;
+                return ex;
             }
-            return true;
+            return null;
         }
 
 
@@ -179,7 +178,7 @@ namespace OptiSort
                 SimulationContainerControl.Visible = false;
                 SimulationContainerControl.Visible = true;
                 var robotSimObject = SimulationContainerControl.AddToScene(Robot);
-               
+
                 Debug.Assert(robotSimObject != null, "Robot object was not added to the scene.");
                 Debug.Assert(robotSimObject.Visible == true, "Robot not visible.");
 
@@ -194,7 +193,7 @@ namespace OptiSort
 
         public void OpenJobControl(IWin32Window form)
         {
-            ControlPanelManager pendantManager = new ControlPanelManager();
+            pendantManager = new ControlPanelManager();
             pendantManager.LaunchControlForm(form, Client, null);
         }
 
