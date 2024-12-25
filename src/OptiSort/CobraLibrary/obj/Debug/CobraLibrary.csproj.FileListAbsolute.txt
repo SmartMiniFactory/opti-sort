@@ -85,3 +85,32 @@ C:\Users\dylan\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\obj\Debug\CobraL
 C:\Users\dylan\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\obj\Debug\CobraLib.B8EF0F39.Up2Date
 C:\Users\dylan\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\obj\Debug\CobraLibrary.dll
 C:\Users\dylan\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\obj\Debug\CobraLibrary.pdb
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\CobraLibrary.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\CobraLibrary.pdb
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.Adept.Common.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.Adept.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.AdeptSight.Common.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.AdeptSight.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.Core.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.Feeder.Common.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.Feeder.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.HSVision.Common.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.HSVision.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.ProcessManager.Common.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.ProcessManager.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.UIBuilder.Common.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\Ace.UIBuilder.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\ActiproSoftware.Shared.Net20.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\ActiproSoftware.SyntaxEditor.Addons.DotNet.Net20.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\ActiproSoftware.SyntaxEditor.Addons.Web.Net20.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\ActiproSoftware.SyntaxEditor.Net20.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\ActiproSoftware.WinUICore.Net20.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\AxInterop.HSDISPLAYLib.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\BidirectionalTCP.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\DotNetMagic2005.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\bin\Debug\stdole.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\obj\Debug\CobraLibrary.csproj.AssemblyReference.cache
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\obj\Debug\CobraLibrary.csproj.CoreCompileInputs.cache
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\obj\Debug\CobraLib.B8EF0F39.Up2Date
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\obj\Debug\CobraLibrary.dll
+C:\Users\Davide Galli\Source\Repos\opti-sort\src\OptiSort\CobraLibrary\obj\Debug\CobraLibrary.pdb

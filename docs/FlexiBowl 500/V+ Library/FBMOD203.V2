@@ -1,0 +1,1066 @@
+.PROGRAM a.flexibowl() ; Ver 2.3
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+;Version: 2
+;Revision: 3
+;Date 9-apr-2013
+
+
+.END
+
+.PROGRAM flb.blow(udp.lun)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+
+	AUTO $cmd
+
+	$cmd = $ENCODE("blw=1",$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	CALL flb.break(udp.lun)
+
+.END
+
+.PROGRAM flb.break(udp.lun)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+
+; This script wait until the last motion instruction is done 
+; INPUT: udp.lun 
+
+	AUTO $cmd, $in, $out
+	DO
+	    $cmd = $ENCODE("OB[4]",$CHR(13))
+	    WRITE (udp.lun) $cmd, /S
+	    WAIT.EVENT , 0.5
+	    READ (udp.lun) $in
+
+	    $out = $DECODE($in,$CHR(13))
+	    $out = $MID($in,2,100)
+	    $out = $DECODE($out,";")
+	UNTIL $out == "0"
+
+.END
+
+.PROGRAM flb.chk.err(udp.lun, error)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+
+; This script wait until the last motion instruction is done 
+; INPUT: udp.lun 
+	AUTO $cmd, $in, $out, c, status, response
+
+	error = FALSE
+
+	DO
+	    c = GETC(udp.lun,1)
+	UNTIL c == -526
+	WAIT
+
+	$cmd = $ENCODE("SR",$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT
+
+	$out = ""
+
+	READ (udp.lun) $in
+
+	$out = $DECODE($in,$CHR(13))
+	$out = $MID($in,2,100)
+	$out = $DECODE($out,";")
+
+	response = VAL($out)
+	status = response BAND ^B1
+
+;if an error occurs, filter the error type 
+	IF status == 1 THEN
+	    error = TRUE
+	    status = response BAND ^B1110
+	    TYPE "error code: ", status
+	    CASE status OF
+	      VALUE 2:
+		TYPE "ERROR: Flexibowl Under Voltage. Check 220V"
+	      VALUE 4:
+		TYPE "ERROR: Flexibowl Over Voltage."
+	      VALUE 10:
+		TYPE "ERROR: Short Circuit: The motor or its wiring may be defective."
+	      VALUE 12:
+		TYPE "ERROR: Temperature: The drive is overheating."
+	    END
+	END
+
+
+
+
+.END
+
+.PROGRAM flb.flip(udp.lun, pist_num)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+;pist_num -> piston Number: 1 -> PISTON 1 , 2 -> PISTON 2 (if installed), 3 -> PISTON 1&2 (same as Flip+Blow)
+	AUTO $cmd
+
+	CASE pist_num OF
+
+	  VALUE 1:
+	    $cmd = $ENCODE("flip=1",$CHR(13))
+	    WRITE (udp.lun) $cmd, /S
+	    CALL flb.break(udp.lun)
+
+	  VALUE 2:
+	    $cmd = $ENCODE("flip2=1",$CHR(13))
+	    WRITE (udp.lun) $cmd, /S
+	    CALL flb.break(udp.lun)
+
+	  VALUE 3:
+	    $cmd = $ENCODE("flip_blow=1",$CHR(13))
+	    WRITE (udp.lun) $cmd, /S
+	    CALL flb.break(udp.lun)
+	END
+
+
+
+.END
+
+.PROGRAM flb.flip.blow(udp.lun)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+;Flip+Blow
+	AUTO $cmd
+
+	$cmd = $ENCODE("flip_blow=1",$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	CALL flb.break(udp.lun)
+
+.END
+
+.PROGRAM flb.forward(udp.lun)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script rotate the Flexibowl plate
+; INPUT: udp.lun 
+
+	AUTO $cmd
+
+	$cmd = $ENCODE("forward=1",$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	CALL flb.break(udp.lun)
+.END
+
+.PROGRAM flb.fwd.blow(udp.lun)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+
+	AUTO $cmd
+
+	$cmd = $ENCODE("fwd_blw=1",$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	CALL flb.break(udp.lun)
+
+.END
+
+.PROGRAM flb.fwd.flip(udp.lun, pist_num)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script rotate the Flexibowl plate and flip parts
+; INPUT: udp.lun 
+
+	AUTO $cmd
+	CASE pist_num OF
+	  VALUE 1:
+
+;write the "fwd_flip=1" function string. Forward_flipping piston 1
+
+	    $cmd = $ENCODE("fwd_flip=1",$CHR(13))
+	    WRITE (udp.lun) $cmd, /S
+	    CALL flb.break(udp.lun)
+
+;write the "fwd_flip2=1" function string.  Forward_flipping piston 2
+	  VALUE 2:
+	    $cmd = $ENCODE("fwd_flip2=1",$CHR(13))
+	    WRITE (udp.lun) $cmd, /S
+	    CALL flb.break(udp.lun)
+
+
+ ;write the "fwd_flip3=1" function string. Forward_flipping piston 1+2
+	  VALUE 3:
+	    $cmd = $ENCODE("fwd_flip12=1",$CHR(13))
+	    WRITE (udp.lun) $cmd, /S
+	    CALL flb.break(udp.lun)
+
+	  ANY
+	END
+
+.END
+
+.PROGRAM flb.fwd.flp.blw(udp.lun)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+;Forward+Flip+Blow
+	AUTO $cmd
+	$cmd = $ENCODE("fwd_fl_bw=1",$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	CALL flb.break(udp.lun)
+
+.END
+
+.PROGRAM flb.init(udp.lun)
+
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+       ; WAIT.EVENT , 0.5
+	flb.acc = 10000
+	flb.dec = 10000
+	flb.ang = 45
+	flb.speed = 30
+	flb.fl1.cnt = 2
+	flb.fl1.dly = 200
+	flb.fl2.cnt = 2
+	flb.fl2.dly = 200
+	flb.sh.acc = 10000
+	flb.sh.dec = 10000
+	flb.sh.ang = 30
+	flb.sh.sp = 100
+	flb.sh.cnt = 2
+	flb.blow.time = 200
+
+
+
+
+
+
+	CALL flb.par.acc(udp.lun, flb.acc)	       ;forward acceleration
+	CALL flb.par.dec(udp.lun, flb.dec)	       ;forward deleration
+	CALL flb.par.angle(udp.lun, flb.ang)	       ;forward angle
+	CALL flb.par.speed(udp.lun, flb.speed)	       ;forward speed
+	CALL flb.par.fl.cnt(udp.lun, flb.fl1.cnt, 1)   ;flip 1 count
+	CALL flb.par.fl.dly(udp.lun, flb.fl1.dly, 1)   ;flip 1 delay
+	CALL flb.par.fl.cnt(udp.lun, flb.fl2.cnt, 2)   ;flip 2 count
+	CALL flb.par.fl.dly(udp.lun, flb.fl2.dly, 2)   ;flip 2 delay
+	CALL flb.par.sh.acc(udp.lun, flb.sh.acc)       ;shake acceleration
+	CALL flb.par.sh.dec(udp.lun, flb.sh.dec)       ;shake deceleration
+	CALL flb.par.sh.ang(udp.lun, flb.sh.ang)       ;shake angle
+	CALL flb.par.sh.sp(udp.lun, flb.sh.sp)	       ;shake speed
+	CALL flb.par.sh.cnt(udp.lun, flb.sh.cnt)       ;shake count
+	CALL flb.par.bl.time(udp.lun, flb.blow.time)   ;blow time
+
+
+.END
+
+.PROGRAM flb.io.cmd(cmd, error)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+	error = FALSE
+	IF SIG(i.fault) THEN
+	    error = TRUE
+	    GOTO 100
+	END
+
+	DO
+	    WAIT
+	UNTIL SIG(i.ready) AND NOT SIG(i.busy)
+
+	CASE cmd OF
+	  VALUE servo.on:
+	    BITS start.bit, 4 = servo.on
+
+	  VALUE servo.off:
+	    BITS start.bit, 4 = servo.off
+
+	  VALUE bcklight.on:
+	    BITS start.bit, 4 = bcklight.on
+
+	  VALUE bcklight.off:
+	    BITS start.bit, 4 = bcklight.off
+
+	  VALUE fwd:
+	    BITS start.bit, 4 = fwd
+
+	  VALUE flip_fwd:
+	    BITS start.bit, 4 = flip_fwd
+
+	  VALUE shake:
+	    BITS start.bit, 4 = shake
+
+	  VALUE flip:
+	    BITS start.bit, 4 = flip
+
+	  VALUE flip2:
+	    BITS start.bit, 4 = flip2
+
+	  VALUE flip2_fwd:
+	    BITS start.bit, 4 = flip2_fwd
+
+	  VALUE blow_fwd:
+	    BITS start.bit, 4 = blow_fwd
+
+	  VALUE blow:
+	    BITS start.bit, 4 = blow
+
+	  VALUE fwd_flip_blow:
+	    BITS start.bit, 4 = fwd_flip_blow
+
+	  VALUE flip_blow, flip_1_2:
+	    BITS start.bit, 4 = flip_blow
+
+	  VALUE fwd_flip_1_2:
+	    BITS start.bit, 4 = fwd_flip_1_2
+
+	END
+
+	WAIT
+
+	SIGNAL o.strobe
+	WAIT.EVENT , 0.05
+	SIGNAL -o.strobe
+	BITS start.bit, 4 = zero
+
+	WAIT.EVENT , 0.05
+
+	IF SIG(i.fault) THEN
+	    error = TRUE
+	    GOTO 100
+	END
+
+	DO
+	    WAIT
+	UNTIL SIG(i.ready) AND NOT SIG(i.busy)
+
+   100	
+
+
+
+
+
+
+
+
+
+
+
+.END
+
+.PROGRAM flb.io.init()
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+;Io communication codes
+	servo.on = 1
+	servo.off = 2
+	bcklight.on = 3
+	bcklight.off = 4
+	fwd = 5
+	flip_fwd = 6
+	shake = 7
+	flip = 8
+	flip2 = 9
+	flip2_fwd = 10
+	blow_fwd = 11
+	blow = 12
+	fwd_flip_blow = 13
+	flip_blow = 14
+	flip_1_2 = 14
+	fwd_flip_1_2 = 15
+
+	zero = 0
+
+;output signal. To be modified according to your wiring
+	o.strobe = 5
+
+;input signals. To be modified according to your wiring
+	i.busy = 1003
+	i.fault = 1001
+	i.ready = 1002
+
+
+	start.bit = 1
+
+
+
+.END
+
+.PROGRAM flb.light(udp.lun, state)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script manage the Flexibowl backlight 
+; INPUT: udp.lun, state 
+;        state = 1  -> LIGHT ON
+;        state = 0  -> LIGHT OFF
+
+	AUTO $stringa, $cmd
+
+
+;set the backlight state
+	$stringa = $ENCODE("light=",state)
+
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.5
+
+
+.END
+
+.PROGRAM flb.par.acc(udp.lun, acc)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set the rotate acceleration
+; INPUT: udp.lun, acc
+;        acc = acceleration value must be (10 - 10000)
+
+	AUTO $cmd
+
+;set the acceleration value
+	$stringa = $ENCODE("acc=",acc)
+
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+.END
+
+.PROGRAM flb.par.angle(udp.lun, angle)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set the rotation angle
+; INPUT: udp.lun, angle
+;        angle = angle of rotation, POSITIVE value means CW direction 
+
+	AUTO $stringa, $cmd
+
+
+;set the rotation angle
+	$stringa = $ENCODE("angle=",angle)
+
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+
+.END
+
+.PROGRAM flb.par.bl.time(udp.lun, time)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set the time for the BLOW command
+; INPUT: udp.lun, time
+;        time = time value for the BLOW command (ms)
+
+	AUTO $stringa, $cmd
+
+
+;set the SHAKE acceleration value 
+	$stringa = $ENCODE("blw_time=",time)
+
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+
+
+.END
+
+.PROGRAM flb.par.dec(udp.lun, dec)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set the rotate deceleration
+; INPUT: udp.lun, dec
+;        dec = deceleration value must be (10 - 10000)
+
+	AUTO $stringa, $cmd
+
+
+
+;set the deceleration value
+	$stringa = $ENCODE("dec=",dec)
+
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+.END
+
+.PROGRAM flb.par.fl.cnt(udp.lun, fl_count, pist_num)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set the flip counts
+; INPUT: udp.lun, fl_count
+;        fl_count = number of piston ON/OFF cycles
+
+	AUTO $stringa, $cmd
+
+
+	IF pist_num == 1 THEN
+;set the flip count
+	    $stringa = $ENCODE("fl_count=",fl_count)
+
+	    $cmd = $ENCODE($stringa,$CHR(13))
+	    WRITE (udp.lun) $cmd, /S
+	    WAIT.EVENT , 0.05
+	END
+
+	IF pist_num == 2 THEN
+;set the flip count
+	    $stringa = $ENCODE("f2_count=",fl_count)
+
+	    $cmd = $ENCODE($stringa,$CHR(13))
+	    WRITE (udp.lun) $cmd, /S
+	    WAIT.EVENT , 0.05
+	END
+
+
+.END
+
+.PROGRAM flb.par.fl.dly(udp.lun, fl_delay, pist_num)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set the delay between the On/Off piston state
+; INPUT: udp.lun, fl_delay
+;        fl_delay = delay between the On/Off piston state in milliseconds 
+
+	AUTO $stringa, $cmd
+
+	IF pist_num == 1 THEN
+;set the fl_delay value
+	    $stringa = $ENCODE("fl_delay=",fl_delay)
+	    $cmd = $ENCODE($stringa,$CHR(13))
+	    WRITE (udp.lun) $cmd, /S
+	    WAIT.EVENT , 0.05
+	END
+
+	IF pist_num == 2 THEN
+;set the fl_delay value
+	    $stringa = $ENCODE("fl2_delay=",fl_delay)
+	    $cmd = $ENCODE($stringa,$CHR(13))
+	    WRITE (udp.lun) $cmd, /S
+	    WAIT.EVENT , 0.05
+	END
+
+.END
+
+.PROGRAM flb.par.sh.acc(udp.lun, sh_acc)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set acceleration for the SHAKE command
+; INPUT: udp.lun, sh_acc
+;        sh_acc = acceleration value for the SHAKE command, must be (10 - 10000)
+	AUTO $stringa, $cmd
+
+;set the SHAKE acceleration value 
+	$stringa = $ENCODE("sh_acc=",sh_acc)
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+.END
+
+.PROGRAM flb.par.sh.ang(udp.lun, sh_angle)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set the angle for the SHAKE command
+; INPUT: udp.lun, sh_angle
+;        sh_angle = angle value for the SHAKE command
+
+	AUTO $stringa, $cmd
+
+;set the shake angle 
+	$stringa = $ENCODE("sh_angle=",sh_angle)
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+.END
+
+.PROGRAM flb.par.sh.cnt(udp.lun, sh_count)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set the number of movements forward/backward to do in a SHAKE command
+; INPUT: udp.lun, sh_count
+;        sh_count = number of movements to do in the SHAKE command
+
+	AUTO $stringa, $cmd
+;set the number of movements
+	$stringa = $ENCODE("sh_count=",sh_count)
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+.END
+
+.PROGRAM flb.par.sh.dec(udp.lun, sh_dec)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set deceleration for the SHAKE command
+; INPUT: udp.lun, sh_dec
+;        sh_dec = deceleration value for the SHAKE command, must be (10 - 10000)
+
+	AUTO $stringa, $cmd
+
+;set the SHAKE deceleration value 
+	$stringa = $ENCODE("sh_dec=",sh_dec)
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+.END
+
+.PROGRAM flb.par.sh.sp(udp.lun, sh_speed)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set the speed for the SHAKE command
+; INPUT: udp.lun, sh_speed
+;        sh_speed = speed value for the SHAKE command, must be (5 - 500)
+
+	AUTO $stringa, $cmd
+
+;set the shaking speed
+	$stringa = $ENCODE("sh_speed=",sh_speed)
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+.END
+
+.PROGRAM flb.par.speed(udp.lun, speed)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script set the speed for the FORWARD command
+; INPUT: udp.lun, speed
+;        speed = speed value for the FORWARD command, must be (5 - 500)
+
+	AUTO $stringa, $cmd
+
+;set the speed of FORWARD command
+	$stringa = $ENCODE("speed=",speed)
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+.END
+
+.PROGRAM flb.res.err(udp.lun)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script resets the Flexibowl's errors/faults
+; INPUT: udp.lun
+
+	AUTO $stringa, $cmd
+
+;kill the Flexibowl internal program 
+	$stringa = "KL"
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+;restart the Flexibowl internal program
+	$stringa = "XQ##init"
+
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.05
+
+.END
+
+.PROGRAM flb.shake(udp.lun)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script activate the SHAKE function
+; INPUT: udp.lun 
+
+	AUTO $cmd
+
+	$cmd = $ENCODE("shake=1",$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	CALL flb.break(udp.lun)
+
+.END
+
+.PROGRAM flb.srv.state(udp.lun, state)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+; This script manage the Flexibowl servo 
+; INPUT: udp.lun, state 
+;        state = 1  -> SERVO ON
+;        state = 0  -> SERVO OFF
+
+	AUTO $stringa, $cmd
+
+;set the servo state
+	$stringa = $ENCODE("servo=",state)
+	$cmd = $ENCODE($stringa,$CHR(13))
+	WRITE (udp.lun) $cmd, /S
+	WAIT.EVENT , 0.5
+
+.END
+
+.PROGRAM test_udp()
+	$ip = "192.168.143.74"
+ ;attach the UDP port
+	CALL flb.att.udp(udp.lun, $ip, error)
+
+
+	CALL flb.light(udp.lun, 1)
+ ;Set the servo state to ON
+	CALL flb.srv.state(udp.lun, 1)
+	CALL flb.forward(udp.lun)
+
+
+;set all the parameters
+	CALL flb.par.bl.time(udp.lun, 200)
+	CALL flb.par.acc(udp.lun, 100)
+	CALL flb.par.dec(udp.lun, 100)
+	CALL flb.par.angle(udp.lun, 180)
+	CALL flb.par.speed(udp.lun, 30)
+	CALL flb.par.fl.cnt(udp.lun, 4)
+	CALL flb.par.fl.dly(udp.lun, 300)
+	CALL flb.par.sh.acc(udp.lun, 100)
+	CALL flb.par.sh.dec(udp.lun, 100)
+	CALL flb.par.sh.ang(udp.lun, 45)
+	CALL flb.par.sh.cnt(udp.lun, 3)
+	CALL flb.par.sh.sp(udp.lun, 40)
+	CALL flb.par.acc(udp.lun, 10000)
+	CALL flb.par.dec(udp.lun, 10000)
+	CALL flb.par.angle(udp.lun, 90)
+	CALL flb.par.speed(udp.lun, 90)
+	CALL flb.par.fl.cnt(udp.lun, 8)
+	CALL flb.par.fl.dly(udp.lun, 100)
+	CALL flb.par.sh.acc(udp.lun, 10000)
+	CALL flb.par.sh.dec(udp.lun, 10000)
+	CALL flb.par.sh.ang(udp.lun, 30)
+	CALL flb.par.sh.cnt(udp.lun, 5)
+	CALL flb.par.sh.sp(udp.lun, 90)
+	CALL flb.par.bl.time(udp.lun, 500)
+
+	WHILE TRUE DO
+
+
+	    CALL flb.blow(udp.lun)
+	    CALL flb.light(udp.lun, 1)
+
+	    CALL flb.forward(udp.lun)
+	    CALL flb.shake(udp.lun)
+	    CALL flb.flip(udp.lun, 1)
+
+	    CALL flb.blow(udp.lun)
+
+	    CALL flb.light(udp.lun, 0)
+
+	    CALL flb.forward(udp.lun)
+	    CALL flb.shake(udp.lun)
+	    CALL flb.flip(udp.lun, 1)
+
+
+	END
+
+
+	FCLOSE (udp.lun)
+	DETACH (udp.lun)
+.END
+
+.PROGRAM flb.att.udp(udp.lun, $ip, error)
+; ****************************************************************************
+;*                                                                            *
+;*                         Copyright (c) 2012 by  ARS s.r.l.                  *
+;*                         via P.Gobetti, 19                                  *
+;*                         52100 AREZZO -ITALY                                *  
+;*                         tel +39-0575-398611                                *
+;*                                                                            *
+; ****************************************************************************
+;
+;PROGRAMMER: Marco Mina
+
+	AUTO t, udp.tout
+	udp.tout = 5
+	error = FALSE
+	t = TIMER(1)
+	DO
+	    ATTACH (udp.lun, 4) "UDP"
+	    FOPEN (udp.lun) $ip+" /REMOTE_PORT 5001 /LOCAL_PORT 5001"
+	    WAIT
+	UNTIL (IOSTAT(udp.lun,0) == 1) OR ((TIMER(1)-t) >= udp.tout)
+	IF ((TIMER(1)-t) >= udp.tout) THEN
+	    TYPE "Error attaching UDP port"
+	    error = IOSTAT(udp.lun,0)
+	END
+
+.END
+
+.PROGRAM test_io()
+	CALL flb.io.init()
+
+	CALL flb.io.cmd(servo.on, error)
+	CALL flb.io.cmd(fwd, error)
+	CALL flb.io.cmd(flip_fwd, error)
+
+	CALL flb.io.cmd(shake, error)
+	CALL flb.io.cmd(flip, error)
+	CALL flb.io.cmd(flip2, error)
+	CALL flb.io.cmd(flip_1_2, error)
+
+	CALL flb.io.cmd(flip2_fwd, error)
+	CALL flb.io.cmd(blow_fwd, error)
+	CALL flb.io.cmd(blow, error)
+
+	CALL flb.io.cmd(fwd_flip_blow, error)
+	CALL flb.io.cmd(flip_blow, error)
+	CALL flb.io.cmd(fwd_flip_1_2, error)
+
+
+
+
+.END
+
+
