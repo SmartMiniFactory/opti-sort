@@ -1,17 +1,9 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Collections.Concurrent;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OptiSort.userControls
@@ -24,8 +16,12 @@ namespace OptiSort.userControls
         public ucLensDistortionCalibration(frmMain frmMain)
         {
             InitializeComponent();
+            
             _frmMain = frmMain;
+
+            ClearTempDirectory();
         }
+
 
         private void btn_acquire_Click(object sender, EventArgs e)
         {
@@ -39,6 +35,16 @@ namespace OptiSort.userControls
             _frmMain._ucCameraStream.ScreenshotsReady += SaveShot;
             _frmMain._ucCameraStream.RequestScreenshots();
         }
+
+        private void btn_calibrate_Click(object sender, EventArgs e)
+        {
+            string script = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Cameras\tests\test_VideoStreamingPublisher.py"));
+            RunPythonScript(script);
+        }
+
+        // ----------------------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------------------
 
 
         // Event handler to add images to the queue
@@ -56,21 +62,21 @@ namespace OptiSort.userControls
                     {
                         AddThumbnailToColumn(flp_ids, image);
                         string filename = "ids_CalibrationImage_" + (_shots + 1);
-                        SaveBitmapAsPng(image, filename);
+                        SaveBitmapAsFile(image, filename);
                     }
 
                     if (topic == Properties.Settings.Default.mqtt_topic_baslerStream)
                     {
                         AddThumbnailToColumn(flp_basler, image);
                         string filename = "basler_CalibrationImage_" + (_shots + 1);
-                        SaveBitmapAsPng(image, filename);
+                        SaveBitmapAsFile(image, filename);
                     }
 
                     if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream)
                     {
                         AddThumbnailToColumn(flp_luxonis, image);
                         string filename = "luxonis_CalibrationImage_" + (_shots + 1);
-                        SaveBitmapAsPng(image, filename);
+                        SaveBitmapAsFile(image, filename);
                     }
                 }
 
@@ -78,6 +84,12 @@ namespace OptiSort.userControls
 
                 _shots++;
                 lbl_shots.Text = _shots.ToString() + "/15";
+
+                if (_shots == 15)
+                {
+                    btn_acquire.Enabled = false;
+                    btn_calibrate.Enabled = true;
+                }
 
                 Cursor = Cursors.Default;
  
@@ -128,7 +140,8 @@ namespace OptiSort.userControls
             panel.Invoke(new Action(() => panel.Controls.Add(pictureBox)));
         }
 
-        public static void SaveBitmapAsPng(Bitmap bitmap, string fileName)
+
+        public static void SaveBitmapAsFile(Bitmap bitmap, string fileName)
         {
             if (bitmap == null)
             {
@@ -140,9 +153,8 @@ namespace OptiSort.userControls
                 throw new ArgumentException("File name cannot be null or empty.", nameof(fileName));
             }
 
-            // Create a folder named "Output" if it doesn't exist
-            string basePath = AppDomain.CurrentDomain.BaseDirectory;
-            string tempPath = Path.Combine(basePath, "Temp");
+            // Create a folder named "Temp" if it doesn't exist
+            string tempPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp");
 
             if (!Directory.Exists(tempPath))
             {
@@ -153,10 +165,102 @@ namespace OptiSort.userControls
             string tempFilePath = Path.Combine(tempPath, fileName + ".png");
 
             // Save the bitmap as a PNG file
-            bitmap.Save(tempFilePath, ImageFormat.Png);
+            bitmap.Save(tempFilePath, ImageFormat.Bmp);
 
             Console.WriteLine($"Bitmap saved as PNG at: {tempFilePath}");
         }
 
+
+        // ----------------------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------------------
+
+        public static void ClearTempDirectory()
+        {
+
+            string directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp");
+
+            if (string.IsNullOrWhiteSpace(directoryPath))
+            {
+                throw new ArgumentException("Temporary directory path cannot be null or empty.", nameof(directoryPath));
+            }
+
+            try
+            {
+                // Ensure the temporary directory exists
+                if (Directory.Exists(directoryPath))
+                {
+                    // Get all files in the temporary directory
+                    var files = Directory.GetFiles(directoryPath);
+
+                    // Delete each file
+                    foreach (var file in files)
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            Console.WriteLine($"Deleted: {file}");
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log the error (or handle it accordingly)
+                            Console.WriteLine($"Failed to delete file: {file}. Error: {ex.Message}");
+                        }
+                    }
+
+                    // Optionally, delete empty subdirectories
+                    var directories = Directory.GetDirectories(directoryPath);
+                    foreach (var directory in directories)
+                    {
+                        try
+                        {
+                            Directory.Delete(directory, true); // Recursive delete
+                            Console.WriteLine($"Deleted directory: {directory}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Failed to delete directory: {directory}. Error: {ex.Message}");
+                        }
+                    }
+                }
+                else
+                {
+                    // If the directory doesn't exist, create it
+                    Directory.CreateDirectory(directoryPath);
+                    Console.WriteLine($"Temporary directory created: {directoryPath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to clean temporary directory. Error: {ex.Message}",
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+            }
+        }
+
+        public static void RunPythonScript(string scriptPath)
+        {
+            var pythonExe = @"C:\Users\dylan\AppData\Local\Programs\Python\Python312\python.exe"; // Path to Python executable
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = pythonExe,
+                Arguments = scriptPath, // Path to the script
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+
+            var process = new Process { StartInfo = processStartInfo };
+
+            process.OutputDataReceived += (sender, e) => Console.WriteLine(e.Data);
+            process.ErrorDataReceived += (sender, e) => Console.WriteLine("ERROR: " + e.Data);
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            process.WaitForExit();
+        }
     }
 }

@@ -30,7 +30,6 @@
         {
             this.lblNote = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.label2 = new System.Windows.Forms.Label();
             this.lbl_camera3 = new System.Windows.Forms.Label();
             this.lbl_camera2 = new System.Windows.Forms.Label();
             this.lbl_camera1 = new System.Windows.Forms.Label();
@@ -39,6 +38,7 @@
             this.flp_basler = new System.Windows.Forms.FlowLayoutPanel();
             this.btn_acquire = new System.Windows.Forms.Button();
             this.lbl_shots = new System.Windows.Forms.Label();
+            this.btn_calibrate = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -63,7 +63,6 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
             this.tableLayoutPanel1.Controls.Add(this.lblNote, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.label2, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.lbl_camera3, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.lbl_camera2, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.lbl_camera1, 0, 1);
@@ -72,6 +71,7 @@
             this.tableLayoutPanel1.Controls.Add(this.flp_basler, 2, 2);
             this.tableLayoutPanel1.Controls.Add(this.btn_acquire, 2, 3);
             this.tableLayoutPanel1.Controls.Add(this.lbl_shots, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.btn_calibrate, 0, 3);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -82,18 +82,6 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1295, 722);
             this.tableLayoutPanel1.TabIndex = 1;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(3, 649);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(425, 73);
-            this.label2.TabIndex = 8;
-            this.label2.Text = "Note: remember to check all the cameras!";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lbl_camera3
             // 
@@ -186,6 +174,19 @@
             this.lbl_shots.Text = "0/15";
             this.lbl_shots.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // btn_calibrate
+            // 
+            this.btn_calibrate.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btn_calibrate.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F);
+            this.btn_calibrate.Location = new System.Drawing.Point(100, 652);
+            this.btn_calibrate.Margin = new System.Windows.Forms.Padding(100, 3, 100, 3);
+            this.btn_calibrate.Name = "btn_calibrate";
+            this.btn_calibrate.Size = new System.Drawing.Size(231, 67);
+            this.btn_calibrate.TabIndex = 8;
+            this.btn_calibrate.Text = "Calibrate";
+            this.btn_calibrate.UseVisualStyleBackColor = true;
+            this.btn_calibrate.Click += new System.EventHandler(this.btn_calibrate_Click);
+            // 
             // ucLensDistortionCalibration
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -209,7 +210,7 @@
         private System.Windows.Forms.FlowLayoutPanel flp_luxonis;
         private System.Windows.Forms.FlowLayoutPanel flp_basler;
         private System.Windows.Forms.Button btn_acquire;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label lbl_shots;
+        private System.Windows.Forms.Button btn_calibrate;
     }
 }
