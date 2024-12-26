@@ -6,6 +6,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -51,19 +53,32 @@ namespace OptiSort.userControls
                     Bitmap image = kvp.Value;
 
                     if (topic == Properties.Settings.Default.mqtt_topic_idsStream)
+                    {
                         AddThumbnailToColumn(flp_ids, image);
+                        string filename = "ids_CalibrationImage_" + (_shots + 1);
+                        SaveBitmapAsPng(image, filename);
+                    }
 
                     if (topic == Properties.Settings.Default.mqtt_topic_baslerStream)
+                    {
                         AddThumbnailToColumn(flp_basler, image);
+                        string filename = "basler_CalibrationImage_" + (_shots + 1);
+                        SaveBitmapAsPng(image, filename);
+                    }
 
                     if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream)
+                    {
                         AddThumbnailToColumn(flp_luxonis, image);
+                        string filename = "luxonis_CalibrationImage_" + (_shots + 1);
+                        SaveBitmapAsPng(image, filename);
+                    }
                 }
 
                 _frmMain._ucCameraStream.ScreenshotsReady -= SaveShot;
 
                 _shots++;
                 lbl_shots.Text = _shots.ToString() + "/15";
+
                 Cursor = Cursors.Default;
  
             }));
@@ -111,6 +126,36 @@ namespace OptiSort.userControls
 
             // Add the PictureBox to the FlowLayoutPanel
             panel.Invoke(new Action(() => panel.Controls.Add(pictureBox)));
+        }
+
+        public static void SaveBitmapAsPng(Bitmap bitmap, string fileName)
+        {
+            if (bitmap == null)
+            {
+                throw new ArgumentNullException(nameof(bitmap), "Bitmap cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                throw new ArgumentException("File name cannot be null or empty.", nameof(fileName));
+            }
+
+            // Create a folder named "Output" if it doesn't exist
+            string basePath = AppDomain.CurrentDomain.BaseDirectory;
+            string tempPath = Path.Combine(basePath, "Temp");
+
+            if (!Directory.Exists(tempPath))
+            {
+                Directory.CreateDirectory(tempPath);
+            }
+
+            // Combine the output folder with the file name
+            string tempFilePath = Path.Combine(tempPath, fileName + ".png");
+
+            // Save the bitmap as a PNG file
+            bitmap.Save(tempFilePath, ImageFormat.Png);
+
+            Console.WriteLine($"Bitmap saved as PNG at: {tempFilePath}");
         }
 
     }

@@ -298,5 +298,10 @@
     <None Include="icons\robotEnabled_2x2_pptx.png" />
     <Content Include="icons\robot_2x2_pptx.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Log\" />
+    <Folder Include="Output\" />
+    <Folder Include="Temp\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

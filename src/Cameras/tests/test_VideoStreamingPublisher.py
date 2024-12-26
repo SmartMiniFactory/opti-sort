@@ -24,7 +24,7 @@ MQTT_USER = "dgalli" # Username for the MQTT Broker
 MQTT_PASSWORD = "dgalli" # Password for the MQTT Broker
 
 # OpenCV
-WEBCAM_ID = 1  # Change this to the index of the desired webcam
+WEBCAM_ID = 0  # Change this to the index of the desired webcam
 encode_param_png = [cv2.IMWRITE_PNG_COMPRESSION, 0]
 encode_param_jpg = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
@@ -60,7 +60,8 @@ while True:
 
     # Encode image to PNG format
     _frame = cv2.imencode('.png', frame, encode_param_png)[1].tobytes()
-    client.publish(MQTT_TOPIC, im2json(_frame)) # Publish the Frame on the Topic home/server
+    client.publish("optisort/ids/stream", im2json(_frame)) # Publish the Frame on the Topic home/server
+    client.publish("optisort/basler/stream", im2json(_frame))  # Publish the Frame on the Topic home/server
     cv2.imshow("Stream input", frame) # Show the frame
     end = time.time() # End time
     t = end - start
