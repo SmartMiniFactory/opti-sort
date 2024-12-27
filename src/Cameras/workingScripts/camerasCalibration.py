@@ -1,25 +1,20 @@
-"""
-The C# program prepares in a folder "..\..\src\OptiSort\HMI\Temp" 45 images in total (15 per camera) containing
+"""The C# program prepares in a folder 45 images in total (15 per camera) containing
 the calibration grids. This script is supposed to cycle through them and perform the camera calibration for all three
 cameras. The script fails if:
 - not enough images (less than 15 per camera) are provided
 - bad images are provided (grid not found)
 - cv2 library fail
 In case of failure, the calibration file is not exported. In case of bad image, the C# program will delete it and ask
-the user to retake it.
-"""
-import os
-
+the user to retake it."""
 # ---------------------------------------------------------------------------------------------------------------------------------------
-
+import json
+import os
 import cv2
 import yaml
 import numpy as np
 import pathlib
 import glob
-
 # ---------------------------------------------------------------------------------------------------------------------------------------
-
 # GRID PARAMETERS
 
 # vertex
@@ -38,12 +33,26 @@ image_points = []  # 2D points in image plane
 
 images = glob.glob('*.jpg')
 
+# Get the absolute path of the script directory
+script_dir = pathlib.Path(__file__).parent.resolve()
+
+# Define the Temp folder path relative to the script directory
+temp_folder = script_dir / "../../OptiSort/HMI/Temp"
+config_folder = script_dir / "../../OptiSort/HMI/Config"
+
 # ---------------------------------------------------------------------------------------------------------------------------------------
 
-not_found = {
-    "ids": [],
-    "basler": [],
-    "luxonis": []
+result = {
+    "bad_image": {
+        "ids": [],
+        "basler": [],
+        "luxonis": []
+    },
+    "calibration_fail": {
+        "ids": False,
+        "basler": False,
+        "luxonis": False
+    }
 }
 
 for camera in ["ids", "basler", "luxonis"]:
@@ -51,8 +60,7 @@ for camera in ["ids", "basler", "luxonis"]:
 
         # get picture path
         filename = camera + "_CalibrationImage_" + str(picture_nr + 1)
-        relativePath = "..\..\OptiSort\HMI\Temp\\" + filename + ".bmp"
-        absolutePath = pathlib.Path(relativePath).resolve()
+        absolutePath = (temp_folder / f"{filename}.bmp").resolve()
 
         # check picture existence
         if absolutePath.exists():
@@ -72,34 +80,37 @@ for camera in ["ids", "basler", "luxonis"]:
                 image_points.append(corners2)
                 cv2.drawChessboardCorners(image, (rows, cols), corners2, ret)
 
-                savePath = pathlib.Path("..\..\OptiSort\HMI\Temp\\").resolve()
-                cv2.imwrite(os.path.join(savePath, filename + "_grid.bmp"), image)
+                savePath = pathlib.Path(r"..\..\OptiSort\HMI\Temp\\").resolve()
+                cv2.imwrite(str(temp_folder / f"{filename}_grid.bmp"), image)
 
             # chess board not found
             else:
-                not_found[camera].append(picture_nr + 1)
-                print(f"calibration grid NOT found for {filename}")
+                result["bad_image"][camera].append(picture_nr + 1)
+                # print(f"calibration grid NOT found for {filename}") # debug string deactivated to not confuse C#
 
         else:
 
-            not_found[camera].append(picture_nr + 1)
-            print(f"{filename} does not exist")
+            result["bad_image"][camera].append(picture_nr + 1)
+            # print(f"{filename} does not exist") # debug string deactivated to not confuse C#
 
     # CALIBRATION -------------------------------------------------------
 
     # chess board should be found in all the pictures for that camera
-    if not not_found[camera]:
+    if not result["bad_image"][camera]:
 
         # check if points are collected
         if object_points and image_points:
-            ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(object_points, image_points, gray.shape[::-1], None, None)
+            ret, mtx, dist, rvecs, tvecs = (
+                cv2.calibrateCamera(object_points, image_points, gray.shape[::-1], None, None)
+            )
 
             if ret:
-                print("Calibration successful!")
-                print("Camera Matrix:\n", mtx)
-                print("Distortion Coefficients:\n", dist)
-                print("Rotation vectors:\n", rvecs)
-                print("Translation vectors:\n", tvecs)
+                # debug string deactivated to not confuse C#
+                # print("Calibration successful!")
+                # print("Camera Matrix:\n", mtx)
+                # print("Distortion Coefficients:\n", dist)
+                # print("Rotation vectors:\n", rvecs)
+                # print("Translation vectors:\n", tvecs)
 
                 # Save calibration results to a file
                 data = {
@@ -109,12 +120,11 @@ for camera in ["ids", "basler", "luxonis"]:
                     'translation_vectors': np.asarray(tvecs).tolist()
                 }
 
-                savePath = pathlib.Path("..\..\OptiSort\HMI\Temp\\").resolve()
-                with open(os.path.join(savePath, camera + "_calibration.yaml"), "w") as f:
+                with open(config_folder / f"{camera}_calibration.yaml", "w") as f:
                     yaml.dump(data, f)
-                print("Calibration data saved to 'calibration.yaml'")
+                    # print("Calibration data saved to 'calibration.yaml'") # debug string deactivated to not confuse C#
 
             else:
-                print("Calibration failed.")
-    else:
-        print("No points collected. Calibration not possible.")
+                result["calibration_fail"][camera] = True
+
+print(json.dumps(result))
