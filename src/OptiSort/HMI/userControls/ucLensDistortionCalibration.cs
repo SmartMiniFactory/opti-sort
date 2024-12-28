@@ -22,7 +22,6 @@ namespace OptiSort.userControls
         private static string _configFolder = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Config"));
 
         // TODO: create dedicated method to update/invoke shots label update and buttons enable/disable
-        // TODO: test overall functioning after declaring path singletones
         // TODO: move general methods to app manager
 
         public ucLensDistortionCalibration(frmMain frmMain)
@@ -109,16 +108,8 @@ namespace OptiSort.userControls
                 }
 
                 _frmMain._ucCameraStream.ScreenshotsReady -= SaveShot;
-
                 _shots++;
-                lbl_shots.Text = _shots.ToString() + "/15";
-
-                if (_shots == 15)
-                {
-                    btn_acquire.Enabled = false;
-                    btn_calibrate.Enabled = true;
-                }
-
+                RefreshBottomControls();
                 Cursor = Cursors.Default;
  
             }));
@@ -180,15 +171,11 @@ namespace OptiSort.userControls
                         RemoveThumbnailFromColumn(flp_luxonis, "luxonis_CalibrationImage_" + id);
                     }
 
-                    flp_basler.Refresh();
-                    flp_ids.Refresh();
-                    flp_luxonis.Refresh();
+                    RefreshFlowPanels();
 
                     _shots -= badImages_all.Count;
                     
-                    this.Invoke(new Action(() => lbl_shots.Text = _shots.ToString() + "/15"));
-                    this.Invoke(new Action(() => btn_acquire.Enabled = true));
-                    this.Invoke(new Action(() => btn_calibrate.Enabled = false));
+                    RefreshBottomControls();
 
                     MessageBox.Show($"BAD IMAGES DETECTED!\nCalibration failed because the grid was not found in {badImages_all.Count} images. Please retake these images.");
                 }
@@ -298,11 +285,7 @@ namespace OptiSort.userControls
                 }
             }
 
-            // Update the shots label and enable/disable buttons based on the count
-            lbl_shots.Text = $"{_shots}/15";
-            btn_acquire.Enabled = _shots < 15;
-            btn_calibrate.Enabled = _shots == 15;
-
+            RefreshBottomControls();
         }
 
 
@@ -421,6 +404,14 @@ namespace OptiSort.userControls
             flp_ids.Refresh();
             flp_luxonis.Refresh();
             flp_basler.Refresh();
+        }
+
+        private void RefreshBottomControls()
+        {
+            lbl_shots.Text = $"{_shots}/15";
+            btn_acquire.Enabled = _shots < 15;
+            btn_calibrate.Enabled = _shots == 15;
+            btn_clear.Enabled = _shots > 0;
         }
 
         // ----------------------------------------------------------------------------------------

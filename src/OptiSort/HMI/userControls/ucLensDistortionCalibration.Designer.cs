@@ -30,20 +30,21 @@
         {
             this.lblNote = new System.Windows.Forms.Label();
             this.tbl_images = new System.Windows.Forms.TableLayoutPanel();
+            this.lbl_baslerCalibTimestamp = new System.Windows.Forms.Label();
+            this.lbl_luxonisCalibTimestamp = new System.Windows.Forms.Label();
             this.lbl_camera3 = new System.Windows.Forms.Label();
             this.lbl_camera2 = new System.Windows.Forms.Label();
             this.lbl_camera1 = new System.Windows.Forms.Label();
             this.flp_ids = new System.Windows.Forms.FlowLayoutPanel();
             this.flp_luxonis = new System.Windows.Forms.FlowLayoutPanel();
             this.flp_basler = new System.Windows.Forms.FlowLayoutPanel();
+            this.lbl_idsCalibTimestamp = new System.Windows.Forms.Label();
             this.btn_acquire = new System.Windows.Forms.Button();
             this.lbl_shots = new System.Windows.Forms.Label();
             this.btn_calibrate = new System.Windows.Forms.Button();
             this.tbl_controls = new System.Windows.Forms.TableLayoutPanel();
             this.btn_clear = new System.Windows.Forms.Button();
-            this.lbl_idsCalibTimestamp = new System.Windows.Forms.Label();
-            this.lbl_luxonisCalibTimestamp = new System.Windows.Forms.Label();
-            this.lbl_baslerCalibTimestamp = new System.Windows.Forms.Label();
+            this.btn_home = new System.Windows.Forms.Button();
             this.tbl_images.SuspendLayout();
             this.tbl_controls.SuspendLayout();
             this.SuspendLayout();
@@ -89,6 +90,30 @@
             this.tbl_images.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 85F));
             this.tbl_images.Size = new System.Drawing.Size(1295, 631);
             this.tbl_images.TabIndex = 1;
+            // 
+            // lbl_baslerCalibTimestamp
+            // 
+            this.lbl_baslerCalibTimestamp.AutoSize = true;
+            this.lbl_baslerCalibTimestamp.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_baslerCalibTimestamp.Font = new System.Drawing.Font("Segoe UI Light", 10F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_baslerCalibTimestamp.Location = new System.Drawing.Point(866, 68);
+            this.lbl_baslerCalibTimestamp.Name = "lbl_baslerCalibTimestamp";
+            this.lbl_baslerCalibTimestamp.Size = new System.Drawing.Size(424, 31);
+            this.lbl_baslerCalibTimestamp.TabIndex = 8;
+            this.lbl_baslerCalibTimestamp.Text = "Last calibration: dd/mm/yyy hh:mm";
+            this.lbl_baslerCalibTimestamp.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lbl_luxonisCalibTimestamp
+            // 
+            this.lbl_luxonisCalibTimestamp.AutoSize = true;
+            this.lbl_luxonisCalibTimestamp.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_luxonisCalibTimestamp.Font = new System.Drawing.Font("Segoe UI Light", 10F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_luxonisCalibTimestamp.Location = new System.Drawing.Point(435, 68);
+            this.lbl_luxonisCalibTimestamp.Name = "lbl_luxonisCalibTimestamp";
+            this.lbl_luxonisCalibTimestamp.Size = new System.Drawing.Size(423, 31);
+            this.lbl_luxonisCalibTimestamp.TabIndex = 7;
+            this.lbl_luxonisCalibTimestamp.Text = "Last calibration: dd/mm/yyy hh:mm";
+            this.lbl_luxonisCalibTimestamp.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lbl_camera3
             // 
@@ -156,11 +181,23 @@
             this.flp_basler.Size = new System.Drawing.Size(424, 522);
             this.flp_basler.TabIndex = 5;
             // 
+            // lbl_idsCalibTimestamp
+            // 
+            this.lbl_idsCalibTimestamp.AutoSize = true;
+            this.lbl_idsCalibTimestamp.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_idsCalibTimestamp.Font = new System.Drawing.Font("Segoe UI Light", 10F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_idsCalibTimestamp.Location = new System.Drawing.Point(5, 68);
+            this.lbl_idsCalibTimestamp.Name = "lbl_idsCalibTimestamp";
+            this.lbl_idsCalibTimestamp.Size = new System.Drawing.Size(422, 31);
+            this.lbl_idsCalibTimestamp.TabIndex = 6;
+            this.lbl_idsCalibTimestamp.Text = "Last calibration: dd/mm/yyy hh:mm";
+            this.lbl_idsCalibTimestamp.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // btn_acquire
             // 
             this.btn_acquire.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btn_acquire.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_acquire.Location = new System.Drawing.Point(20, 5);
+            this.btn_acquire.Location = new System.Drawing.Point(149, 5);
             this.btn_acquire.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
             this.btn_acquire.Name = "btn_acquire";
             this.btn_acquire.Size = new System.Drawing.Size(283, 81);
@@ -174,9 +211,9 @@
             this.lbl_shots.AutoSize = true;
             this.lbl_shots.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lbl_shots.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_shots.Location = new System.Drawing.Point(326, 0);
+            this.lbl_shots.Location = new System.Drawing.Point(455, 0);
             this.lbl_shots.Name = "lbl_shots";
-            this.lbl_shots.Size = new System.Drawing.Size(317, 91);
+            this.lbl_shots.Size = new System.Drawing.Size(188, 91);
             this.lbl_shots.TabIndex = 7;
             this.lbl_shots.Text = "0/15";
             this.lbl_shots.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -184,6 +221,7 @@
             // btn_calibrate
             // 
             this.btn_calibrate.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btn_calibrate.Enabled = false;
             this.btn_calibrate.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F);
             this.btn_calibrate.Location = new System.Drawing.Point(666, 5);
             this.btn_calibrate.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
@@ -196,21 +234,22 @@
             // 
             // tbl_controls
             // 
-            this.tbl_controls.ColumnCount = 4;
+            this.tbl_controls.ColumnCount = 5;
+            this.tbl_controls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.tbl_controls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tbl_controls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
             this.tbl_controls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tbl_controls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tbl_controls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tbl_controls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tbl_controls.Controls.Add(this.btn_clear, 3, 0);
-            this.tbl_controls.Controls.Add(this.lbl_shots, 1, 0);
-            this.tbl_controls.Controls.Add(this.btn_acquire, 0, 0);
-            this.tbl_controls.Controls.Add(this.btn_calibrate, 2, 0);
+            this.tbl_controls.Controls.Add(this.btn_home, 0, 0);
+            this.tbl_controls.Controls.Add(this.btn_clear, 4, 0);
+            this.tbl_controls.Controls.Add(this.lbl_shots, 2, 0);
+            this.tbl_controls.Controls.Add(this.btn_acquire, 1, 0);
+            this.tbl_controls.Controls.Add(this.btn_calibrate, 3, 0);
             this.tbl_controls.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.tbl_controls.Location = new System.Drawing.Point(0, 631);
             this.tbl_controls.Name = "tbl_controls";
             this.tbl_controls.RowCount = 1;
             this.tbl_controls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tbl_controls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 91F));
             this.tbl_controls.Size = new System.Drawing.Size(1295, 91);
             this.tbl_controls.TabIndex = 2;
             // 
@@ -227,41 +266,18 @@
             this.btn_clear.UseVisualStyleBackColor = true;
             this.btn_clear.Click += new System.EventHandler(this.btn_clear_Click);
             // 
-            // lbl_idsCalibTimestamp
+            // btn_home
             // 
-            this.lbl_idsCalibTimestamp.AutoSize = true;
-            this.lbl_idsCalibTimestamp.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_idsCalibTimestamp.Font = new System.Drawing.Font("Segoe UI Light", 10F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_idsCalibTimestamp.Location = new System.Drawing.Point(5, 68);
-            this.lbl_idsCalibTimestamp.Name = "lbl_idsCalibTimestamp";
-            this.lbl_idsCalibTimestamp.Size = new System.Drawing.Size(422, 31);
-            this.lbl_idsCalibTimestamp.TabIndex = 6;
-            this.lbl_idsCalibTimestamp.Text = "Last calibration: dd/mm/yyy hh:mm";
-            this.lbl_idsCalibTimestamp.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lbl_luxonisCalibTimestamp
-            // 
-            this.lbl_luxonisCalibTimestamp.AutoSize = true;
-            this.lbl_luxonisCalibTimestamp.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_luxonisCalibTimestamp.Font = new System.Drawing.Font("Segoe UI Light", 10F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_luxonisCalibTimestamp.Location = new System.Drawing.Point(435, 68);
-            this.lbl_luxonisCalibTimestamp.Name = "lbl_luxonisCalibTimestamp";
-            this.lbl_luxonisCalibTimestamp.Size = new System.Drawing.Size(423, 31);
-            this.lbl_luxonisCalibTimestamp.TabIndex = 7;
-            this.lbl_luxonisCalibTimestamp.Text = "Last calibration: dd/mm/yyy hh:mm";
-            this.lbl_luxonisCalibTimestamp.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lbl_baslerCalibTimestamp
-            // 
-            this.lbl_baslerCalibTimestamp.AutoSize = true;
-            this.lbl_baslerCalibTimestamp.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_baslerCalibTimestamp.Font = new System.Drawing.Font("Segoe UI Light", 10F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_baslerCalibTimestamp.Location = new System.Drawing.Point(866, 68);
-            this.lbl_baslerCalibTimestamp.Name = "lbl_baslerCalibTimestamp";
-            this.lbl_baslerCalibTimestamp.Size = new System.Drawing.Size(424, 31);
-            this.lbl_baslerCalibTimestamp.TabIndex = 8;
-            this.lbl_baslerCalibTimestamp.Text = "Last calibration: dd/mm/yyy hh:mm";
-            this.lbl_baslerCalibTimestamp.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.btn_home.BackgroundImage = global::OptiSort.Properties.Resources.home_2x2_pptx;
+            this.btn_home.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.btn_home.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btn_home.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_home.Location = new System.Drawing.Point(20, 5);
+            this.btn_home.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
+            this.btn_home.Name = "btn_home";
+            this.btn_home.Size = new System.Drawing.Size(89, 81);
+            this.btn_home.TabIndex = 10;
+            this.btn_home.UseVisualStyleBackColor = true;
             // 
             // ucLensDistortionCalibration
             // 
@@ -296,5 +312,6 @@
         private System.Windows.Forms.Label lbl_baslerCalibTimestamp;
         private System.Windows.Forms.Label lbl_luxonisCalibTimestamp;
         private System.Windows.Forms.Label lbl_idsCalibTimestamp;
+        private System.Windows.Forms.Button btn_home;
     }
 }

@@ -306,6 +306,7 @@
     <Content Include="icons\emulation_2x2_pptx.png" />
     <None Include="icons\manualDisabled_2x2_pptx.png" />
     <None Include="icons\manualEnabled_2x2_pptx.png" />
+    <None Include="icons\home_2x2_pptx.png" />
     <Content Include="icons\off_2x2_pptx.png" />
     <Content Include="icons\on_2x2_pptx.png" />
     <None Include="icons\stopEnabled_2x2_pptx.png" />
