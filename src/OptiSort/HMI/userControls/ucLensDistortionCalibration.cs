@@ -35,9 +35,9 @@ namespace OptiSort.userControls
 
         private void ucLensDistortionCalibration_Load(object sender, EventArgs e)
         {
-            SetupFileSystemWatcher();
             RefreshCalibrationTimestamp();
             LoadExistingThumbnails();
+            SetupFileSystemWatcher();
         }
 
         private void btn_acquire_Click(object sender, EventArgs e)
@@ -65,6 +65,13 @@ namespace OptiSort.userControls
             ClearTempDirectory(); 
         }
 
+        private void btn_home_Click(object sender, EventArgs e)
+        {
+            _fileWatcher.Dispose();
+            ucManualControl ucManualControl = new ucManualControl(_frmMain);
+            _frmMain.AddNewUc(ucManualControl);
+        }
+
 
         // ----------------------------------------------------------------------------------------
         // ----------------------------------------------------------------------------------------
@@ -80,30 +87,38 @@ namespace OptiSort.userControls
             // Handle the screenshots when they are ready
             Invoke(new Action(() =>
             {
+                // Get the earliest available index (gap in the sequence)
+                int earliestAvailableIndex = GetEarliestAvailableIndex();
+
                 foreach (var kvp in screenshots)
                 {
                     string topic = kvp.Key;
                     Bitmap image = kvp.Value;
 
+                    string prefix = string.Empty;
+                    FlowLayoutPanel panel = null;
+
                     if (topic == Properties.Settings.Default.mqtt_topic_idsStream)
                     {
-                        string filename = "ids_CalibrationImage_" + (_shots + 1);
-                        SaveBitmapAsFile(image, filename);
-                        AddThumbnailToColumn(flp_ids, image, filename);
+                        prefix = "ids";
+                        panel = flp_ids;
+                    }
+                    else if (topic == Properties.Settings.Default.mqtt_topic_baslerStream)
+                    {
+                        prefix = "basler";
+                        panel = flp_basler;
+                    }
+                    else if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream)
+                    {
+                        prefix = "luxonis";
+                        panel = flp_luxonis;
                     }
 
-                    if (topic == Properties.Settings.Default.mqtt_topic_baslerStream)
+                    if (!string.IsNullOrEmpty(prefix) && panel != null)
                     {
-                        string filename = "basler_CalibrationImage_" + (_shots + 1);
+                        string filename = $"{prefix}_CalibrationImage_{earliestAvailableIndex.ToString("D2")}";
                         SaveBitmapAsFile(image, filename);
-                        AddThumbnailToColumn(flp_basler, image, filename);
-                    }
-
-                    if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream)
-                    {
-                        string filename = "luxonis_CalibrationImage_" + (_shots + 1);
-                        SaveBitmapAsFile(image, filename);
-                        AddThumbnailToColumn(flp_luxonis, image, filename);
+                        AddThumbnailToColumn(panel, image, filename);
                     }
                 }
 
@@ -111,8 +126,55 @@ namespace OptiSort.userControls
                 _shots++;
                 RefreshBottomControls();
                 Cursor = Cursors.Default;
- 
             }));
+        }
+
+
+
+        /// <summary>
+        /// Identifies the earliest available index in the TEMP folder by analyzing existing filenames.
+        /// </summary>
+        /// <returns>The earliest available numeric index.</returns>
+        private int GetEarliestAvailableIndex()
+        {
+            
+            if (!Directory.Exists(_tempFolder))
+                return 1; // Start from 1 if the directory does not exist
+
+            var existingFiles = Directory.GetFiles(_tempFolder, "*_CalibrationImage_*.bmp");
+
+            // Extract indices from filenames
+            var indices = existingFiles
+                .Select(file =>
+                {
+                    string fileName = Path.GetFileNameWithoutExtension(file);
+                    string[] parts = fileName.Split('_');
+                    if (parts.Length == 3 && int.TryParse(parts[2], out int index))
+                    {
+                        return index;
+                    }
+                    return -1; // Invalid index
+                })
+                .Where(index => index > 0) // Filter out invalid indices
+                .OrderBy(index => index) // Sort in ascending order
+                .ToList();
+
+            // If no files exist, start with index 1
+            if (indices.Count == 0)
+                return 1;
+
+            // Find the first missing index (gap)
+            for (int i = 1; i <= indices.Count + 1; i++)
+            {
+                if (!indices.Contains(i))
+                {
+                    // Return the first missing index
+                    return i;
+                }
+            }
+
+            // If no gaps, return the next index after the largest one
+            return indices.Max() + 1;
         }
 
 
@@ -234,6 +296,7 @@ namespace OptiSort.userControls
                 })
                 .Where(x => x != null)
                 .GroupBy(file => file.Id)
+                .OrderBy(group => group.Key)
                 .ToDictionary(group => group.Key, group => group.ToList());
 
             foreach (var group in groupedFiles)
@@ -259,9 +322,9 @@ namespace OptiSort.userControls
                             var luxonisBitmap = new Bitmap(luxonisStream);
 
                             // Add thumbnails to the flow panels
-                            AddThumbnailToColumn(flp_ids, idsBitmap, idsImage.Prefix + "_" + idsImage.Id);
-                            AddThumbnailToColumn(flp_basler, baslerBitmap, baslerImage.Prefix + "_" + baslerImage.Id);
-                            AddThumbnailToColumn(flp_luxonis, luxonisBitmap, luxonisImage.Prefix + "_" + luxonisImage.Id);
+                            AddThumbnailToColumn(flp_ids, idsBitmap, idsImage.Prefix + "_CalibrationImage_" + idsImage.Id);
+                            AddThumbnailToColumn(flp_basler, baslerBitmap, baslerImage.Prefix + "_CalibrationImage_" + baslerImage.Id);
+                            AddThumbnailToColumn(flp_luxonis, luxonisBitmap, luxonisImage.Prefix + "_CalibrationImage_" + luxonisImage.Id);
 
                             _shots++;
                         }
@@ -281,7 +344,7 @@ namespace OptiSort.userControls
                     if (luxonisImage != null)
                         DeleteImage(luxonisImage.FullPath);
 
-                    Debug.WriteLine($"Incomplete triplet for ID {group.Key} - deleted remaining images.");
+                    Debug.WriteLine($"Incomplete triplet for calibration image nr.: {group.Key} - deleted remaining images.");
                 }
             }
 
@@ -301,7 +364,7 @@ namespace OptiSort.userControls
             if (image == null || image.Width == 0 || image.Height == 0)
                 return;
 
-            Debug.WriteLine($"Image Dimensions: {image.Width}x{image.Height}");
+            // Debug.WriteLine($"Image Dimensions: {image.Width}x{image.Height}");
 
             // Create a thumbnail from the image
             const int thumbnailWidth = 100;
@@ -334,6 +397,18 @@ namespace OptiSort.userControls
                 BorderStyle = BorderStyle.FixedSingle,
                 Margin = new Padding(3)
             };
+
+            // Create a ToolTip for the PictureBox
+            var toolTip = new ToolTip
+            {
+                AutoPopDelay = 5000, // How long the tooltip stays visible
+                InitialDelay = 500,  // Delay before it appears
+                ReshowDelay = 100,   // Delay before it reappears
+                ShowAlways = true    // Show even if the form is inactive
+            };
+
+            // Set the ToolTip text to the filename
+            toolTip.SetToolTip(pictureBox, name);
 
             // Add the PictureBox to the FlowLayoutPanel
             panel.Invoke(new Action(() => panel.Controls.Add(pictureBox)));
@@ -496,12 +571,12 @@ namespace OptiSort.userControls
             }
 
             // Combine the output folder with the file name
-            string tempFilePath = Path.Combine(_tempFolder, fileName + ".png");
+            string tempFilePath = Path.Combine(_tempFolder, fileName + ".bmp");
 
-            // Save the bitmap as a PNG file
+            // Save the bitmap as a BMP file
             bitmap.Save(tempFilePath, ImageFormat.Bmp);
 
-            Console.WriteLine($"Bitmap saved as PNG at: {tempFilePath}");
+            Console.WriteLine($"Bitmap saved as BMP at: {tempFilePath}");
         }
 
 
@@ -572,7 +647,7 @@ namespace OptiSort.userControls
 
 
         /// <summary>
-        /// Delete specific image from the TEMP folder
+        /// Delete specific image from the TEMP folder, shift other indexes to occupy that groupId
         /// </summary>
         /// <param name="name"></param>
         private static void DeleteImage(string name)
@@ -654,8 +729,5 @@ namespace OptiSort.userControls
                 CalibrationResult(outputBuilder.ToString()); // call explicitly the calibration result method
             }
         }
-
-
-
     }
 }

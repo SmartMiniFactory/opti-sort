@@ -43,8 +43,8 @@
             this.lbl_shots = new System.Windows.Forms.Label();
             this.btn_calibrate = new System.Windows.Forms.Button();
             this.tbl_controls = new System.Windows.Forms.TableLayoutPanel();
-            this.btn_clear = new System.Windows.Forms.Button();
             this.btn_home = new System.Windows.Forms.Button();
+            this.btn_clear = new System.Windows.Forms.Button();
             this.tbl_images.SuspendLayout();
             this.tbl_controls.SuspendLayout();
             this.SuspendLayout();
@@ -253,6 +253,20 @@
             this.tbl_controls.Size = new System.Drawing.Size(1295, 91);
             this.tbl_controls.TabIndex = 2;
             // 
+            // btn_home
+            // 
+            this.btn_home.BackgroundImage = global::OptiSort.Properties.Resources.home_2x2_pptx;
+            this.btn_home.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btn_home.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btn_home.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_home.Location = new System.Drawing.Point(20, 5);
+            this.btn_home.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
+            this.btn_home.Name = "btn_home";
+            this.btn_home.Size = new System.Drawing.Size(89, 81);
+            this.btn_home.TabIndex = 10;
+            this.btn_home.UseVisualStyleBackColor = true;
+            this.btn_home.Click += new System.EventHandler(this.btn_home_Click);
+            // 
             // btn_clear
             // 
             this.btn_clear.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -265,19 +279,6 @@
             this.btn_clear.Text = "Clear memory";
             this.btn_clear.UseVisualStyleBackColor = true;
             this.btn_clear.Click += new System.EventHandler(this.btn_clear_Click);
-            // 
-            // btn_home
-            // 
-            this.btn_home.BackgroundImage = global::OptiSort.Properties.Resources.home_2x2_pptx;
-            this.btn_home.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.btn_home.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn_home.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_home.Location = new System.Drawing.Point(20, 5);
-            this.btn_home.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
-            this.btn_home.Name = "btn_home";
-            this.btn_home.Size = new System.Drawing.Size(89, 81);
-            this.btn_home.TabIndex = 10;
-            this.btn_home.UseVisualStyleBackColor = true;
             // 
             // ucLensDistortionCalibration
             // 
