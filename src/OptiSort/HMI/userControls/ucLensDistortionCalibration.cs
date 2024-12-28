@@ -17,6 +17,7 @@ namespace OptiSort.userControls
         private frmMain _frmMain;
         private int _shots = 0;
 
+        private FileSystemWatcher _fileWatcher;
         private static string _tempFolder = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp"));
         private static string _configFolder = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Config"));
 
@@ -35,6 +36,7 @@ namespace OptiSort.userControls
 
         private void ucLensDistortionCalibration_Load(object sender, EventArgs e)
         {
+            SetupFileSystemWatcher();
             RefreshCalibrationTimestamp();
             LoadExistingThumbnails();
         }
@@ -213,6 +215,11 @@ namespace OptiSort.userControls
             if (!Directory.Exists(tempPath))
                 return;
 
+            // Clear the panels before repopulating
+            flp_ids.Controls.Clear();
+            flp_basler.Controls.Clear();
+            flp_luxonis.Controls.Clear();
+
             // Get all image files in the Temp folder
             var imageFiles = Directory.GetFiles(tempPath, "*.bmp");
 
@@ -255,12 +262,22 @@ namespace OptiSort.userControls
                 {
                     try
                     {
-                        // All three images exist, add their thumbnails
-                        AddThumbnailToColumn(flp_ids, new Bitmap(idsImage.FullPath), idsImage.Prefix + "_" + idsImage.Id);
-                        AddThumbnailToColumn(flp_basler, new Bitmap(baslerImage.FullPath), baslerImage.Prefix + "_" + baslerImage.Id);
-                        AddThumbnailToColumn(flp_luxonis, new Bitmap(luxonisImage.FullPath), luxonisImage.Prefix + "_" + luxonisImage.Id);
+                        // Load images into memory streams to avoid locking the original files
+                        using (var idsStream = new MemoryStream(File.ReadAllBytes(idsImage.FullPath)))
+                        using (var baslerStream = new MemoryStream(File.ReadAllBytes(baslerImage.FullPath)))
+                        using (var luxonisStream = new MemoryStream(File.ReadAllBytes(luxonisImage.FullPath)))
+                        {
+                            var idsBitmap = new Bitmap(idsStream);
+                            var baslerBitmap = new Bitmap(baslerStream);
+                            var luxonisBitmap = new Bitmap(luxonisStream);
 
-                        _shots++;
+                            // Add thumbnails to the flow panels
+                            AddThumbnailToColumn(flp_ids, idsBitmap, idsImage.Prefix + "_" + idsImage.Id);
+                            AddThumbnailToColumn(flp_basler, baslerBitmap, baslerImage.Prefix + "_" + baslerImage.Id);
+                            AddThumbnailToColumn(flp_luxonis, luxonisBitmap, luxonisImage.Prefix + "_" + luxonisImage.Id);
+
+                            _shots++;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -285,6 +302,7 @@ namespace OptiSort.userControls
             lbl_shots.Text = $"{_shots}/15";
             btn_acquire.Enabled = _shots < 15;
             btn_calibrate.Enabled = _shots == 15;
+
         }
 
 
@@ -368,17 +386,17 @@ namespace OptiSort.userControls
             {
 
                 if (!File.Exists(Path.Combine(_configFolder, "ids_calibration.yaml")))
-                    this.Invoke(new Action(() => lbl_idsCalibTimestamp.Text = "Last calibration: dd/mm/yyyy hh:mm" ));
+                    this.Invoke(new Action(() => lbl_idsCalibTimestamp.Text = "Last calibration: NEVER!"));
                 else
                     this.Invoke(new Action(() => lbl_idsCalibTimestamp.Text = "Last calibration: " + File.GetLastWriteTime(Path.Combine(_configFolder, "ids_calibration.yaml")).ToString("dd/MM/yyyy HH:mm")));
 
                 if (!File.Exists(Path.Combine(_configFolder, "basler_calibration.yaml")))
-                    this.Invoke(new Action(() => lbl_baslerCalibTimestamp.Text = "Last calibration: dd/mm/yyyy hh:mm"));
+                    this.Invoke(new Action(() => lbl_baslerCalibTimestamp.Text = "Last calibration: NEVER!"));
                 else
                     this.Invoke(new Action(() => lbl_baslerCalibTimestamp.Text = "Last calibration: " + File.GetLastWriteTime(Path.Combine(_configFolder, "basler_calibration.yaml")).ToString("dd/MM/yyyy HH:mm")));
 
                 if (!File.Exists(Path.Combine(_configFolder, "luxonis_calibration.yaml")))
-                    this.Invoke(new Action(() => lbl_luxonisCalibTimestamp.Text = "Last calibration: dd/mm/yyyy hh:mm"));
+                    this.Invoke(new Action(() => lbl_luxonisCalibTimestamp.Text = "Last calibration: NEVER!"));
                 else
                     this.Invoke(new Action(() => lbl_luxonisCalibTimestamp.Text = "Last calibration: " + File.GetLastWriteTime(Path.Combine(_configFolder, "luxonis_calibration.yaml")).ToString("dd/MM/yyyy HH:mm")));
             }
@@ -391,10 +409,75 @@ namespace OptiSort.userControls
             }
         }
 
+        private void RefreshFlowPanels()
+        {
+            flp_ids.Controls.Clear();
+            flp_luxonis.Controls.Clear();
+            flp_basler.Controls.Clear();
+            _shots = 0;
+
+            LoadExistingThumbnails();
+            
+            flp_ids.Refresh();
+            flp_luxonis.Refresh();
+            flp_basler.Refresh();
+        }
+
         // ----------------------------------------------------------------------------------------
         // ----------------------------------------------------------------------------------------
         // ----------------------------------------------------------------------------------------
 
+        /// <summary>
+        /// Creates an agent that checks on updates within the TEMP folder to update the flow panels respectively
+        /// </summary>
+        private void SetupFileSystemWatcher()
+        {
+            _fileWatcher = new FileSystemWatcher
+            {
+                Path = _tempFolder, // Directory to watch
+                Filter = "*.bmp", // Monitor only BMP files
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.CreationTime
+            };
+
+            // Subscribe to events
+            //_fileWatcher.Created += OnFileChanged; // too aggressive (three images cannot be added simultaneously, not even by pasting)
+            _fileWatcher.Deleted += OnFileChanged;
+            //_fileWatcher.Changed += OnFileChanged; // too aggressive (three images cannot changed simultaneously)
+            //_fileWatcher.Renamed += OnFileRenamed; // too aggressive (three images cannot renamed simultaneously)
+
+            // Enable the watcher
+            _fileWatcher.EnableRaisingEvents = true;
+        }
+
+        private void OnFileChanged(object sender, FileSystemEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => OnFileChanged(sender, e)));
+                return;
+            }
+
+            Debug.WriteLine($"File {e.ChangeType}: {e.FullPath}");
+
+            // Refresh thumbnails to reflect the current folder's content
+            RefreshFlowPanels();
+        }
+
+        /*
+        private void OnFileRenamed(object sender, RenamedEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => OnFileRenamed(sender, e)));
+                return;
+            }
+
+            Debug.WriteLine($"File Renamed: {e.OldFullPath} -> {e.FullPath}");
+
+            // Refresh thumbnails to reflect the current folder's content
+            RefreshFlowPanels();
+        }
+        */
 
         /// <summary>
         /// Export screenshots as bmp files to the TEMP folder
@@ -437,9 +520,6 @@ namespace OptiSort.userControls
         /// <exception cref="ArgumentException"></exception>
         private static void ClearTempDirectory()
         {
-
-            
-
             if (string.IsNullOrWhiteSpace(_tempFolder))
             {
                 throw new ArgumentException("Temporary directory path cannot be null or empty.", nameof(_tempFolder));
@@ -508,7 +588,7 @@ namespace OptiSort.userControls
         {
             try
             {
-                string filePath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp\" + name + ".bmp"));
+                string filePath = Path.Combine(_tempFolder, name);
                 if (File.Exists(filePath))
                     File.Delete(filePath);
                 else
