@@ -12,21 +12,38 @@ using System.Windows.Forms;
 
 namespace OptiSort.userControls
 {
-    public partial class ucLensDistortionCalibration : UserControl
+    public partial class ucCameraLensCalibration : UserControl
     {
         private frmMain _frmMain;
-        private int _shots = 0;
+        private int _shots;
+        public int Shots
+        {
+            get => _shots;
+            set
+            {
+                if (_shots != value)
+                {
+                    _shots = value;
+                    RefreshBottomControls(); // Trigger re-evaluation when value changes
+                }
+            }
+        }
 
         private FileSystemWatcher _fileWatcher;
+        private bool _isFileWatcherPaused;
+
         private static string _tempFolder = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp"));
         private static string _configFolder = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Config"));
 
-        // TODO: create dedicated method to update/invoke shots label update and buttons enable/disable
+
         // TODO: move general methods to app manager
 
-        public ucLensDistortionCalibration(frmMain frmMain)
+
+        public ucCameraLensCalibration(frmMain frmMain)
         {
             InitializeComponent();
+
+            Shots = 0;
             
             _frmMain = frmMain;
 
@@ -56,6 +73,9 @@ namespace OptiSort.userControls
         private void btn_calibrate_Click(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
+
+            _frmMain.Log("Calibration process in progress...", false, false);
+
             string script = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Cameras\workingScripts\camerasCalibration.py"));
             RunPythonScript(script);
         }
@@ -123,8 +143,7 @@ namespace OptiSort.userControls
                 }
 
                 _frmMain._ucCameraStream.ScreenshotsReady -= SaveShot;
-                _shots++;
-                RefreshBottomControls();
+                Shots++;
                 Cursor = Cursors.Default;
             }));
         }
@@ -184,6 +203,9 @@ namespace OptiSort.userControls
         /// <param name="pythonOutput"></param>
         private void CalibrationResult(string pythonOutput)
         {
+
+            PauseFileWatcher();
+
             try
             {
                 var jsonDocument = JsonDocument.Parse(pythonOutput); // Parse JSON
@@ -206,6 +228,7 @@ namespace OptiSort.userControls
 
                 if (badImage_ids.Length == 0 && badImage_basler.Length == 0 && badImage_luxonis.Length == 0)
                 {
+                    Shots = 0;
                     ClearTempDirectory();
                     RefreshCalibrationTimestamp();
                     MessageBox.Show($"CALIBRATION SUCCEDED!");
@@ -223,23 +246,13 @@ namespace OptiSort.userControls
                     // deleting bad images IDs for all the cameras
                     foreach (int id in badImages_all)
                     {
-                        DeleteImage("ids_CalibrationImage_" + id);
-                        RemoveThumbnailFromColumn(flp_ids, "ids_CalibrationImage_" + id);
-
-                        DeleteImage("basler_CalibrationImage_" + id);
-                        RemoveThumbnailFromColumn(flp_basler, "basler_CalibrationImage_" + id);
-
-                        DeleteImage("luxonis_CalibrationImage_" + id);
-                        RemoveThumbnailFromColumn(flp_luxonis, "luxonis_CalibrationImage_" + id);
+                        DeleteImage("ids_CalibrationImage_" + id.ToString("D2") + ".bmp");
+                        DeleteImage("basler_CalibrationImage_" + id.ToString("D2") + ".bmp");
+                        DeleteImage("luxonis_CalibrationImage_" + id.ToString("D2") + ".bmp");
                     }
 
-                    RefreshFlowPanels();
-
-                    _shots -= badImages_all.Count;
-                    
-                    RefreshBottomControls();
-
-                    MessageBox.Show($"BAD IMAGES DETECTED!\nCalibration failed because the grid was not found in {badImages_all.Count} images. Please retake these images.");
+                    Shots -= badImages_all.Count;
+                    MessageBox.Show($"BAD IMAGES DETECTED!\nCalibration failed because the chess board was not found in {badImages_all.Count} triplets. These were deleted. Please proceed to retaking the images again.");
                 }
             }
             catch (Exception ex)
@@ -247,7 +260,9 @@ namespace OptiSort.userControls
                 Console.WriteLine($"Error parsing JSON: {ex.Message}");
             }
         
+            ResumeFileWatcher();
             Cursor = Cursors.Default;
+            _frmMain.Log("Calibration process ended", false, false);
         }
 
         // ----------------------------------------------------------------------------------------
@@ -255,22 +270,14 @@ namespace OptiSort.userControls
         // ----------------------------------------------------------------------------------------
 
         /// <summary>
-        /// Check TEMP folder, if some items with a specific name format are present, load them into the flow panels
+        /// Deletes incomplete triplets in the TEMP folder.
         /// </summary>
-        private void LoadExistingThumbnails()
+        private void DeleteIncompleteTriplets()
         {
-            string tempPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp"));
-
-            if (!Directory.Exists(tempPath))
+            if (!Directory.Exists(_tempFolder))
                 return;
 
-            // Clear the panels before repopulating
-            flp_ids.Controls.Clear();
-            flp_basler.Controls.Clear();
-            flp_luxonis.Controls.Clear();
-
-            // Get all image files in the Temp folder
-            var imageFiles = Directory.GetFiles(tempPath, "*.bmp");
+            var imageFiles = Directory.GetFiles(_tempFolder, "*.bmp");
 
             // Group files by their numeric identifier
             var groupedFiles = imageFiles
@@ -297,13 +304,79 @@ namespace OptiSort.userControls
                 .Where(x => x != null)
                 .GroupBy(file => file.Id)
                 .OrderBy(group => group.Key)
-                .ToDictionary(group => group.Key, group => group.ToList());
+                .ToList();
 
             foreach (var group in groupedFiles)
             {
-                var triplet = group.Value;
+                var triplet = group.ToList();
 
                 // Check if all three images exist for the same ID
+                var idsImage = triplet.FirstOrDefault(f => f.Prefix == "ids");
+                var baslerImage = triplet.FirstOrDefault(f => f.Prefix == "basler");
+                var luxonisImage = triplet.FirstOrDefault(f => f.Prefix == "luxonis");
+
+                if (idsImage == null || baslerImage == null || luxonisImage == null)
+                {
+                    // Delete incomplete triplet
+                    if (idsImage != null)
+                        DeleteImage(idsImage.FullPath);
+                    if (baslerImage != null)
+                        DeleteImage(baslerImage.FullPath);
+                    if (luxonisImage != null)
+                        DeleteImage(luxonisImage.FullPath);
+
+                    Debug.WriteLine($"Incomplete triplet for calibration image nr.: {group.Key} - deleted remaining images.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads existing valid images into the flow panels.
+        /// </summary>
+        private void LoadExistingThumbnails()
+        {
+            if (!Directory.Exists(_tempFolder))
+                return;
+
+            // Clear the panels before repopulating
+            flp_ids.Controls.Clear();
+            flp_basler.Controls.Clear();
+            flp_luxonis.Controls.Clear();
+
+            var imageFiles = Directory.GetFiles(_tempFolder, "*.bmp");
+
+            // Group files by their numeric identifier
+            var groupedFiles = imageFiles
+                .Select(file =>
+                {
+                    string fileName = Path.GetFileNameWithoutExtension(file);
+                    string[] parts = fileName.Split('_');
+
+                    if (parts.Length == 3 && parts[1] == "CalibrationImage")
+                    {
+                        return new
+                        {
+                            FullPath = file,
+                            Prefix = parts[0], // "ids", "basler", "luxonis"
+                            Id = parts[2]      // The numeric part after "CalibrationImage"
+                        };
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"Invalid file name format: {fileName}");
+                        return null;
+                    }
+                })
+                .Where(x => x != null)
+                .GroupBy(file => file.Id)
+                .OrderBy(group => group.Key)
+                .ToList();
+
+            foreach (var group in groupedFiles)
+            {
+                var triplet = group.ToList();
+
+                // Ensure all three images exist for the same ID
                 var idsImage = triplet.FirstOrDefault(f => f.Prefix == "ids");
                 var baslerImage = triplet.FirstOrDefault(f => f.Prefix == "basler");
                 var luxonisImage = triplet.FirstOrDefault(f => f.Prefix == "luxonis");
@@ -326,7 +399,7 @@ namespace OptiSort.userControls
                             AddThumbnailToColumn(flp_basler, baslerBitmap, baslerImage.Prefix + "_CalibrationImage_" + baslerImage.Id);
                             AddThumbnailToColumn(flp_luxonis, luxonisBitmap, luxonisImage.Prefix + "_CalibrationImage_" + luxonisImage.Id);
 
-                            _shots++;
+                            Shots++;
                         }
                     }
                     catch (Exception ex)
@@ -334,22 +407,9 @@ namespace OptiSort.userControls
                         Debug.WriteLine($"Failed to load image from triplet {group.Key}: {ex.Message}");
                     }
                 }
-                else
-                {
-                    // If any image is missing, delete the remaining images in the triplet
-                    if (idsImage != null)
-                        DeleteImage(idsImage.FullPath);
-                    if (baslerImage != null)
-                        DeleteImage(baslerImage.FullPath);
-                    if (luxonisImage != null)
-                        DeleteImage(luxonisImage.FullPath);
-
-                    Debug.WriteLine($"Incomplete triplet for calibration image nr.: {group.Key} - deleted remaining images.");
-                }
             }
-
-            RefreshBottomControls();
         }
+
 
 
 
@@ -414,26 +474,7 @@ namespace OptiSort.userControls
             panel.Invoke(new Action(() => panel.Controls.Add(pictureBox)));
         }
 
-        /// <summary>
-        /// Remove specific thumbnail from a specific flow panel
-        /// </summary>
-        /// <param name="panel"></param>
-        /// <param name="name"></param>
-        private static void RemoveThumbnailFromColumn(FlowLayoutPanel panel, string name)
-        {
-            foreach (Control ctrl in panel.Controls)
-            {
-                if (ctrl.Name == name) // Identify the control by name
-                {
-                    panel.Controls.Remove(ctrl);
-                    ctrl.Dispose();
-                    break;
-                }
-            }
-        }
-
-        
-
+       
         // ----------------------------------------------------------------------------------------
         // ----------------------------------------------------------------------------------------
         // ----------------------------------------------------------------------------------------
@@ -472,7 +513,7 @@ namespace OptiSort.userControls
             flp_ids.Controls.Clear();
             flp_luxonis.Controls.Clear();
             flp_basler.Controls.Clear();
-            _shots = 0;
+            Shots = 0;
 
             LoadExistingThumbnails();
             
@@ -483,10 +524,10 @@ namespace OptiSort.userControls
 
         private void RefreshBottomControls()
         {
-            lbl_shots.Text = $"{_shots}/15";
-            btn_acquire.Enabled = _shots < 15;
-            btn_calibrate.Enabled = _shots == 15;
-            btn_clear.Enabled = _shots > 0;
+            lbl_shots.Text = $"{Shots}/15";
+            btn_acquire.Enabled = Shots < 15;
+            btn_calibrate.Enabled = Shots == 15;
+            btn_clear.Enabled = Shots > 0;
         }
 
         // ----------------------------------------------------------------------------------------
@@ -515,8 +556,22 @@ namespace OptiSort.userControls
             _fileWatcher.EnableRaisingEvents = true;
         }
 
+        private void PauseFileWatcher()
+        {
+            _isFileWatcherPaused = true;
+        }
+
+        private void ResumeFileWatcher()
+        {
+            _isFileWatcherPaused = false;
+            LoadExistingThumbnails();
+        }
+
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
+            if (_isFileWatcherPaused)
+                return;
+
             if (InvokeRequired)
             {
                 Invoke(new Action(() => OnFileChanged(sender, e)));
@@ -525,7 +580,7 @@ namespace OptiSort.userControls
 
             Debug.WriteLine($"File {e.ChangeType}: {e.FullPath}");
 
-            // Refresh thumbnails to reflect the current folder's content
+            DeleteIncompleteTriplets();
             RefreshFlowPanels();
         }
 

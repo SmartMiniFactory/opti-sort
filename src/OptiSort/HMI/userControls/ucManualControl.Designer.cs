@@ -29,6 +29,10 @@
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.button3 = new System.Windows.Forms.Button();
+            this.btn_coordinateCalibration = new System.Windows.Forms.Button();
+            this.btn_lensCalibration = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
             this.btnFaultReset = new System.Windows.Forms.Button();
             this.btnScaraJog = new System.Windows.Forms.Button();
             this.lblScara = new System.Windows.Forms.Label();
@@ -37,10 +41,6 @@
             this.btnFlexibowlBw = new System.Windows.Forms.Button();
             this.lblFlexibowl = new System.Windows.Forms.Label();
             this.btnFlexibowlFw = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.btn_lensCalibration = new System.Windows.Forms.Button();
-            this.btn_coordinateCalibration = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -76,6 +76,56 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1166, 677);
             this.tableLayoutPanel1.TabIndex = 0;
+            // 
+            // button3
+            // 
+            this.button3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.button3.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button3.Location = new System.Drawing.Point(100, 602);
+            this.button3.Margin = new System.Windows.Forms.Padding(100, 2, 100, 2);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(383, 73);
+            this.button3.TabIndex = 11;
+            this.button3.Text = "---";
+            this.button3.UseVisualStyleBackColor = true;
+            // 
+            // btn_coordinateCalibration
+            // 
+            this.btn_coordinateCalibration.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btn_coordinateCalibration.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_coordinateCalibration.Location = new System.Drawing.Point(683, 527);
+            this.btn_coordinateCalibration.Margin = new System.Windows.Forms.Padding(100, 2, 100, 2);
+            this.btn_coordinateCalibration.Name = "btn_coordinateCalibration";
+            this.btn_coordinateCalibration.Size = new System.Drawing.Size(383, 71);
+            this.btn_coordinateCalibration.TabIndex = 10;
+            this.btn_coordinateCalibration.Text = "Coordinate reference frame";
+            this.btn_coordinateCalibration.UseVisualStyleBackColor = true;
+            // 
+            // btn_lensCalibration
+            // 
+            this.btn_lensCalibration.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btn_lensCalibration.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_lensCalibration.Location = new System.Drawing.Point(100, 527);
+            this.btn_lensCalibration.Margin = new System.Windows.Forms.Padding(100, 2, 100, 2);
+            this.btn_lensCalibration.Name = "btn_lensCalibration";
+            this.btn_lensCalibration.Size = new System.Drawing.Size(383, 71);
+            this.btn_lensCalibration.TabIndex = 9;
+            this.btn_lensCalibration.Text = "Camera lenses";
+            this.btn_lensCalibration.UseVisualStyleBackColor = true;
+            this.btn_lensCalibration.Click += new System.EventHandler(this.btn_lensCalibration_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.label1, 2);
+            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(3, 450);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(1160, 75);
+            this.label1.TabIndex = 8;
+            this.label1.Text = "Calibrations";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // btnFaultReset
             // 
@@ -180,56 +230,6 @@
             this.btnFlexibowlFw.Text = "Forward";
             this.btnFlexibowlFw.UseVisualStyleBackColor = true;
             this.btnFlexibowlFw.Click += new System.EventHandler(this.btnFlexibowlFw_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.tableLayoutPanel1.SetColumnSpan(this.label1, 2);
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(3, 450);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(1160, 75);
-            this.label1.TabIndex = 8;
-            this.label1.Text = "Calibrations";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // btn_lensCalibration
-            // 
-            this.btn_lensCalibration.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn_lensCalibration.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_lensCalibration.Location = new System.Drawing.Point(100, 527);
-            this.btn_lensCalibration.Margin = new System.Windows.Forms.Padding(100, 2, 100, 2);
-            this.btn_lensCalibration.Name = "btn_lensCalibration";
-            this.btn_lensCalibration.Size = new System.Drawing.Size(383, 71);
-            this.btn_lensCalibration.TabIndex = 9;
-            this.btn_lensCalibration.Text = "Camera lens distortion";
-            this.btn_lensCalibration.UseVisualStyleBackColor = true;
-            this.btn_lensCalibration.Click += new System.EventHandler(this.btn_lensCalibration_Click);
-            // 
-            // btn_coordinateCalibration
-            // 
-            this.btn_coordinateCalibration.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn_coordinateCalibration.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_coordinateCalibration.Location = new System.Drawing.Point(683, 527);
-            this.btn_coordinateCalibration.Margin = new System.Windows.Forms.Padding(100, 2, 100, 2);
-            this.btn_coordinateCalibration.Name = "btn_coordinateCalibration";
-            this.btn_coordinateCalibration.Size = new System.Drawing.Size(383, 71);
-            this.btn_coordinateCalibration.TabIndex = 10;
-            this.btn_coordinateCalibration.Text = "Coordinate reference frame";
-            this.btn_coordinateCalibration.UseVisualStyleBackColor = true;
-            // 
-            // button3
-            // 
-            this.button3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.button3.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.Location = new System.Drawing.Point(100, 602);
-            this.button3.Margin = new System.Windows.Forms.Padding(100, 2, 100, 2);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(383, 73);
-            this.button3.TabIndex = 11;
-            this.button3.Text = "---";
-            this.button3.UseVisualStyleBackColor = true;
             // 
             // ucManualControl
             // 

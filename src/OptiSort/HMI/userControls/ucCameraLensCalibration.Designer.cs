@@ -1,6 +1,6 @@
 ﻿namespace OptiSort.userControls
 {
-    partial class ucLensDistortionCalibration
+    partial class ucCameraLensCalibration
     {
         /// <summary> 
         /// Required designer variable.

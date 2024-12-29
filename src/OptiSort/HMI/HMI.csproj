@@ -214,11 +214,11 @@
     <Compile Include="userControls\ucFlexibowl.Designer.cs">
       <DependentUpon>ucFlexibowl.cs</DependentUpon>
     </Compile>
-    <Compile Include="userControls\ucLensDistortionCalibration.cs">
+    <Compile Include="userControls\ucCameraLensCalibration.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="userControls\ucLensDistortionCalibration.Designer.cs">
-      <DependentUpon>ucLensDistortionCalibration.cs</DependentUpon>
+    <Compile Include="userControls\ucCameraLensCalibration.Designer.cs">
+      <DependentUpon>ucCameraLensCalibration.cs</DependentUpon>
     </Compile>
     <Compile Include="userControls\ucManualControl.cs">
       <SubType>UserControl</SubType>
@@ -258,8 +258,8 @@
     <EmbeddedResource Include="userControls\ucFlexibowl.resx">
       <DependentUpon>ucFlexibowl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="userControls\ucLensDistortionCalibration.resx">
-      <DependentUpon>ucLensDistortionCalibration.cs</DependentUpon>
+    <EmbeddedResource Include="userControls\ucCameraLensCalibration.resx">
+      <DependentUpon>ucCameraLensCalibration.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucManualControl.resx">
       <DependentUpon>ucManualControl.cs</DependentUpon>

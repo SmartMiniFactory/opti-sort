@@ -59,7 +59,7 @@ for camera in ["ids", "basler", "luxonis"]:
     for picture_nr in range(15):
 
         # get picture path
-        filename = camera + "_CalibrationImage_" + str(picture_nr + 1)
+        filename = f"{camera}_CalibrationImage_{picture_nr + 1:02d}" # using format 01, 02, ... for digits
         absolutePath = (temp_folder / f"{filename}.bmp").resolve()
 
         # check picture existence
@@ -80,8 +80,8 @@ for camera in ["ids", "basler", "luxonis"]:
                 image_points.append(corners2)
                 cv2.drawChessboardCorners(image, (rows, cols), corners2, ret)
 
-                savePath = pathlib.Path(r"..\..\OptiSort\HMI\Temp\\").resolve()
-                cv2.imwrite(str(temp_folder / f"{filename}_grid.bmp"), image)
+                # saving image with grid (cool but unuseful)
+                # cv2.imwrite(str(temp_folder / f"{filename}_grid.bmp"), image)
 
             # chess board not found
             else:
