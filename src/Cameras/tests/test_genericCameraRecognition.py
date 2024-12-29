@@ -1,3 +1,10 @@
+"""
+This file implements an algorithm to recognize the target components with a geometrical approach
+The script works on a vector image
+The script is not working on a video stream, because a better lighting setup is needed to perform serious testing
+"""
+
+
 import cv2
 
 

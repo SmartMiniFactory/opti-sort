@@ -100,6 +100,7 @@
             this.btn_coordinateCalibration.TabIndex = 10;
             this.btn_coordinateCalibration.Text = "Coordinate reference frame";
             this.btn_coordinateCalibration.UseVisualStyleBackColor = true;
+            this.btn_coordinateCalibration.Click += new System.EventHandler(this.btn_coordinateCalibration_Click);
             // 
             // btn_lensCalibration
             // 

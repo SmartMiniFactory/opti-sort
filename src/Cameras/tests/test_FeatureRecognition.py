@@ -1,3 +1,8 @@
+"""
+This script was used to explore OpenCV library (image processing and feature recognition) by using random screenshots
+of the target components to be found
+"""
+
 import cv2
 import numpy as np
 import keyboard

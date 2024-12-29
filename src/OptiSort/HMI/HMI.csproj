@@ -208,6 +208,12 @@
     <Compile Include="userControls\ucConfiguration.Designer.cs">
       <DependentUpon>ucConfiguration.cs</DependentUpon>
     </Compile>
+    <Compile Include="userControls\ucCoordinateReferenceFrame.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucCoordinateReferenceFrame.Designer.cs">
+      <DependentUpon>ucCoordinateReferenceFrame.cs</DependentUpon>
+    </Compile>
     <Compile Include="userControls\ucFlexibowl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -254,6 +260,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucConfiguration.resx">
       <DependentUpon>ucConfiguration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="userControls\ucCoordinateReferenceFrame.resx">
+      <DependentUpon>ucCoordinateReferenceFrame.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucFlexibowl.resx">
       <DependentUpon>ucFlexibowl.cs</DependentUpon>

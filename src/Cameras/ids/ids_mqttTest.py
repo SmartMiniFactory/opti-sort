@@ -1,3 +1,6 @@
+"""
+This script connects to the IDS camera and publishes the video stream on a dedicated MQTT topic
+"""
 ####################################################### LIBRARIES #######################################################
 import cv2
 import keyboard

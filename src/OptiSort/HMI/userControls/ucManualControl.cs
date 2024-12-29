@@ -95,5 +95,11 @@ namespace OptiSort.userControls
             ucCameraLensCalibration ucLensDistortionCalibration = new ucCameraLensCalibration(_frmMain);
             _frmMain.AddNewUc(ucLensDistortionCalibration);
         }
+
+        private void btn_coordinateCalibration_Click(object sender, EventArgs e)
+        {
+            ucCoordinateReferenceFrame ucCoordinateReferenceFrame = new ucCoordinateReferenceFrame(_frmMain);
+            _frmMain.AddNewUc(ucCoordinateReferenceFrame);
+        }
     }
 }

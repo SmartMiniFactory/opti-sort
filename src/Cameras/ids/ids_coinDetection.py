@@ -1,4 +1,7 @@
-#Libraries
+"""
+This script tests the usage of the OpenCV library to detect coins by using the IDS camera
+"""
+# Libraries
 from pyueye import ueye
 import numpy as np
 import cv2
