@@ -1,4 +1,5 @@
 """
+DESCRIPTION
 This file represents the final version merging all the tests done on other files
 This will be exported to a .exe and run on the machinery, controlled by and interacting with the HMI (C#)
 Overall, it merges:
@@ -8,25 +9,102 @@ Overall, it merges:
 - feature recognition
 """
 
-import paho.mqtt.client as mqtt
-import cv2
-import json
-import base64
-import datetime
+# -------------------------------------------------------------------------------------------------------------------
+
+import pathlib
+import xml.etree.ElementTree as ET
+from MQTT.mqtt_publisher import MQTTClient
+from cameras.ids import Ids
+from cameras.basler import Basler
+from cameras.luxonis import Luxonis
+from processing.image_processor import ImageProcessor
 import time
-from pyueye import ueye
-from pypylon import pylon
-import depthai as dai
-import keyboard
-import numpy as np
 
-# MQTT
-MQTT_BROKER = "localhost"  # IP address of the MQTT broker
-MQTT_PORT = 1883  # Port of the MQTT Broker
-MQTT_IDS_TOPIC = "optisort/ids/stream"  # Topic on which frame will be published
-MQTT_LUXONIS_TOPIC = "optisort/luxonis/stream"  # Topic on which frame will be published
-MQTT_BASLER_TOPIC = "optisort/basler/stream"  # Topic on which frame will be published
+# -------------------------------------------------------------------------------------------------------------------
 
+# MQTT setup: acquiring parameters from HMI settings (AppConfig file)
+
+script_dir = pathlib.Path(__file__).parent.resolve()
+appconfig_file = (script_dir / "../../OptiSort/HMI/App.config").resolve()
+
+mqtt_broker = 'localhost'
+mqtt_port = 1883
+topics = []
+
+# parsing App.config XML
+tree = ET.parse(appconfig_file)
+for element in tree.getroot():
+    if element.tag == "userSettings":
+        for setting in element[0]:
+
+            if setting.attrib['name'] == 'mqtt_client':
+                mqtt_broker = setting[0].text
+
+            if setting.attrib['name'] == 'mqtt_topic_idsStream':
+                topics.append(setting[0].text)
+
+            if setting.attrib['name'] == 'mqtt_topic_luxonisStream':
+                topics.append(setting[0].text)
+
+            if setting.attrib['name'] == 'mqtt_topic_baslerStream':
+                topics.append(setting[0].text)
+
+            if setting.attrib['name'] == 'mqtt_port':
+                mqtt_port = setting[0].text
+
+# instance MQTT client
+mqtt_client = MQTTClient(mqtt_broker, mqtt_port, topics)
+
+
+ids_config = {
+    "exposure": 10000,  # Microseconds
+    "gain": 1.5,
+    "resolution": (1280, 720),  # Width, Height
+    "pixel_format": "RGB8"
+}
+
+# Define cameras
+ids_camera = Ids(camera_id="ids1", config=ids_config)
+basler_camera = Basler(camera_id="basler1", config={})
+luxonis_camera = Luxonis(camera_id="luxonis1", config={})
+
+# Initialize cameras
+ids_camera.initialize()
+basler_camera.initialize()
+luxonis_camera.initialize()
+
+# Start streaming
+ids_camera.start_streaming()
+basler_camera.start_streaming()
+luxonis_camera.start_streaming()
+
+# image processor instance
+processor = ImageProcessor()
+
+# -------------------------------------------------------------------------------------------------------------------
+
+# Main loop
+while True:
+
+    # TODO: consider async techniques / think about synchronization; manual screenshots or videostream??
+
+    # Capture frames from each camera
+    frame_ids = ids_camera.capture_frame()
+    frame_basler = basler_camera.capture_frame()
+    frame_luxonis = luxonis_camera.capture_frame()
+
+    # Process frames
+    processed_ids = processor.process_frame(frame_ids)
+    processed_basler = processor.process_frame(frame_basler)
+    processed_luxonis = processor.process_frame(frame_luxonis)
+
+    # Publish results
+    mqtt_client.publish("camera_topic/ids", processed_ids)
+    mqtt_client.publish("camera_topic/basler", processed_basler)
+    mqtt_client.publish("camera_topic/luxonis", processed_luxonis)
+
+
+"""
 client = mqtt.Client()  # Create the MQTT Client
 client.connect(MQTT_BROKER, MQTT_PORT)  # Establishing Connection with the Broker
 
@@ -234,3 +312,5 @@ baslerCamera.StopGrabbing()
 
 cv2.destroyAllWindows()
 client.disconnect()
+
+"""
