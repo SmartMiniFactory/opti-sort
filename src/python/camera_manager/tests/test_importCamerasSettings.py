@@ -4,7 +4,7 @@ from ids_peak import ids_peak  # Assuming you're using IDS Peak SDK
 
 # Load the .ini file
 script_dir = pathlib.Path(__file__).parent.resolve()
-calib_file = (script_dir / "../../OptiSort/HMI/Config/camera_parameters.ini").resolve()
+calib_file = (script_dir / "../../OptiSort/HMI/config/camera_parameters.ini").resolve()
 
 config = configparser.ConfigParser()
 config.read(calib_file, encoding='cp1250')

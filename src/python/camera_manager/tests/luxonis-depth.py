@@ -37,7 +37,7 @@ stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 stereo.setLeftRightCheck(True)
 stereo.setSubpixel(True)
 
-# Config
+# config
 topLeft = dai.Point2f(0.4, 0.4)
 bottomRight = dai.Point2f(0.6, 0.6)
 

@@ -56,6 +56,10 @@ for element in tree.getroot():
 mqtt_client = MQTTClient(mqtt_broker, mqtt_port, topics)
 
 
+ids_configfile = (script_dir / "../../OptiSort/HMI/config/camera_configuration.ini").resolve()
+basler_configfile = (script_dir / "../../OptiSort/HMI/config/camera_config.pfs").resolve()
+luxonis_configfile = (script_dir / "../../OptiSort/HMI/config/camera_configuration.ini").resolve()
+
 ids_config = {
     "exposure": 10000,  # Microseconds
     "gain": 1.5,
@@ -64,9 +68,9 @@ ids_config = {
 }
 
 # Define cameras
-ids_camera = Ids(camera_id="ids1", config=ids_config)
-basler_camera = Basler(camera_id="basler1", config={})
-luxonis_camera = Luxonis(camera_id="luxonis1", config={})
+ids_camera = Ids(camera_id="ids1", config_path=ids_configfile)
+basler_camera = Basler(camera_id="basler1", config_path=basler_configfile)
+luxonis_camera = Luxonis(camera_id="luxonis1", config_path=luxonis_configfile)
 
 # Initialize cameras
 ids_camera.initialize()

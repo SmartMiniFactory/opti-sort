@@ -8,13 +8,13 @@ from pypylon import pylon
 
 
 class Basler(BaseCamera):
-    def __init__(self, camera_id, config):
+    def __init__(self, camera_id, config_path):
         """
         Initialize the Basler Camera.
         :param camera_id: Unique ID for the camera.
-        :param config: Dictionary containing camera-specific configurations.
+        :param config_path: path to the configuration file exported by the manufacturer's application.
         """
-        super().__init__(camera_id, config)
+        super().__init__(camera_id, config_path)
         self.camera = None  # Basler camera object
         self.converter = pylon.ImageFormatConverter()  # For converting frames to OpenCV-compatible format
         self.converter.OutputPixelFormat = pylon.PixelType_BGR8packed
@@ -25,8 +25,14 @@ class Basler(BaseCamera):
         Initialize the Basler camera.
         """
         try:
+            # Find and initialize the camera
+            tl_factory = pylon.TlFactory.GetInstance()
+            devices = tl_factory.EnumerateDevices()
+            if not devices:
+                raise RuntimeError("No Basler cameras found.")
+
             # Create an InstantCamera object for the first camera found
-            self.camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
+            self.camera = pylon.InstantCamera(tl_factory.CreateDevice(devices[self.camera_id]))
             self.camera.Open()  # Open the camera for configuration and streaming
 
             print(f"Camera {self.camera_id} initialized successfully! Using device: {self.camera.GetDeviceInfo().GetModelName()}")
@@ -35,19 +41,15 @@ class Basler(BaseCamera):
 
     def configure(self):
         """
-        Configure the Basler camera using settings from the provided config dictionary.
+        Load a PFS file into the Basler camera configuration.
         """
         try:
-            # Apply configuration parameters from `self.config`
-            if "exposure" in self.config:
-                self.camera.ExposureTime.SetValue(self.config["exposure"])
-            if "gain" in self.config:
-                self.camera.Gain.SetValue(self.config["gain"])
-            if "pixel_format" in self.config:
-                self.camera.PixelFormat.SetValue(self.config["pixel_format"])
-            if "frame_rate" in self.config:
-                self.camera.AcquisitionFrameRateEnable.SetValue(True)
-                self.camera.AcquisitionFrameRate.SetValue(self.config["frame_rate"])
+            # Create a node map for the camera
+            nodemap = self.camera.GetNodeMap()
+
+            # Use Basler's Pylon feature to load the PFS file
+            pylon.FeaturePersistence.Load(self.config_path, nodemap)
+            print(f"Successfully loaded PFS file: {self.config_path}")
 
             print(f"Camera {self.camera_id} configured successfully!")
         except Exception as e:

@@ -1,7 +1,7 @@
 class BaseCamera:
-    def __init__(self, camera_id, config):
+    def __init__(self, camera_id, config_path):
         self.camera_id = camera_id
-        self.config = config
+        self.config_path = config_path
 
     def initialize(self):
         pass

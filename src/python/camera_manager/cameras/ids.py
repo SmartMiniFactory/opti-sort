@@ -4,23 +4,23 @@ This file is provided with the specific functionalities to interact with the UI-
 """
 
 from base_camera import BaseCamera
-from peak.uds import UDSDeviceManager
-from peak.uds import Buffer, ImageFormatConverter
+from ids_peak import ids_peak
+import configparser
 import numpy as np
 
 
 class Ids(BaseCamera):
-    def __init__(self, camera_id, config):
+    def __init__(self, camera_id, config_path):
         """
         Initialize the IDS Camera.
         :param camera_id: Unique ID for the camera.
-        :param config: Dictionary containing camera-specific configurations.
+        :param config_path: path to the configuration file exported by the manufacturer's application.
         """
-        super().__init__(camera_id, config)
-        self.device_manager = UDSDeviceManager()  # Peak library device manager
+        super().__init__(camera_id, config_path)
+        ids_peak.Library.Initialize()
+        self.device_manager = ids_peak.DeviceManager.Instance()  # Peak library device manager
         self.device = None  # Camera device object
         self.data_stream = None  # Data stream for image capture
-        self.converter = ImageFormatConverter()  # For image conversion (e.g., to RGB)
         self.buffer_queue = []  # Queue for managing buffers
 
     def initialize(self):
@@ -28,13 +28,14 @@ class Ids(BaseCamera):
         Discover and open the IDS camera using the Peak library.
         """
         try:
-            devices = self.device_manager.devices
-            if not devices:
+            self.device_manager.Update()
+            if not self.device_manager.Devices().empty():
                 raise RuntimeError("No IDS devices found!")
 
             # Select the first available device
-            self.device = devices[0]
-            self.device.open()
+            # https://www.1stvision.com/cameras/IDS/IDS-manuals/en/program-open-camera.html
+
+            self.device = self.device_manager.Devices()[0].OpenDevice(ids_peak.DeviceAccessType_Control)
 
             # Get the default data stream
             self.data_stream = self.device.data_streams[0]
@@ -49,17 +50,21 @@ class Ids(BaseCamera):
         Configure the IDS camera using settings from the provided config dictionary.
         """
         try:
-            # Apply configuration parameters from `self.config`
-            if "exposure" in self.config:
-                self.device.node_map.ExposureTime.value = self.config["exposure"]
-            if "gain" in self.config:
-                self.device.node_map.Gain.value = self.config["gain"]
-            if "resolution" in self.config:
-                width, height = self.config["resolution"]
-                self.device.node_map.Width.value = width
-                self.device.node_map.Height.value = height
-            if "pixel_format" in self.config:
-                self.device.node_map.PixelFormat.value = self.config["pixel_format"]
+            # Extract from config file
+            config = configparser.ConfigParser()
+            config.read(self.config_path, encoding='cp1250')
+
+            # Loading configuration to camera
+            # https://www.1stvision.com/cameras/IDS/IDS-manuals/en/operate-camera-reference.html
+
+            # self.device.node_map.ExposureTime.value =
+            # self.device.node_map.Gain.value =
+            # self.device.node_map.Width.value = config.get('Image size', 'Width')
+            # self.device.node_map.Height.value = config.get('Image size', 'Width')
+            # self.device.node_map.PixelFormat.value =
+
+            # TODO: maybe is possible to import/export directly some .cset files
+            # https://www.1stvision.com/cameras/IDS/IDS-manuals/en/program-save-cset-file.html
 
             print(f"Camera {self.camera_id} configured successfully!")
         except Exception as e:

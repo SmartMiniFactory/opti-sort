@@ -191,6 +191,6 @@ if __name__ == "__main__":
     # Get the absolute path of the script directory
     script_dir = pathlib.Path(__file__).parent.resolve()
     image_path = script_dir / "../../OptiSort/HMI/Temp/luxonis_CalibrationImage_01.bmp"
-    calib_path = script_dir / "../../OptiSort/HMI/Config/luxonis_calibration.yaml"
+    calib_path = script_dir / "../../OptiSort/HMI/config/luxonis_calibration.yaml"
 
     main(image_path, calib_path)

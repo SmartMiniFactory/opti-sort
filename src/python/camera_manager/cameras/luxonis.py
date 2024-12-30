@@ -8,13 +8,13 @@ import depthai as dai
 
 
 class Luxonis(BaseCamera):
-    def __init__(self, camera_id, config):
+    def __init__(self, camera_id, config_path):
         """
         Initialize the Luxonis Camera.
         :param camera_id: Unique ID for the camera.
-        :param config: Dictionary containing camera-specific configurations.
+        :param config_path: path to the configuration file exported by the manufacturer's application.
         """
-        super().__init__(camera_id, config)
+        super().__init__(camera_id, config_path)
         self.pipeline = dai.Pipeline()  # DepthAI pipeline for configuring streams
         self.device = None  # Luxonis device object
         self.cam_rgb = None  # RGB camera node

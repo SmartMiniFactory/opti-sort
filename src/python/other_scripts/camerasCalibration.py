@@ -38,7 +38,7 @@ script_dir = pathlib.Path(__file__).parent.resolve()
 
 # Define the Temp folder path relative to the script directory
 temp_folder = script_dir / "../../OptiSort/HMI/Temp"
-config_folder = script_dir / "../../OptiSort/HMI/Config"
+config_folder = script_dir / "../../OptiSort/HMI/config"
 
 # ---------------------------------------------------------------------------------------------------------------------------------------
 
