@@ -413,10 +413,10 @@
             // 
             // cmbCameras
             // 
-            this.cmbCameras.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cmbCameras.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.cmbCameras.Font = new System.Drawing.Font("Microsoft Sans Serif", 25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cmbCameras.FormattingEnabled = true;
-            this.cmbCameras.Location = new System.Drawing.Point(1426, 3);
+            this.cmbCameras.Location = new System.Drawing.Point(1426, 6);
             this.cmbCameras.Name = "cmbCameras";
             this.cmbCameras.Size = new System.Drawing.Size(469, 66);
             this.cmbCameras.TabIndex = 7;

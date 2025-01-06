@@ -38,7 +38,7 @@ script_dir = pathlib.Path(__file__).parent.resolve()
 
 # Define the Temp folder path relative to the script directory
 temp_folder = script_dir / "../../OptiSort/HMI/Temp"
-config_folder = script_dir / "../../OptiSort/HMI/config"
+config_folder = script_dir / "../../OptiSort/HMI/Config"
 
 # ---------------------------------------------------------------------------------------------------------------------------------------
 
@@ -68,6 +68,8 @@ for camera in ["ids", "basler", "luxonis"]:
             # acquire image with openCV
             image = cv2.imread(str(absolutePath))
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+            # https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
 
             # Find the chess board corners
             ret, corners = cv2.findChessboardCorners(gray, (rows, cols), None)

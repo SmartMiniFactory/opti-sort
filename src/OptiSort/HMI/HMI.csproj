@@ -104,6 +104,9 @@
       <HintPath>..\CobraLibrary\references\Interop.HSDISPLAYLib.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="LedBulb, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LedBulb.1.0.0\lib\net48\LedBulb.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.9.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -214,12 +217,6 @@
     <Compile Include="userControls\ucCoordinateReferenceFrame.Designer.cs">
       <DependentUpon>ucCoordinateReferenceFrame.cs</DependentUpon>
     </Compile>
-    <Compile Include="userControls\ucFlexibowl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="userControls\ucFlexibowl.Designer.cs">
-      <DependentUpon>ucFlexibowl.cs</DependentUpon>
-    </Compile>
     <Compile Include="userControls\ucCameraLensCalibration.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -264,9 +261,6 @@
     <EmbeddedResource Include="userControls\ucCoordinateReferenceFrame.resx">
       <DependentUpon>ucCoordinateReferenceFrame.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="userControls\ucFlexibowl.resx">
-      <DependentUpon>ucFlexibowl.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucCameraLensCalibration.resx">
       <DependentUpon>ucCameraLensCalibration.cs</DependentUpon>
     </EmbeddedResource>
@@ -300,6 +294,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="LedBulb.png" />
     <None Include="Resources\OptisortLogo.jpg" />
     <None Include="icons\stopPassivated_2x2_pptx.png" />
     <None Include="icons\autoDisabled_2x2_pptx.png" />
