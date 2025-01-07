@@ -16,10 +16,9 @@ namespace OptiSort
 
     public partial class ucCameraStream : UserControl
     {
-        private frmMain _frmMain;
+        private optisort_mgr _manager;
         private readonly object _lock = new object(); // should be used each time different threads try access (write or read) shared resources
 
-        public string StreamTopic { get; set; }
         public Bitmap Image { get; private set; }
 
         private DateTime _imgDate = DateTime.MinValue;
@@ -32,19 +31,20 @@ namespace OptiSort
         private int _latencyMilliseconds = 0;
 
         // Screenshot requests
-        private bool _screenshotRequested = false;
         private Dictionary<string, Bitmap> _screenshotBuffer = new Dictionary<string, Bitmap>();
-        public event Action<Dictionary<string, Bitmap>> ScreenshotsReady;
         private Dictionary<string, DateTime> _topicLastReceived = new Dictionary<string, DateTime>();
         private TimeSpan _topicTimeoutThreshold = TimeSpan.FromSeconds(2);
 
-        internal ucCameraStream(frmMain frmMain)
+        internal ucCameraStream(optisort_mgr manager)
         {
             InitializeComponent();
-            _frmMain = frmMain;
+            _manager = manager;
 
             // Create a transparent placeholder Bitmap
             Image = CreateTransparentBitmap(pictureBox.Width, pictureBox.Height);
+
+            // Attach user control to mqtt-generated events
+            _manager.MqttClient.MessageReceived += OnMessageReceived;
 
             // Create timer
             _timeoutTimer = new System.Threading.Timer(OnTimeout, null, TimeSpan.Zero, _topicTimeoutThreshold);
@@ -68,7 +68,7 @@ namespace OptiSort
             lock (_lock)
             {
                 // Regular streaming logic
-                if (!_screenshotRequested || topic == StreamTopic)
+                if (!_manager.RequestScreenshots || topic == _manager.StreamingTopic)
                 {
                     Bitmap previousImage = Image;
                     Image = image;
@@ -81,7 +81,7 @@ namespace OptiSort
                 }
 
                 // Handle screenshot request
-                if (_screenshotRequested)
+                if (_manager.RequestScreenshots)
                 {
                     // Add the current image to the buffer for the topic
                     _screenshotBuffer[topic] = image;
@@ -98,8 +98,8 @@ namespace OptiSort
                     if (requiredTopics.All(_screenshotBuffer.ContainsKey))
                     {
                         // Notify that screenshots are ready
-                        ScreenshotsReady?.Invoke(new Dictionary<string, Bitmap>(_screenshotBuffer));
-                        _screenshotRequested = false;
+                        _manager.NotifyScreenshotsReady(_screenshotBuffer);
+                        _manager.RequestScreenshots = false;
                     }
                 }
             }
@@ -124,7 +124,7 @@ namespace OptiSort
         {
             lock (_lock)
             {
-                _screenshotRequested = true;
+                _manager.RequestScreenshots = true;
                 _screenshotBuffer.Clear(); // Clear buffer for new screenshots
 
                 // Initialize last received times for all required topics
@@ -187,7 +187,7 @@ namespace OptiSort
         /// <param name="g"></param>
         private void RenderTimeoutOverlay(Graphics g)
         {
-            if (_frmMain.StatusMqttClient)
+            if (_manager.StatusMqttClient)
             {
                 g.Clear(Color.Black);
                 using (var pen = new Pen(Color.Red, 10))
@@ -222,7 +222,7 @@ namespace OptiSort
         /// <param name="state"></param>
         private void OnTimeout(object state)
         {
-            if (_screenshotRequested)
+            if (_manager.RequestScreenshots)
             {
                 lock (_lock)
                 {
@@ -249,10 +249,9 @@ namespace OptiSort
                     // If all required topics have been captured (including placeholders), invoke ScreenshotsReady
                     if (requiredTopics.All(t => _screenshotBuffer.ContainsKey(t)))
                     {
-                        ScreenshotsReady?.Invoke(new Dictionary<string, Bitmap>(_screenshotBuffer));
-
                         // Reset request flag
-                        _screenshotRequested = false;
+                        _manager.NotifyScreenshotsReady(_screenshotBuffer);
+                        _manager.RequestScreenshots = false;
                     }
                 }
             }

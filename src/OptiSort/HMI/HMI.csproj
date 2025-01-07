@@ -176,6 +176,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="optisort_mgr.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -235,6 +236,12 @@
     <Compile Include="userControls\ucProcessView.Designer.cs">
       <DependentUpon>ucProcessView.cs</DependentUpon>
     </Compile>
+    <Compile Include="userControls\ucRobotSimulation.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucRobotSimulation.Designer.cs">
+      <DependentUpon>ucRobotSimulation.cs</DependentUpon>
+    </Compile>
     <Compile Include="userControls\ucScaraTargets.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -269,6 +276,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucProcessView.resx">
       <DependentUpon>ucProcessView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="userControls\ucRobotSimulation.resx">
+      <DependentUpon>ucRobotSimulation.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucScaraTargets.resx">
       <DependentUpon>ucScaraTargets.cs</DependentUpon>

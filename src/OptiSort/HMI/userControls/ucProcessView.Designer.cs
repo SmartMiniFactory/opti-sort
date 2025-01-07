@@ -14,7 +14,7 @@
         protected override void Dispose(bool disposing)
         {
             // unsubscribe mqtt messages triggers
-            _frmMain.MqttClient.MessageReceived -= _ucScaraTargets.OnMessageReceived;
+            _manager.MqttClient.MessageReceived -= _ucScaraTargets.OnMessageReceived;
 
             if (disposing && (components != null))
             {

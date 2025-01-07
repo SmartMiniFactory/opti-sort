@@ -12,12 +12,12 @@ namespace OptiSort.userControls
 {
     public partial class ucCoordinateReferenceFrame : UserControl
     {
-        private frmMain _frmMain;
+        private optisort_mgr _manager;
 
-        public ucCoordinateReferenceFrame(frmMain frmMain)
+        internal ucCoordinateReferenceFrame(optisort_mgr manager)
         {
             InitializeComponent();
-            _frmMain = frmMain;
+            _manager = manager;
         }
     }
 }

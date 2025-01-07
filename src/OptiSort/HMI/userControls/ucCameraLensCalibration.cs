@@ -14,7 +14,7 @@ namespace OptiSort.userControls
 {
     public partial class ucCameraLensCalibration : UserControl
     {
-        private frmMain _frmMain;
+        private optisort_mgr _manager;
         private int _shots;
         public int Shots
         {
@@ -39,13 +39,13 @@ namespace OptiSort.userControls
         // TODO: move general methods to app manager
 
 
-        public ucCameraLensCalibration(frmMain frmMain)
+        internal ucCameraLensCalibration(optisort_mgr manager)
         {
             InitializeComponent();
 
             Shots = 0;
             
-            _frmMain = frmMain;
+            _manager = manager;
 
             this.Load += ucLensDistortionCalibration_Load; // Attach the Load event to call the method after the control is fully initialized
         }
@@ -59,22 +59,22 @@ namespace OptiSort.userControls
 
         private void btn_acquire_Click(object sender, EventArgs e)
         {
-            if (!_frmMain.StatusMqttClient)
+            if (!_manager.StatusMqttClient)
             {
                 MessageBox.Show("Enable camera streaming first (MQTT service)");
                 return;
             }
 
             Cursor = Cursors.WaitCursor;
-            _frmMain._ucCameraStream.ScreenshotsReady += SaveShot;
-            _frmMain._ucCameraStream.RequestScreenshots();
+            _manager.ScreenshotsReady += SaveShot;
+            _manager.RequestScreenshots = true;
         }
 
         private void btn_calibrate_Click(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
 
-            _frmMain.Log("Calibration process in progress...", false, false);
+            _manager.Log("Calibration process in progress...", false, false);
 
             string script = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Cameras\workingScripts\camerasCalibration.py"));
             RunPythonScript(script);
@@ -88,8 +88,8 @@ namespace OptiSort.userControls
         private void btn_home_Click(object sender, EventArgs e)
         {
             _fileWatcher.Dispose();
-            ucManualControl ucManualControl = new ucManualControl(_frmMain);
-            _frmMain.AddNewUc(ucManualControl);
+            ucManualControl ucManualControl = new ucManualControl(_manager);
+            _manager.RequestNewUcLoading(ucManualControl);
         }
 
 
@@ -142,7 +142,7 @@ namespace OptiSort.userControls
                     }
                 }
 
-                _frmMain._ucCameraStream.ScreenshotsReady -= SaveShot;
+                _manager.ScreenshotsReady -= SaveShot;
                 Shots++;
                 Cursor = Cursors.Default;
             }));
@@ -262,7 +262,7 @@ namespace OptiSort.userControls
         
             ResumeFileWatcher();
             Cursor = Cursors.Default;
-            _frmMain.Log("Calibration process ended", false, false);
+            _manager.Log("Calibration process ended", false, false);
         }
 
         // ----------------------------------------------------------------------------------------

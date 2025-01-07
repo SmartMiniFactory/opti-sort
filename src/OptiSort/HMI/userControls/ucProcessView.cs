@@ -20,20 +20,20 @@ namespace OptiSort.userControls
 
         public bool AutomaticProcess { get; set; }
 
-        private frmMain _frmMain;
+        private optisort_mgr _manager;
         private ucScaraTargets _ucScaraTargets;
 
-        public ucProcessView(frmMain frmMain)
+        internal ucProcessView(optisort_mgr manager)
         {
             InitializeComponent();
-            _frmMain = frmMain;
+            _manager = manager;
 
             // init scara dgv
-            _ucScaraTargets = new ucScaraTargets(_frmMain); // using log function
+            _ucScaraTargets = new ucScaraTargets(_manager); // using log function
             _ucScaraTargets.Dock = DockStyle.Fill;
             pnlScara.Controls.Clear();
             pnlScara.Controls.Add(_ucScaraTargets);
-            _frmMain.MqttClient.MessageReceived += _ucScaraTargets.OnMessageReceived; // enable MQTT messages to trigger the user control
+            _manager.MqttClient.MessageReceived += _ucScaraTargets.OnMessageReceived; // enable MQTT messages to trigger the user control
 
             RefreshControls();
 
