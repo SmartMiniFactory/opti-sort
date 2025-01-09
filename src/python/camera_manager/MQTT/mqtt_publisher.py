@@ -1,19 +1,60 @@
 import paho.mqtt.client as mqtt
 
-
 class MQTTClient:
-    def __init__(self, broker, port, topics):
+    def __init__(self, broker, port, client_name, topics):
         self.broker = broker
-        self.port = port
+        self.port = int(port)
+        self.client_name = client_name
         self.topics = topics
-        self.client = mqtt.Client()
-        self.client.connect(self.broker, self.port)
+        self.client = mqtt.Client(client_name)
+
+        # Set callbacks for connect, disconnect, and message
+        self.client.on_connect = self.on_connect
+        self.client.on_disconnect = self.on_disconnect
+        self.client.on_message = self.on_message
+
+    def on_connect(self, client, userdata, flags, rc):
+        if rc == 0:
+            print(f"Connected to MQTT broker: {self.broker}")
+            # Subscribe to topics after connection
+            for topic in self.topics:
+                self.client.subscribe(topic)
+        else:
+            print(f"Failed to connect with result code {rc}. Error description: {self.get_connect_error_message(rc)}")
+
+    def get_connect_error_message(self, rc):
+        error_messages = {
+            0: "Connection successful.",
+            1: "Incorrect protocol version.",
+            2: "Invalid client identifier.",
+            3: "Server unavailable.",
+            4: "Bad username or password.",
+            5: "Not authorized."
+        }
+        return error_messages.get(rc, "Unknown error.")
+
+    def on_disconnect(self, client, userdata, rc):
+        print(f"Disconnected from broker. Reason: {rc}")
+
+    def on_message(self, client, userdata, msg):
+        print(f"Received message on {msg.topic}: {msg.payload.decode()}")
+
+    def connect(self):
+        try:
+            # Attempt to connect to the MQTT broker
+            self.client.connect(self.broker, self.port, 60)
+            # Start a loop to handle incoming messages and ensure a successful connection
+            self.client.loop_start()
+        except Exception as e:
+            print(f"Error connecting to MQTT broker: {e}")
 
     def publish(self, topic, message):
-        self.client.publish(topic, message)
+        if self.client.is_connected():
+            # Publish a message to the given topic
+            self.client.publish(topic, message)
+        else:
+            print("Cannot publish. Client is not connected to the broker.")
 
-    def subscribe(self, topic):
-        self.client.subscribe(topic)
-
-    def loop(self):
-        self.client.loop_start()
+    def disconnect(self):
+        self.client.disconnect()
+        self.client.loop_stop()

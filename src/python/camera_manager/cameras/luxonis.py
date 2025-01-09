@@ -3,7 +3,7 @@ DESCRIPTION:
 This file is provided with the specific functionalities to interact with the OAK-D SR PoE/CAD camera by LUXONIS
 """
 
-from base_camera import BaseCamera
+from cameras.base_camera import BaseCamera
 import depthai as dai
 
 

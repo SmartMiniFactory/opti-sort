@@ -80,8 +80,10 @@ namespace OptiSort
             pnlRobotView.Controls.Add(ucRobotSimulation);
 
             
-            // attach propery changed to refresh of status bar
+            // attach events
             _manager.PropertyChanged += RefreshStatusBar;
+            _manager.NewUserControlRequested += AddNewUc;
+            
 
             // log box setup
             _manager.LogEvent += OnLogEvent;

@@ -76,7 +76,7 @@ namespace OptiSort.userControls
 
             _manager.Log("Calibration process in progress...", false, false);
 
-            string script = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Cameras\workingScripts\camerasCalibration.py"));
+            string script = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\camerasCalibration.py"));
             RunPythonScript(script);
         }
 

@@ -68,7 +68,7 @@ namespace OptiSort
             lock (_lock)
             {
                 // Regular streaming logic
-                if (!_manager.RequestScreenshots || topic == _manager.StreamingTopic)
+                if (topic == _manager.StreamingTopic)
                 {
                     Bitmap previousImage = Image;
                     Image = image;
@@ -238,7 +238,7 @@ namespace OptiSort
                     // Check if any topic has timed out
                     foreach (var topic in requiredTopics)
                     {
-                        if (currentTime - _topicLastReceived[topic] > TimeSpan.FromSeconds(4))
+                        if (!_topicLastReceived.ContainsKey(topic) || currentTime - _topicLastReceived[topic] > TimeSpan.FromSeconds(4))
                         {
                             // Replace the image with a placeholder bitmap for this topic
                             Console.WriteLine($"{topic} timed out");

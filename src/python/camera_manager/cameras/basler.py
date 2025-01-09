@@ -3,7 +3,7 @@ DESCRIPTION:
 This file is provided with the specific functionalities to interact with the cA1300-32gm camera by BASLER
 """
 
-from base_camera import BaseCamera
+from cameras.base_camera import BaseCamera
 from pypylon import pylon
 
 
