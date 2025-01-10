@@ -585,7 +585,17 @@ namespace OptiSort
         /// <param name="scriptPath"></param>
         public string RunPythonScript(string scriptPath)
         {
-            var pythonExe = @"C:\Users\dylan\AppData\Local\Programs\Python\Python312\python.exe"; // Path to Python executable
+            string pythonExe = LocatePythonInterpreter();
+            if (string.IsNullOrEmpty(pythonExe))
+            {
+                throw new Exception("Python interpreter not found. Ensure Python is installed and added to the system PATH.");
+            }
+
+            if (!File.Exists(scriptPath))
+            {
+                throw new Exception("Python script not found.");
+            }
+
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = pythonExe,
@@ -640,6 +650,40 @@ namespace OptiSort
 
             return null;
         }
+
+        private string LocatePythonInterpreter()
+        {
+            // Attempt to find Python in the PATH
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = "/c python --version",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            try
+            {
+                using (var process = Process.Start(processStartInfo))
+                {
+                    process.WaitForExit();
+                    string output = process.StandardOutput.ReadToEnd();
+                    if (!string.IsNullOrWhiteSpace(output) && output.Contains("Python"))
+                    {
+                        return "python"; // Python was found in the PATH
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore errors and fall back to alternative methods
+            }
+
+            return null; // Python not found
+        }
+
 
     }
 }
