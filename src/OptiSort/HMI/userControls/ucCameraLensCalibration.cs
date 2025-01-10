@@ -539,6 +539,12 @@ namespace OptiSort.userControls
         /// </summary>
         private void SetupFileSystemWatcher()
         {
+
+            if (!Directory.Exists(_tempFolder))
+            {
+                Directory.CreateDirectory(_tempFolder);
+            }
+
             _fileWatcher = new FileSystemWatcher
             {
                 Path = _tempFolder, // Directory to watch
