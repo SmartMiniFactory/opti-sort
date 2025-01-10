@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -106,10 +108,21 @@ namespace OptiSort
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        // events
         public event Action<Dictionary<string, Bitmap>> ScreenshotsReady; // Event to notify subscribers
         public event Action<Control> NewUserControlRequested; // Event to notify subscribers
+        public event Action TempFileDeleted;
+        public event Action TempFolderWatcherResumed;
 
 
+        // file management
+        public string TempFolder { get; private set; } = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp"));
+        public string ConfigFolder { get; private set; } = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Config"));
+        
+        public FileSystemWatcher TempFolderWatcher;
+        private bool _isFileWatcherPaused = false;
+        
+        
         // Logging
         public event Action<LogEntry> LogEvent; // Event to notify subscribers
         public class LogEntry
@@ -132,7 +145,6 @@ namespace OptiSort
 
             // Initialize the remoting subsystem
             RemotingUtil.InitializeRemotingSubsystem(true, 0);
-
 
             // Instance cobra class
             string remotingPort = Properties.Settings.Default.scara_port;
@@ -163,7 +175,7 @@ namespace OptiSort
         }
 
         // -----------------------------------------------------------------------------------
-        // ---------------------------------- CONNECTIONS ------------------------------------
+        // ---------------------------------- SUBSYSTEMS -------------------------------------
         // -----------------------------------------------------------------------------------
 
         #region ACE scara
@@ -365,8 +377,193 @@ namespace OptiSort
         #endregion
 
 
+        // -----------------------------------------------------------------------------------
+        // ---------------------------------- FILE MANAGENT ----------------------------------
+        // -----------------------------------------------------------------------------------
+        /// <summary>
+        /// Creates an agent that checks on updates within the TEMP folder to update the flow panels respectively
+        /// </summary>
+        public void SetupTempFolderWatcher()
+        {
+
+            if (!Directory.Exists(TempFolder))
+            {
+                Directory.CreateDirectory(TempFolder);
+            }
+
+            TempFolderWatcher = new FileSystemWatcher
+            {
+                Path = TempFolder, // Directory to watch
+                Filter = "*.bmp", // Monitor only BMP files
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.CreationTime
+            };
+
+            // Subscribe to events
+            //_fileWatcher.Created += OnFileChanged; // too aggressive (three images cannot be added simultaneously, not even by pasting)
+            TempFolderWatcher.Deleted += OnFileDeleted;
+            //_fileWatcher.Changed += OnFileChanged; // too aggressive (three images cannot changed simultaneously)
+            //_fileWatcher.Renamed += OnFileRenamed; // too aggressive (three images cannot renamed simultaneously)
+
+            TempFolderWatcher.EnableRaisingEvents = true;
+        }
+
+        public void PauseFileWatcher()
+        {
+            _isFileWatcherPaused = true;
+        }
+
+        public void ResumeFileWatcher()
+        {
+            _isFileWatcherPaused = false;
+            TempFolderWatcherResumed?.Invoke();
+        }
+
+        public void OnFileDeleted(object sender, FileSystemEventArgs e)
+        {
+            if (_isFileWatcherPaused)
+                return;
+
+            TempFileDeleted?.Invoke();
+            Debug.WriteLine($"File {e.ChangeType}: {e.FullPath}");
+        }
+
+        public void DisposeTempFolderWatcher()
+        {
+            TempFolderWatcher?.Dispose();
+        }
 
 
+        /// <summary>
+        /// Export screenshots as bmp files to the TEMP folder
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="fileName"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public void SaveBitmapAsFile(Bitmap bitmap, string fileName)
+        {
+            if (bitmap == null)
+            {
+                throw new ArgumentNullException(nameof(bitmap), "Bitmap cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                throw new ArgumentException("File name cannot be null or empty.", nameof(fileName));
+            }
+
+
+            if (!Directory.Exists(TempFolder))
+            {
+                Directory.CreateDirectory(TempFolder);
+            }
+
+            // Combine the output folder with the file name
+            string tempFilePath = Path.Combine(TempFolder, fileName + ".bmp");
+
+            // Save the bitmap as a BMP file
+            bitmap.Save(tempFilePath, ImageFormat.Bmp);
+
+            Console.WriteLine($"Bitmap saved as BMP at: {tempFilePath}");
+        }
+
+
+        /// <summary>
+        /// Delete all the contents of the TEMP folder (calibration screenshots of the cameras)
+        /// </summary>
+        /// <exception cref="ArgumentException"></exception>
+        public void ClearTempDirectory()
+        {
+            if (string.IsNullOrWhiteSpace(TempFolder))
+            {
+                throw new ArgumentException("Temporary directory path cannot be null or empty.", nameof(TempFolder));
+            }
+
+            try
+            {
+                // Ensure the temporary directory exists
+                if (Directory.Exists(TempFolder))
+                {
+                    // Get all files in the temporary directory
+                    var files = Directory.GetFiles(TempFolder);
+
+                    // Delete each file
+                    foreach (var file in files)
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            Console.WriteLine($"Deleted: {file}");
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log the error (or handle it accordingly)
+                            Console.WriteLine($"Failed to delete file: {file}. Error: {ex.Message}");
+                        }
+                    }
+
+                    // Optionally, delete empty subdirectories
+                    var directories = Directory.GetDirectories(TempFolder);
+                    foreach (var directory in directories)
+                    {
+                        try
+                        {
+                            Directory.Delete(directory, true); // Recursive delete
+                            Console.WriteLine($"Deleted directory: {directory}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Failed to delete directory: {directory}. Error: {ex.Message}");
+                        }
+                    }
+                }
+                else
+                {
+                    // If the directory doesn't exist, create it
+                    Directory.CreateDirectory(TempFolder);
+                    Console.WriteLine($"Temporary directory created: {TempFolder}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to clean temporary directory. Error: {ex.Message}",
+                                "Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+            }
+        }
+
+
+        /// <summary>
+        /// Delete specific image from the TEMP folder, shift other indexes to occupy that groupId
+        /// </summary>
+        /// <param name="name"></param>
+        public void DeleteFile(string name)
+        {
+            try
+            {
+                string filePath = Path.Combine(TempFolder, name);
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+                else
+                    Console.WriteLine($"Delete failed because file is not found: {filePath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting file: {ex.Message}");
+            }
+        }
+
+        // -----------------------------------------------------------------------------------
+        // ------------------------------------- GENERAL -------------------------------------
+        // -----------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Can be called by any user control to log things inside the listbox in the frmain, which is invoked by this
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="isError"></param>
+        /// <param name="isSuccess"></param>
         public void Log(string message, bool isError = false, bool isSuccess = false)
         {
             // Prepend timestamp to the message
@@ -382,7 +579,67 @@ namespace OptiSort
         }
 
 
+        /// <summary>
+        /// Run a python script in background and returns its output as a string
+        /// </summary>
+        /// <param name="scriptPath"></param>
+        public string RunPythonScript(string scriptPath)
+        {
+            var pythonExe = @"C:\Users\dylan\AppData\Local\Programs\Python\Python312\python.exe"; // Path to Python executable
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = pythonExe,
+                Arguments = scriptPath, // Path to the script
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
 
+            var process = new Process { StartInfo = processStartInfo };
+
+            // Use StringBuilder to collect output data
+            var outputBuilder = new StringBuilder();
+            var errorBuilder = new StringBuilder();
+
+            process.OutputDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                {
+                    outputBuilder.AppendLine(e.Data);
+                }
+            };
+            process.ErrorDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                {
+                    errorBuilder.AppendLine(e.Data);
+                }
+            };
+
+            // Start the process
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            // Wait for the process to complete (or temporary imaged used will overlap)
+            process.WaitForExit();
+
+            // Handle errors if any
+            if (errorBuilder.Length > 0)
+            {
+                Console.WriteLine("ERROR: " + errorBuilder.ToString());
+                // Optionally, handle errors here (e.g., log them or throw an exception)
+            }
+
+            // Trigger the CalibrationResult method with the collected output
+            if (outputBuilder.Length > 0)
+            {
+                return outputBuilder.ToString(); // call explicitly the calibration result method
+            }
+
+            return null;
+        }
 
     }
 }
