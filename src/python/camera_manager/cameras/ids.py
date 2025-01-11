@@ -5,8 +5,8 @@ This file is provided with the specific functionalities to interact with the UI-
 
 from cameras.base_camera import BaseCamera
 from ids_peak import ids_peak
-import configparser
 import numpy as np
+from ids_peak_ipl import ids_peak_ipl
 
 
 class Ids(BaseCamera):
@@ -14,36 +14,55 @@ class Ids(BaseCamera):
         """
         Initialize the IDS Camera.
         :param camera_id: Unique ID for the camera.
-        :param config_path: path to the configuration file exported by the manufacturer's application.
+        :param config_path: Path to the configuration file exported by the manufacturer's application.
         """
         super().__init__(camera_id, config_path)
+
         ids_peak.Library.Initialize()
+
         self.device_manager = ids_peak.DeviceManager.Instance()  # Peak library device manager
         self.device = None  # Camera device object
+        self.node_map = None
         self.data_stream = None  # Data stream for image capture
         self.buffer_queue = []  # Queue for managing buffers
+
 
     def initialize(self):
         """
         Discover and open the IDS camera using the Peak library.
         """
         try:
+            # Create instance of the device manager
+            self.device_manager = ids_peak.DeviceManager.Instance()
+
+            # Update the device manager
             self.device_manager.Update()
-            if not self.device_manager.Devices().empty():
-                raise RuntimeError("No IDS devices found!")
 
-            # Select the first available device
-            # https://www.1stvision.com/cameras/IDS/IDS-manuals/en/program-open-camera.html
+            # Return if no device was found
+            if self.device_manager.Devices().empty():
+                raise RuntimeError("No IDS camera found")
 
-            self.device = self.device_manager.Devices()[0].OpenDevice(ids_peak.DeviceAccessType_Control)
+            # open the first openable device in the device manager's device list
+            device_count = self.device_manager.Devices().size()
+            for i in range(device_count):
+                if self.device_manager.Devices()[i].IsOpenable():
+                    self.device = self.device_manager.Devices()[i].OpenDevice(ids_peak.DeviceAccessType_Control)
 
-            # Get the default data stream
-            self.data_stream = self.device.data_streams[0]
-            self.data_stream.start_acquisition()
+                    # Get NodeMap of the RemoteDevice for all accesses to the GenICam NodeMap tree
+                    self.node_map = self.device.RemoteDevice().NodeMaps()[0]
+                    break
 
-            print(f"Camera {self.camera_id} initialized successfully!")
+            # prepare acquisition
+            self.data_stream = self.device.DataStreams()
+            if self.data_stream.empty():
+                raise RuntimeError("No Data Stream available")
+
+            self.data_stream = self.device.DataStreams()[0].OpenDataStream()
+            return True
+
         except Exception as e:
             raise RuntimeError(f"Failed to initialize IDS camera: {e}")
+
 
     def configure(self):
         """
@@ -53,6 +72,7 @@ class Ids(BaseCamera):
             # Extract from config file
             config = configparser.ConfigParser()
             config.read(self.config_path, encoding='cp1250')
+            node_map = self.device.RemoteDevice().NodeMaps()[0]
 
             # Loading configuration to camera
             # https://www.1stvision.com/cameras/IDS/IDS-manuals/en/operate-camera-reference.html
@@ -63,6 +83,26 @@ class Ids(BaseCamera):
             # self.device.node_map.Height.value = config.get('Image size', 'Width')
             # self.device.node_map.PixelFormat.value =
 
+            """node_map = self.device.RemoteDevice().NodeMaps()[0]
+            node_map.FindNode("Width").SetValue(1280)  # Set width
+            node_map.FindNode("Height").SetValue(720)  # Set height
+            node_map.FindNode("PixelFormat").SetValue("Mono8")  # Example: 8-bit monochrome
+
+            node_map.FindNode("AcquisitionMode").SetValue("Continuous")"""
+
+            # Determine the current entry of UserSetDefault (str)
+            value = node_map.FindNode("UserSetDefault").CurrentEntry().SymbolicValue()
+            # Get a list of all available entries of UserSetDefault
+            allEntries = node_map.FindNode("UserSetDefault").Entries()
+            availableEntries = []
+            for entry in allEntries:
+                if (entry.AccessStatus() != ids_peak.NodeAccessStatus_NotAvailable
+                        and entry.AccessStatus() != ids_peak.NodeAccessStatus_NotImplemented):
+                    availableEntries.append(entry.SymbolicValue())
+
+             # Set UserSetDefault to "Default" (str)
+            node_map.FindNode("UserSetDefault").SetCurrentEntry("Default")
+
             # TODO: maybe is possible to import/export directly some .cset files
             # https://www.1stvision.com/cameras/IDS/IDS-manuals/en/program-save-cset-file.html
 
@@ -70,49 +110,115 @@ class Ids(BaseCamera):
         except Exception as e:
             raise RuntimeError(f"Failed to configure IDS camera: {e}")
 
+
+    def set_roi(self, x, y, width, height):
+        try:
+            # Get the minimum ROI and set it. After that there are no size restrictions anymore
+            x_min = self.node_map.FindNode("OffsetX").Minimum()
+            y_min = self.node_map.FindNode("OffsetY").Minimum()
+            w_min = self.node_map.FindNode("Width").Minimum()
+            h_min = self.node_map.FindNode("Height").Minimum()
+
+            self.node_map.FindNode("OffsetX").SetValue(x_min)
+            self.node_map.FindNode("OffsetY").SetValue(y_min)
+            self.node_map.FindNode("Width").SetValue(w_min)
+            self.node_map.FindNode("Width").SetValue(w_min)
+            self.node_map.FindNode("Height").SetValue(h_min)
+
+            # Get the maximum ROI values
+            x_max = self.node_map.FindNode("OffsetX").Maximum()
+            y_max = self.node_map.FindNode("OffsetY").Maximum()
+            w_max = self.node_map.FindNode("Width").Maximum()
+            h_max = self.node_map.FindNode("Height").Maximum()
+
+            if (x < x_min) or (y < y_min) or (x > x_max) or (y > y_max):
+                raise RuntimeError("Wrong ROI setup: parameters outside the maximum bounds")
+            elif (width < w_min) or (height < h_min) or ((x + width) > w_max) or ((y + height) > h_max):
+                raise RuntimeError("Wrong ROI setup: exceeding width or height")
+
+            else:
+                # Now, set final AOI
+                self.node_map.FindNode("OffsetX").SetValue(x)
+                self.node_map.FindNode("OffsetY").SetValue(y)
+                self.node_map.FindNode("Width").SetValue(width)
+                self.node_map.FindNode("Height").SetValue(height)
+                return True
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to set ROI for IDS camera: {e}")
+
+
     def start_streaming(self):
         """
         Start streaming images by queuing buffers for acquisition.
         """
         try:
-            # Allocate buffers and queue them for acquisition
-            for _ in range(5):  # Number of buffers to allocate
-                buffer = self.data_stream.allocate_and_announce_buffer()
-                self.buffer_queue.append(buffer)
-                self.data_stream.queue_buffer(buffer)
+            # allocate and announce buffer
+            if self.data_stream:
+                # Flush queue and prepare all buffers for revoking
+                self.data_stream.Flush(ids_peak.DataStreamFlushMode_DiscardAll)
 
-            self.data_stream.start_acquisition()
-            print(f"Camera {self.camera_id} started streaming.")
+                # Clear all old buffers
+                for buffer in self.data_stream.AnnouncedBuffers():
+                    self.data_stream.RevokeBuffer(buffer)
+
+                payload_size = self.node_map.FindNode("PayloadSize").Value()
+
+                # Get number of minimum required buffers
+                num_buffers_min_required = self.data_stream.NumBuffersAnnouncedMinRequired()
+
+                # Alloc buffers
+                for count in range(num_buffers_min_required):
+                    buffer = self.data_stream.AllocAndAnnounceBuffer(payload_size)
+                    self.data_stream.QueueBuffer(buffer)
+
+                # Start acquisition
+                self.data_stream.StartAcquisition(ids_peak.AcquisitionStartMode_Default,
+                                                  ids_peak.DataStream.INFINITE_NUMBER)
+                self.node_map.FindNode("TLParamsLocked").SetValue(1)
+                self.node_map.FindNode("AcquisitionStart").Execute()
+                return True
+
         except Exception as e:
             raise RuntimeError(f"Failed to start streaming for IDS camera: {e}")
+
 
     def stop_streaming(self):
         """
         Stop the streaming process and release resources.
         """
         try:
+            # TODO: unrevised; check documentation
             self.data_stream.stop_acquisition()
             self.device.close()
             print(f"Camera {self.camera_id} stopped streaming.")
         except Exception as e:
             raise RuntimeError(f"Failed to stop streaming for IDS camera: {e}")
 
-    def capture_frame(self):
-        """
-        Capture a single frame from the IDS camera stream.
-        :return: Captured frame as a NumPy array (RGB format).
-        """
-        try:
-            buffer = self.data_stream.wait_for_finished_buffer(5000)  # Wait for 5 seconds
-            if buffer:
-                # Convert buffer to an image
-                image = self.converter.convert(buffer)
-                frame = np.asarray(image.get_numpy_array())
 
-                # Re-queue the buffer for further use
-                self.data_stream.queue_buffer(buffer)
-                return frame
-            else:
-                raise RuntimeError("Failed to capture frame: Timeout waiting for buffer.")
+    def capture_frame(self):
+        try:
+            # Wait for the buffer to be finished (timeout of 5000ms)
+            buffer = self.data_stream.WaitForFinishedBuffer(5000)
+
+            # Create image from the buffer using the IDS Peak IPL library
+            image = ids_peak_ipl.Image.CreateFromSizeAndBuffer(
+                buffer.PixelFormat(),
+                buffer.BasePtr(),
+                buffer.Size(),
+                buffer.Width(),
+                buffer.Height()
+            )
+            # Convert image to BGR format
+            image = image.ConvertTo(ids_peak_ipl.PixelFormatName_BGRa8, ids_peak_ipl.ConversionMode_Fast)
+
+            # Convert image to NumPy array for OpenCV
+            img_array = image.get_numpy()
+
+            # Queue the buffer again for reuse
+            self.data_stream.QueueBuffer(buffer)
+
+            return img_array
+
         except Exception as e:
             raise RuntimeError(f"Failed to capture frame from IDS camera: {e}")

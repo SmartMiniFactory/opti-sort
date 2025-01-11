@@ -32,7 +32,7 @@ class Basler(BaseCamera):
                 raise RuntimeError("No Basler cameras found.")
 
             # Create an InstantCamera object for the first camera found
-            self.camera = pylon.InstantCamera(tl_factory.CreateDevice(devices[self.camera_id]))
+            self.camera = pylon.InstantCamera(tl_factory.CreateFirstDevice())
             self.camera.Open()  # Open the camera for configuration and streaming
 
             print(f"Camera {self.camera_id} initialized successfully! Using device: {self.camera.GetDeviceInfo().GetModelName()}")
