@@ -20,7 +20,7 @@ namespace JointReader
     internal class Program
     {
         static string topicName = "DT_BROADCAST";
-        static string brokerAddress = "localhost";
+        static string brokerAddress = "10.12.238.20";
         static string cliendId = "OptiSort";
         static int brokerPort = 1883;
 
