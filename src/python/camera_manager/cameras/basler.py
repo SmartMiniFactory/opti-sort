@@ -35,7 +35,7 @@ class Basler(BaseCamera):
             self.camera = pylon.InstantCamera(tl_factory.CreateFirstDevice())
             self.camera.Open()  # Open the camera for configuration and streaming
 
-            print(f"Camera {self.camera_id} initialized successfully! Using device: {self.camera.GetDeviceInfo().GetModelName()}")
+            print(f"Basler camera initialized successfully! Using device: {self.camera.GetDeviceInfo().GetModelName()}")
         except Exception as e:
             raise RuntimeError(f"Failed to initialize Basler camera: {e}")
 
@@ -51,11 +51,11 @@ class Basler(BaseCamera):
             pylon.FeaturePersistence.Load(self.config_path, nodemap)
             print(f"Successfully loaded PFS file: {self.config_path}")
 
-            print(f"Camera {self.camera_id} configured successfully!")
+            print(f"Basler camera - configured successfully!")
         except Exception as e:
             raise RuntimeError(f"Failed to configure Basler camera: {e}")
 
-    def start_streaming(self):
+    def acquisition_start(self):
         """
         Start streaming images from the Basler camera.
         """
@@ -63,11 +63,11 @@ class Basler(BaseCamera):
             if not self.camera.IsOpen():
                 raise RuntimeError("Camera is not initialized. Call `initialize()` first.")
             self.camera.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
-            print(f"Camera {self.camera_id} started streaming.")
+            print(f"Basler camera - acquisition started successfully!")
         except Exception as e:
             raise RuntimeError(f"Failed to start streaming for Basler camera: {e}")
 
-    def stop_streaming(self):
+    def acquisition_stop(self):
         """
         Stop streaming images and close the camera.
         """
@@ -76,7 +76,7 @@ class Basler(BaseCamera):
                 self.camera.StopGrabbing()
             if self.camera and self.camera.IsOpen():
                 self.camera.Close()
-            print(f"Camera {self.camera_id} stopped streaming.")
+            print(f"Basler camera - acquisition stopped successfully!")
         except Exception as e:
             raise RuntimeError(f"Failed to stop streaming for Basler camera: {e}")
 

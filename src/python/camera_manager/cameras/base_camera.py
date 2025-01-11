@@ -9,10 +9,10 @@ class BaseCamera:
     def configure(self):
         pass
 
-    def start_streaming(self):
+    def acquisition_start(self):
         pass
 
-    def stop_streaming(self):
+    def acquisition_stop(self):
         pass
 
     def capture_frame(self):

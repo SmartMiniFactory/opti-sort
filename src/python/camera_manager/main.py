@@ -29,117 +29,160 @@ import keyboard
 import base64
 
 
+# -------------------------------------------------------------------------------------------------------------------
+
+
 def im2json(imdata):
     jstr = json.dumps({"image": base64.b64encode(imdata).decode('ascii'), "timestamp": datetime.datetime.now().isoformat()})
     return jstr
 
 
+def parse_appconfig(file_path):
+
+    # set defaults
+    broker = '127.0.0.1'
+    port = 1883
+    camera_topics = []
+
+    # parse appconfig XML
+    tree = ET.parse(file_path)
+    for element in tree.getroot():
+        if element.tag == "userSettings":
+            for setting in element[0]:
+
+                if setting.attrib['name'] == 'mqtt_broker':
+                    broker = setting[0].text
+
+                if setting.attrib['name'] == 'mqtt_topic_idsStream':
+                    camera_topics.append(setting[0].text)
+
+                if setting.attrib['name'] == 'mqtt_topic_luxonisStream':
+                    camera_topics.append(setting[0].text)
+
+                if setting.attrib['name'] == 'mqtt_topic_baslerStream':
+                    camera_topics.append(setting[0].text)
+
+                if setting.attrib['name'] == 'mqtt_port':
+                    port = int(setting[0].text)
+
+        return broker, port, camera_topics
+
+
 # -------------------------------------------------------------------------------------------------------------------
 
-# MQTT setup: acquiring parameters from HMI settings (AppConfig file)
 
+# acquire testing mode
+testing = ''
+while testing != 'c' and testing != 'w':
+    testing = input("Do you want to use your webcam or real cameras? (w/c): ")
+
+if testing == 'c':
+    testing = False
+else:
+    testing = True
+
+# acquire encoding mode
+encoding = ''
+while encoding != "jpg" and encoding != "png":
+    encoding = input("Do you want to jpg or png as encoding mode? (jpg/png): ")
+
+encode_param_png = [cv2.IMWRITE_PNG_COMPRESSION, 0]
+encode_param_jpg = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+
+
+# Define important directories or files
 script_dir = pathlib.Path(__file__).parent.resolve()
 appconfig_file = (script_dir / "../../OptiSort/HMI/App.config").resolve()
 
-# old position
-
-mqtt_broker = '127.0.0.1'
-mqtt_port = 1883
-mqtt_client_name = "camera_manager" # name of the client connecting to the broker (each client must have unique name)
-topics = []
-
-encode_param_png = [cv2.IMWRITE_PNG_COMPRESSION, 0]
-
-# parsing App.config XML
-tree = ET.parse(appconfig_file)
-for element in tree.getroot():
-    if element.tag == "userSettings":
-        for setting in element[0]:
-
-            if setting.attrib['name'] == 'mqtt_broker':
-                mqtt_broker = setting[0].text
-
-            if setting.attrib['name'] == 'mqtt_topic_idsStream':
-                topics.append(setting[0].text)
-
-            if setting.attrib['name'] == 'mqtt_topic_luxonisStream':
-                topics.append(setting[0].text)
-
-            if setting.attrib['name'] == 'mqtt_topic_baslerStream':
-                topics.append(setting[0].text)
-
-            if setting.attrib['name'] == 'mqtt_port':
-                mqtt_port = int(setting[0].text)
-
-# instance MQTT client
-mqtt_client = MQTTClient(mqtt_broker, mqtt_port, mqtt_client_name, topics)
+# Initialize MQTT
+mqtt_client_name = "camera_manager" # name of the client (unique) connecting to the broker
+mqtt_broker, mqtt_port, mqtt_stream_topics = parse_appconfig(appconfig_file)
+mqtt_client = MQTTClient(mqtt_broker, mqtt_port, mqtt_client_name, mqtt_stream_topics)
 mqtt_client.connect()
 
-ids_configfile = (script_dir / "../../OptiSort/HMI/config/camera_configuration.ini").resolve()
-"""basler_configfile = (script_dir / "../../OptiSort/HMI/config/camera_config.pfs").resolve()
-luxonis_configfile = (script_dir / "../../OptiSort/HMI/config/camera_configuration.ini").resolve()
-"""
-ids_config = {
+# locate configuration files
+ids_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_configuration.ini").resolve()
+basler_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_config.pfs").resolve()
+luxonis_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_configuration.ini").resolve()
+
+"""ids_config = {
     "exposure": 10000,  # Microseconds
     "gain": 1.5,
     "resolution": (1280, 720),  # Width, Height
     "pixel_format": "RGB8"
-}
-
-# Define cameras
-ids_camera = Ids(camera_id="ids1", config_path=ids_configfile)
-"""basler_camera = Basler(camera_id="basler1", config_path=basler_configfile)
-luxonis_camera = Luxonis(camera_id="luxonis1", config_path=luxonis_configfile)
-
-# Initialize cameras
-ids_camera.initialize()
-basler_camera.initialize()
-luxonis_camera.initialize()
-
-# Start streaming
-ids_camera.start_streaming()
-basler_camera.start_streaming()
-luxonis_camera.start_streaming()"""
+}"""
 
 
-ids_camera.open_camera()
-ids_camera.prepare_acquisition()
-ids_camera.set_roi(16, 16, 128, 128)
-ids_camera.alloc_and_announce_buffers()
-ids_camera.start_acquisition()
+if testing:
+    webcam = cv2.VideoCapture(0)
+
+else:
+    # Instance IDS camera
+    print("Initializing IDS camera...")
+    ids_camera = Ids(camera_id="ids", config_path=ids_configfile)
+    ids_camera.initialize()
+    # ids_camera.configure()
+    ids_camera.set_roi(0, 0, 1280, 1024)
+    ids_camera.acquisition_start()
+
+    # Instance Basler camera
+    print("Initializing Basler camera...")
+    basler_camera = Basler(camera_id="basler", config_path=basler_configfile)
+    basler_camera.initialize()
+    basler_camera.acquisition_start()
+
+    # Instance Luxonis camera
+    print("Initializing Luxonis camera...")
+    luxonis_camera = Luxonis(camera_id="luxonis", config_path=luxonis_configfile)
+    luxonis_camera.initialize()
+    luxonis_camera.acquisition_start()
 
 
-# image processor instance
-#processor = ImageProcessor()
+# Instance image processor class
+processor = ImageProcessor()
 
 # -------------------------------------------------------------------------------------------------------------------
-
-stream = cv2.VideoCapture(0)
 
 # Main loop
 while True:
 
+    start = time.time()  # Start time
+
     # TODO: consider async techniques / think about synchronization; manual screenshots or videostream??
 
     # Capture frames from each camera
-    frame = ids_camera.capture_frame()
+    if testing:
+        _, webcam_frame = webcam.read()
+        cv2.imshow("Webcam frame", webcam_frame)
 
-    print(frame)
+        # encode to PNG or JPG and then convert to JSON to publish mqtt message
+        """expression_if_true if condition else expression_if_false"""
+        encoded_webcam_frame = cv2.imencode('.png', webcam_frame, encode_param_png if encoding == "png" else encode_param_jpg)[1].tobytes()
 
-    start = time.time()  # Start time
-    _, frame = stream.read()  # Read frame
+        # comment out below to simulate camera malfunctioning
+        mqtt_client.publish("optisort/ids/stream", im2json(encoded_webcam_frame))
+        mqtt_client.publish("optisort/basler/stream", im2json(encoded_webcam_frame))
+        mqtt_client.publish("optisort/luxonis/stream", im2json(encoded_webcam_frame))
 
-    # Encode image to PNG format
-    _frame = cv2.imencode('.png', frame, encode_param_png)[1].tobytes()
 
-    time.sleep(1)  # streaming performance depends also on publishing frequency; 1/15 (FPS) = 0.66
+    else:
+        ids_frame = ids_camera.capture_frame()
+        basler_frame = basler_camera.capture_frame()
+        luxonis_frame = luxonis_camera.capture_frame()
 
-    # Publish results
-    mqtt_client.publish("optisort/ids/stream", im2json(frame))
-    """mqtt_client.publish("optisort/basler/stream", im2json(processed_basler))
-    mqtt_client.publish("optisort/luxonis/stream", im2json(processed_luxonis))"""
+        cv2.imshow("IDS frame", ids_frame)
+        cv2.imshow("Basler frame", basler_frame)
+        cv2.imshow("Luxonis frame", luxonis_frame)
 
-    cv2.imshow("Stream input", frame)  # Show the frame
+        # encode to PNG or JPG and then convert to JSON to publish mqtt message
+        encoded_ids_frame = cv2.imencode('.png', ids_frame, encode_param_png if encoding == "png" else encode_param_jpg)[1].tobytes()
+        encoded_basler_frame = cv2.imencode('.png', basler_frame, encode_param_png if encoding == "png" else encode_param_jpg)[1].tobytes()
+        encoded_luxonis_frame = cv2.imencode('.png', luxonis_frame, encode_param_png if encoding == "png" else encode_param_jpg)[1].tobytes()
+
+        mqtt_client.publish("optisort/ids/stream", im2json(encoded_ids_frame))
+        mqtt_client.publish("optisort/basler/stream", im2json(encoded_basler_frame))
+        mqtt_client.publish("optisort/luxonis/stream", im2json(encoded_luxonis_frame))
+
 
     # Press q if you want to end the loop
     if cv2.waitKey(1) & keyboard.is_pressed('q'):
@@ -150,3 +193,5 @@ while True:
     t = end - start
     fps = 1 / t
     print("FPS: ", np.round(fps, 0), end="\r")  # Print the FPS\"""
+
+    time.sleep(1)  # streaming performance depends also on publishing frequency; 1/15 (FPS) = 0.66

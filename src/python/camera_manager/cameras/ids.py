@@ -58,6 +58,7 @@ class Ids(BaseCamera):
                 raise RuntimeError("No Data Stream available")
 
             self.data_stream = self.device.DataStreams()[0].OpenDataStream()
+            print(f"IDS camera initialized successfully! Using device: {self.device.DisplayName()}")
             return True
 
         except Exception as e:
@@ -70,9 +71,8 @@ class Ids(BaseCamera):
         """
         try:
             # Extract from config file
-            config = configparser.ConfigParser()
-            config.read(self.config_path, encoding='cp1250')
-            node_map = self.device.RemoteDevice().NodeMaps()[0]
+            # config = configparser.ConfigParser()
+            # config.read(self.config_path, encoding='cp1250')
 
             # Loading configuration to camera
             # https://www.1stvision.com/cameras/IDS/IDS-manuals/en/operate-camera-reference.html
@@ -91,9 +91,9 @@ class Ids(BaseCamera):
             node_map.FindNode("AcquisitionMode").SetValue("Continuous")"""
 
             # Determine the current entry of UserSetDefault (str)
-            value = node_map.FindNode("UserSetDefault").CurrentEntry().SymbolicValue()
+            value = self.node_map.FindNode("UserSetDefault").CurrentEntry().SymbolicValue()
             # Get a list of all available entries of UserSetDefault
-            allEntries = node_map.FindNode("UserSetDefault").Entries()
+            allEntries = self.node_map.FindNode("UserSetDefault").Entries()
             availableEntries = []
             for entry in allEntries:
                 if (entry.AccessStatus() != ids_peak.NodeAccessStatus_NotAvailable
@@ -101,17 +101,17 @@ class Ids(BaseCamera):
                     availableEntries.append(entry.SymbolicValue())
 
              # Set UserSetDefault to "Default" (str)
-            node_map.FindNode("UserSetDefault").SetCurrentEntry("Default")
+            self.node_map.FindNode("UserSetDefault").SetCurrentEntry("Default")
 
             # TODO: maybe is possible to import/export directly some .cset files
             # https://www.1stvision.com/cameras/IDS/IDS-manuals/en/program-save-cset-file.html
 
-            print(f"Camera {self.camera_id} configured successfully!")
+            print(f"IDS camera - configured successfully!")
         except Exception as e:
             raise RuntimeError(f"Failed to configure IDS camera: {e}")
 
 
-    def set_roi(self, x, y, width, height):
+    def set_roi(self, offset_x, offset_y, width, height):
         try:
             # Get the minimum ROI and set it. After that there are no size restrictions anymore
             x_min = self.node_map.FindNode("OffsetX").Minimum()
@@ -131,24 +131,26 @@ class Ids(BaseCamera):
             w_max = self.node_map.FindNode("Width").Maximum()
             h_max = self.node_map.FindNode("Height").Maximum()
 
-            if (x < x_min) or (y < y_min) or (x > x_max) or (y > y_max):
+            if (offset_x < x_min) or (offset_y < y_min) or (offset_x > x_max) or (offset_y > y_max):
                 raise RuntimeError("Wrong ROI setup: parameters outside the maximum bounds")
-            elif (width < w_min) or (height < h_min) or ((x + width) > w_max) or ((y + height) > h_max):
+            elif (width < w_min) or (height < h_min) or ((offset_x + width) > w_max) or ((offset_y + height) > h_max):
                 raise RuntimeError("Wrong ROI setup: exceeding width or height")
 
             else:
                 # Now, set final AOI
-                self.node_map.FindNode("OffsetX").SetValue(x)
-                self.node_map.FindNode("OffsetY").SetValue(y)
+                self.node_map.FindNode("OffsetX").SetValue(offset_x)
+                self.node_map.FindNode("OffsetY").SetValue(offset_y)
                 self.node_map.FindNode("Width").SetValue(width)
                 self.node_map.FindNode("Height").SetValue(height)
+
+                print(f"IDS camera - ROI set successfully!")
                 return True
 
         except Exception as e:
             raise RuntimeError(f"Failed to set ROI for IDS camera: {e}")
 
 
-    def start_streaming(self):
+    def acquisition_start(self):
         """
         Start streaming images by queuing buffers for acquisition.
         """
@@ -177,13 +179,14 @@ class Ids(BaseCamera):
                                                   ids_peak.DataStream.INFINITE_NUMBER)
                 self.node_map.FindNode("TLParamsLocked").SetValue(1)
                 self.node_map.FindNode("AcquisitionStart").Execute()
+                print(f"IDS camera - acquisition started successfully!")
                 return True
 
         except Exception as e:
             raise RuntimeError(f"Failed to start streaming for IDS camera: {e}")
 
 
-    def stop_streaming(self):
+    def acquisition_stop(self):
         """
         Stop the streaming process and release resources.
         """
@@ -191,13 +194,16 @@ class Ids(BaseCamera):
             # TODO: unrevised; check documentation
             self.data_stream.stop_acquisition()
             self.device.close()
-            print(f"Camera {self.camera_id} stopped streaming.")
+            print(f"IDS camera - acquisition stopped successfully!")
         except Exception as e:
             raise RuntimeError(f"Failed to stop streaming for IDS camera: {e}")
 
 
     def capture_frame(self):
         try:
+
+            # https://www.1stvision.com/cameras/IDS/IDS-manuals/en/program-convert-images-generic.html
+
             # Wait for the buffer to be finished (timeout of 5000ms)
             buffer = self.data_stream.WaitForFinishedBuffer(5000)
 
@@ -209,6 +215,7 @@ class Ids(BaseCamera):
                 buffer.Width(),
                 buffer.Height()
             )
+
             # Convert image to BGR format
             image = image.ConvertTo(ids_peak_ipl.PixelFormatName_BGRa8, ids_peak_ipl.ConversionMode_Fast)
 

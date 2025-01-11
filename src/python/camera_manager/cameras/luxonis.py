@@ -40,7 +40,7 @@ class Luxonis(BaseCamera):
             self.device = dai.Device(self.pipeline)
             self.rgb_queue = self.device.getOutputQueue(name="video", maxSize=4, blocking=False)
 
-            print(f"Camera {self.camera_id} initialized successfully!")
+            print(f"Luxonis camera initialized successfully! Using device: {dai.DeviceBase.getCameraSensorNames()}")
         except Exception as e:
             raise RuntimeError(f"Failed to initialize Luxonis camera: {e}")
 
@@ -59,28 +59,28 @@ class Luxonis(BaseCamera):
                 width, height = self.config["resolution"]
                 self.cam_rgb.setVideoSize(width, height)
 
-            print(f"Camera {self.camera_id} configured successfully!")
+            print("Luxonis camera - configured successfully!")
         except Exception as e:
             raise RuntimeError(f"Failed to configure Luxonis camera: {e}")
 
-    def start_streaming(self):
+    def acquisition_start(self):
         """
         Start streaming images from the Luxonis camera.
         """
         try:
             if not self.rgb_queue:
                 raise RuntimeError("RGB queue is not initialized. Call `initialize()` first.")
-            print(f"Camera {self.camera_id} started streaming.")
+            print("Luxonis camera - acquisition started successfully!")
         except Exception as e:
             raise RuntimeError(f"Failed to start streaming for Luxonis camera: {e}")
 
-    def stop_streaming(self):
+    def acquisition_stop(self):
         """
         Stop the Luxonis camera device.
         """
         try:
             self.device.close()
-            print(f"Camera {self.camera_id} stopped streaming.")
+            print("Luxonis camera - acquisition stopped successfully!")
         except Exception as e:
             raise RuntimeError(f"Failed to stop streaming for Luxonis camera: {e}")
 
