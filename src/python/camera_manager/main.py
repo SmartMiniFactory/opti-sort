@@ -114,6 +114,7 @@ luxonis_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_configurati
 
 
 if testing:
+    print("Opening webcam...")
     webcam = cv2.VideoCapture(0)
 
 else:
@@ -139,9 +140,13 @@ else:
 
 
 # Instance image processor class
+print("Initializing image processor...")
 processor = ImageProcessor()
 
 # -------------------------------------------------------------------------------------------------------------------
+
+
+print("Starting loop...")
 
 # Main loop
 while True:
@@ -194,4 +199,4 @@ while True:
     fps = 1 / t
     print("FPS: ", np.round(fps, 0), end="\r")  # Print the FPS\"""
 
-    time.sleep(1)  # streaming performance depends also on publishing frequency; 1/15 (FPS) = 0.66
+    time.sleep(0.2)  # streaming performance depends also on publishing frequency; 1/15 (FPS) = 0.66

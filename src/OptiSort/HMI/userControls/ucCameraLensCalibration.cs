@@ -78,7 +78,7 @@ namespace OptiSort.userControls
             }
 
             Cursor = Cursors.WaitCursor;
-            _manager.ScreenshotsReady += SaveShot;
+            //_manager.ScreenshotsReady += SaveShot;
             _manager.RequestScreenshots = true;
         }
 
@@ -154,7 +154,7 @@ namespace OptiSort.userControls
                     }
                 }
 
-                _manager.ScreenshotsReady -= SaveShot;
+                //_manager.ScreenshotsReady -= SaveShot;
                 Shots++;
                 Cursor = Cursors.Default;
             }));

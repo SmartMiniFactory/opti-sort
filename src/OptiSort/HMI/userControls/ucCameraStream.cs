@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ActiproSoftware.SyntaxEditor;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -17,11 +18,9 @@ namespace OptiSort
     public partial class ucCameraStream : UserControl
     {
         private optisort_mgr _manager;
-        private readonly object _lock = new object(); // should be used each time different threads try access (write or read) shared resources
 
         public Bitmap Image { get; private set; }
-
-        private DateTime _imgDate = DateTime.MinValue;
+        //private DateTime _imgDate = DateTime.MinValue;
         private readonly System.Threading.Timer _timeoutTimer;
 
         // Performance computation
@@ -43,122 +42,80 @@ namespace OptiSort
             // Create a transparent placeholder Bitmap
             Image = CreateTransparentBitmap(pictureBox.Width, pictureBox.Height);
 
-            // Attach user control to mqtt-generated events
-            _manager.MqttClient.MessageReceived += OnMessageReceived;
+            // Subscribe to bitmap queuing updates
+            _manager.BitmapQueued += OnBitmapQueued;
 
-            // Create timer
-            _timeoutTimer = new System.Threading.Timer(OnTimeout, null, TimeSpan.Zero, _topicTimeoutThreshold);
+            
         }
 
 
-        /// <summary>
-        /// Called each time a new MQTT message is received, based on the topic reconstructs the image streaming and paints the control
-        /// </summary>
-        /// <param name="topic"></param>
-        /// <param name="message"></param>
-        public void OnMessageReceived(string topic, JsonElement message)
+        
+        private void OnBitmapQueued(string messageFromTopic)
         {
-            // coverting json into bitmap
-            string base64Image = message.GetProperty("image").GetString();
-            Bitmap image = JsonToBitmap(base64Image); // Decode the base64 image
-
-            string timestampString = message.GetProperty("timestamp").GetString();
-            DateTime messageTimestamp = DateTime.Parse(timestampString, null, System.Globalization.DateTimeStyles.RoundtripKind); // Decode timestamp
-
-            lock (_lock)
+            // render Bitmap only when coming from the camera selected for streaming
+            if (messageFromTopic == _manager.StreamingTopic)
             {
-                // Regular streaming logic
-                if (topic == _manager.StreamingTopic)
-                {
-                    Bitmap previousImage = Image;
-                    Image = image;
-                    _imgDate = DateTime.Now;
-                    previousImage?.Dispose();
-
-                    TimeSpan latency = DateTime.Now - messageTimestamp;
-                    _latencyMilliseconds = (int)latency.TotalMilliseconds;
-                    _frameCount++;
-                }
-
-                // Handle screenshot request
-                if (_manager.RequestScreenshots)
-                {
-                    // Add the current image to the buffer for the topic
-                    _screenshotBuffer[topic] = image;
-                    _topicLastReceived[topic] = DateTime.Now;
-
-                    // Check if all required topics have been captured
-                    var requiredTopics = new[]
-                    {
-                        Properties.Settings.Default.mqtt_topic_idsStream,
-                        Properties.Settings.Default.mqtt_topic_luxonisStream,
-                        Properties.Settings.Default.mqtt_topic_baslerStream
-                    };
-
-                    if (requiredTopics.All(_screenshotBuffer.ContainsKey))
-                    {
-                        // Notify that screenshots are ready
-                        _manager.NotifyScreenshotsReady(_screenshotBuffer);
-                        _manager.RequestScreenshots = false;
-                    }
-                }
-            }
-
-            // Calculate FPS every second
-            if ((DateTime.Now - _lastFpsUpdate).TotalSeconds >= 1)
-            {
-                _fps = _frameCount;
-                _frameCount = 0;
-                _lastFpsUpdate = DateTime.Now;
-            }
-
-            // trigger repaint
-            pictureBox.Invalidate();
-        }
-
-
-        /// <summary>
-        /// Method to trigger screenshot requests
-        /// </summary>
-        public void RequestScreenshots()
-        {
-            lock (_lock)
-            {
-                _manager.RequestScreenshots = true;
-                _screenshotBuffer.Clear(); // Clear buffer for new screenshots
-
-                // Initialize last received times for all required topics
-                var requiredTopics = new[]
-                {
-                    Properties.Settings.Default.mqtt_topic_idsStream,
-                    Properties.Settings.Default.mqtt_topic_luxonisStream,
-                    Properties.Settings.Default.mqtt_topic_baslerStream
-                };
-
-                // save creation time in timeout buffer
-                foreach (var topic in requiredTopics)
-                {
-                    if (!_topicLastReceived.ContainsKey(topic))
-                    {
-                        _topicLastReceived[topic] = DateTime.Now;
-                    }
-                }
+                pictureBox.Invalidate(); // Trigger re-paint
             }
         }
+
+        
 
 
         private void pictureBox_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            Bitmap currentImage;
+            Bitmap currentImage = null;
+            DateTime published = DateTime.MinValue;
+            DateTime received = DateTime.MinValue;
 
-            lock (_lock) // Lock for thread safety
+            if (_manager.StreamingTopic == Properties.Settings.Default.mqtt_topic_idsStream)
             {
-                currentImage = Image; // Read the image safely
+                if (_manager.idsQueue.TryDequeue(out var item))
+                {
+                    currentImage = item.Frame;
+                    published = item.messageTimestamp;
+                    received = item.receptionTimestamp;
+                }
+                else // Queue is empty
+                {
+                    RenderTimeoutOverlay(g); 
+                    return;
+                }
+            }
+
+            if (_manager.StreamingTopic == Properties.Settings.Default.mqtt_topic_baslerStream)
+            {
+                if (_manager.baslerQueue.TryDequeue(out var item))
+                {
+                    currentImage = item.Frame;
+                    published = item.messageTimestamp;
+                    received = item.receptionTimestamp;
+                }
+                else // Queue is empty
+                {
+                    RenderTimeoutOverlay(g);
+                    return;
+                }
+            }
+
+            if (_manager.StreamingTopic == Properties.Settings.Default.mqtt_topic_luxonisStream)
+            {
+                if (_manager.luxonisQueue.TryDequeue(out var item))
+                {
+                    currentImage = item.Frame;
+                    published = item.messageTimestamp;
+                    received = item.receptionTimestamp;
+                }
+                else // Queue is empty
+                {
+                    RenderTimeoutOverlay(g);
+                    return;
+                }
             }
 
             // Check for timeout condition
-            if (_imgDate.AddSeconds(2) < DateTime.Now)
+            if (received.AddSeconds(2) < DateTime.Now)
             {
                 RenderTimeoutOverlay(g);
             }
@@ -216,74 +173,9 @@ namespace OptiSort
         }
 
 
-        /// <summary>
-        /// This method will be called periodically by the timer
-        /// </summary>
-        /// <param name="state"></param>
-        private void OnTimeout(object state)
-        {
-            if (_manager.RequestScreenshots)
-            {
-                lock (_lock)
-                {
-                    DateTime currentTime = DateTime.Now;
-
-                    var requiredTopics = new[]
-                    {
-                        Properties.Settings.Default.mqtt_topic_idsStream,
-                        Properties.Settings.Default.mqtt_topic_luxonisStream,
-                        Properties.Settings.Default.mqtt_topic_baslerStream
-                    };
-
-                    // Check if any topic has timed out
-                    foreach (var topic in requiredTopics)
-                    {
-                        if (!_topicLastReceived.ContainsKey(topic) || currentTime - _topicLastReceived[topic] > TimeSpan.FromSeconds(4))
-                        {
-                            // Replace the image with a placeholder bitmap for this topic
-                            Console.WriteLine($"{topic} timed out");
-                            _screenshotBuffer[topic] = CreateTransparentBitmap(pictureBox.Width, pictureBox.Height);
-                        }
-                    }
-
-                    // If all required topics have been captured (including placeholders), invoke ScreenshotsReady
-                    if (requiredTopics.All(t => _screenshotBuffer.ContainsKey(t)))
-                    {
-                        // Reset request flag
-                        _manager.NotifyScreenshotsReady(_screenshotBuffer);
-                        _manager.RequestScreenshots = false;
-                    }
-                }
-            }
-
-            pictureBox.Invalidate(); // Trigger re-paint
-        }
-
 
         /// <summary>
-        /// Converts the image MQTT image (base64) to a bitmap
-        /// </summary>
-        /// <param name="base64Image"></param>
-        /// <returns></returns>
-        private Bitmap JsonToBitmap(string base64Image)
-        {
-            // Trim off any metadata if present
-            if (base64Image.Contains(","))
-            {
-                base64Image = base64Image.Substring(base64Image.IndexOf(",") + 1);
-            }
-
-            // Convert from Base64 to Bitmap
-            byte[] imageBytes = Convert.FromBase64String(base64Image);
-            using (var ms = new MemoryStream(imageBytes))
-            {
-                return new Bitmap(ms);
-            }
-        }
-
-
-        /// <summary>
-        /// Creates bitmap placeholder to instance an empty pictureBox for the constructor
+        /// Creates bitmap placeholder to instance an empty pictureBox
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
@@ -297,6 +189,25 @@ namespace OptiSort
             }
             return bitmap;
         }
+
+
+        private void CalculatePerformance(DateTime published, DateTime received)
+        {
+
+            TimeSpan latency = DateTime.Now - received;
+            _latencyMilliseconds = (int)latency.TotalMilliseconds;
+            _frameCount++; // TODO: suspicius
+
+
+            // Calculate FPS every second
+            if ((DateTime.Now - _lastFpsUpdate).TotalSeconds >= 1)
+            {
+                _fps = _frameCount;
+                _frameCount = 0;
+                _lastFpsUpdate = DateTime.Now;
+            }
+        }
+
 
     }
 }

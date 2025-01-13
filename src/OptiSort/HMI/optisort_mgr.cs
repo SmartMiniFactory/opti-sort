@@ -1,6 +1,8 @@
 ﻿using Ace.Core.Util;
+using Ace.UIBuilder.Client.Controls.Tools.WindowsForms;
 using FlexibowlLibrary;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -9,6 +11,8 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -21,6 +25,7 @@ namespace OptiSort
         public Cobra600 Cobra600 { get; set; }
         public Flexibowl Flexibowl { get; set; }
 
+
         // status
         public event PropertyChangedEventHandler PropertyChanged; // declare propertyChanged event (required by the associated interface)
         private bool _statusScara = false;
@@ -29,6 +34,7 @@ namespace OptiSort
         private bool _statusMqttClient = false;
         private string _streamingTopic = null;
         private bool _requestScreenshots = false;
+
 
         // custom defined properties to trigger events on status changed
         public bool StatusScara
@@ -108,11 +114,19 @@ namespace OptiSort
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+
         // events
-        public event Action<Dictionary<string, Bitmap>> ScreenshotsReady; // Event to notify subscribers
         public event Action<Control> NewUserControlRequested; // Event to notify subscribers
         public event Action TempFileDeleted;
         public event Action TempFolderWatcherResumed;
+        public event Action<string> BitmapQueued;
+        //public event Action<Dictionary<string, Bitmap>> ScreenshotsReady; // Event to notify subscribers
+
+
+        // MQTT
+        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> idsQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
+        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> baslerQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
+        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> luxonisQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
 
 
         // file management
@@ -133,12 +147,19 @@ namespace OptiSort
             public override string ToString() => Message; // Fallback for ListBox's default behavior
         }
 
+
         public optisort_mgr()
         {
             // Instance MQTT class
             string mqttBroker = Properties.Settings.Default.mqtt_broker;
             string mqttPort = Properties.Settings.Default.mqtt_port;
             MqttClient = new MQTT(mqttBroker, mqttPort);
+
+            // Attach mqtt messages to handler
+            MqttClient.MessageReceived += OnMessageReceived;
+
+            // Create timer
+            //private System.Threading.Timer _timeoutTimer = new System.Threading.Timer(OnTimeout, null, TimeSpan.Zero, _topicTimeoutThreshold);
 
             // attach property changes to various useful methods
             PropertyChanged += NewStreamingTopic;
@@ -164,10 +185,12 @@ namespace OptiSort
             }
         }
 
+        /*
         public void NotifyScreenshotsReady(Dictionary<string, Bitmap> screenshotBuffer)
         {
             ScreenshotsReady?.Invoke(new Dictionary<string, Bitmap>(screenshotBuffer));
         }
+        */
 
         public void RequestNewUcLoading(Control control)
         {
@@ -178,7 +201,7 @@ namespace OptiSort
         // ---------------------------------- SUBSYSTEMS -------------------------------------
         // -----------------------------------------------------------------------------------
 
-        #region ACE scara
+        #region Subsystems
 
         // TODO: is possible to use async?
 
@@ -249,10 +272,6 @@ namespace OptiSort
             }
         }
 
-        #endregion
-
-        #region flexibowl
-
         public bool ConnectFlexibowl()
         {
             Log("Trying to connect to flexibowl", false, false);
@@ -291,10 +310,6 @@ namespace OptiSort
                 return false;
             }
         }
-
-        #endregion
-
-        #region MQTT
 
         public async Task<bool> ConnectMQTTClient()
         {
@@ -376,10 +391,160 @@ namespace OptiSort
 
         #endregion
 
+        // -----------------------------------------------------------------------------------
+        // ---------------------------------- MQTT MANAGEMENT --------------------------------
+        // -----------------------------------------------------------------------------------
+
+
+        private void OnMessageReceived(string topic, JsonElement message)
+        {
+            // Start a dedicated task for the method
+            Task.Run(() => AddBitmapToQueue(topic, message));
+        }
+
+        private void AddBitmapToQueue(string topic, JsonElement message)
+        {
+            // coverting json into bitmap
+            string base64Image = message.GetProperty("image").GetString();
+            Bitmap image = JsonToBitmap(base64Image); // Decode the base64 image
+
+            string timestampString = message.GetProperty("timestamp").GetString();
+            DateTime messageTimestamp = DateTime.Parse(timestampString, null, System.Globalization.DateTimeStyles.RoundtripKind); // Decode timestamp
+
+            
+
+                // queue bitmaps in three different queues
+                if (topic == Properties.Settings.Default.mqtt_topic_idsStream)
+                    idsQueue.Enqueue((image, messageTimestamp, DateTime.Now));
+
+                if (topic == Properties.Settings.Default.mqtt_topic_baslerStream)
+                    baslerQueue.Enqueue((image, messageTimestamp, DateTime.Now));
+
+                if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream)
+                    luxonisQueue.Enqueue((image, messageTimestamp, DateTime.Now));
+
+                BitmapQueued?.Invoke(topic);
+
+                /*
+                // Regular streaming logic
+                if (topic == StreamingTopic)
+                {
+                    Bitmap previousImage = Image;
+                    Image = image;
+                    _imgDate = DateTime.Now;
+                    previousImage?.Dispose();
+                }
+
+                
+                // Handle screenshot request
+                if (_manager.RequestScreenshots)
+                {
+                    // Add the current image to the buffer for the topic
+                    _screenshotBuffer[topic] = image;
+                    _topicLastReceived[topic] = DateTime.Now;
+
+                    // Check if all required topics have been captured
+                    var requiredTopics = new[]
+                    {
+                        Properties.Settings.Default.mqtt_topic_idsStream,
+                        Properties.Settings.Default.mqtt_topic_luxonisStream,
+                        Properties.Settings.Default.mqtt_topic_baslerStream
+                    };
+
+                    if (requiredTopics.All(_screenshotBuffer.ContainsKey))
+                    {
+                        // Notify that screenshots are ready
+                        _manager.NotifyScreenshotsReady(_screenshotBuffer);
+                        _manager.RequestScreenshots = false;
+                    }
+                }*/
+        }
+
+        /*
+        /// <summary>
+        /// Method to trigger screenshot requests
+        /// </summary>
+        private void RequestScreenshots()
+        {
+            lock (_lock)
+            {
+                _manager.RequestScreenshots = true;
+                _screenshotBuffer.Clear(); // Clear buffer for new screenshots
+
+                // Initialize last received times for all required topics
+                var requiredTopics = new[]
+                {
+                    Properties.Settings.Default.mqtt_topic_idsStream,
+                    Properties.Settings.Default.mqtt_topic_luxonisStream,
+                    Properties.Settings.Default.mqtt_topic_baslerStream
+                };
+
+                // save creation time in timeout buffer
+                foreach (var topic in requiredTopics)
+                {
+                    if (!_topicLastReceived.ContainsKey(topic))
+                    {
+                        _topicLastReceived[topic] = DateTime.Now;
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// This method will be called periodically by the timer
+        /// </summary>
+        /// <param name="state"></param>
+        private void OnTimeout(object state)
+        {
+            if (_manager.RequestScreenshots)
+            {
+                lock (_lock)
+                {
+                    DateTime currentTime = DateTime.Now;
+
+                    var requiredTopics = new[]
+                    {
+                        Properties.Settings.Default.mqtt_topic_idsStream,
+                        Properties.Settings.Default.mqtt_topic_luxonisStream,
+                        Properties.Settings.Default.mqtt_topic_baslerStream
+                    };
+
+                    // Check if any topic has timed out
+                    foreach (var topic in requiredTopics)
+                    {
+                        if (!_topicLastReceived.ContainsKey(topic) || currentTime - _topicLastReceived[topic] > TimeSpan.FromSeconds(4))
+                        {
+                            // Replace the image with a placeholder bitmap for this topic
+                            Console.WriteLine($"{topic} timed out");
+                            _screenshotBuffer[topic] = CreateTransparentBitmap(pictureBox.Width, pictureBox.Height);
+                        }
+                    }
+
+                    // If all required topics have been captured (including placeholders), invoke ScreenshotsReady
+                    if (requiredTopics.All(t => _screenshotBuffer.ContainsKey(t)))
+                    {
+                        // Reset request flag
+                        _manager.NotifyScreenshotsReady(_screenshotBuffer);
+                        _manager.RequestScreenshots = false;
+                    }
+                }
+            }
+
+            
+        }
+        */
+
+
+
+
 
         // -----------------------------------------------------------------------------------
-        // ---------------------------------- FILE MANAGENT ----------------------------------
+        // ---------------------------------- FILE MANAGEMENT --------------------------------
         // -----------------------------------------------------------------------------------
+
+        #region file management
+
         /// <summary>
         /// Creates an agent that checks on updates within the TEMP folder to update the flow panels respectively
         /// </summary>
@@ -434,6 +599,28 @@ namespace OptiSort
 
 
         /// <summary>
+        /// Converts the image MQTT image (base64) to a bitmap
+        /// </summary>
+        /// <param name="base64Image"></param>
+        /// <returns></returns>
+        private Bitmap JsonToBitmap(string base64Image)
+        {
+            // Trim off any metadata if present
+            if (base64Image.Contains(","))
+            {
+                base64Image = base64Image.Substring(base64Image.IndexOf(",") + 1);
+            }
+
+            // Convert from Base64 to Bitmap
+            byte[] imageBytes = Convert.FromBase64String(base64Image);
+            using (var ms = new MemoryStream(imageBytes))
+            {
+                return new Bitmap(ms);
+            }
+        }
+
+
+        /// <summary>
         /// Export screenshots as bmp files to the TEMP folder
         /// </summary>
         /// <param name="bitmap"></param>
@@ -465,6 +652,27 @@ namespace OptiSort
             bitmap.Save(tempFilePath, ImageFormat.Bmp);
 
             Console.WriteLine($"Bitmap saved as BMP at: {tempFilePath}");
+        }
+
+
+        /// <summary>
+        /// Delete specific image from the TEMP folder, shift other indexes to occupy that groupId
+        /// </summary>
+        /// <param name="name"></param>
+        public void DeleteFile(string name)
+        {
+            try
+            {
+                string filePath = Path.Combine(TempFolder, name);
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+                else
+                    Console.WriteLine($"Delete failed because file is not found: {filePath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting file: {ex.Message}");
+            }
         }
 
 
@@ -533,26 +741,7 @@ namespace OptiSort
             }
         }
 
-
-        /// <summary>
-        /// Delete specific image from the TEMP folder, shift other indexes to occupy that groupId
-        /// </summary>
-        /// <param name="name"></param>
-        public void DeleteFile(string name)
-        {
-            try
-            {
-                string filePath = Path.Combine(TempFolder, name);
-                if (File.Exists(filePath))
-                    File.Delete(filePath);
-                else
-                    Console.WriteLine($"Delete failed because file is not found: {filePath}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error deleting file: {ex.Message}");
-            }
-        }
+        #endregion
 
         // -----------------------------------------------------------------------------------
         // ------------------------------------- GENERAL -------------------------------------
@@ -577,7 +766,6 @@ namespace OptiSort
             // Raise the log event
             LogEvent?.Invoke(logEntry);
         }
-
 
         /// <summary>
         /// Run a python script in background and returns its output as a string
@@ -683,7 +871,6 @@ namespace OptiSort
 
             return null; // Python not found
         }
-
 
     }
 }
