@@ -91,13 +91,13 @@ def main():
     try:
         while True:
             IPH.sendRequest(10, "PUT", "/io/COBRA 600 CAD MODEL/BASE ASSY-1/tQ1",
-                            {"value": np.deg2rad(IPH.joint_positions[0])})
+                            {"value": np.deg2rad(IPH.joint_positions[0])}) # Shoulder
             IPH.sendRequest(20, "PUT", "/io/COBRA 600 CAD MODEL/BASE ASSY-1/tQ2",
-                            {"value": np.deg2rad(IPH.joint_positions[1])})
+                            {"value": np.deg2rad(IPH.joint_positions[1])}) # Wrist
             IPH.sendRequest(30, "PUT", "/io/COBRA 600 CAD MODEL/BASE ASSY-1/tQ3",
-                            {"value": IPH.joint_positions[2]})
+                            {"value": IPH.joint_positions[2]}) # Arm
             IPH.sendRequest(40, "PUT", "/io/COBRA 600 CAD MODEL/BASE ASSY-1/tQ4",
-                            {"value": np.deg2rad(IPH.joint_positions[3])})
+                            {"value": np.deg2rad(IPH.joint_positions[3])}) # Hand
 
             time.sleep(0.05)  # Wait before sending new requests
     except KeyboardInterrupt:
