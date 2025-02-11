@@ -125,6 +125,11 @@ namespace JointReader
 
                 // Publish the message
                 mqttClient.PublishAsync(message);
+                // Print the message
+                Console.WriteLine(jsonMessage);
+
+                // Wait for 0.5 second
+                System.Threading.Thread.Sleep(500);
             }
 
         }

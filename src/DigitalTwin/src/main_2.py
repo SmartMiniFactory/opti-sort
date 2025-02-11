@@ -5,6 +5,10 @@ from queue import Queue
 import threading
 import requests
 import numpy as np
+import keyboard
+
+# Create a stop flag to kill the threads
+stop_flag = threading.Event()
 
 # Define an HTML session
 session = requests.Session()
@@ -22,23 +26,10 @@ url_q3 = f"http://localhost:8080/io/COBRA 600 CAD MODEL/BASE ASSY-1/tQ3"
 url_q4 = f"http://localhost:8080/io/COBRA 600 CAD MODEL/BASE ASSY-1/tQ4"
 
 def publish_html_put(queue, url, body=None, headers=None):
-    while True:
+    while not stop_flag.is_set(): # Check if the stop flag is set
         if not queue.empty():
-                # Define the headers
-            headers = {'Content-Type': 'application/json'}
-            
-            # Define the body
-            body = {"value": queue.get()}
-            
-                # Make the PUT request
-            response = session.put(url=url, headers=headers, json=body)
-            
-                # Process the response
-            if response.status_code == 200:
-                return True
-            else:
-                # Handle error cases
-                return False
+            #print(queue.get())
+            pass
                     
 
 # Define the callback functions
@@ -74,20 +65,31 @@ client.subscribe("DT_BROADCAST")
 # Start the loop
 client.loop_start()
 
-# Create and start the threads
-thread_q1 = threading.Thread(target=publish_html_put, args=(queue_q1, url_q1))
-thread_q2 = threading.Thread(target=publish_html_put, args=(queue_q2, url_q2))
-thread_q3 = threading.Thread(target=publish_html_put, args=(queue_q3, url_q3))
-thread_q4 = threading.Thread(target=publish_html_put, args=(queue_q4, url_q4))
+threads = []
+for queue, url in [(queue_q1, "http://localhost:8080/io/COBRA/tQ1"),
+                   (queue_q2, "http://localhost:8080/io/COBRA/tQ2"),
+                   (queue_q3, "http://localhost:8080/io/COBRA/tQ3"),
+                   (queue_q4, "http://localhost:8080/io/COBRA/tQ4")]:
+    t = threading.Thread(target=publish_html_put, args=(queue, url))
+    t.start()
+    threads.append(t)
 
-thread_q1.start()
-thread_q2.start()
-thread_q3.start()
-thread_q4.start()
+print("Press 'E' to exit")
+keyboard.wait('q')
 
-while True:
-    # Keep the main thread alive
-    thread_q1.join()
-    thread_q2.join()
-    thread_q3.join()
-    thread_q4.join()
+# Segnala ai thread di fermarsi
+print("Stopping the threads")
+stop_flag.set()
+
+# Aspetta che i thread terminino
+for t in threads:
+    t.join()
+
+print("All threads stopped")
+client.loop_stop()
+client.disconnect()
+
+
+
+
+
