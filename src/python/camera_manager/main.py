@@ -69,9 +69,9 @@ async def main():
         ]
     else:
         tasks = [
-                capture_and_publish(ids_camera, "optisort/ids/stream", mqtt_client),
-                capture_and_publish(basler_camera, "optisort/basler/stream", mqtt_client),
-                capture_and_publish(luxonis_camera, "optisort/luxonis/stream", mqtt_client),
+            capture_and_publish(ids_camera, "optisort/ids/stream", mqtt_client),
+            capture_and_publish(basler_camera, "optisort/basler/stream", mqtt_client),
+            capture_and_publish(luxonis_camera, "optisort/luxonis/stream", mqtt_client),
         ]
     await asyncio.gather(*tasks)
 
@@ -93,7 +93,7 @@ async def capture_and_publish(camera, topic, client):
             frame = camera.capture_frame()
 
         # show frame
-        cv2.imshow("Webcam frame", frame)
+        cv2.imshow("Camera frame", frame)
 
         # Encode the frame
         encoded_frame = cv2.imencode("." + encoding, frame, encode_param)[1].tobytes()

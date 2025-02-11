@@ -162,7 +162,7 @@ namespace OptiSort
             //private System.Threading.Timer _timeoutTimer = new System.Threading.Timer(OnTimeout, null, TimeSpan.Zero, _topicTimeoutThreshold);
 
             // attach property changes to various useful methods
-            PropertyChanged += NewStreamingTopic;
+            PropertyChanged += OnPropertyUpdate;
 
             // Initialize the remoting subsystem
             RemotingUtil.InitializeRemotingSubsystem(true, 0);
@@ -177,12 +177,9 @@ namespace OptiSort
         }
 
 
-        private void NewStreamingTopic(object sender, PropertyChangedEventArgs e)
+        private void OnPropertyUpdate(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(StreamingTopic))
-            {
-                Log($"Streaming topic updated to '{StreamingTopic}'", false, false);
-            }
+            
         }
 
         /*
@@ -387,6 +384,16 @@ namespace OptiSort
                 Log($"{client} unsubscribed to {topic}", false, true);
             else
                 Log($"Unable unsubscribing {client} to {topic}", true, false);
+        }
+
+        public void UpdateStreamingTopic(string newTopic)
+        {
+            if (StatusMqttClient)
+            {
+                UnsubscribeMqttTopic(Properties.Settings.Default.mqtt_client, StreamingTopic);
+                StreamingTopic = newTopic;
+                SubscribeMqttTopic(Properties.Settings.Default.mqtt_client, StreamingTopic);
+            }
         }
 
         #endregion

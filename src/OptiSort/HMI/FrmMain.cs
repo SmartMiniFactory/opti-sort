@@ -357,13 +357,13 @@ namespace OptiSort
         private void btnMqttConnect_Click(object sender, EventArgs e)
         {
             // async call, no need for handling cursor
-            _manager.ConnectMQTTClient();
+            _ = _manager.ConnectMQTTClient();
         }
 
         private void btnMqttDisconnect_Click(object sender, EventArgs e)
         {
             // async call, no need for handling cursor
-            _manager.DisconnectMqttClient(Properties.Settings.Default.mqtt_client);
+            _ = _manager.DisconnectMqttClient(Properties.Settings.Default.mqtt_client);
         }
 
 
@@ -373,7 +373,7 @@ namespace OptiSort
 
         private void cmbCameras_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _manager.StreamingTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic; 
+            _manager.UpdateStreamingTopic(_camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic); 
         }
 
         private void OnLogEvent(optisort_mgr.LogEntry logEntry)
