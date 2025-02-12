@@ -128,6 +128,7 @@ namespace OptiSort
                         g.DrawImage(currentImage, new Rectangle(0, 0, pictureBox.Width, pictureBox.Height));
                         g.DrawString($"FPS: {_fps}", new Font("Arial", 16), Brushes.White, new PointF(10, 10)); // Draw FPS overlay
                         g.DrawString($"Latency: {_latencyMilliseconds} ms", new Font("Arial", 16), Brushes.White, new PointF(10, 40)); // Draw Latency overlay 
+                        g.DrawString($"Topic: {_manager.StreamingTopic}", new Font("Arial", 16), Brushes.White, new PointF(10, 70)); // Draw Latency overlay 
                     }
                     catch (Exception ex)
                     {

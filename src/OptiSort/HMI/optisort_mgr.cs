@@ -127,16 +127,16 @@ namespace OptiSort
         public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> idsQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
         public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> baslerQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
         public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> luxonisQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
-
+        private DateTime lastNonStreamingUpdate = DateTime.MinValue;
 
         // file management
         public string TempFolder { get; private set; } = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp"));
         public string ConfigFolder { get; private set; } = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Config"));
-        
+
         public FileSystemWatcher TempFolderWatcher;
         private bool _isFileWatcherPaused = false;
-        
-        
+
+
         // Logging
         public event Action<LogEntry> LogEvent; // Event to notify subscribers
         public class LogEntry
@@ -179,7 +179,7 @@ namespace OptiSort
 
         private void OnPropertyUpdate(object sender, PropertyChangedEventArgs e)
         {
-            
+
         }
 
         /*
@@ -402,13 +402,26 @@ namespace OptiSort
         // ---------------------------------- MQTT MANAGEMENT --------------------------------
         // -----------------------------------------------------------------------------------
 
-
+        /// <summary>
+        /// Each time an MQTT arrives, a dedicated task is created to convert the incoming JSON to a BITMAP and queue it
+        /// </summary>
+        /// <param name="topic"></param>
+        /// <param name="message"></param>
         private void OnMessageReceived(string topic, JsonElement message)
         {
-            // Start a dedicated task for the method
-            Task.Run(() => AddBitmapToQueue(topic, message));
+            // TODO: activate this only in case of streaming topics
+            Task.Run(() => AddBitmapToQueue(topic, message)); // Start a dedicated task for the method
         }
 
+
+        /// <summary>
+        /// Converts the incoming JSON to a BITMAP of any mqtt topic
+        /// If the triggering topic is the streaming topic, the queue can reach a maximum of 5 items then is cleared to avoid latency
+        /// If the triggering topic is a NON-streaming one, the respective queue is updated only each 1s and the queue can contain at maximum 1 item (saving resources)
+        /// Queuing non-streaming bitmaps is useful to render them in case of screenshots (e.g. camera lens calibration)
+        /// </summary>
+        /// <param name="topic"></param>
+        /// <param name="message"></param>
         private void AddBitmapToQueue(string topic, JsonElement message)
         {
             // coverting json into bitmap
@@ -418,54 +431,56 @@ namespace OptiSort
             string timestampString = message.GetProperty("timestamp").GetString();
             DateTime messageTimestamp = DateTime.Parse(timestampString, null, System.Globalization.DateTimeStyles.RoundtripKind); // Decode timestamp
 
-            
 
-                // queue bitmaps in three different queues
-                if (topic == Properties.Settings.Default.mqtt_topic_idsStream)
-                    idsQueue.Enqueue((image, messageTimestamp, DateTime.Now));
+            const int MaxStreamingQueueSize = 5;            // Max size for StreamingTopic queue
+            const int NonStreamingUpdateInterval = 1000;    // 1 second for updates to non-streaming queues
 
-                if (topic == Properties.Settings.Default.mqtt_topic_baslerStream)
-                    baslerQueue.Enqueue((image, messageTimestamp, DateTime.Now));
 
-                if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream)
-                    luxonisQueue.Enqueue((image, messageTimestamp, DateTime.Now));
+            if (topic == StreamingTopic)
+            {
+                // Determine the queue dynamically and add bitmap to queue (including json timestamp, enqueuing timestamp)
+                ConcurrentQueue<(Bitmap, DateTime, DateTime)> streamingQueue = GetQueueForTopic(topic);
+                streamingQueue.Enqueue((image, messageTimestamp, DateTime.Now));
 
-                BitmapQueued?.Invoke(topic);
-
-                /*
-                // Regular streaming logic
-                if (topic == StreamingTopic)
+                // If the queue exceeds the maximum size, remove previous frames to reduce latency
+                while (streamingQueue.Count > MaxStreamingQueueSize)
                 {
-                    Bitmap previousImage = Image;
-                    Image = image;
-                    _imgDate = DateTime.Now;
-                    previousImage?.Dispose();
+                    streamingQueue.TryDequeue(out _);
                 }
-
-                
-                // Handle screenshot request
-                if (_manager.RequestScreenshots)
+            }
+            else // Handle non-streaming topics
+            {
+                if ((DateTime.Now - lastNonStreamingUpdate).TotalMilliseconds >= NonStreamingUpdateInterval) // update queue with reduced frequency (discard some mqtt messages to avoid overload)
                 {
-                    // Add the current image to the buffer for the topic
-                    _screenshotBuffer[topic] = image;
-                    _topicLastReceived[topic] = DateTime.Now;
+                    ConcurrentQueue<(Bitmap, DateTime, DateTime)> nonStreamingQueue = GetQueueForTopic(topic);
+                    
+                    while (nonStreamingQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
 
-                    // Check if all required topics have been captured
-                    var requiredTopics = new[]
-                    {
-                        Properties.Settings.Default.mqtt_topic_idsStream,
-                        Properties.Settings.Default.mqtt_topic_luxonisStream,
-                        Properties.Settings.Default.mqtt_topic_baslerStream
-                    };
+                    nonStreamingQueue.Enqueue((image, messageTimestamp, DateTime.Now)); // queue bitmap
+                    lastNonStreamingUpdate = DateTime.Now; // update last queuing time for non-streaming topics
+                }
+            }
 
-                    if (requiredTopics.All(_screenshotBuffer.ContainsKey))
-                    {
-                        // Notify that screenshots are ready
-                        _manager.NotifyScreenshotsReady(_screenshotBuffer);
-                        _manager.RequestScreenshots = false;
-                    }
-                }*/
+            Console.WriteLine("Ids queue: " + idsQueue.Count + "; Basler queue: " + baslerQueue.Count + "; Luxonis queue: " + luxonisQueue.Count);
+
+            BitmapQueued?.Invoke(topic); // notify subscribers about queuing a bitmap
         }
+
+
+        private ConcurrentQueue<(Bitmap, DateTime, DateTime)> GetQueueForTopic(string topic)
+        {
+            if (topic == Properties.Settings.Default.mqtt_topic_idsStream)
+                return idsQueue;
+
+            if (topic == Properties.Settings.Default.mqtt_topic_baslerStream)
+                return baslerQueue;
+
+            if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream)
+                return luxonisQueue;
+
+            throw new ArgumentException("Unknown topic: " + topic);
+        }
+
 
         /*
         /// <summary>
