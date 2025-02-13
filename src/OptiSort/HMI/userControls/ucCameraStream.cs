@@ -1,4 +1,5 @@
 ﻿using ActiproSoftware.SyntaxEditor;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,10 +25,13 @@ namespace OptiSort
         private readonly System.Threading.Timer _timeoutTimer;
 
         // Performance computation
+        private Stopwatch _stopwatch = Stopwatch.StartNew();
         private int _frameCount = 0;
-        private int _fps = 0;
-        private DateTime _lastFpsUpdate = DateTime.Now;
-        private int _latencyMilliseconds = 0;
+        private double _mqttLatency;
+        private double _renderingLatency;
+        private double _totalLatency;
+        private double _fps;
+        private double _maxAllowedLatency = 5000; // milliseconds
 
         // Screenshot requests
         private Dictionary<string, Bitmap> _screenshotBuffer = new Dictionary<string, Bitmap>();
@@ -45,11 +49,12 @@ namespace OptiSort
             // Subscribe to bitmap queuing updates
             _manager.BitmapQueued += OnBitmapQueued;
 
-            
+            // Start the timer to reset FPS metrics periodically
+            StartMetricsResetTimer();
         }
 
 
-        
+
         private void OnBitmapQueued(string messageFromTopic)
         {
             // render Bitmap only when coming from the camera selected for streaming
@@ -59,7 +64,7 @@ namespace OptiSort
             }
         }
 
-        
+
 
 
         private void pictureBox_Paint(object sender, PaintEventArgs e)
@@ -68,29 +73,36 @@ namespace OptiSort
             Bitmap currentImage = null;
             DateTime published = DateTime.MinValue;
             DateTime received = DateTime.MinValue;
+            int queueCount = 0;
+
 
             if (_manager.StreamingTopic == Properties.Settings.Default.mqtt_topic_idsStream)
             {
-                if (_manager.idsQueue.TryDequeue(out var item))
+                if (_manager._idsQueue.TryDequeue(out var item))
                 {
+                    queueCount = _manager._idsQueue.Count;
                     currentImage = item.Frame;
                     published = item.messageTimestamp;
                     received = item.receptionTimestamp;
+                    CalculateLatency(received, published);
                 }
                 else // Queue is empty
                 {
-                    RenderTimeoutOverlay(g); 
+                    RenderTimeoutOverlay(g);
                     return;
                 }
             }
 
             if (_manager.StreamingTopic == Properties.Settings.Default.mqtt_topic_baslerStream)
             {
-                if (_manager.baslerQueue.TryDequeue(out var item))
+                if (_manager._baslerQueue.TryDequeue(out var item))
                 {
+                    queueCount = _manager._baslerQueue.Count;
                     currentImage = item.Frame;
                     published = item.messageTimestamp;
                     received = item.receptionTimestamp;
+                    CalculateLatency(received, published);
+
                 }
                 else // Queue is empty
                 {
@@ -101,11 +113,13 @@ namespace OptiSort
 
             if (_manager.StreamingTopic == Properties.Settings.Default.mqtt_topic_luxonisStream)
             {
-                if (_manager.luxonisQueue.TryDequeue(out var item))
+                if (_manager._luxonisQueue.TryDequeue(out var item))
                 {
+                    queueCount = _manager._luxonisQueue.Count;
                     currentImage = item.Frame;
                     published = item.messageTimestamp;
                     received = item.receptionTimestamp;
+                    CalculateLatency(received, published);
                 }
                 else // Queue is empty
                 {
@@ -113,6 +127,8 @@ namespace OptiSort
                     return;
                 }
             }
+
+            _frameCount++;
 
             // Check for timeout condition
             if (received.AddSeconds(2) < DateTime.Now)
@@ -125,10 +141,15 @@ namespace OptiSort
                 {
                     try
                     {
+                        int y = 10;
+                        int increment = 20;
                         g.DrawImage(currentImage, new Rectangle(0, 0, pictureBox.Width, pictureBox.Height));
-                        g.DrawString($"FPS: {_fps}", new Font("Arial", 16), Brushes.White, new PointF(10, 10)); // Draw FPS overlay
-                        g.DrawString($"Latency: {_latencyMilliseconds} ms", new Font("Arial", 16), Brushes.White, new PointF(10, 40)); // Draw Latency overlay 
-                        g.DrawString($"Topic: {_manager.StreamingTopic}", new Font("Arial", 16), Brushes.White, new PointF(10, 70)); // Draw Latency overlay 
+                        g.DrawString($"Topic: {_manager.StreamingTopic}", new Font("Arial", 10), Brushes.White, new PointF(10, y));
+                        g.DrawString($"FPS: {_fps}", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        g.DrawString($"Mqtt latency: {_mqttLatency} ms", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        g.DrawString($"Rendering latency: {_renderingLatency} ms", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        g.DrawString($"Latency overload: {Math.Round(_totalLatency /_maxAllowedLatency * 100, 1, MidpointRounding.AwayFromZero)}%", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        g.DrawString($"Queued frames: {queueCount}", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
                     }
                     catch (Exception ex)
                     {
@@ -137,6 +158,8 @@ namespace OptiSort
                 }
             }
         }
+
+        
 
 
         /// <summary>
@@ -191,24 +214,28 @@ namespace OptiSort
             return bitmap;
         }
 
-
-        private void CalculatePerformance(DateTime published, DateTime received)
+        private void CalculateLatency(DateTime rxTimestamp, DateTime msgTimestamp)
         {
-
-            TimeSpan latency = DateTime.Now - received;
-            _latencyMilliseconds = (int)latency.TotalMilliseconds;
-            _frameCount++; // TODO: suspicius
-
-
-            // Calculate FPS every second
-            if ((DateTime.Now - _lastFpsUpdate).TotalSeconds >= 1)
-            {
-                _fps = _frameCount;
-                _frameCount = 0;
-                _lastFpsUpdate = DateTime.Now;
-            }
+            _mqttLatency = Math.Round((rxTimestamp - msgTimestamp).TotalMilliseconds, 2, MidpointRounding.AwayFromZero);
+            _renderingLatency = Math.Round((DateTime.Now - rxTimestamp).TotalMilliseconds, 2, MidpointRounding.AwayFromZero);
+            _totalLatency = Math.Round((DateTime.Now - msgTimestamp).TotalMilliseconds, 2, MidpointRounding.AwayFromZero);
         }
 
+        // Periodic reset to ensure FPS calculation is accurate over time
+        private void ResetMetrics()
+        {
+            _fps = Math.Round(_frameCount / _stopwatch.Elapsed.TotalSeconds, 0, MidpointRounding.AwayFromZero);
+            _frameCount = 0;
+            _stopwatch.Restart();
+        }
+
+        // Start a timer to reset FPS metrics every second
+        private void StartMetricsResetTimer()
+        {
+            var timer = new System.Timers.Timer(1000); // 1 second interval
+            timer.Elapsed += (sender, e) => ResetMetrics();
+            timer.Start();
+        }
 
     }
 }

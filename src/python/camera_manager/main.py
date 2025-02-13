@@ -62,58 +62,74 @@ async def main():
     global testing, webcam, ids_camera, basler_camera, luxonis_camera, mqtt_client
 
     if testing:
-        tasks = [
-            capture_and_publish(webcam, "optisort/ids/stream", mqtt_client),
-            capture_and_publish(webcam, "optisort/basler/stream", mqtt_client),
-            capture_and_publish(webcam, "optisort/luxonis/stream", mqtt_client),
+        cameras = [webcam, webcam, webcam]
+        topics = [
+            "optisort/ids/stream",
+            "optisort/basler/stream",
+            "optisort/luxonis/stream",
         ]
     else:
-        tasks = [
-            capture_and_publish(ids_camera, "optisort/ids/stream", mqtt_client),
-            capture_and_publish(basler_camera, "optisort/basler/stream", mqtt_client),
-            capture_and_publish(luxonis_camera, "optisort/luxonis/stream", mqtt_client),
+        cameras = [ids_camera, basler_camera, luxonis_camera]
+        topics = [
+            "optisort/ids/stream",
+            "optisort/basler/stream",
+            "optisort/luxonis/stream",
         ]
-    await asyncio.gather(*tasks)
+
+    # Create and run tasks for each topic independently
+    tasks = [
+        capture_and_publish(camera, topic, mqtt_client, idx) for idx, (camera, topic) in enumerate(zip(cameras, topics))
+    ]
+
+    # Gather all tasks
+    try:
+        await asyncio.gather(*tasks)
+    except asyncio.CancelledError:
+        print("Tasks were cancelled.")
+    except Exception as e:
+        print(f"Error occurred: {e}")
 
 
-async def capture_and_publish(camera, topic, client):
+async def capture_and_publish(camera, topic, client, idx):
     global testing, encoding, encode_param
 
-    while True:
-        start = time.time()  # Start time
+    try:
+        while True:
+            # Calculate the next publication time (synchronized to a 1-second clock)
+            next_publish_time = time.time() + 0.0005
 
-        if testing:
-            # Capture frame from the testing camera (webcam)
-            ret, frame = camera.read()
-            if not ret:
-                print("Failed to capture webcam frame.")
-                return False
-        else:
-            # Capture frames from the real cameras
-            frame = camera.capture_frame()
+            # Capture frame
+            if testing:
+                ret, frame = camera.read()
+                if not ret:
+                    print(f"Failed to capture frame from camera for topic {topic}")
+                    break
+            else:
+                frame = camera.capture_frame()
 
-        # show frame
-        cv2.imshow("Camera frame", frame)
+            # Show frame (optional)
+            # cv2.imshow(f"Camera frame - {topic}", frame)
 
-        # Encode the frame
-        encoded_frame = cv2.imencode("." + encoding, frame, encode_param)[1].tobytes()
+            # Encode the frame
+            encoded_frame = cv2.imencode("." + encoding, frame, encode_param)[1].tobytes()
 
-        # Publish frame to MQTT topics
-        await client.publish(topic, im2json(encoded_frame))
+            # Publish frame to MQTT topic
+            await client.publish(topic, im2json(encoded_frame))
 
-        # Handle frame display and quitting
-        if cv2.waitKey(1) & keyboard.is_pressed('q'):
-            print("\nQuitting...")
-            return False
+            # Quit if 'q' is pressed
+            if keyboard.is_pressed("q"):
+                print("Quit detected. Exiting...")
+                break
 
-        # Calculate FPS and sleep for the remaining time
-        end = time.time()
-        elapsed = end - start
-        fps = 1 / elapsed
-        print("FPS: ", np.round(fps, 0), end="\r")
+            # Calculate sleep duration to sync to the clock
+            now = time.time()
+            sleep_duration = max(next_publish_time - now, 0)  # Avoid negative sleep
+            await asyncio.sleep(sleep_duration)
 
-        if await asyncio.sleep(0.2 - elapsed):  # Adjust interval based on elapsed time
-            return True
+    finally:
+        # Clean up resources
+        cv2.destroyAllWindows()
+        print(f"Stopped capture for topic {topic}")
 
 # -------------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------------

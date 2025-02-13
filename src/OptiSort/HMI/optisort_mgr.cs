@@ -124,9 +124,9 @@ namespace OptiSort
 
 
         // MQTT
-        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> idsQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
-        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> baslerQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
-        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> luxonisQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
+        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> _idsQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
+        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> _baslerQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
+        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> _luxonisQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
         private DateTime lastNonStreamingUpdate = DateTime.MinValue;
 
         // file management
@@ -179,7 +179,8 @@ namespace OptiSort
 
         private void OnPropertyUpdate(object sender, PropertyChangedEventArgs e)
         {
-
+            if (e.PropertyName == nameof(StreamingTopic))
+                ResetQueues();
         }
 
         /*
@@ -461,7 +462,7 @@ namespace OptiSort
                 }
             }
 
-            Console.WriteLine("Ids queue: " + idsQueue.Count + "; Basler queue: " + baslerQueue.Count + "; Luxonis queue: " + luxonisQueue.Count);
+            Console.WriteLine("Ids queue: " + _idsQueue.Count + "; Basler queue: " + _baslerQueue.Count + "; Luxonis queue: " + _luxonisQueue.Count);
 
             BitmapQueued?.Invoke(topic); // notify subscribers about queuing a bitmap
         }
@@ -470,15 +471,22 @@ namespace OptiSort
         private ConcurrentQueue<(Bitmap, DateTime, DateTime)> GetQueueForTopic(string topic)
         {
             if (topic == Properties.Settings.Default.mqtt_topic_idsStream)
-                return idsQueue;
+                return _idsQueue;
 
             if (topic == Properties.Settings.Default.mqtt_topic_baslerStream)
-                return baslerQueue;
+                return _baslerQueue;
 
             if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream)
-                return luxonisQueue;
+                return _luxonisQueue;
 
             throw new ArgumentException("Unknown topic: " + topic);
+        }
+
+        private void ResetQueues()
+        {
+            while (_idsQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
+            while (_baslerQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
+            while (_luxonisQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
         }
 
 
