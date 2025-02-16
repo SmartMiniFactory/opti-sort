@@ -1,11 +1,14 @@
 ﻿using Ace.UIBuilder.Client.Controls.Tools.WindowsForms;
+using ActiproSoftware.SyntaxEditor;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Text.Json;
 using System.Windows.Forms;
@@ -16,6 +19,10 @@ namespace OptiSort.userControls
     {
         private optisort_mgr _manager;
         private int _shots;
+        private bool _idsShot = false;
+        private bool _luxonisShot = false;
+        private bool _baslerShot = false;
+
         public int Shots
         {
             get => _shots;
@@ -50,8 +57,18 @@ namespace OptiSort.userControls
             _manager.TempFileDeleted += OnTempFileDeleted;
             _manager.TempFolderWatcherResumed += OnWatcherResumed;
 
+            _manager.PropertyChanged += OnPropertyChange;
+            btn_acquire.Enabled = _manager.StatusMqttClient;
+
         }
 
+        private void OnPropertyChange(object sender, PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName == nameof(_manager.StatusMqttClient) || e.PropertyName == nameof(_manager.RequestScreenshots))
+            {
+                RefreshBottomControls();
+            }
+        }
 
         private void OnTempFileDeleted()
         {
@@ -78,8 +95,8 @@ namespace OptiSort.userControls
             }
 
             Cursor = Cursors.WaitCursor;
-            //_manager.ScreenshotsReady += SaveShot;
             _manager.RequestScreenshots = true;
+            _manager.BitmapQueued += SaveShots;
         }
 
         private void btn_calibrate_Click(object sender, EventArgs e)
@@ -110,56 +127,70 @@ namespace OptiSort.userControls
         // ----------------------------------------------------------------------------------------
 
 
-        /// <summary>
-        /// When this is triggered, three screenshots are ready to be processed. The method saves the screenshots as files and adds their thumbnails to the flow panels
-        /// </summary>
-        /// <param name="screenshots"></param>
-        private void SaveShot(Dictionary<string, Bitmap> screenshots)
+
+        private void SaveShots(string topic)
         {
-            // Handle the screenshots when they are ready
             Invoke(new Action(() =>
             {
-                // Get the earliest available index (gap in the sequence)
                 int earliestAvailableIndex = GetEarliestAvailableIndex();
 
-                foreach (var kvp in screenshots)
+                string prefix = string.Empty;
+                FlowLayoutPanel panel = null;
+                Bitmap image = null;
+
+                if (topic == Properties.Settings.Default.mqtt_topic_idsStream && _idsShot == false)
                 {
-                    string topic = kvp.Key;
-                    Bitmap image = kvp.Value;
+                    if (_manager._idsQueue.TryDequeue(out var item))
+                    {
+                        image = item.Frame;
+                        _idsShot = true;
+                    }else return; // in case queue is empty, saving cannot continue because bitmaps cannot be null to be saved
 
-                    string prefix = string.Empty;
-                    FlowLayoutPanel panel = null;
+                    prefix = "ids";
+                    panel = flp_ids;
+                }
+                else if (topic == Properties.Settings.Default.mqtt_topic_baslerStream && _baslerShot == false)
+                {
+                    if (_manager._baslerQueue.TryDequeue(out var item))
+                    {
+                        image = item.Frame;
+                        _baslerShot = true;
+                    }else return;
 
-                    if (topic == Properties.Settings.Default.mqtt_topic_idsStream)
+                    prefix = "basler";
+                    panel = flp_basler;
+                }
+                else if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream && _luxonisShot == false)
+                {
+                    if (_manager._luxonisQueue.TryDequeue(out var item))
                     {
-                        prefix = "ids";
-                        panel = flp_ids;
-                    }
-                    else if (topic == Properties.Settings.Default.mqtt_topic_baslerStream)
-                    {
-                        prefix = "basler";
-                        panel = flp_basler;
-                    }
-                    else if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream)
-                    {
-                        prefix = "luxonis";
-                        panel = flp_luxonis;
-                    }
-
-                    if (!string.IsNullOrEmpty(prefix) && panel != null)
-                    {
-                        string filename = $"{prefix}_CalibrationImage_{earliestAvailableIndex.ToString("D2")}";
-                        _manager.SaveBitmapAsFile(image, filename);
-                        AddThumbnailToColumn(panel, image, filename);
-                    }
+                        image = item.Frame;
+                        _luxonisShot = true;
+                    }else return;
+ 
+                    prefix = "luxonis";
+                    panel = flp_luxonis;
                 }
 
-                //_manager.ScreenshotsReady -= SaveShot;
-                Shots++;
-                Cursor = Cursors.Default;
+                if (!string.IsNullOrEmpty(prefix) && panel != null)
+                {
+                    string filename = $"{prefix}_CalibrationImage_{earliestAvailableIndex.ToString("D2")}";
+                    _manager.SaveBitmapAsFile(image, filename);
+                    AddThumbnailToColumn(panel, image, filename);
+                }
+
+                if(_idsShot && _baslerShot && _luxonisShot)
+                {
+                    _idsShot = false;
+                    _luxonisShot = false;
+                    _baslerShot = false;
+                    _manager.RequestScreenshots = false;
+                    _manager.BitmapQueued -= SaveShots;
+                    Cursor = Cursors.Default;
+                    Shots++;
+                }
             }));
         }
-
 
 
         /// <summary>
@@ -577,6 +608,7 @@ namespace OptiSort.userControls
             btn_acquire.Enabled = Shots < 15;
             btn_calibrate.Enabled = Shots == 15;
             btn_clear.Enabled = Shots > 0;
+            btn_acquire.Enabled = _manager.StatusMqttClient == true && _manager.RequestScreenshots == false;
         }
 
     }

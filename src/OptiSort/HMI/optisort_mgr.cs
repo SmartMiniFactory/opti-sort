@@ -425,6 +425,7 @@ namespace OptiSort
         /// <param name="message"></param>
         private void AddBitmapToQueue(string topic, JsonElement message)
         {
+
             // coverting json into bitmap
             string base64Image = message.GetProperty("image").GetString();
             Bitmap image = JsonToBitmap(base64Image); // Decode the base64 image
@@ -454,16 +455,16 @@ namespace OptiSort
                 if ((DateTime.Now - lastNonStreamingUpdate).TotalMilliseconds >= NonStreamingUpdateInterval) // update queue with reduced frequency (discard some mqtt messages to avoid overload)
                 {
                     ConcurrentQueue<(Bitmap, DateTime, DateTime)> nonStreamingQueue = GetQueueForTopic(topic);
-                    
-                    while (nonStreamingQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
 
-                    nonStreamingQueue.Enqueue((image, messageTimestamp, DateTime.Now)); // queue bitmap
+                    if(nonStreamingQueue.Count > 0)
+                        nonStreamingQueue.TryDequeue(out _);
+
+                    nonStreamingQueue.Enqueue((image, messageTimestamp, DateTime.Now)); 
                     lastNonStreamingUpdate = DateTime.Now; // update last queuing time for non-streaming topics
                 }
             }
 
             Console.WriteLine("Ids queue: " + _idsQueue.Count + "; Basler queue: " + _baslerQueue.Count + "; Luxonis queue: " + _luxonisQueue.Count);
-
             BitmapQueued?.Invoke(topic); // notify subscribers about queuing a bitmap
         }
 
