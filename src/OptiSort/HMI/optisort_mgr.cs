@@ -120,7 +120,6 @@ namespace OptiSort
         public event Action TempFileDeleted;
         public event Action TempFolderWatcherResumed;
         public event Action<string> BitmapQueued;
-        //public event Action<Dictionary<string, Bitmap>> ScreenshotsReady; // Event to notify subscribers
 
 
         // MQTT
@@ -158,9 +157,6 @@ namespace OptiSort
             // Attach mqtt messages to handler
             MqttClient.MessageReceived += OnMessageReceived;
 
-            // Create timer
-            //private System.Threading.Timer _timeoutTimer = new System.Threading.Timer(OnTimeout, null, TimeSpan.Zero, _topicTimeoutThreshold);
-
             // attach property changes to various useful methods
             PropertyChanged += OnPropertyUpdate;
 
@@ -182,13 +178,6 @@ namespace OptiSort
             if (e.PropertyName == nameof(StreamingTopic))
                 ResetQueues();
         }
-
-        /*
-        public void NotifyScreenshotsReady(Dictionary<string, Bitmap> screenshotBuffer)
-        {
-            ScreenshotsReady?.Invoke(new Dictionary<string, Bitmap>(screenshotBuffer));
-        }
-        */
 
         public void RequestNewUcLoading(Control control)
         {
@@ -452,10 +441,10 @@ namespace OptiSort
             }
             else // Handle non-streaming topics
             {
-                if ((DateTime.Now - lastNonStreamingUpdate).TotalMilliseconds >= NonStreamingUpdateInterval) // update queue with reduced frequency (discard some mqtt messages to avoid overload)
+                if (((DateTime.Now - lastNonStreamingUpdate).TotalMilliseconds >= NonStreamingUpdateInterval) || RequestScreenshots == true) // if screenshot mode is disabled, update queue with reduced frequency (discard some mqtt messages to avoid overload)
                 {
                     ConcurrentQueue<(Bitmap, DateTime, DateTime)> nonStreamingQueue = GetQueueForTopic(topic);
-
+                    
                     if(nonStreamingQueue.Count > 0)
                         nonStreamingQueue.TryDequeue(out _);
 
@@ -489,85 +478,6 @@ namespace OptiSort
             while (_baslerQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
             while (_luxonisQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
         }
-
-
-        /*
-        /// <summary>
-        /// Method to trigger screenshot requests
-        /// </summary>
-        private void RequestScreenshots()
-        {
-            lock (_lock)
-            {
-                _manager.RequestScreenshots = true;
-                _screenshotBuffer.Clear(); // Clear buffer for new screenshots
-
-                // Initialize last received times for all required topics
-                var requiredTopics = new[]
-                {
-                    Properties.Settings.Default.mqtt_topic_idsStream,
-                    Properties.Settings.Default.mqtt_topic_luxonisStream,
-                    Properties.Settings.Default.mqtt_topic_baslerStream
-                };
-
-                // save creation time in timeout buffer
-                foreach (var topic in requiredTopics)
-                {
-                    if (!_topicLastReceived.ContainsKey(topic))
-                    {
-                        _topicLastReceived[topic] = DateTime.Now;
-                    }
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// This method will be called periodically by the timer
-        /// </summary>
-        /// <param name="state"></param>
-        private void OnTimeout(object state)
-        {
-            if (_manager.RequestScreenshots)
-            {
-                lock (_lock)
-                {
-                    DateTime currentTime = DateTime.Now;
-
-                    var requiredTopics = new[]
-                    {
-                        Properties.Settings.Default.mqtt_topic_idsStream,
-                        Properties.Settings.Default.mqtt_topic_luxonisStream,
-                        Properties.Settings.Default.mqtt_topic_baslerStream
-                    };
-
-                    // Check if any topic has timed out
-                    foreach (var topic in requiredTopics)
-                    {
-                        if (!_topicLastReceived.ContainsKey(topic) || currentTime - _topicLastReceived[topic] > TimeSpan.FromSeconds(4))
-                        {
-                            // Replace the image with a placeholder bitmap for this topic
-                            Console.WriteLine($"{topic} timed out");
-                            _screenshotBuffer[topic] = CreateTransparentBitmap(pictureBox.Width, pictureBox.Height);
-                        }
-                    }
-
-                    // If all required topics have been captured (including placeholders), invoke ScreenshotsReady
-                    if (requiredTopics.All(t => _screenshotBuffer.ContainsKey(t)))
-                    {
-                        // Reset request flag
-                        _manager.NotifyScreenshotsReady(_screenshotBuffer);
-                        _manager.RequestScreenshots = false;
-                    }
-                }
-            }
-
-            
-        }
-        */
-
-
-
 
 
         // -----------------------------------------------------------------------------------
