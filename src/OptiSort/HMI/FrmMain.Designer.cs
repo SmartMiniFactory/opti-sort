@@ -441,6 +441,7 @@
             this.Controls.Add(this.tblMainStructure);
             this.Controls.Add(this.tblPanel);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MinimumSize = new System.Drawing.Size(1920, 1080);
             this.Name = "frmMain";

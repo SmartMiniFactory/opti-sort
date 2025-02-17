@@ -193,4 +193,7 @@
   <data name="home_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icons\home_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Optisort_Logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Optisort_Logo.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
