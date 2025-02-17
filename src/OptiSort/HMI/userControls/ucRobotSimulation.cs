@@ -42,16 +42,12 @@ namespace OptiSort.userControls
                 }
 
                 // Set up font and brush for the message
-                using (Font font = new Font("Arial", 12, FontStyle.Bold))
+                using (Font font = new Font("Arial", 11, FontStyle.Bold))
                 using (Brush textBrush = new SolidBrush(Color.White))
                 {
-                    string message = "Connect ACE Server for 3D render";
-
-                    // Measure the size of the message to center it
+                    string message = "Connect ACE server for 3D rendering";
                     SizeF textSize = g.MeasureString(message, font);
                     PointF textLocation = new PointF((bmp.Width - textSize.Width) / 2, (bmp.Height - textSize.Height) / 2);
-
-                    // Draw the message centered on the bitmap
                     g.DrawString(message, font, textBrush, textLocation);
                 }
             }
@@ -60,7 +56,7 @@ namespace OptiSort.userControls
             System.Windows.Forms.PictureBox pictureBox = new System.Windows.Forms.PictureBox
             {
                 Dock = DockStyle.Fill,   // Fill the panel
-                BackColor = Color.Transparent,
+                BackColor = Color.Black,
                 Image = bmp,
                 SizeMode = PictureBoxSizeMode.Zoom
             };

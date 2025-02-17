@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -20,10 +21,6 @@ namespace OptiSort
     {
         private optisort_mgr _manager;
 
-        public Bitmap Image { get; private set; }
-        //private DateTime _imgDate = DateTime.MinValue;
-        private readonly System.Threading.Timer _timeoutTimer;
-
         // Performance computation
         private Stopwatch _stopwatch = Stopwatch.StartNew();
         private int _frameCount = 0;
@@ -32,28 +29,46 @@ namespace OptiSort
         private double _totalLatency;
         private double _fps;
         private double _maxAllowedLatency = 5000; // milliseconds
+        
+        private bool _mqttLatencyError = false;
 
-        // Screenshot requests
-        private Dictionary<string, Bitmap> _screenshotBuffer = new Dictionary<string, Bitmap>();
-        private Dictionary<string, DateTime> _topicLastReceived = new Dictionary<string, DateTime>();
-        private TimeSpan _topicTimeoutThreshold = TimeSpan.FromSeconds(2);
+        // watchdog
+        private Classes.Watchdog _watchdog;
+
 
         internal ucCameraStream(optisort_mgr manager)
         {
             InitializeComponent();
             _manager = manager;
 
-            // Create a transparent placeholder Bitmap
-            Image = CreateTransparentBitmap(pictureBox.Width, pictureBox.Height);
-
             // Subscribe to bitmap queuing updates
             _manager.BitmapQueued += OnBitmapQueued;
+
+            // Subscribe to propery changed
+            _manager.PropertyChanged += OnPropertyChange;
+
+            // Create watchdog to trigger repaint in case of mqtt connection loss
+            _watchdog = new Classes.Watchdog(500);
+            _watchdog.Elapsed += Watchdog_Elapsed;
+            _watchdog.Start();
 
             // Start the timer to reset FPS metrics periodically
             StartMetricsResetTimer();
         }
 
+        private void Watchdog_Elapsed(object sender, EventArgs e)
+        {
+            pictureBox.Invalidate();
+        }
 
+        private void OnPropertyChange(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(_manager.StatusMqttClient))
+            {
+                pictureBox.Invalidate(); // Trigger re-paint
+                _mqttLatencyError = false;
+            }
+        }
 
         private void OnBitmapQueued(string messageFromTopic)
         {
@@ -141,6 +156,16 @@ namespace OptiSort
                 {
                     try
                     {
+
+                        double overload = Math.Round(_totalLatency / _maxAllowedLatency * 100, 1, MidpointRounding.AwayFromZero);
+                        if (overload > 100 && _mqttLatencyError == false)
+                        {
+                            _mqttLatencyError = true;
+                            _ = _manager.DisconnectMqttClient();
+                            MessageBox.Show("MQTT service interrupted because of a latency overload. Please try restarting the service");
+                            return;
+                        }
+
                         int y = 10;
                         int increment = 20;
                         g.DrawImage(currentImage, new Rectangle(0, 0, pictureBox.Width, pictureBox.Height));
@@ -148,8 +173,16 @@ namespace OptiSort
                         g.DrawString($"FPS: {_fps}", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
                         g.DrawString($"Mqtt latency: {_mqttLatency} ms", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
                         g.DrawString($"Rendering latency: {_renderingLatency} ms", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
-                        g.DrawString($"Latency overload: {Math.Round(_totalLatency /_maxAllowedLatency * 100, 1, MidpointRounding.AwayFromZero)}%", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        
+                        if (overload <= 20)
+                            g.DrawString($"Latency overload: {overload}%", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        else if(overload > 20 && overload <= 60)
+                            g.DrawString($"Latency overload: {overload}%", new Font("Arial", 10), Brushes.Yellow, new PointF(10, y = y + increment));
+                        else
+                            g.DrawString($"Latency overload: {overload}%", new Font("Arial", 10), Brushes.Red, new PointF(10, y = y + increment));
+
                         g.DrawString($"Queued frames: {queueCount}", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        _watchdog.Reset();
                     }
                     catch (Exception ex)
                     {
@@ -160,8 +193,6 @@ namespace OptiSort
         }
 
         
-
-
         /// <summary>
         /// Rendering image 
         /// </summary>
@@ -196,23 +227,6 @@ namespace OptiSort
             }
         }
 
-
-
-        /// <summary>
-        /// Creates bitmap placeholder to instance an empty pictureBox
-        /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
-        private Bitmap CreateTransparentBitmap(int width, int height)
-        {
-            var bitmap = new Bitmap(width, height);
-            using (var g = Graphics.FromImage(bitmap))
-            {
-                g.Clear(Color.Transparent);
-            }
-            return bitmap;
-        }
 
         private void CalculateLatency(DateTime rxTimestamp, DateTime msgTimestamp)
         {

@@ -363,7 +363,7 @@ namespace OptiSort
         private void btnMqttDisconnect_Click(object sender, EventArgs e)
         {
             // async call, no need for handling cursor
-            _ = _manager.DisconnectMqttClient(Properties.Settings.Default.mqtt_client);
+            _ = _manager.DisconnectMqttClient();
         }
 
 

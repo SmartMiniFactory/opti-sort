@@ -98,18 +98,17 @@ namespace OptiSort.userControls
                 // MQTT
                 if (settingName.IndexOf("mqtt", StringComparison.OrdinalIgnoreCase) >= 0 && _manager.StatusMqttClient)
                 {
-                    string clientID = _manager.MqttClient.GetConnectedClientName();
 
                     if (settingName.IndexOf("client", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        _ = DisconnectAsync(clientID);
+                        _ = DisconnectAsync();
                         _ = ConnectAsync();
                     }
 
                     else if (settingName.IndexOf("topic", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        _manager.UnsubscribeMqttTopic(clientID, _oldValue);
-                        _manager.SubscribeMqttTopic(clientID, newValue);   
+                        _manager.UnsubscribeMqttTopic(_oldValue);
+                        _manager.SubscribeMqttTopic(newValue);   
                     }
                 }
 
@@ -151,7 +150,7 @@ namespace OptiSort.userControls
 
                 // Disconnect services before changing 
                 if (_manager.StatusMqttClient)
-                    _ = DisconnectAsync(Properties.Settings.Default.mqtt_client);
+                    _ = DisconnectAsync();
 
                 if (_manager.StatusFlexibowl)
                     _manager.DisconnectFlexibowl();
@@ -197,12 +196,12 @@ namespace OptiSort.userControls
         }
 
 
-        public async Task DisconnectAsync(string client)
+        public async Task DisconnectAsync()
         {
             try
             {
                 _mqttClientDisconnected = false; 
-                await _manager.DisconnectMqttClient(client);
+                await _manager.DisconnectMqttClient();
                 _mqttClientDisconnected = true;
             }
             catch (Exception ex)
@@ -221,7 +220,7 @@ namespace OptiSort.userControls
 
             try
             {
-                _manager.ConnectMQTTClient();
+                _ = _manager.ConnectMQTTClient();
             }
             catch (Exception ex)
             {

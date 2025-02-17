@@ -328,7 +328,7 @@ namespace OptiSort
 
                 foreach (string topic in topics)
                 {
-                    SubscribeMqttTopic(mqttClientName, topic);
+                    SubscribeMqttTopic(topic);
                 }
 
                 return true;
@@ -340,51 +340,55 @@ namespace OptiSort
             }
         }
 
-        public async Task<bool> DisconnectMqttClient(string clientName)
+        public async Task<bool> DisconnectMqttClient()
         {
-            Log("Trying to destroy MQTT client", false, false);
+            string mqttClientName = Properties.Settings.Default.mqtt_client;
+            Log($"Trying to destroy MQTT client {mqttClientName}", false, false);
 
-            Task<bool> destroyClient = MqttClient.DestroyClient(clientName);
+            Task<bool> destroyClient = MqttClient.DestroyClient(mqttClientName);
             if (await destroyClient)
             {
                 StatusMqttClient = false;
-                Log($"MQTT client '{clientName}' destroyed", false, true);
+                Log($"MQTT client '{mqttClientName}' destroyed", false, true);
                 return true;
             }
             else
             {
-                Log($"Error destroying '{clientName}'", true, false);
+                Log($"Error destroying '{mqttClientName}'", true, false);
                 return false;
             }
         }
 
-        public async void SubscribeMqttTopic(string client, string topic)
+        public async void SubscribeMqttTopic(string topic)
         {
-            bool subscribed = await MqttClient.SubscribeClientToTopic(client, topic);
+            string mqttClientName = Properties.Settings.Default.mqtt_client;
+            bool subscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topic);
             if (subscribed)
-                Log($"{client} subscribed to {topic}", false, true);
+                Log($"{mqttClientName} subscribed to {topic}", false, true);
             else
-                Log($"Unable subscribing {client} to {topic}", true, false);
+                Log($"Unable subscribing {mqttClientName} to {topic}", true, false);
         }
 
-        public async void UnsubscribeMqttTopic(string client, string topic)
+        public async void UnsubscribeMqttTopic(string topic)
         {
-            bool unsubscribed = await MqttClient.UnsubscribeClientFromTopic(client, topic);
+            string mqttClientName = Properties.Settings.Default.mqtt_client;
+            bool unsubscribed = await MqttClient.UnsubscribeClientFromTopic(mqttClientName, topic);
             if (unsubscribed)
-                Log($"{client} unsubscribed to {topic}", false, true);
+                Log($"{mqttClientName} unsubscribed to {topic}", false, true);
             else
-                Log($"Unable unsubscribing {client} to {topic}", true, false);
+                Log($"Unable unsubscribing {mqttClientName} to {topic}", true, false);
         }
 
         public void UpdateStreamingTopic(string newTopic)
         {
             if (StatusMqttClient)
             {
-                UnsubscribeMqttTopic(Properties.Settings.Default.mqtt_client, StreamingTopic);
+                UnsubscribeMqttTopic(StreamingTopic);
                 StreamingTopic = newTopic;
-                SubscribeMqttTopic(Properties.Settings.Default.mqtt_client, StreamingTopic);
+                SubscribeMqttTopic(StreamingTopic);
             }
         }
+
 
         #endregion
 
