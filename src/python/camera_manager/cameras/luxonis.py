@@ -3,7 +3,7 @@ DESCRIPTION:
 This file is provided with the specific functionalities to interact with the OAK-D SR PoE/CAD camera by LUXONIS
 """
 
-from cameras.base_camera import BaseCamera
+from python.camera_manager.cameras.base_camera import BaseCamera
 import depthai as dai
 
 
@@ -17,30 +17,42 @@ class Luxonis(BaseCamera):
         super().__init__(camera_id, config_path)
         self.pipeline = dai.Pipeline()  # DepthAI pipeline for configuring streams
         self.device = None  # Luxonis device object
-        self.cam_rgb = None  # RGB camera node
-        self.xout_video = None  # Output stream for RGB video
-        self.rgb_queue = None  # Queue to read RGB frames
+        self.qLeft = None # Left camera monovision streaming
+        self.qRight = None # right camera monovision streaming
 
     def initialize(self):
         """
         Set up the DepthAI pipeline and initialize the Luxonis device.
         """
         try:
-            # Create an RGB camera node
-            self.cam_rgb = self.pipeline.create(dai.node.ColorCamera)
-            self.cam_rgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-            self.cam_rgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+            # Define sources and outputs
+            monoLeft = self.pipeline.create(dai.node.MonoCamera)
+            monoRight = self.pipeline.create(dai.node.MonoCamera)
+            xoutLeft = self.pipeline.create(dai.node.XLinkOut)
+            xoutRight = self.pipeline.create(dai.node.XLinkOut)
 
-            # Configure video output
-            self.xout_video = self.pipeline.create(dai.node.XLinkOut)
-            self.xout_video.setStreamName("video")
-            self.cam_rgb.video.link(self.xout_video.input)
+            xoutLeft.setStreamName('left')
+            xoutRight.setStreamName('right')
 
-            # Initialize the device with the pipeline
+            # Properties
+            monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+            monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+            monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+            monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+
+            # Linking
+            monoRight.out.link(xoutRight.input)
+            monoLeft.out.link(xoutLeft.input)
+
+            # Create the device AFTER defining the full pipeline
             self.device = dai.Device(self.pipeline)
-            self.rgb_queue = self.device.getOutputQueue(name="video", maxSize=4, blocking=False)
 
-            print(f"Luxonis camera initialized successfully! Using device: {dai.DeviceBase.getCameraSensorNames()}")
+            # Output queues will be used to get the grayscale frames from the outputs defined above
+            self.qLeft = self.device.getOutputQueue(name="left", maxSize=4, blocking=False)
+            self.qRight = self.device.getOutputQueue(name="right", maxSize=4, blocking=False)
+
+            print(f"Luxonis camera initialized successfully! Using device: {self.device.getCameraSensorNames()}")
+
         except Exception as e:
             raise RuntimeError(f"Failed to initialize Luxonis camera: {e}")
 
@@ -49,15 +61,7 @@ class Luxonis(BaseCamera):
         Configure the Luxonis camera using settings from the provided config dictionary.
         """
         try:
-            # Apply configuration parameters from `self.config`
-            if "fps" in self.config:
-                self.cam_rgb.setFps(self.config["fps"])
-            if "color_order" in self.config:
-                self.cam_rgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB if self.config[
-                    "color_order"] == "RGB" else dai.ColorCameraProperties.ColorOrder.BGR)
-            if "resolution" in self.config:
-                width, height = self.config["resolution"]
-                self.cam_rgb.setVideoSize(width, height)
+
 
             print("Luxonis camera - configured successfully!")
         except Exception as e:
@@ -68,21 +72,17 @@ class Luxonis(BaseCamera):
         Start streaming images from the Luxonis camera.
         """
         try:
-            if not self.rgb_queue:
-                raise RuntimeError("RGB queue is not initialized. Call `initialize()` first.")
+
+            self.qLeft = self.device.getOutputQueue(name="left", maxSize=4, blocking=False)
+            self.qRight = self.device.getOutputQueue(name="right", maxSize=4, blocking=False)
+            print("Device connected. Queues initialized.")
+
+
+
             print("Luxonis camera - acquisition started successfully!")
         except Exception as e:
             raise RuntimeError(f"Failed to start streaming for Luxonis camera: {e}")
 
-    def acquisition_stop(self):
-        """
-        Stop the Luxonis camera device.
-        """
-        try:
-            self.device.close()
-            print("Luxonis camera - acquisition stopped successfully!")
-        except Exception as e:
-            raise RuntimeError(f"Failed to stop streaming for Luxonis camera: {e}")
 
     def capture_frame(self):
         """
@@ -90,8 +90,21 @@ class Luxonis(BaseCamera):
         :return: Captured frame as a NumPy array.
         """
         try:
-            in_video = self.rgb_queue.get()  # Get a frame from the video stream
-            frame = in_video.getCvFrame()  # Convert the frame to OpenCV format (NumPy array)
-            return frame
+            inLeft = self.qLeft.tryGet() if self.qLeft else None
+            inRight = self.qRight.tryGet() if self.qRight else None
+            return inLeft, inRight
+
         except Exception as e:
             raise RuntimeError(f"Failed to capture frame from Luxonis camera: {e}")
+
+    def acquisition_stop(self):
+        """
+        Stop the Luxonis camera device.
+        """
+        try:
+            if self.device:
+                del self.device
+            print("Luxonis camera - device disconnected!")
+        except Exception as e:
+            raise RuntimeError(f"Failed to stop streaming for Luxonis camera: {e}")
+

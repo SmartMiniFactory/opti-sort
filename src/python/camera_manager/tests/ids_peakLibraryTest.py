@@ -24,10 +24,12 @@ def open_camera():
 
         # Return if no device was found
         if device_manager.Devices().empty():
+            print("No device found")
             return False
 
         # open the first available device in the device manager's device list
         device_count = device_manager.Devices().size()
+
         for i in range(device_count):
             if device_manager.Devices()[i].IsOpenable():
                 m_device = device_manager.Devices()[i].OpenDevice(peak.DeviceAccessType_Control)

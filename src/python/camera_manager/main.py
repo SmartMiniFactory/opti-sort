@@ -61,6 +61,9 @@ def im2json(imdata):
 async def main():
     global testing, webcam, ids_camera, basler_camera, luxonis_camera, mqtt_client
 
+
+    #TODO: change topics from static to dynamic (parsing XML)
+
     if testing:
         cameras = [webcam, webcam, webcam]
         topics = [
@@ -69,11 +72,11 @@ async def main():
             "optisort/luxonis/stream",
         ]
     else:
-        cameras = [ids_camera, basler_camera, luxonis_camera]
+        cameras = [basler_camera, luxonis_camera, ids_camera]
         topics = [
-            "optisort/ids/stream",
             "optisort/basler/stream",
             "optisort/luxonis/stream",
+            "optisort/ids/stream",
         ]
 
     # Create and run tasks for each topic independently
@@ -95,26 +98,45 @@ async def capture_and_publish(camera, topic, client, idx):
 
     try:
         while True:
+
             # Calculate the next publication time (synchronized to a 1-second clock)
-            next_publish_time = time.time() + 0.0005
+            next_publish_time = time.time() + 0.5
 
-            # Capture frame
-            if testing:
-                ret, frame = camera.read()
-                if not ret:
-                    print(f"Failed to capture frame from camera for topic {topic}")
-                    break
-            else:
-                frame = camera.capture_frame()
+            try:
 
-            # Show frame (optional)
-            # cv2.imshow(f"Camera frame - {topic}", frame)
+                if testing:
+                    ret, frame = camera.read()
+                    if not ret:
+                        print(f"Failed to capture frame from camera for topic {topic}")
+                        continue  # Skip this camera and continue with the next loop iteration
 
-            # Encode the frame
-            encoded_frame = cv2.imencode("." + encoding, frame, encode_param)[1].tobytes()
+                else:
+                    # TODO: change topics to dynamic
 
-            # Publish frame to MQTT topic
-            await client.publish(topic, im2json(encoded_frame))
+                    if topic == 'optisort/luxonis/stream':
+                        left, right = camera.capture_frame()
+                        frame = None
+                        if left is not None:
+                            frame = left.getCvFrame()
+                        elif right is not None:
+                            frame = right.getCvFrame()
+
+                    else:
+                        frame = camera.capture_frame()
+
+                # Show frame (optional)
+                # cv2.imshow(f"Camera frame - {topic}", frame)
+
+                # Encode the frame
+                if frame is not None:
+                    encoded_frame = cv2.imencode("." + encoding, frame, encode_param)[1].tobytes()
+
+                    # Publish frame to MQTT topic
+                    await client.publish(topic, im2json(encoded_frame))
+
+            except Exception as e:
+                print(f"Error capturing frame from camera for topic {topic}: {e}")
+                continue  # Skip the current iteration and continue with the next
 
             # Quit if 'q' is pressed
             if keyboard.is_pressed("q"):
@@ -130,6 +152,7 @@ async def capture_and_publish(camera, topic, client, idx):
         # Clean up resources
         cv2.destroyAllWindows()
         print(f"Stopped capture for topic {topic}")
+
 
 # -------------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------------
@@ -189,7 +212,7 @@ if __name__ == "__main__":
         print("Initializing IDS camera...")
         ids_camera = Ids(camera_id="ids", config_path=ids_configfile)
         ids_camera.initialize()
-        # ids_camera.configure()
+        ids_camera.configure()
         ids_camera.set_roi(0, 0, 1280, 1024)
         ids_camera.acquisition_start()
 
@@ -203,6 +226,7 @@ if __name__ == "__main__":
         print("Initializing Luxonis camera...")
         luxonis_camera = Luxonis(camera_id="luxonis", config_path=luxonis_configfile)
         luxonis_camera.initialize()
+        # luxonis_camera.configure()
         luxonis_camera.acquisition_start()
 
     # Instance image processor class

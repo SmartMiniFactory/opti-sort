@@ -3,7 +3,7 @@ DESCRIPTION:
 This file is provided with the specific functionalities to interact with the UI-5240CP-M-G camera by IDS
 """
 
-from cameras.base_camera import BaseCamera
+from python.camera_manager.cameras.base_camera import BaseCamera
 from ids_peak import ids_peak
 import numpy as np
 from ids_peak_ipl import ids_peak_ipl
@@ -57,8 +57,10 @@ class Ids(BaseCamera):
             if self.data_stream.empty():
                 raise RuntimeError("No Data Stream available")
 
+
             self.data_stream = self.device.DataStreams()[0].OpenDataStream()
             print(f"IDS camera initialized successfully! Using device: {self.device.DisplayName()}")
+
             return True
 
         except Exception as e:
@@ -90,21 +92,31 @@ class Ids(BaseCamera):
 
             node_map.FindNode("AcquisitionMode").SetValue("Continuous")"""
 
-            # Determine the current entry of UserSetDefault (str)
-            value = self.node_map.FindNode("UserSetDefault").CurrentEntry().SymbolicValue()
-            # Get a list of all available entries of UserSetDefault
-            allEntries = self.node_map.FindNode("UserSetDefault").Entries()
-            availableEntries = []
-            for entry in allEntries:
-                if (entry.AccessStatus() != ids_peak.NodeAccessStatus_NotAvailable
-                        and entry.AccessStatus() != ids_peak.NodeAccessStatus_NotImplemented):
-                    availableEntries.append(entry.SymbolicValue())
+            # Set camera to continuous acquisition mode
+            self.node_map.FindNode("AcquisitionMode").SetCurrentEntry("Continuous")
 
-             # Set UserSetDefault to "Default" (str)
-            self.node_map.FindNode("UserSetDefault").SetCurrentEntry("Default")
+            # Disable trigger mode
+
+            self.node_map.FindNode("TriggerMode").SetCurrentEntry("Off")
+            # self.node_map.FindNode("TriggerSelector").SetCurrentEntry("AcquisitionStart")
+            self.node_map.FindNode("AcquisitionFrameRate").SetValue(17.2)
+
+
+            # Enable auto exposure
+            # self.node_map.FindNode("ExposureAuto").SetCurrentEntry("Off")
+
+            # Enable auto gain
+            # self.node_map.FindNode("GainAuto").SetCurrentEntry("Off")
+
+            # Optionally, set the frame rate if needed
+            # self.node_map.FindNode("AcquisitionFrameRate").SetValue(30)  # Set to desired frame rate (e.g., 30 FPS)
 
             # TODO: maybe is possible to import/export directly some .cset files
             # https://www.1stvision.com/cameras/IDS/IDS-manuals/en/program-save-cset-file.html
+
+            # List all available nodes in the NodeMap
+            # for node in self.node_map.Nodes():
+                # print(node.Name())
 
             print(f"IDS camera - configured successfully!")
         except Exception as e:
@@ -206,8 +218,9 @@ class Ids(BaseCamera):
 
             # Wait for the buffer to be finished (timeout of 5000ms)
             buffer = self.data_stream.WaitForFinishedBuffer(5000)
+            if buffer is None:
+                raise RuntimeError("No buffer received from IDS camera (timeout or issue).")
 
-            # Create image from the buffer using the IDS Peak IPL library
             image = ids_peak_ipl.Image.CreateFromSizeAndBuffer(
                 buffer.PixelFormat(),
                 buffer.BasePtr(),
@@ -216,13 +229,16 @@ class Ids(BaseCamera):
                 buffer.Height()
             )
 
-            # Convert image to BGR format
             image = image.ConvertTo(ids_peak_ipl.PixelFormatName_BGRa8, ids_peak_ipl.ConversionMode_Fast)
-
-            # Convert image to NumPy array for OpenCV
             img_array = image.get_numpy()
 
-            # Queue the buffer again for reuse
+            if img_array is None:
+                raise RuntimeError("Image conversion failed, got None.")
+
+            # Ensure correct format for OpenCV
+            img_array = img_array.astype(np.uint8)
+            img_array = img_array[:, :, :3]  # Remove alpha channel
+
             self.data_stream.QueueBuffer(buffer)
 
             return img_array
