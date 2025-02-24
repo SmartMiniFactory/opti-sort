@@ -457,7 +457,8 @@ namespace OptiSort
                 }
             }
 
-            Console.WriteLine("Ids queue: " + _idsQueue.Count + "; Basler queue: " + _baslerQueue.Count + "; Luxonis queue: " + _luxonisQueue.Count);
+            // Uncomment below to debug queues
+            // Console.WriteLine("Ids queue: " + _idsQueue.Count + "; Basler queue: " + _baslerQueue.Count + "; Luxonis queue: " + _luxonisQueue.Count);
             BitmapQueued?.Invoke(topic); // notify subscribers about queuing a bitmap
         }
 
@@ -478,6 +479,7 @@ namespace OptiSort
 
         private void ResetQueues()
         {
+            Console.Write("Resetting queues");
             while (_idsQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
             while (_baslerQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
             while (_luxonisQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)

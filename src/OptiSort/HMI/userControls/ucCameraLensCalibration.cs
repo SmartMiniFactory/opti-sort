@@ -58,7 +58,8 @@ namespace OptiSort.userControls
             _manager.TempFolderWatcherResumed += OnWatcherResumed;
 
             _manager.PropertyChanged += OnPropertyChange;
-            btn_acquire.Enabled = _manager.StatusMqttClient;
+ 
+            RefreshBottomControls();
 
         }
 
@@ -130,66 +131,75 @@ namespace OptiSort.userControls
 
         private void SaveShots(string topic)
         {
-            Invoke(new Action(() =>
+            if (_manager.RequestScreenshots) // this check is needed because the event is not unsubscribed immediately and late coming triggers may generate additional screenshots
             {
-                int earliestAvailableIndex = GetEarliestAvailableIndex();
 
-                string prefix = string.Empty;
-                FlowLayoutPanel panel = null;
-                Bitmap image = null;
-
-                if (topic == Properties.Settings.Default.mqtt_topic_idsStream && _idsShot == false)
+                Invoke(new Action(() =>
                 {
-                    if (_manager._idsQueue.TryDequeue(out var item))
+                    int imageIndex = GetEarliestAvailableIndex();
+
+                    string prefix = string.Empty;
+                    FlowLayoutPanel panel = null;
+                    Bitmap image = null;
+
+                    if (topic == Properties.Settings.Default.mqtt_topic_idsStream && _idsShot == false)
                     {
-                        image = item.Frame;
-                        _idsShot = true;
-                    }else return; // in case queue is empty, saving cannot continue because bitmaps cannot be null to be saved
+                        if (_manager._idsQueue.TryDequeue(out var item))
+                        {
+                            image = item.Frame;
+                            _idsShot = true;
+                        }
+                        else return; // in case queue is empty, saving cannot continue because bitmaps cannot be null to be saved
 
-                    prefix = "ids";
-                    panel = flp_ids;
-                }
-                else if (topic == Properties.Settings.Default.mqtt_topic_baslerStream && _baslerShot == false)
-                {
-                    if (_manager._baslerQueue.TryDequeue(out var item))
+                        prefix = "ids";
+                        panel = flp_ids;
+                    }
+                    else if (topic == Properties.Settings.Default.mqtt_topic_baslerStream && _baslerShot == false)
                     {
-                        image = item.Frame;
-                        _baslerShot = true;
-                    }else return;
+                        if (_manager._baslerQueue.TryDequeue(out var item))
+                        {
+                            image = item.Frame;
+                            _baslerShot = true;
+                        }
+                        else return;
 
-                    prefix = "basler";
-                    panel = flp_basler;
-                }
-                else if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream && _luxonisShot == false)
-                {
-                    if (_manager._luxonisQueue.TryDequeue(out var item))
+                        prefix = "basler";
+                        panel = flp_basler;
+                    }
+                    else if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream && _luxonisShot == false)
                     {
-                        image = item.Frame;
-                        _luxonisShot = true;
-                    }else return;
- 
-                    prefix = "luxonis";
-                    panel = flp_luxonis;
-                }
+                        if (_manager._luxonisQueue.TryDequeue(out var item))
+                        {
+                            image = item.Frame;
+                            _luxonisShot = true;
+                        }
+                        else return;
 
-                if (!string.IsNullOrEmpty(prefix) && panel != null)
-                {
-                    string filename = $"{prefix}_CalibrationImage_{earliestAvailableIndex.ToString("D2")}";
-                    _manager.SaveBitmapAsFile(image, filename);
-                    AddThumbnailToColumn(panel, image, filename);
-                }
+                        prefix = "luxonis";
+                        panel = flp_luxonis;
+                    }
 
-                if(_idsShot && _baslerShot && _luxonisShot)
-                {
-                    _idsShot = false;
-                    _luxonisShot = false;
-                    _baslerShot = false;
-                    _manager.RequestScreenshots = false;
-                    _manager.BitmapQueued -= SaveShots;
-                    Cursor = Cursors.Default;
-                    Shots++;
-                }
-            }));
+                    if (!string.IsNullOrEmpty(prefix) && panel != null)
+                    {
+                        string filename = $"{prefix}_CalibrationImage_{imageIndex.ToString("D2")}";
+                        _manager.SaveBitmapAsFile(image, filename);
+                        AddThumbnailToColumn(panel, image, filename);
+                    }
+
+                    if (_idsShot && _baslerShot && _luxonisShot)
+                    {
+                        _manager.BitmapQueued -= SaveShots;
+                        _manager.RequestScreenshots = false;
+
+                        _idsShot = false;
+                        _luxonisShot = false;
+                        _baslerShot = false;
+
+                        Cursor = Cursors.Default;
+                        Shots++;
+                    }
+                }));
+            }
         }
 
 
@@ -199,14 +209,13 @@ namespace OptiSort.userControls
         /// <returns>The earliest available numeric index.</returns>
         private int GetEarliestAvailableIndex()
         {
-
             if (!Directory.Exists(_manager.TempFolder))
                 return 1; // Start from 1 if the directory does not exist
 
             var existingFiles = Directory.GetFiles(_manager.TempFolder, "*_CalibrationImage_*.bmp");
 
             // Extract indices from filenames
-            var indices = existingFiles
+            var indexCounts = existingFiles
                 .Select(file =>
                 {
                     string fileName = Path.GetFileNameWithoutExtension(file);
@@ -218,26 +227,20 @@ namespace OptiSort.userControls
                     return -1; // Invalid index
                 })
                 .Where(index => index > 0) // Filter out invalid indices
-                .OrderBy(index => index) // Sort in ascending order
-                .ToList();
+                .GroupBy(index => index) // Count occurrences
+                .ToDictionary(g => g.Key, g => g.Count());
 
-            // If no files exist, start with index 1
-            if (indices.Count == 0)
-                return 1;
-
-            // Find the first missing index (gap)
-            for (int i = 1; i <= indices.Count + 1; i++)
+            // Start checking from index 1
+            int i = 1;
+            while (true)
             {
-                if (!indices.Contains(i))
-                {
-                    // Return the first missing index
-                    return i;
-                }
-            }
+                if (!indexCounts.ContainsKey(i) || indexCounts[i] < 3)
+                    return i; // Return the first index that has fewer than 3 occurrences
 
-            // If no gaps, return the next index after the largest one
-            return indices.Max() + 1;
+                i++; // Move to the next index
+            }
         }
+
 
 
         /// <summary>
@@ -246,6 +249,7 @@ namespace OptiSort.userControls
         /// <param name="pythonOutput"></param>
         private void CalibrationResult(string pythonOutput)
         {
+            Console.WriteLine("py: " + pythonOutput);
 
             _manager.PauseFileWatcher();
 
@@ -275,6 +279,7 @@ namespace OptiSort.userControls
                     _manager.ClearTempDirectory();
                     RefreshCalibrationTimestamp();
                     MessageBox.Show($"CALIBRATION SUCCEDED!");
+                    _manager.Log("Lens calibration successfull", false, true);
                 }
                 else
                 {
@@ -296,11 +301,13 @@ namespace OptiSort.userControls
 
                     Shots -= badImages_all.Count;
                     MessageBox.Show($"BAD IMAGES DETECTED!\nCalibration failed because the chess board was not found in {badImages_all.Count} triplets. These were deleted. Please proceed to retaking the images again.");
+                    _manager.Log("Bad images detected! Please retake some screenshots", false, false);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error parsing JSON: {ex.Message}");
+                _manager.Log("Error parsing calibration result", true, false);
             }
 
             _manager.ResumeFileWatcher();
@@ -377,8 +384,11 @@ namespace OptiSort.userControls
         /// </summary>
         private void LoadExistingThumbnails()
         {
+
             if (!Directory.Exists(_manager.TempFolder))
                 return;
+
+            Shots = 0;
 
             // Clear the panels before repopulating
             flp_ids.Controls.Clear();
@@ -592,7 +602,6 @@ namespace OptiSort.userControls
             flp_ids.Controls.Clear();
             flp_luxonis.Controls.Clear();
             flp_basler.Controls.Clear();
-            Shots = 0;
 
             LoadExistingThumbnails();
 
@@ -607,7 +616,7 @@ namespace OptiSort.userControls
             lbl_shots.Text = $"{Shots}/15";
             btn_calibrate.Enabled = Shots == 15;
             btn_clear.Enabled = Shots > 0;
-            btn_acquire.Enabled = _manager.StatusMqttClient == true && _manager.RequestScreenshots == false && _shots < 15;
+            btn_acquire.Enabled = _manager.StatusMqttClient == true && _manager.RequestScreenshots == false && Shots < 15;
         }
 
     }
