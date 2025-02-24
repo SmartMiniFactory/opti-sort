@@ -605,10 +605,9 @@ namespace OptiSort.userControls
         private void RefreshBottomControls()
         {
             lbl_shots.Text = $"{Shots}/15";
-            btn_acquire.Enabled = Shots < 15;
             btn_calibrate.Enabled = Shots == 15;
             btn_clear.Enabled = Shots > 0;
-            btn_acquire.Enabled = _manager.StatusMqttClient == true && _manager.RequestScreenshots == false;
+            btn_acquire.Enabled = _manager.StatusMqttClient == true && _manager.RequestScreenshots == false && _shots < 15;
         }
 
     }

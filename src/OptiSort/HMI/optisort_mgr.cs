@@ -449,7 +449,7 @@ namespace OptiSort
                 {
                     ConcurrentQueue<(Bitmap, DateTime, DateTime)> nonStreamingQueue = GetQueueForTopic(topic);
                     
-                    if(nonStreamingQueue.Count > 0)
+                    if(nonStreamingQueue.Count > 0 || RequestScreenshots == true)
                         nonStreamingQueue.TryDequeue(out _);
 
                     nonStreamingQueue.Enqueue((image, messageTimestamp, DateTime.Now)); 
