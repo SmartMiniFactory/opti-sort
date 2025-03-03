@@ -62,6 +62,8 @@ class Luxonis(BaseCamera):
         """
         try:
 
+            print(self.pipeline.getCalibrationData())
+
 
             print("Luxonis camera - configured successfully!")
         except Exception as e:

@@ -226,7 +226,7 @@ if __name__ == "__main__":
         print("Initializing Luxonis camera...")
         luxonis_camera = Luxonis(camera_id="luxonis", config_path=luxonis_configfile)
         luxonis_camera.initialize()
-        # luxonis_camera.configure()
+        luxonis_camera.configure()
         luxonis_camera.acquisition_start()
 
     # Instance image processor class
