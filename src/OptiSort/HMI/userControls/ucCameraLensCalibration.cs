@@ -22,6 +22,7 @@ namespace OptiSort.userControls
         private bool _idsShot = false;
         private bool _luxonisShot = false;
         private bool _baslerShot = false;
+        private int _pythonProcessId;
 
         public int Shots
         {
@@ -47,22 +48,28 @@ namespace OptiSort.userControls
             this.Load += ucLensDistortionCalibration_Load; // Attach the Load event to call the method after the control is fully initialized
         }
 
+        // Perform a series of actions on form loading
         private void ucLensDistortionCalibration_Load(object sender, EventArgs e)
         {
             RefreshCalibrationTimestamp();
             LoadExistingThumbnails();
 
-            _manager.SetupTempFolderWatcher();
+            _manager.SetupTempFolderWatcher(); // create file watcher
 
-            _manager.TempFileDeleted += OnTempFileDeleted;
-            _manager.TempFolderWatcherResumed += OnWatcherResumed;
+            _manager.TempFileDeleted += OnTempFileDeleted; // Subscribe to manager's file deletion event from TEMP folder
+            _manager.TempFolderWatcherResumed += OnWatcherResumed; // Subscribe to manager's file watcher resume event
 
-            _manager.PropertyChanged += OnPropertyChange;
- 
-            RefreshBottomControls();
+            _manager.PropertyChanged += OnPropertyChange; // Subscribe to manager's propery changed event
+
+            RefreshBottomControls(); 
 
         }
 
+        /// <summary>
+       /// Refresh pushbuttons based on manager's properties status
+       /// </summary>
+       /// <param name="sender"></param>
+       /// <param name="e"></param>
         private void OnPropertyChange(object sender, PropertyChangedEventArgs e)
         {
             if(e.PropertyName == nameof(_manager.StatusMqttClient) || e.PropertyName == nameof(_manager.RequestScreenshots))
@@ -71,20 +78,51 @@ namespace OptiSort.userControls
             }
         }
 
+        /// <summary>
+        /// If an image gets deleted from the folder, the other two are also deleted and the flow panels are updated
+        /// </summary>
         private void OnTempFileDeleted()
         {
             DeleteIncompleteTriplets();
             RefreshFlowPanels();
         }
 
+        /// <summary>
+        /// Reload flow panels on file watcher resume to catch up with current folder condition
+        /// </summary>
         private void OnWatcherResumed()
         {
             LoadExistingThumbnails();
         }
 
+        /// <summary>
+        /// Launches calibration output receival
+        /// </summary>
+        /// <param name="processID"></param>
+        /// <param name="output"></param>
+        private void PythonOutputReceived(int processID, string output)
+        {
+            if(processID == _pythonProcessId)
+                CalibrationResult(output);
+        }
+
+        /// <summary>
+        /// Logs python error and shows msgbox
+        /// </summary>
+        /// <param name="processID"></param>
+        /// <param name="output"></param>
+        private void PythonErrorReceived(int processID, string output)
+        {
+            if (processID == _pythonProcessId)
+            {
+                _manager.Log("Python camera calibration file threw an error!", true, false);
+                MessageBox.Show("Python camera calibration file threw an error", "Python error!");
+            }
+        }
+
 
         // ----------------------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------------------
+        // ------------------------------------ PUSHBUTTONS ---------------------------------------
         // ----------------------------------------------------------------------------------------
 
         private void btn_acquire_Click(object sender, EventArgs e)
@@ -100,20 +138,25 @@ namespace OptiSort.userControls
             _manager.BitmapQueued += SaveShots;
         }
 
+
         private void btn_calibrate_Click(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
             _manager.Log("Calibration process in progress...", false, false);
 
             string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
-            string result = _manager.RunPythonScript(scriptPath);
-            CalibrationResult(result);
+            
+            
+            _pythonProcessId = _manager.ExecuteScript(scriptPath);
+            _manager.OnOutputReceived += PythonOutputReceived;
+            _manager.OnErrorReceived += PythonErrorReceived;
         }
 
         private void btn_clear_Click(object sender, EventArgs e)
         {
             _manager.ClearTempDirectory();
         }
+
 
         private void btn_home_Click(object sender, EventArgs e)
         {

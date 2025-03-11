@@ -1,6 +1,7 @@
 ﻿using Ace.Core.Util;
 using Ace.UIBuilder.Client.Controls.Tools.WindowsForms;
 using FlexibowlLibrary;
+using OptiSort.Classes;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -21,12 +22,25 @@ namespace OptiSort
 
     internal class optisort_mgr : INotifyPropertyChanged
     {
+        // Services
         public MQTT MqttClient { get; set; }
         public Cobra600 Cobra600 { get; set; }
         public Flexibowl Flexibowl { get; set; }
 
 
-        // status
+        // Python runner
+        private Dictionary<int, PythonProcessRunner> _runners;
+        private Dictionary<int, string> _activeProcesses;
+
+
+        // MQTT-specific
+        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> _idsQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
+        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> _baslerQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
+        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> _luxonisQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
+        private DateTime lastNonStreamingUpdate = DateTime.MinValue;
+
+
+        // Status
         public event PropertyChangedEventHandler PropertyChanged; // declare propertyChanged event (required by the associated interface)
         private bool _statusScara = false;
         private bool _statusScaraEmulation = true;
@@ -35,8 +49,6 @@ namespace OptiSort
         private string _streamingTopic = null;
         private bool _requestScreenshots = false;
 
-
-        // custom defined properties to trigger events on status changed
         public bool StatusScara
         {
             get { return _statusScara; }
@@ -115,27 +127,24 @@ namespace OptiSort
         }
 
 
-        // events
+        // Events
         public event Action<Control> NewUserControlRequested; // Event to notify subscribers
         public event Action TempFileDeleted;
         public event Action TempFolderWatcherResumed;
         public event Action<string> BitmapQueued;
+        public event Action<int, string> OnOutputReceived; // python script generates an output 
+        public event Action<int, string> OnErrorReceived; // python script generates an error
+        public event Action<int, bool> OnExecutionTerminated; // python script ended
 
 
-        // MQTT
-        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> _idsQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
-        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> _baslerQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
-        public ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)> _luxonisQueue = new ConcurrentQueue<(Bitmap Frame, DateTime messageTimestamp, DateTime receptionTimestamp)>();
-        private DateTime lastNonStreamingUpdate = DateTime.MinValue;
-
-        // file management
-        public string TempFolder { get; private set; } = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp"));
-        public string ConfigFolder { get; private set; } = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Config"));
-
+        // File management
         public FileSystemWatcher TempFolderWatcher;
         private bool _isFileWatcherPaused = false;
 
+        public string TempFolder { get; private set; } = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp"));
+        public string ConfigFolder { get; private set; } = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Config"));
 
+        
         // Logging
         public event Action<LogEntry> LogEvent; // Event to notify subscribers
         public class LogEntry
@@ -146,6 +155,9 @@ namespace OptiSort
             public override string ToString() => Message; // Fallback for ListBox's default behavior
         }
 
+        // -----------------------------------------------------------------------------------
+        // ---------------------------------- CONSTRUCTOR -------------------------------------
+        // -----------------------------------------------------------------------------------
 
         public optisort_mgr()
         {
@@ -170,18 +182,31 @@ namespace OptiSort
             // Instance flexibowl class
             string flexibowlIP = Properties.Settings.Default.flexibowl_IP;
             Flexibowl = new Flexibowl(flexibowlIP);
+
+            // Instance class dedicated to running python files
+            _activeProcesses = new Dictionary<int, string>();
+            _runners = new Dictionary<int, PythonProcessRunner>();
+
         }
 
 
+        
         private void OnPropertyUpdate(object sender, PropertyChangedEventArgs e)
         {
+            // This method is triggered anytime one of the properties defined under "status" gets updated
             if (e.PropertyName == nameof(StreamingTopic))
                 ResetQueues();
+
+            // add stuff here...
         }
 
-        public void RequestNewUcLoading(Control control)
+        /// <summary>
+        /// User controls can request loading another user control by calling this method
+        /// </summary>
+        /// <param name="control"></param>
+        public void RequestNewUcLoading(Control uc)
         {
-            NewUserControlRequested?.Invoke(control);
+            NewUserControlRequested?.Invoke(uc);
         }
 
         // -----------------------------------------------------------------------------------
@@ -192,6 +217,10 @@ namespace OptiSort
 
         // TODO: is possible to use async?
 
+        /// <summary>
+        /// Connects to the SCARA robot (ACE software should be running)
+        /// </summary>
+        /// <returns></returns>
         public bool ConnectScara()
         {
             // check if ACE is running
@@ -228,6 +257,10 @@ namespace OptiSort
             }
         }
 
+        /// <summary>
+        /// Disconnects the connected SCARA robot
+        /// </summary>
+        /// <returns></returns>
         public bool DisconnectScara()
         {
             Log("Trying to disconnect from robot", false, false);
@@ -245,6 +278,9 @@ namespace OptiSort
             }
         }
 
+        /// <summary>
+        /// Switch connection between a connection to a real robot or an emulated one
+        /// </summary>
         public void ToggleScaraEmulationMode()
         {
             if (StatusScaraEmulation)
@@ -259,6 +295,10 @@ namespace OptiSort
             }
         }
 
+        /// <summary>
+        /// Connect to the FLEXIBOWL robot
+        /// </summary>
+        /// <returns></returns>
         public bool ConnectFlexibowl()
         {
             Log("Trying to connect to flexibowl", false, false);
@@ -280,6 +320,10 @@ namespace OptiSort
             }
         }
 
+        /// <summary>
+        /// Disconnect from a connected FLEXIBOWL robot
+        /// </summary>
+        /// <returns></returns>
         public bool DisconnectFlexibowl()
         {
             Log("Trying to disconnect to flexibowl", false, false);
@@ -298,6 +342,10 @@ namespace OptiSort
             }
         }
 
+        /// <summary>
+        /// Create MQTT client and connect to a broker
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> ConnectMQTTClient()
         {
             if (StatusMqttClient)
@@ -340,6 +388,10 @@ namespace OptiSort
             }
         }
 
+        /// <summary>
+        /// Disconnect MQTT client from a broker, then destroy client
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> DisconnectMqttClient()
         {
             string mqttClientName = Properties.Settings.Default.mqtt_client;
@@ -359,6 +411,10 @@ namespace OptiSort
             }
         }
 
+        /// <summary>
+        /// Subscribe the connected MQTT client to a specific topic of the broker
+        /// </summary>
+        /// <param name="topic"></param>
         public async void SubscribeMqttTopic(string topic)
         {
             string mqttClientName = Properties.Settings.Default.mqtt_client;
@@ -369,6 +425,10 @@ namespace OptiSort
                 Log($"Unable subscribing {mqttClientName} to {topic}", true, false);
         }
 
+        /// <summary>
+        /// Unsubscribe MQTT client from topic
+        /// </summary>
+        /// <param name="topic"></param>
         public async void UnsubscribeMqttTopic(string topic)
         {
             string mqttClientName = Properties.Settings.Default.mqtt_client;
@@ -378,6 +438,9 @@ namespace OptiSort
             else
                 Log($"Unable unsubscribing {mqttClientName} to {topic}", true, false);
         }
+
+
+        // TODO: to revise
 
         public void UpdateStreamingTopic(string newTopic)
         {
@@ -390,11 +453,50 @@ namespace OptiSort
         }
 
 
+        public void ConnectCameras()
+        {
+            OnOutputReceived += LogOutput;
+            OnErrorReceived += LogError;
+            OnExecutionTerminated += LogTermination;
+
+
+            string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
+            int processID = ExecuteScript(scriptPath);
+
+            Log($"ProcessID {processID}");
+
+        }
+
+        private void LogOutput(int id, string output)
+        {
+            Console.WriteLine($"Output received ({id}): {output}");
+        }
+
+        private void LogError(int id, string output)
+        {
+            _activeProcesses.Remove(id);
+            Console.WriteLine($"Error received ({id}): {output}");
+        }
+
+        private void LogTermination(int id, bool output)
+        {
+            _activeProcesses.Remove(id);
+            Console.WriteLine($"Script ended ({id}): {output}");
+        }
+
+        public void DisconnectCameras()
+        {
+
+        }
+
+
         #endregion
 
         // -----------------------------------------------------------------------------------
         // ---------------------------------- MQTT MANAGEMENT --------------------------------
         // -----------------------------------------------------------------------------------
+
+        #region MQTT
 
         /// <summary>
         /// Each time an MQTT arrives, a dedicated task is created to convert the incoming JSON to a BITMAP and queue it
@@ -462,7 +564,12 @@ namespace OptiSort
             BitmapQueued?.Invoke(topic); // notify subscribers about queuing a bitmap
         }
 
-
+        /// <summary>
+        /// Returns streaming queue based on requested topic
+        /// </summary>
+        /// <param name="topic"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         private ConcurrentQueue<(Bitmap, DateTime, DateTime)> GetQueueForTopic(string topic)
         {
             if (topic == Properties.Settings.Default.mqtt_topic_idsStream)
@@ -477,6 +584,9 @@ namespace OptiSort
             throw new ArgumentException("Unknown topic: " + topic);
         }
 
+        /// <summary>
+        /// Resets contents of all the streaming queues
+        /// </summary>
         private void ResetQueues()
         {
             Console.Write("Resetting queues");
@@ -485,6 +595,7 @@ namespace OptiSort
             while (_luxonisQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
         }
 
+        #endregion
 
         // -----------------------------------------------------------------------------------
         // ---------------------------------- FILE MANAGEMENT --------------------------------
@@ -519,17 +630,28 @@ namespace OptiSort
             TempFolderWatcher.EnableRaisingEvents = true;
         }
 
+        /// <summary>
+        /// Pauses checking contents of the target folder
+        /// </summary>
         public void PauseFileWatcher()
         {
             _isFileWatcherPaused = true;
         }
 
+        /// <summary>
+        /// Resumes checking contents of the target folder
+        /// </summary>
         public void ResumeFileWatcher()
         {
             _isFileWatcherPaused = false;
             TempFolderWatcherResumed?.Invoke();
         }
 
+        /// <summary>
+        /// Generates deletion event when a file gets deleted from target folder
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
             if (_isFileWatcherPaused)
@@ -539,14 +661,16 @@ namespace OptiSort
             Debug.WriteLine($"File {e.ChangeType}: {e.FullPath}");
         }
 
+        /// <summary>
+        /// Elimante agent checking the target folder
+        /// </summary>
         public void DisposeTempFolderWatcher()
         {
             TempFolderWatcher?.Dispose();
         }
 
-
         /// <summary>
-        /// Converts the image MQTT image (base64) to a bitmap
+        /// Converts a JSON-encoded image (base64) to a bitmap
         /// </summary>
         /// <param name="base64Image"></param>
         /// <returns></returns>
@@ -565,7 +689,6 @@ namespace OptiSort
                 return new Bitmap(ms);
             }
         }
-
 
         /// <summary>
         /// Export screenshots as bmp files to the TEMP folder
@@ -601,7 +724,6 @@ namespace OptiSort
             Console.WriteLine($"Bitmap saved as BMP at: {tempFilePath}");
         }
 
-
         /// <summary>
         /// Delete specific image from the TEMP folder, shift other indexes to occupy that groupId
         /// </summary>
@@ -621,7 +743,6 @@ namespace OptiSort
                 Console.WriteLine($"Error deleting file: {ex.Message}");
             }
         }
-
 
         /// <summary>
         /// Delete all the contents of the TEMP folder (calibration screenshots of the cameras)
@@ -691,7 +812,7 @@ namespace OptiSort
         #endregion
 
         // -----------------------------------------------------------------------------------
-        // ------------------------------------- GENERAL -------------------------------------
+        // ------------------------------------- LOG -------------------------------------
         // -----------------------------------------------------------------------------------
 
         /// <summary>
@@ -714,110 +835,59 @@ namespace OptiSort
             LogEvent?.Invoke(logEntry);
         }
 
+        // -----------------------------------------------------------------------------------
+        // ------------------------------------- PYTHON -------------------------------------
+        // -----------------------------------------------------------------------------------
+
+        #region python
+
         /// <summary>
-        /// Run a python script in background and returns its output as a string
+        /// User controls can call this method to run specific python scripts, which will be managed by dedicated threads
         /// </summary>
         /// <param name="scriptPath"></param>
-        public string RunPythonScript(string scriptPath)
+        /// <returns></returns>
+        public int ExecuteScript(string scriptPath)
         {
-            string pythonExe = LocatePythonInterpreter();
-            if (string.IsNullOrEmpty(pythonExe))
+
+            foreach (var process in _activeProcesses)
             {
-                throw new Exception("Python interpreter not found. Ensure Python is installed and added to the system PATH.");
+                if (process.Value == scriptPath) // script already running
+                    return 0;
             }
 
-            if (!File.Exists(scriptPath))
-            {
-                throw new Exception("Python script not found.");
-            }
+            int processId = 1;
+            if (_activeProcesses.Count > 0)
+                processId = _activeProcesses.Keys.Max() + 1;
+   
+            _activeProcesses[processId] = scriptPath;
 
-            var processStartInfo = new ProcessStartInfo
-            {
-                FileName = pythonExe,
-                Arguments = scriptPath, // Path to the script
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
+            var runner = new PythonProcessRunner();
 
-            var process = new Process { StartInfo = processStartInfo };
+            // Subscribe to runner events and associate with process ID
+            runner.OnOutputReceived += (output) => OnOutputReceived?.Invoke(processId, output);
+            runner.OnErrorReceived += (error) => OnErrorReceived?.Invoke(processId, error);
+            runner.OnExecutionTerminated += (status) => OnExecutionTerminated?.Invoke(processId, status);
 
-            // Use StringBuilder to collect output data
-            var outputBuilder = new StringBuilder();
-            var errorBuilder = new StringBuilder();
+            _runners[processId] = runner;
+            runner.RunPythonScript(scriptPath);
 
-            process.OutputDataReceived += (sender, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                {
-                    outputBuilder.AppendLine(e.Data);
-                }
-            };
-            process.ErrorDataReceived += (sender, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                {
-                    errorBuilder.AppendLine(e.Data);
-                }
-            };
-
-            // Start the process
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-
-            // Wait for the process to complete (or temporary imaged used will overlap)
-            process.WaitForExit();
-
-            // Handle errors if any
-            if (errorBuilder.Length > 0)
-            {
-                Console.WriteLine("ERROR: " + errorBuilder.ToString());
-                // Optionally, handle errors here (e.g., log them or throw an exception)
-            }
-
-            // Trigger the CalibrationResult method with the collected output
-            if (outputBuilder.Length > 0)
-            {
-                return outputBuilder.ToString(); // call explicitly the calibration result method
-            }
-
-            return null;
+            return processId;
         }
 
-        private string LocatePythonInterpreter()
+        /// <summary>
+        /// Stop a specific python execution
+        /// </summary>
+        /// <param name="processId"></param>
+        public void StopExecution(int processId)
         {
-            // Attempt to find Python in the PATH
-            var processStartInfo = new ProcessStartInfo
+            if (_runners.ContainsKey(processId))
             {
-                FileName = "cmd.exe",
-                Arguments = "/c python --version",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            try
-            {
-                using (var process = Process.Start(processStartInfo))
-                {
-                    process.WaitForExit();
-                    string output = process.StandardOutput.ReadToEnd();
-                    if (!string.IsNullOrWhiteSpace(output) && output.Contains("Python"))
-                    {
-                        return "python"; // Python was found in the PATH
-                    }
-                }
+                _runners[processId].Stop();
+                _runners.Remove(processId);
             }
-            catch
-            {
-                // Ignore errors and fall back to alternative methods
-            }
-
-            return null; // Python not found
         }
+
+        #endregion
 
     }
 }

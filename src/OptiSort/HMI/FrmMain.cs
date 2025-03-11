@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using FlexibowlLibrary;
 using System.Drawing.Text;
+using System.IO;
 
 
 namespace OptiSort
@@ -366,6 +367,15 @@ namespace OptiSort
             _ = _manager.DisconnectMqttClient();
         }
 
+        private void btnCamerasConnect_Click(object sender, EventArgs e)
+        {
+            _manager.ConnectCameras();
+        }
+
+        private void btnCamerasDisconnect_Click(object sender, EventArgs e)
+        {
+            _manager.DisconnectCameras();
+        }
 
         // -----------------------------------------------------------------------------------
         // ------------------------------- CAMERA STREAM -------------------------------------
@@ -402,6 +412,6 @@ namespace OptiSort
             e.DrawFocusRectangle();
         }
 
-
+        
     }
 }

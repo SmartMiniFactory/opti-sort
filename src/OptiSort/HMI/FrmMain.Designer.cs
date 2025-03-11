@@ -55,6 +55,10 @@
             this.pnlRobotView = new System.Windows.Forms.Panel();
             this.cmbCameras = new System.Windows.Forms.ComboBox();
             this.pnlCameraStream = new System.Windows.Forms.Panel();
+            this.lblCamerasStatus = new System.Windows.Forms.Label();
+            this.btnCamerasConnect = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.btnCamerasDisconnect = new System.Windows.Forms.Button();
             this.tblPanel.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tblMainStructure.SuspendLayout();
@@ -182,17 +186,24 @@
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.ColumnCount = 10;
+            this.tableLayoutPanel1.ColumnCount = 13;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 81F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
+            this.tableLayoutPanel1.Controls.Add(this.btnCamerasDisconnect, 13, 1);
+            this.tableLayoutPanel1.Controls.Add(this.label1, 11, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnCamerasConnect, 13, 0);
+            this.tableLayoutPanel1.Controls.Add(this.lblCamerasStatus, 10, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnEmulateScara, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnMqttDisconnect, 9, 1);
             this.tableLayoutPanel1.Controls.Add(this.btnFlexibowlDisconnect, 6, 1);
@@ -212,6 +223,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1898, 129);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
@@ -234,9 +246,9 @@
             this.btnMqttDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnMqttDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnMqttDisconnect.Enabled = false;
-            this.btnMqttDisconnect.Location = new System.Drawing.Point(1820, 67);
+            this.btnMqttDisconnect.Location = new System.Drawing.Point(1324, 67);
             this.btnMqttDisconnect.Name = "btnMqttDisconnect";
-            this.btnMqttDisconnect.Size = new System.Drawing.Size(75, 59);
+            this.btnMqttDisconnect.Size = new System.Drawing.Size(74, 59);
             this.btnMqttDisconnect.TabIndex = 11;
             this.btnMqttDisconnect.UseVisualStyleBackColor = true;
             this.btnMqttDisconnect.Click += new System.EventHandler(this.btnMqttDisconnect_Click);
@@ -247,7 +259,7 @@
             this.btnFlexibowlDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnFlexibowlDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFlexibowlDisconnect.Enabled = false;
-            this.btnFlexibowlDisconnect.Location = new System.Drawing.Point(1077, 67);
+            this.btnFlexibowlDisconnect.Location = new System.Drawing.Point(829, 67);
             this.btnFlexibowlDisconnect.Name = "btnFlexibowlDisconnect";
             this.btnFlexibowlDisconnect.Size = new System.Drawing.Size(74, 59);
             this.btnFlexibowlDisconnect.TabIndex = 10;
@@ -272,9 +284,9 @@
             this.btnMqttConnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnMqttConnect.BackgroundImage")));
             this.btnMqttConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnMqttConnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnMqttConnect.Location = new System.Drawing.Point(1820, 3);
+            this.btnMqttConnect.Location = new System.Drawing.Point(1324, 3);
             this.btnMqttConnect.Name = "btnMqttConnect";
-            this.btnMqttConnect.Size = new System.Drawing.Size(75, 58);
+            this.btnMqttConnect.Size = new System.Drawing.Size(74, 58);
             this.btnMqttConnect.TabIndex = 8;
             this.btnMqttConnect.UseVisualStyleBackColor = true;
             this.btnMqttConnect.Click += new System.EventHandler(this.btnMqttConnect_Click);
@@ -284,7 +296,7 @@
             this.btnFlexibowlConnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnFlexibowlConnect.BackgroundImage")));
             this.btnFlexibowlConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnFlexibowlConnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnFlexibowlConnect.Location = new System.Drawing.Point(1077, 3);
+            this.btnFlexibowlConnect.Location = new System.Drawing.Point(829, 3);
             this.btnFlexibowlConnect.Name = "btnFlexibowlConnect";
             this.btnFlexibowlConnect.Size = new System.Drawing.Size(74, 58);
             this.btnFlexibowlConnect.TabIndex = 7;
@@ -297,7 +309,7 @@
             this.lblMqttStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblMqttStatusValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMqttStatusValue.ForeColor = System.Drawing.Color.Red;
-            this.lblMqttStatusValue.Location = new System.Drawing.Point(1705, 0);
+            this.lblMqttStatusValue.Location = new System.Drawing.Point(1209, 0);
             this.lblMqttStatusValue.Name = "lblMqttStatusValue";
             this.tableLayoutPanel1.SetRowSpan(this.lblMqttStatusValue, 2);
             this.lblMqttStatusValue.Size = new System.Drawing.Size(109, 129);
@@ -310,10 +322,10 @@
             this.lblMqttStatus.AutoSize = true;
             this.lblMqttStatus.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblMqttStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMqttStatus.Location = new System.Drawing.Point(1157, 0);
+            this.lblMqttStatus.Location = new System.Drawing.Point(909, 0);
             this.lblMqttStatus.Name = "lblMqttStatus";
             this.tableLayoutPanel1.SetRowSpan(this.lblMqttStatus, 2);
-            this.lblMqttStatus.Size = new System.Drawing.Size(542, 129);
+            this.lblMqttStatus.Size = new System.Drawing.Size(294, 129);
             this.lblMqttStatus.TabIndex = 4;
             this.lblMqttStatus.Text = "MQTT Service:";
             this.lblMqttStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -324,7 +336,7 @@
             this.lblFlexibowlStatusValue.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblFlexibowlStatusValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblFlexibowlStatusValue.ForeColor = System.Drawing.Color.Red;
-            this.lblFlexibowlStatusValue.Location = new System.Drawing.Point(962, 0);
+            this.lblFlexibowlStatusValue.Location = new System.Drawing.Point(714, 0);
             this.lblFlexibowlStatusValue.Name = "lblFlexibowlStatusValue";
             this.tableLayoutPanel1.SetRowSpan(this.lblFlexibowlStatusValue, 2);
             this.lblFlexibowlStatusValue.Size = new System.Drawing.Size(109, 129);
@@ -340,7 +352,7 @@
             this.lblFlexibowlStatus.Location = new System.Drawing.Point(414, 0);
             this.lblFlexibowlStatus.Name = "lblFlexibowlStatus";
             this.tableLayoutPanel1.SetRowSpan(this.lblFlexibowlStatus, 2);
-            this.lblFlexibowlStatus.Size = new System.Drawing.Size(542, 129);
+            this.lblFlexibowlStatus.Size = new System.Drawing.Size(294, 129);
             this.lblFlexibowlStatus.TabIndex = 2;
             this.lblFlexibowlStatus.Text = "Flexibowl:";
             this.lblFlexibowlStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -432,6 +444,58 @@
             this.pnlCameraStream.Size = new System.Drawing.Size(469, 345);
             this.pnlCameraStream.TabIndex = 5;
             // 
+            // lblCamerasStatus
+            // 
+            this.lblCamerasStatus.AutoSize = true;
+            this.lblCamerasStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblCamerasStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCamerasStatus.Location = new System.Drawing.Point(1404, 0);
+            this.lblCamerasStatus.Name = "lblCamerasStatus";
+            this.tableLayoutPanel1.SetRowSpan(this.lblCamerasStatus, 2);
+            this.lblCamerasStatus.Size = new System.Drawing.Size(294, 129);
+            this.lblCamerasStatus.TabIndex = 13;
+            this.lblCamerasStatus.Text = "Cameras:";
+            this.lblCamerasStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // btnCamerasConnect
+            // 
+            this.btnCamerasConnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnCamerasConnect.BackgroundImage")));
+            this.btnCamerasConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnCamerasConnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnCamerasConnect.Location = new System.Drawing.Point(1819, 3);
+            this.btnCamerasConnect.Name = "btnCamerasConnect";
+            this.btnCamerasConnect.Size = new System.Drawing.Size(76, 58);
+            this.btnCamerasConnect.TabIndex = 15;
+            this.btnCamerasConnect.UseVisualStyleBackColor = true;
+            this.btnCamerasConnect.Click += new System.EventHandler(this.btnCamerasConnect_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.Red;
+            this.label1.Location = new System.Drawing.Point(1704, 0);
+            this.label1.Name = "label1";
+            this.tableLayoutPanel1.SetRowSpan(this.label1, 2);
+            this.label1.Size = new System.Drawing.Size(109, 129);
+            this.label1.TabIndex = 17;
+            this.label1.Text = "Offline";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btnCamerasDisconnect
+            // 
+            this.btnCamerasDisconnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnCamerasDisconnect.BackgroundImage")));
+            this.btnCamerasDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnCamerasDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnCamerasDisconnect.Enabled = false;
+            this.btnCamerasDisconnect.Location = new System.Drawing.Point(1819, 67);
+            this.btnCamerasDisconnect.Name = "btnCamerasDisconnect";
+            this.btnCamerasDisconnect.Size = new System.Drawing.Size(76, 59);
+            this.btnCamerasDisconnect.TabIndex = 18;
+            this.btnCamerasDisconnect.UseVisualStyleBackColor = true;
+            this.btnCamerasDisconnect.Click += new System.EventHandler(this.btnCamerasDisconnect_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -483,6 +547,10 @@
         private System.Windows.Forms.Button btnEmulateScara;
         private System.Windows.Forms.Button btnStop;
         private System.Windows.Forms.Button btnRun;
+        private System.Windows.Forms.Button btnCamerasConnect;
+        private System.Windows.Forms.Label lblCamerasStatus;
+        private System.Windows.Forms.Button btnCamerasDisconnect;
+        private System.Windows.Forms.Label label1;
     }
 }
 
