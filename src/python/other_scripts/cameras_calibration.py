@@ -6,16 +6,49 @@ cameras. The script fails if:
 - cv2 library fail
 In case of failure, the calibration file is not exported. In case of bad image, the C# program will delete it and ask
 the user to retake it."""
-# ---------------------------------------------------------------------------------------------------------------------------------------
+
 import json
 import os
+
+import paho.mqtt.client as mqtt
 import cv2
 import yaml
 import numpy as np
 import pathlib
 import glob
-# ---------------------------------------------------------------------------------------------------------------------------------------
-# GRID PARAMETERS
+
+# SCRIPT IDENTIFICATION (get script path and define TEMP, CONFIG folder paths)
+script_dir = pathlib.Path(__file__).parent.resolve()
+script_name = pathlib.Path(__file__).name
+temp_folder = script_dir / "../../OptiSort/HMI/Temp"
+config_folder = script_dir / "../../OptiSort/HMI/Config"
+
+
+def publish(message, result):
+    global script_dir
+    if result is None:
+        payload = {"script": (script_dir / script_name).as_posix(), "message": message}
+    else:
+        payload = {"script": (script_dir / script_name).as_posix(), "message": message, "result": result}
+    mqttc.publish('optisort/camera_calibration', str(json.dumps(payload)))
+
+
+def on_publish(client, userdata, mid):
+    print(f"Message Published: {client}, {userdata}, {mid}")
+
+
+# MQTT SETUP
+broker = '127.0.0.1'
+port = 1883
+client_name = 'camera_calibration'
+MQTT_KEEPALIVE_INTERVAL = 500
+
+mqttc = mqtt.Client()  # Initiate MQTT Client
+mqttc.on_publish = on_publish  # Register publish callback function
+mqttc.connect(broker, port, MQTT_KEEPALIVE_INTERVAL)  # Connect with MQTT Broker
+publish("Calibration script starting", None)
+
+# GRID PARAMETERS ---------------------------------------------------------------------------------------------
 
 # vertex
 cols = 5
@@ -33,12 +66,7 @@ image_points = []  # 2D points in image plane
 
 images = glob.glob('*.jpg')
 
-# Get the absolute path of the script directory
-script_dir = pathlib.Path(__file__).parent.resolve()
 
-# Define the Temp folder path relative to the script directory
-temp_folder = script_dir / "../../OptiSort/HMI/Temp"
-config_folder = script_dir / "../../OptiSort/HMI/Config"
 
 # ---------------------------------------------------------------------------------------------------------------------------------------
 
@@ -56,10 +84,12 @@ result = {
 }
 
 for camera in ["ids", "basler", "luxonis"]:
-    for picture_nr in range(15):
 
+    publish(f"Calibration in progress for camera {camera}", None)
+
+    for picture_nr in range(15):
         # get picture path
-        filename = f"{camera}_CalibrationImage_{picture_nr + 1:02d}" # using format 01, 02, ... for digits
+        filename = f"{camera}_CalibrationImage_{picture_nr + 1:02d}"  # using format 01, 02, ... for digits
         absolutePath = (temp_folder / f"{filename}.bmp").resolve()
 
         # check picture existence
@@ -124,9 +154,10 @@ for camera in ["ids", "basler", "luxonis"]:
 
                 with open(config_folder / f"{camera}_calibration.yaml", "w") as f:
                     yaml.dump(data, f)
-                    # print("Calibration data saved to 'calibration.yaml'") # debug string deactivated to not confuse C#
+                    publish(f"{camera} calibration data saved to .yaml file", None)
 
             else:
                 result["calibration_fail"][camera] = True
 
-print(json.dumps(result))
+publish("Calibration terminated", result)
+mqttc.disconnect()  # Disconnect from MQTT_Broker

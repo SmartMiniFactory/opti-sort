@@ -116,7 +116,8 @@ namespace OptiSort.Classes
                 // Ignore errors and fall back to alternative methods
             }
 
-            return null; // Python not found
+            OnErrorReceived?.Invoke("Python interpreted not found; Double check installation and PATH configuration");
+            return null;
         }
     }
 }

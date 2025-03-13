@@ -58,7 +58,6 @@ namespace OptiSort.userControls
 
             _manager.TempFileDeleted += OnTempFileDeleted; // Subscribe to manager's file deletion event from TEMP folder
             _manager.TempFolderWatcherResumed += OnWatcherResumed; // Subscribe to manager's file watcher resume event
-
             _manager.PropertyChanged += OnPropertyChange; // Subscribe to manager's propery changed event
 
             RefreshBottomControls(); 
@@ -100,10 +99,31 @@ namespace OptiSort.userControls
         /// </summary>
         /// <param name="processID"></param>
         /// <param name="output"></param>
-        private void PythonOutputReceived(int processID, string output)
+        private void MqttMessageReceived(string topic, JsonElement message, int processID)
         {
-            if(processID == _pythonProcessId)
-                CalibrationResult(output);
+            // check if mqtt message is sent by expected script
+            if (processID == _pythonProcessId)
+            {
+                // check if message contains results
+                if (message.TryGetProperty("result", out JsonElement resultElement))
+                {
+                    this.Invoke((MethodInvoker)(() =>
+                    {
+                        CalibrationResult(resultElement);
+                    }));
+                }
+
+                // in any case: log "message" string coming from the python file
+                if (message.TryGetProperty("message", out JsonElement messageElement))
+                {
+                    string msg = messageElement.GetString();
+
+                    this.Invoke((MethodInvoker)(() =>
+                    {
+                        _manager.Log(msg, false, false); 
+                    }));
+                }
+            } 
         }
 
         /// <summary>
@@ -111,14 +131,35 @@ namespace OptiSort.userControls
         /// </summary>
         /// <param name="processID"></param>
         /// <param name="output"></param>
-        private void PythonErrorReceived(int processID, string output)
+        private void PythonErrorHandler(int processID, string output)
         {
             if (processID == _pythonProcessId)
             {
-                _manager.Log("Python camera calibration file threw an error!", true, false);
-                MessageBox.Show("Python camera calibration file threw an error", "Python error!");
+                this.Invoke((MethodInvoker)(() =>
+                {
+                    _manager.Log("Python camera calibration file threw an error!", true, false);
+                    MessageBox.Show("Python camera calibration file threw an error", "Python error!");
+                }));
             }
         }
+
+        private void PythonTerminationHandler(int processID, bool executionTerminated)
+        {
+            if (processID == _pythonProcessId)
+            {
+                this.Invoke((MethodInvoker)(() =>
+                {                
+                    _manager.Log("Python camera calibration file has closed!", false, false);
+                    _manager.OnErrorReceived -= PythonErrorHandler;
+                    _manager.OnExecutionTerminated -= PythonTerminationHandler;
+                    _manager.UnsubscribeMqttTopic("optisort/camera_calibration");
+                }));
+            }
+        }
+
+
+
+
 
 
         // ----------------------------------------------------------------------------------------
@@ -142,14 +183,19 @@ namespace OptiSort.userControls
         private void btn_calibrate_Click(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
-            _manager.Log("Calibration process in progress...", false, false);
 
+            // subscribe to mqtt topic to receive updates from python file
+            _manager.SubscribeMqttTopic("optisort/camera_calibration");
+            _manager.MqttMessageReceived += MqttMessageReceived;
+
+            // subscribe termination events to handler
+            _manager.OnErrorReceived += PythonErrorHandler;
+            _manager.OnExecutionTerminated += PythonTerminationHandler;
+
+            // launch python file and memorize processId
             string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
-            
-            
             _pythonProcessId = _manager.ExecuteScript(scriptPath);
-            _manager.OnOutputReceived += PythonOutputReceived;
-            _manager.OnErrorReceived += PythonErrorReceived;
+            _manager.Log("Camera calibration file launched", false, false);
         }
 
         private void btn_clear_Click(object sender, EventArgs e)
@@ -290,26 +336,35 @@ namespace OptiSort.userControls
         /// Parse py's output and interpret result (calibration failed or succeded)
         /// </summary>
         /// <param name="pythonOutput"></param>
-        private void CalibrationResult(string pythonOutput)
+        private void CalibrationResult(JsonElement pythonOutput)
         {
-            Console.WriteLine("py: " + pythonOutput);
 
             _manager.PauseFileWatcher();
 
             try
             {
-                var jsonDocument = JsonDocument.Parse(pythonOutput); // Parse JSON
-                var root = jsonDocument.RootElement; // Access elements
 
-                // Extract "bad_image" -> "ids", "basler", "luxonis" into C# arrays
-                int[] badImage_ids = JsonSerializer.Deserialize<int[]>(root.GetProperty("bad_image").GetProperty("ids").GetRawText());
-                int[] badImage_basler = JsonSerializer.Deserialize<int[]>(root.GetProperty("bad_image").GetProperty("basler").GetRawText());
-                int[] badImage_luxonis = JsonSerializer.Deserialize<int[]>(root.GetProperty("bad_image").GetProperty("luxonis").GetRawText());
+                // Extracting "bad_image" indexes
+                int[] GetIntArray(JsonElement parent, string key) => parent
+                    .TryGetProperty(key, out JsonElement element) && element.ValueKind == JsonValueKind.Array ? element
+                    .EnumerateArray().Select(e => e.GetInt32()).ToArray() : Array.Empty<int>();
 
-                // Extract "calibration_fail" -> "ids", "basler", "luxonis" into booleans
-                bool calibrationFail_ids = root.GetProperty("calibration_fail").GetProperty("ids").GetBoolean();
-                bool calibrationFail_basler = root.GetProperty("calibration_fail").GetProperty("basler").GetBoolean();
-                bool calibrationFail_luxonis = root.GetProperty("calibration_fail").GetProperty("luxonis").GetBoolean();
+                JsonElement badImage = pythonOutput.GetProperty("bad_image");
+
+                int[] badImage_ids = GetIntArray(badImage, "ids");
+                int[] badImage_basler = GetIntArray(badImage, "basler");
+                int[] badImage_luxonis = GetIntArray(badImage, "luxonis");
+
+
+                // extracting cameras who failed calibration
+                bool GetBoolValue(JsonElement parent, string key) => parent
+                    .TryGetProperty(key, out JsonElement element) && element.ValueKind == JsonValueKind.True?true:false;
+
+                JsonElement calibrationFail = pythonOutput.GetProperty("calibration_fail");
+
+                bool calibrationFail_ids = GetBoolValue(calibrationFail, "ids");
+                bool calibrationFail_basler = GetBoolValue(calibrationFail, "basler");
+                bool calibrationFail_luxonis = GetBoolValue(calibrationFail, "luxonis");
 
                 if (calibrationFail_ids || calibrationFail_luxonis || calibrationFail_basler)
                 {
@@ -657,7 +712,7 @@ namespace OptiSort.userControls
         private void RefreshBottomControls()
         {
             lbl_shots.Text = $"{Shots}/15";
-            btn_calibrate.Enabled = Shots == 15;
+            btn_calibrate.Enabled = _manager.StatusMqttClient == true && _manager.RequestScreenshots == false && Shots == 15;
             btn_clear.Enabled = Shots > 0;
             btn_acquire.Enabled = _manager.StatusMqttClient == true && _manager.RequestScreenshots == false && Shots < 15;
         }

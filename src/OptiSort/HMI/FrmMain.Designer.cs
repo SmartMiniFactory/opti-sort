@@ -38,6 +38,10 @@
             this.btnAuto = new System.Windows.Forms.Button();
             this.pnlCurrentUc = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnCamerasDisconnect = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.btnCamerasConnect = new System.Windows.Forms.Button();
+            this.lblCamerasStatus = new System.Windows.Forms.Label();
             this.btnEmulateScara = new System.Windows.Forms.Button();
             this.btnMqttDisconnect = new System.Windows.Forms.Button();
             this.btnFlexibowlDisconnect = new System.Windows.Forms.Button();
@@ -55,10 +59,6 @@
             this.pnlRobotView = new System.Windows.Forms.Panel();
             this.cmbCameras = new System.Windows.Forms.ComboBox();
             this.pnlCameraStream = new System.Windows.Forms.Panel();
-            this.lblCamerasStatus = new System.Windows.Forms.Label();
-            this.btnCamerasConnect = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.btnCamerasDisconnect = new System.Windows.Forms.Button();
             this.tblPanel.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tblMainStructure.SuspendLayout();
@@ -199,7 +199,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 82F));
             this.tableLayoutPanel1.Controls.Add(this.btnCamerasDisconnect, 13, 1);
             this.tableLayoutPanel1.Controls.Add(this.label1, 11, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnCamerasConnect, 13, 0);
@@ -226,6 +226,58 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1898, 129);
             this.tableLayoutPanel1.TabIndex = 2;
+            // 
+            // btnCamerasDisconnect
+            // 
+            this.btnCamerasDisconnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnCamerasDisconnect.BackgroundImage")));
+            this.btnCamerasDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnCamerasDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnCamerasDisconnect.Enabled = false;
+            this.btnCamerasDisconnect.Location = new System.Drawing.Point(1819, 67);
+            this.btnCamerasDisconnect.Name = "btnCamerasDisconnect";
+            this.btnCamerasDisconnect.Size = new System.Drawing.Size(76, 59);
+            this.btnCamerasDisconnect.TabIndex = 18;
+            this.btnCamerasDisconnect.UseVisualStyleBackColor = true;
+            this.btnCamerasDisconnect.Click += new System.EventHandler(this.btnCamerasDisconnect_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.Red;
+            this.label1.Location = new System.Drawing.Point(1704, 0);
+            this.label1.Name = "label1";
+            this.tableLayoutPanel1.SetRowSpan(this.label1, 2);
+            this.label1.Size = new System.Drawing.Size(109, 129);
+            this.label1.TabIndex = 17;
+            this.label1.Text = "Offline";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btnCamerasConnect
+            // 
+            this.btnCamerasConnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnCamerasConnect.BackgroundImage")));
+            this.btnCamerasConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnCamerasConnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnCamerasConnect.Location = new System.Drawing.Point(1819, 3);
+            this.btnCamerasConnect.Name = "btnCamerasConnect";
+            this.btnCamerasConnect.Size = new System.Drawing.Size(76, 58);
+            this.btnCamerasConnect.TabIndex = 15;
+            this.btnCamerasConnect.UseVisualStyleBackColor = true;
+            this.btnCamerasConnect.Click += new System.EventHandler(this.btnCamerasConnect_Click);
+            // 
+            // lblCamerasStatus
+            // 
+            this.lblCamerasStatus.AutoSize = true;
+            this.lblCamerasStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblCamerasStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCamerasStatus.Location = new System.Drawing.Point(1404, 0);
+            this.lblCamerasStatus.Name = "lblCamerasStatus";
+            this.tableLayoutPanel1.SetRowSpan(this.lblCamerasStatus, 2);
+            this.lblCamerasStatus.Size = new System.Drawing.Size(294, 129);
+            this.lblCamerasStatus.TabIndex = 13;
+            this.lblCamerasStatus.Text = "Cameras:";
+            this.lblCamerasStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // btnEmulateScara
             // 
@@ -443,58 +495,6 @@
             this.pnlCameraStream.Name = "pnlCameraStream";
             this.pnlCameraStream.Size = new System.Drawing.Size(469, 345);
             this.pnlCameraStream.TabIndex = 5;
-            // 
-            // lblCamerasStatus
-            // 
-            this.lblCamerasStatus.AutoSize = true;
-            this.lblCamerasStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblCamerasStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCamerasStatus.Location = new System.Drawing.Point(1404, 0);
-            this.lblCamerasStatus.Name = "lblCamerasStatus";
-            this.tableLayoutPanel1.SetRowSpan(this.lblCamerasStatus, 2);
-            this.lblCamerasStatus.Size = new System.Drawing.Size(294, 129);
-            this.lblCamerasStatus.TabIndex = 13;
-            this.lblCamerasStatus.Text = "Cameras:";
-            this.lblCamerasStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // btnCamerasConnect
-            // 
-            this.btnCamerasConnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnCamerasConnect.BackgroundImage")));
-            this.btnCamerasConnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnCamerasConnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnCamerasConnect.Location = new System.Drawing.Point(1819, 3);
-            this.btnCamerasConnect.Name = "btnCamerasConnect";
-            this.btnCamerasConnect.Size = new System.Drawing.Size(76, 58);
-            this.btnCamerasConnect.TabIndex = 15;
-            this.btnCamerasConnect.UseVisualStyleBackColor = true;
-            this.btnCamerasConnect.Click += new System.EventHandler(this.btnCamerasConnect_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.Color.Red;
-            this.label1.Location = new System.Drawing.Point(1704, 0);
-            this.label1.Name = "label1";
-            this.tableLayoutPanel1.SetRowSpan(this.label1, 2);
-            this.label1.Size = new System.Drawing.Size(109, 129);
-            this.label1.TabIndex = 17;
-            this.label1.Text = "Offline";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // btnCamerasDisconnect
-            // 
-            this.btnCamerasDisconnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnCamerasDisconnect.BackgroundImage")));
-            this.btnCamerasDisconnect.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnCamerasDisconnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnCamerasDisconnect.Enabled = false;
-            this.btnCamerasDisconnect.Location = new System.Drawing.Point(1819, 67);
-            this.btnCamerasDisconnect.Name = "btnCamerasDisconnect";
-            this.btnCamerasDisconnect.Size = new System.Drawing.Size(76, 59);
-            this.btnCamerasDisconnect.TabIndex = 18;
-            this.btnCamerasDisconnect.UseVisualStyleBackColor = true;
-            this.btnCamerasDisconnect.Click += new System.EventHandler(this.btnCamerasDisconnect_Click);
             // 
             // frmMain
             // 

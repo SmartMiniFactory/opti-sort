@@ -11,8 +11,10 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -128,6 +130,7 @@ namespace OptiSort
 
 
         // Events
+        public event Action<string, JsonElement, int> MqttMessageReceived; // expose mqtt messaging events for user controls' subscriptions
         public event Action<Control> NewUserControlRequested; // Event to notify subscribers
         public event Action TempFileDeleted;
         public event Action TempFolderWatcherResumed;
@@ -460,6 +463,8 @@ namespace OptiSort
             OnExecutionTerminated += LogTermination;
 
 
+
+
             string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
             int processID = ExecuteScript(scriptPath);
 
@@ -499,14 +504,31 @@ namespace OptiSort
         #region MQTT
 
         /// <summary>
-        /// Each time an MQTT arrives, a dedicated task is created to convert the incoming JSON to a BITMAP and queue it
+        /// Triggered each time an MQTT arrives
         /// </summary>
         /// <param name="topic"></param>
         /// <param name="message"></param>
         private void OnMessageReceived(string topic, JsonElement message)
         {
-            // TODO: activate this only in case of streaming topics
-            Task.Run(() => AddBitmapToQueue(topic, message)); // Start a dedicated task for the method
+            // launch bitmap conversion only if message comes from streaming topics
+            if (Regex.IsMatch(topic, @".*/stream$"))
+                Task.Run(() => AddBitmapToQueue(topic, message)); // Start a dedicated task for the method
+
+            // if the message is from a script, it is probably awaited from an user control, thus message received event is exposed with script processID
+            if (message.TryGetProperty("script", out JsonElement scriptElement))
+            {
+                foreach (var script in _activeProcesses)
+                {
+                    bool pathsAreEqual = string.Equals(Path.GetFullPath(script.Value), Path.GetFullPath(scriptElement.GetString()), StringComparison.OrdinalIgnoreCase);
+                    if (pathsAreEqual)
+                    {
+                        int processID = script.Key;
+                        MqttMessageReceived?.Invoke(topic, message, processID); // expose mqtt message with process value (user forms need the process value to trigger event handlers)
+                        break;
+                    }
+                }
+            }
+
         }
 
 
