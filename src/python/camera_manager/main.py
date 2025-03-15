@@ -109,12 +109,10 @@ async def capture_and_publish(camera, topic, client, idx):
                     # TODO: change topics to dynamic
 
                     if topic == 'optisort/luxonis/stream':
-                        left, right = camera.capture_frame()
+                        video = camera.capture_frame()
                         frame = None
-                        if left is not None:
-                            frame = left.getCvFrame()
-                        elif right is not None:
-                            frame = right.getCvFrame()
+                        if video is not None:
+                            frame = video.getCvFrame()
 
                     else:
                         frame = camera.capture_frame()

@@ -81,11 +81,8 @@ class Luxonis(BaseCamera):
         """
         try:
 
-            self.qLeft = self.device.getOutputQueue(name="left", maxSize=4, blocking=False)
-            self.qRight = self.device.getOutputQueue(name="right", maxSize=4, blocking=False)
+            self.video = self.device.getOutputQueue(name="video", maxSize=4, blocking=False)
             print("Device connected. Queues initialized.")
-
-
 
             print("Luxonis camera - acquisition started successfully!")
         except Exception as e:
@@ -98,9 +95,8 @@ class Luxonis(BaseCamera):
         :return: Captured frame as a NumPy array.
         """
         try:
-            inLeft = self.qLeft.tryGet() if self.qLeft else None
-            inRight = self.qRight.tryGet() if self.qRight else None
-            return inLeft, inRight
+            video = self.video.tryGet() if self.video else None
+            return video
 
         except Exception as e:
             raise RuntimeError(f"Failed to capture frame from Luxonis camera: {e}")
