@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 
-import depthai as dai
-import cv2
-
-pipeline = dai.Pipeline()
-
 '''
 Camera node is a source of ImgFrame. You can control in at runtime with the InputControl and InputConfig
 It aims to unify the Color Camera and MonoCamera into one node.
@@ -26,69 +21,46 @@ Besides points above, compared to MonoCamera node, Camera node:
 https://docs.luxonis.com/software/depthai-components/nodes/camera/
 '''
 
+import depthai as dai
+import cv2
+
+pipeline = dai.Pipeline()
+
 # Define sources and outputs
-cam: dai.node.Camera = pipeline.create(dai.node.Camera) # rgb camera; can output both ISP and VIDEO
+cam = pipeline.create(dai.node.Camera)  # RGB camera
 cam.setBoardSocket(dai.CameraBoardSocket.CAM_B)
-cam.setSize((1280, 800)) # setSize replaces both cam.setResolution() and cam.setIspScale() # Camera node will automatically find resolution that fits best and apply correct scaling to achieve user-selected size
-#cam.setPreviewSize(300, 300)
+cam.setSize((1280, 800))  # Initial resolution selection
+
+# ImageManip node for cropping an AOI to 1:1 aspect ratio
+manip = pipeline.create(dai.node.ImageManip)
+manip.initialConfig.setCropRect(0.3,0.1,0.7,0.9)
+#manip.initialConfig.setCropRect(0.2, 0.0, 0.8, 1.0)  # Crop a central AOI with a 1:1 aspect ratio
+manip.initialConfig.setResize(800, 800)  # Resize after cropping
+manip.setMaxOutputFrameSize(800 * 800 * 3)  # Assuming max square crop is 800x800
+manip.setKeepAspectRatio(False)
+manip.initialConfig.setFrameType(dai.ImgFrame.Type.GRAY8)  # Convert to greyscale
 
 # Create node connections
 configIn = pipeline.create(dai.node.XLinkIn)
-ispOut = pipeline.create(dai.node.XLinkOut) # distorted, but interacts with 3A algorithm; highest possible res
-videoOut = pipeline.create(dai.node.XLinkOut) # automatically undistorted; cropped to 4k (3840x2160) from ISP
-previewOut = pipeline.create(dai.node.XLinkOut) # automatically undistorted; 1:1 aspect ratio cropped to from VIDEO
-
-manip = pipeline.create(dai.node.ImageManip) # used to crop image
-
-'''
-Preferred approach:
-streaming the video output and cropping the FOV mantaining the highest possible resolution
-Crop will be done at a 1:1 aspect ratio, which will be mandatory also for other cameras
-
-
-'''
+videoOut = pipeline.create(dai.node.XLinkOut)
 
 # Stream names
 configIn.setStreamName('config')
 videoOut.setStreamName("video")
-ispOut.setStreamName("isp")
-previewOut.setStreamName("prev")
 
-# Linking
+# Linking nodes
 configIn.out.link(cam.inputConfig)
-cam.video.link(videoOut.input)
-cam.isp.link(ispOut.input)
-cam.preview.link(previewOut.input)
-
-# TODO: greyscale
-
-#cam.video.link(manip.inputImage)
-#configIn.out.link(manip.inputConfig)
-#manip.out.link(videoOut.input)
-
-# Set up cropping with ImageManip
-manip.initialConfig.setCropRect(0.3046875, 0.1875, 0.6953125, 0.8125)  # Normalized coordinates
-manip.setMaxOutputFrameSize(1280 * 800 * 3)
+cam.video.link(manip.inputImage)
+manip.out.link(videoOut.input)
 
 with dai.Device(pipeline) as device:
-
     configQueue = device.getInputQueue('config')
-
     video = device.getOutputQueue(name="video", maxSize=1, blocking=False)
-    isp = device.getOutputQueue(name="isp", maxSize=1, blocking=False)
-    prev = device.getOutputQueue(name="prev", maxSize=1, blocking=False)
 
     while True:
-
-        cfg = dai.ImageManipConfig()
-        cfg.setCropRect(0.3046875, 0.1875, 0.6953125, 0.8125)
-        configQueue.send(cfg)
-
         if video.has():
-            cv2.imshow("video", video.get().getCvFrame())
-        if isp.has():
-            cv2.imshow("isp", isp.get().getCvFrame())
-        if prev.has():
-            cv2.imshow("prev", prev.get().getCvFrame())
+            frame = video.get().getCvFrame()
+            cv2.imshow("video", frame if len(frame.shape) == 2 else cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))  # Ensure greyscale
+
         if cv2.waitKey(1) == ord('q'):
             break
