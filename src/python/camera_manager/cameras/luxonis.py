@@ -17,8 +17,8 @@ class Luxonis(BaseCamera):
         super().__init__(camera_id, config_path)
         self.pipeline = dai.Pipeline()  # DepthAI pipeline for configuring streams
         self.device = None  # Luxonis device object
-        self.qLeft = None # Left camera monovision streaming
-        self.qRight = None # right camera monovision streaming
+        self.configQueue = None
+        self.video = None
 
     def initialize(self):
         """
@@ -26,30 +26,37 @@ class Luxonis(BaseCamera):
         """
         try:
             # Define sources and outputs
-            monoLeft = self.pipeline.create(dai.node.MonoCamera)
-            monoRight = self.pipeline.create(dai.node.MonoCamera)
-            xoutLeft = self.pipeline.create(dai.node.XLinkOut)
-            xoutRight = self.pipeline.create(dai.node.XLinkOut)
+            cam = self.pipeline.create(dai.node.Camera)  # RGB camera
+            cam.setBoardSocket(dai.CameraBoardSocket.CAM_B)
+            cam.setSize((1280, 800))  # Initial resolution selection
 
-            xoutLeft.setStreamName('left')
-            xoutRight.setStreamName('right')
+            # ImageManip node for cropping an AOI to 1:1 aspect ratio
+            manip = self.pipeline.create(dai.node.ImageManip)
+            manip.initialConfig.setCropRect(0.3, 0.1, 0.7, 0.9)
+            manip.initialConfig.setResize(800, 800)  # Resize after cropping
+            manip.setMaxOutputFrameSize(800 * 800 * 3)  # Assuming max square crop is 800x800
+            manip.setKeepAspectRatio(False)
+            manip.initialConfig.setFrameType(dai.ImgFrame.Type.GRAY8)  # Convert to greyscale
 
-            # Properties
-            monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
-            monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
-            monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-            monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+            # Create node connections
+            configIn = self.pipeline.create(dai.node.XLinkIn)
+            videoOut = self.pipeline.create(dai.node.XLinkOut)
 
-            # Linking
-            monoRight.out.link(xoutRight.input)
-            monoLeft.out.link(xoutLeft.input)
+            # Stream names
+            configIn.setStreamName('config')
+            videoOut.setStreamName("video")
+
+            # Linking nodes
+            configIn.out.link(cam.inputConfig)
+            cam.video.link(manip.inputImage)
+            manip.out.link(videoOut.input)
 
             # Create the device AFTER defining the full pipeline
             self.device = dai.Device(self.pipeline)
 
             # Output queues will be used to get the grayscale frames from the outputs defined above
-            self.qLeft = self.device.getOutputQueue(name="left", maxSize=4, blocking=False)
-            self.qRight = self.device.getOutputQueue(name="right", maxSize=4, blocking=False)
+            self.configQueue = self.device.getInputQueue('config')
+            self.video = self.device.getOutputQueue(name="video", maxSize=1, blocking=False)
 
             print(f"Luxonis camera initialized successfully! Using device: {self.device.getCameraSensorNames()}")
 
@@ -63,7 +70,6 @@ class Luxonis(BaseCamera):
         try:
 
             print(self.pipeline.getCalibrationData())
-
 
             print("Luxonis camera - configured successfully!")
         except Exception as e:
