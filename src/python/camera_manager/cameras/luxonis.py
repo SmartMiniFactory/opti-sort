@@ -8,13 +8,13 @@ import depthai as dai
 
 
 class Luxonis(BaseCamera):
-    def __init__(self, camera_id, config_path):
+    def __init__(self, camera_id):
         """
         Initialize the Luxonis Camera.
         :param camera_id: Unique ID for the camera.
         :param config_path: path to the configuration file exported by the manufacturer's application.
         """
-        super().__init__(camera_id, config_path)
+        super().__init__(camera_id)
         self.pipeline = dai.Pipeline()  # DepthAI pipeline for configuring streams
         self.device = None  # Luxonis device object
         self.configQueue = None
@@ -63,15 +63,15 @@ class Luxonis(BaseCamera):
         except Exception as e:
             raise RuntimeError(f"Failed to initialize Luxonis camera: {e}")
 
-    def configure(self):
+    def configure(self, config_path):
         """
         Configure the Luxonis camera using settings from the provided config dictionary.
         """
         try:
 
             print(self.pipeline.getCalibrationData())
+            print("STILL TODO")
 
-            print("Luxonis camera - configured successfully!")
         except Exception as e:
             raise RuntimeError(f"Failed to configure Luxonis camera: {e}")
 

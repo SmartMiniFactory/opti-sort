@@ -462,9 +462,6 @@ namespace OptiSort
             OnErrorReceived += LogError;
             OnExecutionTerminated += LogTermination;
 
-
-
-
             string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
             int processID = ExecuteScript(scriptPath);
 
@@ -517,14 +514,16 @@ namespace OptiSort
             // if the message is from a script, it is probably awaited from an user control, thus message received event is exposed with script processID
             if (message.TryGetProperty("script", out JsonElement scriptElement))
             {
-                foreach (var script in _activeProcesses)
+                if (scriptElement.TryGetProperty("PID", out JsonElement pidElement))
                 {
-                    bool pathsAreEqual = string.Equals(Path.GetFullPath(script.Value), Path.GetFullPath(scriptElement.GetString()), StringComparison.OrdinalIgnoreCase);
-                    if (pathsAreEqual)
+                    int PID = pidElement.GetInt32();
+                    foreach (var activeProcessID in _activeProcesses)
                     {
-                        int processID = script.Key;
-                        MqttMessageReceived?.Invoke(topic, message, processID); // expose mqtt message with process value (user forms need the process value to trigger event handlers)
-                        break;
+                        if (activeProcessID.Key == PID) 
+                        { 
+                            MqttMessageReceived?.Invoke(topic, message, PID); // expose mqtt message with process value (user forms need the process value to trigger event handlers)
+                            break;
+                        }
                     }
                 }
             }
@@ -877,23 +876,19 @@ namespace OptiSort
                     return 0;
             }
 
-            int processId = 1;
-            if (_activeProcesses.Count > 0)
-                processId = _activeProcesses.Keys.Max() + 1;
-   
-            _activeProcesses[processId] = scriptPath;
-
             var runner = new PythonProcessRunner();
 
+            int pid = runner.RunPythonScript(scriptPath);
+
             // Subscribe to runner events and associate with process ID
-            runner.OnOutputReceived += (output) => OnOutputReceived?.Invoke(processId, output);
-            runner.OnErrorReceived += (error) => OnErrorReceived?.Invoke(processId, error);
-            runner.OnExecutionTerminated += (status) => OnExecutionTerminated?.Invoke(processId, status);
+            runner.OnOutputReceived += (output) => OnOutputReceived?.Invoke(pid, output);
+            runner.OnErrorReceived += (error) => OnErrorReceived?.Invoke(pid, error);
+            runner.OnExecutionTerminated += (status) => OnExecutionTerminated?.Invoke(pid, status);
 
-            _runners[processId] = runner;
-            runner.RunPythonScript(scriptPath);
-
-            return processId;
+            _activeProcesses[pid] = scriptPath;
+            _runners[pid] = runner;
+            
+            return pid;
         }
 
         /// <summary>

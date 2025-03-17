@@ -22,14 +22,15 @@ script_dir = pathlib.Path(__file__).parent.resolve()
 script_name = pathlib.Path(__file__).name
 temp_folder = script_dir / "../../OptiSort/HMI/Temp"
 config_folder = script_dir / "../../OptiSort/HMI/Config"
+script_id = str(os.getpid())
 
 
 def publish(message, result):
     global script_dir
     if result is None:
-        payload = {"script": (script_dir / script_name).as_posix(), "message": message}
+        payload = {"script": {"path": (script_dir / script_name).as_posix(), "PID": script_id}, "message": message}
     else:
-        payload = {"script": (script_dir / script_name).as_posix(), "message": message, "result": result}
+        payload = {"script": {"path": (script_dir / script_name).as_posix(), "PID": script_id}, "message": message, "result": result}
     mqttc.publish('optisort/camera_calibration', str(json.dumps(payload)))
 
 

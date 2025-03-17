@@ -18,25 +18,25 @@ namespace OptiSort.Classes
         public event Action<string> OnErrorReceived;
         public event Action<bool> OnExecutionTerminated;
 
-        public void RunPythonScript(string scriptPath)
+        public int RunPythonScript(string scriptPath)
         {
             if (_isRunning)
             {
                 OnErrorReceived?.Invoke("Process already running.");
-                return;
+                return 0;
             }
 
             string pythonExe = LocatePythonInterpreter();
             if (string.IsNullOrEmpty(pythonExe))
             {
                 OnErrorReceived?.Invoke("Python interpreter not found.");
-                return;
+                return 0;
             }
 
             if (!File.Exists(scriptPath))
             {
                 OnErrorReceived?.Invoke("Python script not found.");
-                return;
+                return 0;
             }
 
             var processStartInfo = new ProcessStartInfo
@@ -74,6 +74,8 @@ namespace OptiSort.Classes
             _process.Start();
             _process.BeginOutputReadLine();
             _process.BeginErrorReadLine();
+
+            return _process.Id;
         }
 
         public void Stop()

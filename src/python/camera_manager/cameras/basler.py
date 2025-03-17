@@ -8,13 +8,13 @@ from pypylon import pylon
 
 
 class Basler(BaseCamera):
-    def __init__(self, camera_id, config_path):
+    def __init__(self, camera_id):
         """
         Initialize the Basler Camera.
         :param camera_id: Unique ID for the camera.
         :param config_path: path to the configuration file exported by the manufacturer's application.
         """
-        super().__init__(camera_id, config_path)
+        super().__init__(camera_id)
         self.camera = None  # Basler camera object
         self.converter = pylon.ImageFormatConverter()  # For converting frames to OpenCV-compatible format
         self.converter.OutputPixelFormat = pylon.PixelType_BGR8packed
@@ -39,18 +39,12 @@ class Basler(BaseCamera):
         except Exception as e:
             raise RuntimeError(f"Failed to initialize Basler camera: {e}")
 
-    def configure(self):
+    def configure(self, config_path):
         """
         Load a PFS file into the Basler camera configuration.
         """
         try:
-            # Create a node map for the camera
-            nodemap = self.camera.GetNodeMap()
-
-            # Use Basler's Pylon feature to load the PFS file
-            pylon.FeaturePersistence.Load(self.config_path, nodemap)
-            print(f"Successfully loaded PFS file: {self.config_path}")
-
+            pylon.FeaturePersistence.Load(str(config_path), self.camera.GetNodeMap(), True)
             print(f"Basler camera - configured successfully!")
         except Exception as e:
             raise RuntimeError(f"Failed to configure Basler camera: {e}")

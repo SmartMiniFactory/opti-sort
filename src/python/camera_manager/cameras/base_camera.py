@@ -1,12 +1,11 @@
 class BaseCamera:
-    def __init__(self, camera_id, config_path):
+    def __init__(self, camera_id):
         self.camera_id = camera_id
-        self.config_path = config_path
 
     def initialize(self):
         pass
 
-    def configure(self):
+    def configure(self, config_path):
         pass
 
     def acquisition_start(self):

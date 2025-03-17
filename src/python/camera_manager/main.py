@@ -203,23 +203,21 @@ if __name__ == "__main__":
     else:
         # Instance IDS camera
         print("Initializing IDS camera...")
-        ids_camera = Ids(camera_id="ids", config_path=ids_configfile)
+        ids_camera = Ids(camera_id="ids")
         ids_camera.initialize()
-        ids_camera.configure()
-        ids_camera.set_roi(0, 0, 1280, 1024)
+        ids_camera.configure(ids_configfile)
         ids_camera.acquisition_start()
 
         # Instance Basler camera
         print("Initializing Basler camera...")
-        basler_camera = Basler(camera_id="basler", config_path=basler_configfile)
+        basler_camera = Basler(camera_id="basler")
         basler_camera.initialize()
         basler_camera.acquisition_start()
 
         # Instance Luxonis camera
         print("Initializing Luxonis camera...")
-        luxonis_camera = Luxonis(camera_id="luxonis", config_path=luxonis_configfile)
+        luxonis_camera = Luxonis(camera_id="luxonis")
         luxonis_camera.initialize()
-        luxonis_camera.configure()
         luxonis_camera.acquisition_start()
 
     # Instance image processor class
