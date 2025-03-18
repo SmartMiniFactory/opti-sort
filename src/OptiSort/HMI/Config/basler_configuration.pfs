@@ -5,10 +5,7 @@ SequenceSetTotalNumber	2
 SequenceSetIndex	0
 SequenceSetExecutions	1
 SequenceAdvanceMode	Auto
-GainAuto	Off
-GainSelector	All
-GainRaw	850
-GainSelector	All
+GainAuto	Continuous
 BlackLevelSelector	All
 BlackLevelRaw	64
 BlackLevelSelector	All
@@ -67,9 +64,9 @@ TriggerControlImplementation	Legacy
 TriggerSelector	AcquisitionStart
 ExposureMode	Timed
 ExposureAuto	Off
-ExposureTimeRaw	1797771
-AcquisitionFrameRateEnable	0
-AcquisitionFrameRateAbs	409.5
+ExposureTimeRaw	3604
+AcquisitionFrameRateEnable	1
+AcquisitionFrameRateAbs	25
 LineSelector	Line1
 LineMode	Input
 LineSelector	Line2

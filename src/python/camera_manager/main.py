@@ -185,16 +185,9 @@ if __name__ == "__main__":
     mqtt_client.connect()
 
     # locate configuration files
-    ids_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_configuration.ini").resolve()
-    basler_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_config.pfs").resolve()
-    luxonis_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_configuration.ini").resolve()
-
-    """ids_config = {
-        "exposure": 10000,  # Microseconds
-        "gain": 1.5,
-        "resolution": (1280, 720),  # Width, Height
-        "pixel_format": "RGB8"
-    }"""
+    config_folder = pathlib.Path("../../OptiSort/HMI/Config").resolve()
+    ids_configfile = (config_folder / "ids_configuration.ini").resolve()
+    basler_configfile = (config_folder / "basler_configuration.pfs").resolve()
 
     if testing:
         print("Opening webcam...")
@@ -205,13 +198,14 @@ if __name__ == "__main__":
         print("Initializing IDS camera...")
         ids_camera = Ids(camera_id="ids")
         ids_camera.initialize()
-        # ids_camera.configure(ids_configfile)
+        #ids_camera.configure(ids_configfile)
         ids_camera.acquisition_start()
 
         # Instance Basler camera
         print("Initializing Basler camera...")
         basler_camera = Basler(camera_id="basler")
         basler_camera.initialize()
+        basler_camera.configure(basler_configfile)
         basler_camera.acquisition_start()
 
         # Instance Luxonis camera

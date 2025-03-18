@@ -2,6 +2,7 @@
 DESCRIPTION:
 This file is provided with the specific functionalities to interact with the cA1300-32gm camera by BASLER
 """
+import os
 
 from python.camera_manager.cameras.base_camera import BaseCamera
 from pypylon import pylon
@@ -31,8 +32,8 @@ class Basler(BaseCamera):
             if not devices:
                 raise RuntimeError("No Basler cameras found.")
 
-            # Create an InstantCamera object for the first camera found
-            self.camera = pylon.InstantCamera(tl_factory.CreateFirstDevice())
+
+            self.camera = pylon.InstantCamera(tl_factory.CreateFirstDevice()) # Create an InstantCamera object for the first camera found
             self.camera.Open()  # Open the camera for configuration and streaming
 
             print(f"Basler camera initialized successfully! Using device: {self.camera.GetDeviceInfo().GetModelName()}")
@@ -44,6 +45,12 @@ class Basler(BaseCamera):
         Load a PFS file into the Basler camera configuration.
         """
         try:
+
+            if not config_path.is_file():
+                raise FileNotFoundError(f"The file {config_path} does not exist.")
+            if not os.access(config_path, os.R_OK):  # os.access can still be used for checking readability
+                raise PermissionError(f"The file {config_path} is not readable.")
+
             pylon.FeaturePersistence.Load(str(config_path), self.camera.GetNodeMap(), True)
             print(f"Basler camera - configured successfully!")
         except Exception as e:

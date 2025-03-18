@@ -57,8 +57,7 @@ class Ids(BaseCamera):
     def configure(self, config_path):
         try:
             # Determine the current UEyeParametersetPath (str)
-            value = self.node_map.FindNode("UEyeParametersetPath").Value()
-            print(f'Current parameter path: {value}')
+            # value = self.node_map.FindNode("UEyeParametersetPath").Value()
 
             # Set UEyeParametersetPath to "C:/settings/MyCamera" (str)
             self.node_map.FindNode("UEyeParametersetPath").SetValue(str(config_path))
