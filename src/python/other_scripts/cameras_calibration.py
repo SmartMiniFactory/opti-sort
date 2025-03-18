@@ -9,7 +9,6 @@ the user to retake it."""
 
 import json
 import os
-
 import paho.mqtt.client as mqtt
 import cv2
 import yaml
@@ -19,10 +18,11 @@ import glob
 
 # SCRIPT IDENTIFICATION (get script path and define TEMP, CONFIG folder paths)
 script_dir = pathlib.Path(__file__).parent.resolve()
+script_id = str(os.getpid())
 script_name = pathlib.Path(__file__).name
 temp_folder = script_dir / "../../OptiSort/HMI/Temp"
 config_folder = script_dir / "../../OptiSort/HMI/Config"
-script_id = str(os.getpid())
+
 
 
 def publish(message, result):
@@ -89,6 +89,9 @@ for camera in ["ids", "basler", "luxonis"]:
     publish(f"Calibration in progress for camera {camera}", None)
 
     for picture_nr in range(15):
+
+        print(str(os.getpid()))
+
         # get picture path
         filename = f"{camera}_CalibrationImage_{picture_nr + 1:02d}"  # using format 01, 02, ... for digits
         absolutePath = (temp_folder / f"{filename}.bmp").resolve()

@@ -516,7 +516,8 @@ namespace OptiSort
             {
                 if (scriptElement.TryGetProperty("PID", out JsonElement pidElement))
                 {
-                    int PID = pidElement.GetInt32();
+                    int PID = int.Parse(pidElement.GetString());
+                    Console.WriteLine($"Mqtt PID: {PID}");
                     foreach (var activeProcessID in _activeProcesses)
                     {
                         if (activeProcessID.Key == PID) 

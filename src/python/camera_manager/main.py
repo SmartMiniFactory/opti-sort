@@ -205,7 +205,7 @@ if __name__ == "__main__":
         print("Initializing IDS camera...")
         ids_camera = Ids(camera_id="ids")
         ids_camera.initialize()
-        ids_camera.configure(ids_configfile)
+        # ids_camera.configure(ids_configfile)
         ids_camera.acquisition_start()
 
         # Instance Basler camera

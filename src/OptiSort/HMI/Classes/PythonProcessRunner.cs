@@ -42,7 +42,7 @@ namespace OptiSort.Classes
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = pythonExe,
-                Arguments = scriptPath,
+                Arguments = $"\"{scriptPath}\"",  // Add explicit quotes around the script path (to solve issues caused by whitespaces in the file path)
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
