@@ -79,27 +79,27 @@ def im2json(imdata):
 init: distinction between test and real camera; connection with camera and resource lock
 idle: waiting for configuration command; landing point after camera activity completes
 config: camera setup that depends on the specific need, next state depends on mqtt parameters
-all_streaming_freerun: all three cameras stream at lowest possible quality (intended for supervision)
-single_streaming_freerun: only the target camera is streaming at a fixed rate at maximum detail (intended for process)
-single_streaming_triggered: only the target camera acquires frames based on mqtt triggers, at max detail (int. for process)
+...
 """
-states = ['init', 'idle', 'config', 'all_streaming_freerun', 'single_streaming_freerun', 'single_streaming_triggered', 'exiting']
+states = ['init', 'webcam', 'cameras', 'idle', 'config', 'ready', 'streaming', 'processing', 'ended']
 
 # State Machine Class
 class StateMachine:
     def __init__(self):
         self.machine = Machine(model=self, states=states, initial='init')
-
+        self.machine.add_transition('initialize', 'init', 'idle', after=self.idle)
         self.machine.add_transition('set_idle', '*', 'idle', after=self.idle)
-        self.machine.add_transition('configure', 'idle', 'streaming') # state depends on parameters
-        self.machine.add_transition('freerun-all', 'config', 'all_streaming_freerun', after=self.streaming_A)
-        self.machine.add_transition('freerun-single', 'config', 'single_streaming_freerun', after=self.streaming_B)
-        self.machine.add_transition('freerun-triggered', 'config', 'single_streaming_triggered', after=self.streaming_C)
-        self.machine.add_transition('terminate', 'idle', 'ended', after=self.exit_script())
+        self.machine.add_transition('configure', 'idle', 'ready', after=self.ready)
+        self.machine.add_transition('start_streaming', 'ready', 'streaming', after=self.stream)
+        self.machine.add_transition('start_processing', 'ready', 'processing', after=self.process)
+        self.machine.add_transition('terminate', '*', 'ended', after=self.exit_script)
 
-        self.testing = None
-        self.mode = None
+        # flags
+        self.testing = None # should become true or false
+        self.streaming = False
+        self.processing = False
         self.target_camera = None
+
         self.webcam = None
         self.ids = None
         self.basler = None
@@ -113,33 +113,42 @@ class StateMachine:
             command = payload.get("command")
             # print(f"Parsed command: {command}")  # Debugging line
 
-            if command == "init":
-                self.testing = payload.get("webcam")  # should be a boolean
-                self.initialization()
+            if self.state == 'init':
 
+                if command == "webcam":
+                    self.testing = True
+                    self.initialize()
 
-            elif command == "config":
-                if payload.get("mode") == "idle-streaming":
-                    self.mode = 'A'
-                    self.configure()
-
-                elif payload.get("mode") == "simple-process":
-                    self.mode = 'B'
-                    self.configure()
-
-                elif payload.get("mode") == "optimized-process":
-                    self.mode = 'C'
-                    self.configure()
+                elif command == "cameras":
+                    self.testing = False
+                    self.initialize()
 
                 else:
-                    publish("Unrecognized operational mode", None)
+                    publish("You should set webcam or cameras first", None)
 
+            else:
+                if command == "streaming":
+                    self.streaming = True
+                    self.configure()
 
-            elif command == "reset":
-                self.reset()
+                elif command == "processing":
+                    self.processing = True
+                    self.configure()
 
-            elif command == "exit":
-                self.exit()
+                elif command == "start" and self.streaming:
+                    self.start_streaming()
+
+                elif command == "start" and self.processing:
+                    self.start_processing()
+
+                elif command == "stop":
+                    self.set_idle()
+
+                elif command == "exit":
+                    self.terminate()
+
+                else:
+                    publish("Command not recognized", None)
 
             # print(f"State changed to: {self.state}")  # Debugging line
 
@@ -148,6 +157,9 @@ class StateMachine:
 
 
     def initialization(self):
+
+        publish("I'm initializing", None)
+
         if self.testing:
             self.webcam = cv2.VideoCapture(0)
 
@@ -169,59 +181,30 @@ class StateMachine:
 
     def idle(self):
         publish("Cameras initialized; waiting for config parameters", None)
+        self.streaming = False
+        self.processing = False
 
     def configuration(self):
 
         ids_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_configuration.ini").resolve()
         basler_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_config.pfs").resolve()
 
-        if self.mode == 'A':
-            if not self.testing:
-                self.ids.configure(ids_configfile)
-                self.basler.configure(basler_configfile)
-                self.luxonis.configure(None)
-            self.streaming_A()
-
-        elif self.mode == 'B':
-            if self.target_camera == 'ids':
-                self.ids.acquisition_start()
-                self.streaming_B(self.ids, "optisort/ids/stream")
-
-            elif self.target_camera == 'basler':
-                self.basler.acquisition_start()
-                self.streaming_B(self.basler, "optisort/basler/stream")
-
-            elif self.target_camera == 'luxonis':
-                self.luxonis.acquisition_start()
-                self.streaming_B(self.luxonis, "optisort/luxonis/stream")
-
-        elif self.mode == 'C':
-            if self.target_camera == 'ids':
-                self.streaming_C(self.ids)
-            elif self.target_camera == 'basler':
-                self.streaming_C(self.basler)
-            elif self.target_camera == 'luxonis':
-                self.streaming_C(self.luxonis)
+        publish("I'm configuring", None)
 
 
-    # async def streaming_A(self):
-
-    async def streaming_B(self, target_camera, topic):
-        while self.state == 'streaming':
-            try:
-                frame = target_camera.capture_frame()
-                if frame is not None:
-                    encoded_frame = cv2.imencode(".jpg", frame, self.encode_param)[1].tobytes()
-                    mqttc.publish(topic, im2json(encoded_frame))
-
-                await time.sleep(0.5)  # Set frame rate independently for each camera
-            except Exception as e:
-                print(f"Error capturing frame from {topic}: {e}")
-
-    # async def streaming_C(self, target_camera):
+    def ready(self):
+        publish("Cameras configured; send start command", None)
 
 
-    def exit_scritp(self):
+    def process(self):
+        publish("I'm processing", None)
+
+    def stream(self):
+        publish("I'm streaming", None)
+
+
+    def exit_script(self):
+        # TODO: release resources
         publish("Exiting state machine and releasing resources...", None)
         sys.exit(0)
 
