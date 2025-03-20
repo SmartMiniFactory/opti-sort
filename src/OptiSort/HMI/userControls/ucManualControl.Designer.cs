@@ -41,6 +41,7 @@
             this.btnFlexibowlBw = new System.Windows.Forms.Button();
             this.lblFlexibowl = new System.Windows.Forms.Label();
             this.btnFlexibowlFw = new System.Windows.Forms.Button();
+            this.btnLight = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,6 +50,7 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Controls.Add(this.btnLight, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.btn_detectionAlgorithm, 0, 8);
             this.tableLayoutPanel1.Controls.Add(this.btn_coordinateCalibration, 1, 7);
             this.tableLayoutPanel1.Controls.Add(this.btn_lensCalibration, 0, 7);
@@ -232,6 +234,19 @@
             this.btnFlexibowlFw.UseVisualStyleBackColor = true;
             this.btnFlexibowlFw.Click += new System.EventHandler(this.btnFlexibowlFw_Click);
             // 
+            // btnLight
+            // 
+            this.btnLight.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnLight.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnLight.Location = new System.Drawing.Point(683, 227);
+            this.btnLight.Margin = new System.Windows.Forms.Padding(100, 2, 100, 2);
+            this.btnLight.Name = "btnLight";
+            this.btnLight.Size = new System.Drawing.Size(383, 71);
+            this.btnLight.TabIndex = 12;
+            this.btnLight.Text = "Turn On Light";
+            this.btnLight.UseVisualStyleBackColor = true;
+            this.btnLight.Click += new System.EventHandler(this.btnLight_Click);
+            // 
             // ucManualControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -260,5 +275,6 @@
         private System.Windows.Forms.Button btn_lensCalibration;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btn_detectionAlgorithm;
+        private System.Windows.Forms.Button btnLight;
     }
 }

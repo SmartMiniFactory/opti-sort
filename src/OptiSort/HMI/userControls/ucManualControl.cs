@@ -101,5 +101,10 @@ namespace OptiSort.userControls
             ucCoordinateReferenceFrame ucCoordinateReferenceFrame = new ucCoordinateReferenceFrame(_manager);
             _manager.RequestNewUcLoading(ucCoordinateReferenceFrame);
         }
+
+        private void btnLight_Click(object sender, EventArgs e)
+        {
+            _manager.Cobra600.ToggleDigitalOutput(1097);
+        }
     }
 }
