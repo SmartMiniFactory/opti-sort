@@ -449,9 +449,7 @@ namespace OptiSort
         {
             if (StatusMqttClient)
             {
-                UnsubscribeMqttTopic(StreamingTopic);
                 StreamingTopic = newTopic;
-                SubscribeMqttTopic(StreamingTopic);
             }
         }
 
@@ -542,6 +540,8 @@ namespace OptiSort
         /// <param name="message"></param>
         private void AddBitmapToQueue(string topic, JsonElement message)
         {
+
+            Console.WriteLine($"Adding bitmap to queue {topic}");
 
             // coverting json into bitmap
             string base64Image = message.GetProperty("image").GetString();
