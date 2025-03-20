@@ -22,6 +22,7 @@ namespace OptiSort.userControls
         private bool _idsShot = false;
         private bool _luxonisShot = false;
         private bool _baslerShot = false;
+        private DateTime _elapsedTime;
         private int _pythonProcessId;
 
         public int Shots
@@ -177,6 +178,7 @@ namespace OptiSort.userControls
             Cursor = Cursors.WaitCursor;
             _manager.RequestScreenshots = true;
             _manager.BitmapQueued += SaveShots;
+            _elapsedTime = DateTime.Now;
         }
 
 
@@ -279,16 +281,25 @@ namespace OptiSort.userControls
                     {
                         _manager.BitmapQueued -= SaveShots;
                         _manager.RequestScreenshots = false;
-
                         _idsShot = false;
                         _luxonisShot = false;
                         _baslerShot = false;
-
                         Cursor = Cursors.Default;
                         Shots++;
+                    }else if ((DateTime.Now - _elapsedTime).TotalSeconds > 5)
+                    {
+                        _manager.BitmapQueued -= SaveShots;
+                        _manager.RequestScreenshots = false;
+                        _idsShot = false;
+                        _luxonisShot = false;
+                        _baslerShot = false;
+                        Cursor = Cursors.Default;
+                        Shots++;
+                        MessageBox.Show("Timeout reached. MQTT streamings might have a problem: check all the topics or inform the developer.");
                     }
                 }));
             }
+
         }
 
 
