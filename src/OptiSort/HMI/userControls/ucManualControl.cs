@@ -104,7 +104,7 @@ namespace OptiSort.userControls
 
         private void btnLight_Click(object sender, EventArgs e)
         {
-            _manager.Cobra600.ToggleDigitalOutput(1097);
+            _manager.Cobra600.ToggleDigitalOutput(99);
         }
     }
 }
