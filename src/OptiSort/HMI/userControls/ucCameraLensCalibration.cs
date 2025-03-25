@@ -151,9 +151,11 @@ namespace OptiSort.userControls
                 this.Invoke((MethodInvoker)(() =>
                 {                
                     _manager.Log("Python camera calibration file has closed!", false, false);
+                    _manager.MqttMessageReceived -= MqttMessageReceived;
                     _manager.OnErrorReceived -= PythonErrorHandler;
                     _manager.OnExecutionTerminated -= PythonTerminationHandler;
                     _manager.UnsubscribeMqttTopic("optisort/camera_calibration");
+                    _manager.StopExecution(_pythonProcessId); // needed to reset active processes memory
                 }));
             }
         }
@@ -197,6 +199,7 @@ namespace OptiSort.userControls
             // launch python file and memorize processId
             string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
             _pythonProcessId = _manager.ExecuteScript(scriptPath);
+            Console.Write($"Pythnon started with process {_pythonProcessId}");
             _manager.Log("Camera calibration file launched", false, false);
         }
 

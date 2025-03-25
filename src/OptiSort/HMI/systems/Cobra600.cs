@@ -205,9 +205,9 @@ namespace OptiSort
                 bool ioStatus = Controller.GetDigitalIO(channel);
 
                 if(ioStatus)
-                    Controller.SetRobotDigitalIO(-channel);
+                    Controller.SetDigitalIO(-channel);
                 else
-                    Controller.SetRobotDigitalIO(channel);
+                    Controller.SetDigitalIO(channel);
 
                 bool newStatus = Controller.GetDigitalIO(channel);
 

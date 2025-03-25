@@ -63,7 +63,7 @@ async def main():
         cameras = [webcam, webcam, webcam]
         topics = [
             "optisort/ids/stream",
-            "optisort/luxo/stream",
+            "optisort/basler/stream",
             "optisort/luxonis/stream",
         ]
     else:

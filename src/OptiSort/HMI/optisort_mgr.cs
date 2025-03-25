@@ -541,8 +541,6 @@ namespace OptiSort
         private void AddBitmapToQueue(string topic, JsonElement message)
         {
 
-            Console.WriteLine($"Adding bitmap to queue {topic}");
-
             // coverting json into bitmap
             string base64Image = message.GetProperty("image").GetString();
             Bitmap image = JsonToBitmap(base64Image); // Decode the base64 image
