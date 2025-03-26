@@ -10,9 +10,9 @@ import json
 import xml.etree.ElementTree as ET
 from transitions import Machine
 import cv2
-from cameras.ids import Ids
-from cameras.basler import Basler
-from cameras.luxonis import Luxonis
+# from cameras.ids import Ids
+# from cameras.basler import Basler
+# from cameras.luxonis import Luxonis
 
 # Get script details and localization
 script_dir = pathlib.Path(__file__).parent.resolve()
@@ -145,6 +145,7 @@ class StateMachine:
                     self.set_idle()
 
                 elif command == "exit":
+                    publish("terminating program", None)
                     self.terminate()
 
                 else:
@@ -164,15 +165,15 @@ class StateMachine:
             self.webcam = cv2.VideoCapture(0)
 
         else:
-            self.ids = Ids(camera_id="ids")
+            # self.ids = Ids(camera_id="ids")
             self.ids.initialize()
             publish("IDS camera initialized", None)
 
-            self.basler = Basler(camera_id="basler")
+            # self.basler = Basler(camera_id="basler")
             self.basler.initialize()
             publish("Basler camera initalized", None)
 
-            self.luxonis = Luxonis(camera_id="luxonis")
+            # self.luxonis = Luxonis(camera_id="luxonis")
             self.luxonis.initialize()
             publish("Luxonis camera initialized", None)
 

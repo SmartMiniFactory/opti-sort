@@ -2,6 +2,7 @@
 using Ace.UIBuilder.Client.Controls.Tools.WindowsForms;
 using FlexibowlLibrary;
 using OptiSort.Classes;
+using OptiSort.systems;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -24,10 +25,15 @@ namespace OptiSort
 
     internal class optisort_mgr : INotifyPropertyChanged
     {
+
+        private frmMain _frmMain;
+
         // Services
         public MQTT MqttClient { get; set; }
         public Cobra600 Cobra600 { get; set; }
         public Flexibowl Flexibowl { get; set; }
+        public CameraManager Cameramanager { get; set; }
+
 
 
         // Python runner
@@ -162,8 +168,10 @@ namespace OptiSort
         // ---------------------------------- CONSTRUCTOR -------------------------------------
         // -----------------------------------------------------------------------------------
 
-        public optisort_mgr()
+        public optisort_mgr(frmMain frmMain)
         {
+            _frmMain = frmMain;
+
             // Instance MQTT class
             string mqttBroker = Properties.Settings.Default.mqtt_broker;
             string mqttPort = Properties.Settings.Default.mqtt_port;
@@ -185,6 +193,9 @@ namespace OptiSort
             // Instance flexibowl class
             string flexibowlIP = Properties.Settings.Default.flexibowl_IP;
             Flexibowl = new Flexibowl(flexibowlIP);
+
+            // Instance class dedicated to managing cameras
+            Cameramanager = new CameraManager(this, frmMain);
 
             // Instance class dedicated to running python files
             _activeProcesses = new Dictionary<int, string>();
@@ -456,32 +467,9 @@ namespace OptiSort
 
         public void ConnectCameras()
         {
-            OnOutputReceived += LogOutput;
-            OnErrorReceived += LogError;
-            OnExecutionTerminated += LogTermination;
 
-            string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
-            int processID = ExecuteScript(scriptPath);
+            Cameramanager.ConnectCameraManager();
 
-            Log($"ProcessID {processID}");
-
-        }
-
-        private void LogOutput(int id, string output)
-        {
-            Console.WriteLine($"Output received ({id}): {output}");
-        }
-
-        private void LogError(int id, string output)
-        {
-            _activeProcesses.Remove(id);
-            Console.WriteLine($"Error received ({id}): {output}");
-        }
-
-        private void LogTermination(int id, bool output)
-        {
-            _activeProcesses.Remove(id);
-            Console.WriteLine($"Script ended ({id}): {output}");
         }
 
         public void DisconnectCameras()
@@ -896,10 +884,16 @@ namespace OptiSort
         /// <param name="processId"></param>
         public void StopExecution(int processId)
         {
+
+            if (_activeProcesses.ContainsKey(processId))
+            {
+                _activeProcesses.Remove(processId);
+            }
+
             if (_runners.ContainsKey(processId))
             {
                 _runners[processId].Stop();
-                _runners.Remove(processId);
+                _runners.Remove(processId);    
             }
         }
 

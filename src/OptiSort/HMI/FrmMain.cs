@@ -45,7 +45,7 @@ namespace OptiSort
         {
             InitializeComponent();
 
-            _manager = new optisort_mgr();
+            _manager = new optisort_mgr(this);
 
             // Display default user control
             ucManualControl ucManualControl = new ucManualControl(_manager);
@@ -388,12 +388,20 @@ namespace OptiSort
 
         private void OnLogEvent(optisort_mgr.LogEntry logEntry)
         {
-            // Update the ListBox with the new log entry
-            lstLog.Items.Add(logEntry);
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => OnLogEvent(logEntry)));
+            }
+            else
+            {
+                // Update the ListBox with the new log entry
+                lstLog.Items.Add(logEntry);
 
-            // Ensure the last row is visible
-            lstLog.TopIndex = lstLog.Items.Count - 1;
+                // Ensure the last row is visible
+                lstLog.TopIndex = lstLog.Items.Count - 1;
+            }
         }
+
 
         public void LstLog_DrawItem(object sender, DrawItemEventArgs e)
         {

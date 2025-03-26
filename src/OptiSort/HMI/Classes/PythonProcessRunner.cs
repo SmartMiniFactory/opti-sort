@@ -60,7 +60,10 @@ namespace OptiSort.Classes
             _process.ErrorDataReceived += (sender, e) =>
             {
                 if (!string.IsNullOrEmpty(e.Data))
+                {
+                    Console.WriteLine($"Python Error: {e.Data}"); // Debugging
                     OnErrorReceived?.Invoke(e.Data);
+                }
             };
 
             _process.EnableRaisingEvents = true;
