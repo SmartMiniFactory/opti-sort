@@ -54,6 +54,11 @@ namespace OptiSort.systems
             _scriptID = _manager.ExecuteScript(scriptPath);
         }
 
+        public void DisconnectCameraManager()
+        {
+            SendCommand("exit");
+        }
+
 
         private void MqttMessageReceived(string topic, JsonElement message, int processID)
         {

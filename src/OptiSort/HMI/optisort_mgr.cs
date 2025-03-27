@@ -12,6 +12,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
 using System.Text.Json;
@@ -54,6 +55,7 @@ namespace OptiSort
         private bool _statusScaraEmulation = true;
         private bool _statusFelxibowl = false;
         private bool _statusMqttClient = false;
+        private bool _statusCameraManager = false;
         private string _streamingTopic = null;
         private bool _requestScreenshots = false;
 
@@ -90,6 +92,18 @@ namespace OptiSort
                 {
                     _statusMqttClient = value;
                     OnPropertyChanged(nameof(StatusMqttClient));
+                }
+            }
+        }
+        public bool StatusCameraManager
+        {
+            get { return _statusCameraManager; }
+            set
+            {
+                if (_statusCameraManager != value) // setting value different from actual value -> store new value and trigger event
+                {
+                    _statusCameraManager = value;
+                    OnPropertyChanged(nameof(StatusCameraManager));
                 }
             }
         }
@@ -454,7 +468,6 @@ namespace OptiSort
         }
 
 
- 
         public void UpdateStreamingTopic(string newTopic)
         {
             if (StatusMqttClient)
@@ -473,14 +486,20 @@ namespace OptiSort
 
         public void ConnectCameras()
         {
-
-            Cameramanager.ConnectCameraManager();
+            if (StatusMqttClient)
+            {
+                Cameramanager.ConnectCameraManager();
+                StatusCameraManager = true;
+            }
+            else
+                MessageBox.Show("Cannot connect to camera manager: MQTT client is not connected", "MQTT REQUIRED!");
 
         }
 
         public void DisconnectCameras()
         {
-
+            Cameramanager.DisconnectCameraManager();
+            StatusCameraManager = false;
         }
 
 

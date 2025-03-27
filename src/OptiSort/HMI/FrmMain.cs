@@ -226,10 +226,13 @@ namespace OptiSort
             btnEmulateScara.Enabled = !_manager.StatusScara;
             btnFlexibowlConnect.Enabled = !_manager.StatusFlexibowl;
             btnMqttConnect.Enabled = !_manager.StatusMqttClient;
+            btnCamerasConnect.Enabled = !_manager.StatusCameraManager;
+
             // disconnection buttons should be enabled when status is true, disabled when status is false
             btnScaraDisconnect.Enabled = _manager.StatusScara;
             btnFlexibowlDisconnect.Enabled = _manager.StatusFlexibowl;
             btnMqttDisconnect.Enabled = _manager.StatusMqttClient;
+            btnCamerasDisconnect.Enabled = _manager.StatusCameraManager;
 
             if (e.PropertyName == nameof(_manager.StatusScara))
             {
@@ -302,6 +305,24 @@ namespace OptiSort
                     lblMqttStatusValue.ForeColor = Color.Red;
                     btnMqttConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                     btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
+                }
+            }
+
+            if (e.PropertyName == nameof(_manager.StatusCameraManager))
+            {
+                if (_manager.StatusCameraManager == true)
+                {
+                    lblCamerasStatusValue.Text = "Online";
+                    lblCamerasStatusValue.ForeColor = Color.Green;
+                    btnCamerasConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
+                    btnCamerasDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
+                }
+                else
+                {
+                    lblCamerasStatusValue.Text = "Offline";
+                    lblCamerasStatusValue.ForeColor = Color.Red;
+                    btnCamerasConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
+                    btnCamerasDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                 }
             }
         }
