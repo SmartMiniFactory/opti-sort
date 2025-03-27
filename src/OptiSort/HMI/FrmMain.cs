@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using FlexibowlLibrary;
 using System.Drawing.Text;
 using System.IO;
+using OptiSort.systems;
 
 
 namespace OptiSort
@@ -80,11 +81,11 @@ namespace OptiSort
             pnlRobotView.Controls.Clear();
             pnlRobotView.Controls.Add(ucRobotSimulation);
 
-            
+
             // attach events
             _manager.PropertyChanged += RefreshStatusBar;
             _manager.NewUserControlRequested += AddNewUc;
-            
+
 
             // log box setup
             _manager.LogEvent += OnLogEvent;
@@ -98,7 +99,7 @@ namespace OptiSort
         // -------------------------------- FORM NAVIGATION ----------------------------------
         // -----------------------------------------------------------------------------------
 
-  
+
 
         private void CleanPnlCurrentUc()
         {
@@ -257,7 +258,7 @@ namespace OptiSort
                 }
             }
 
-            if(e.PropertyName == nameof(_manager.StatusScaraEmulation))
+            if (e.PropertyName == nameof(_manager.StatusScaraEmulation))
             {
                 if (_manager.StatusScaraEmulation)
                     btnEmulateScara.BackgroundImage = Properties.Resources.emulationEnabled_2x2_pptx;
@@ -314,7 +315,7 @@ namespace OptiSort
             {
                 // add robot rendering to panel
                 pnlRobotView.Controls.Clear();
-                pnlRobotView.Controls.Add(_manager.Cobra600.SimulationContainerControl); 
+                pnlRobotView.Controls.Add(_manager.Cobra600.SimulationContainerControl);
                 pnlRobotView.Refresh();
             }
 
@@ -383,7 +384,7 @@ namespace OptiSort
 
         private void cmbCameras_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _manager.UpdateStreamingTopic(_camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic); 
+            _manager.UpdateStreamingTopic(_camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic);
         }
 
         private void OnLogEvent(optisort_mgr.LogEntry logEntry)
@@ -420,6 +421,5 @@ namespace OptiSort
             e.DrawFocusRectangle();
         }
 
-        
     }
 }

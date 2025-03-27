@@ -454,14 +454,20 @@ namespace OptiSort
         }
 
 
-        // TODO: to revise
-
+ 
         public void UpdateStreamingTopic(string newTopic)
         {
             if (StatusMqttClient)
             {
                 StreamingTopic = newTopic;
             }
+        }
+
+
+        public async void PublishMqttMessage(string topic, object message)
+        {
+            string mqttClientName = Properties.Settings.Default.mqtt_client;
+            _ = await MqttClient.PublishMessage(mqttClientName, topic, message);
         }
 
 

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -15,8 +16,10 @@ namespace OptiSort.systems
         private optisort_mgr _manager;
         private frmMain _frmMain;
         private int _scriptID;
+        
+        public int Status { get; private set; }
 
-        public enum Status
+        public enum status
         {
             init, 
             webcam, 
@@ -36,6 +39,7 @@ namespace OptiSort.systems
             _frmMain = frmMain;
         } 
 
+
         public void ConnectCameraManager()
         {
             // subscribe to mqtt topic to receive updates from python file
@@ -50,6 +54,7 @@ namespace OptiSort.systems
             _scriptID = _manager.ExecuteScript(scriptPath);
         }
 
+
         private void MqttMessageReceived(string topic, JsonElement message, int processID)
         {
             if (processID == _scriptID)
@@ -58,6 +63,21 @@ namespace OptiSort.systems
                 {
                     string msg = messageElement.GetString();
                     _manager.Log("Camera manager over MQTT: " + msg, false, false);
+
+                    if (msg.Contains("connected"))
+                    {
+                        UpdateCameraManagerStatus(status.init);
+                        SendCommand("webcam");
+                    }
+                    else if (msg.Contains("parameters"))
+                    {
+                        SendCommand("streaming");
+                    }
+                    else if (msg.Contains("configured"))
+                    {
+                        SendCommand("start");
+                    }
+
                 }
             }
         }
@@ -85,7 +105,21 @@ namespace OptiSort.systems
             }
         }
 
+        private void UpdateCameraManagerStatus(status status)
+        {
+            Status = (int)status;
+        }
 
-    
+        private void SendCommand(string cmd)
+        {
+            var data = new
+            {
+                command = cmd
+            };
+            _manager.PublishMqttMessage("optisort/camera_manager/input", data);
+        }
+
     }
+
 }
+
