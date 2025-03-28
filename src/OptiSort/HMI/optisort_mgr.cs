@@ -167,7 +167,7 @@ namespace OptiSort
         public string TempFolder { get; private set; } = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp"));
         public string ConfigFolder { get; private set; } = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Config"));
 
-        
+
         // Logging
         public event Action<LogEntry> LogEvent; // Event to notify subscribers
         public class LogEntry
@@ -218,7 +218,7 @@ namespace OptiSort
         }
 
 
-        
+
         private void OnPropertyUpdate(object sender, PropertyChangedEventArgs e)
         {
             // This method is triggered anytime one of the properties defined under "status" gets updated
@@ -531,8 +531,8 @@ namespace OptiSort
                     Console.WriteLine($"Mqtt PID: {PID}");
                     foreach (var activeProcessID in _activeProcesses)
                     {
-                        if (activeProcessID.Key == PID) 
-                        { 
+                        if (activeProcessID.Key == PID)
+                        {
                             MqttMessageReceived?.Invoke(topic, message, PID); // expose mqtt message with process value (user forms need the process value to trigger event handlers)
                             break;
                         }
@@ -583,11 +583,11 @@ namespace OptiSort
                 if (((DateTime.Now - lastNonStreamingUpdate).TotalMilliseconds >= NonStreamingUpdateInterval) || RequestScreenshots == true) // if screenshot mode is disabled, update queue with reduced frequency (discard some mqtt messages to avoid overload)
                 {
                     ConcurrentQueue<(Bitmap, DateTime, DateTime)> nonStreamingQueue = GetQueueForTopic(topic);
-                    
-                    if(nonStreamingQueue.Count > 0 || RequestScreenshots == true)
+
+                    if (nonStreamingQueue.Count > 0 || RequestScreenshots == true)
                         nonStreamingQueue.TryDequeue(out _);
 
-                    nonStreamingQueue.Enqueue((image, messageTimestamp, DateTime.Now)); 
+                    nonStreamingQueue.Enqueue((image, messageTimestamp, DateTime.Now));
                     lastNonStreamingUpdate = DateTime.Now; // update last queuing time for non-streaming topics
                 }
             }
@@ -889,7 +889,6 @@ namespace OptiSort
             }
 
             var runner = new PythonProcessRunner();
-
             int pid = runner.RunPythonScript(scriptPath);
 
             // Subscribe to runner events and associate with process ID
@@ -899,7 +898,7 @@ namespace OptiSort
 
             _activeProcesses[pid] = scriptPath;
             _runners[pid] = runner;
-            
+
             return pid;
         }
 
@@ -917,12 +916,20 @@ namespace OptiSort
 
             if (_runners.ContainsKey(processId))
             {
-                _runners[processId].Stop();
-                _runners.Remove(processId);    
+                _runners[processId].Stop(); // killing the background python process
+                _runners.Remove(processId);
             }
         }
 
-        #endregion
+        public void KillAllProcesses()
+        {
+            var runnersCopy = _runners.Keys.ToList(); // copying list to avoid iteration exeption triggering
 
+            foreach (var key in runnersCopy)
+            {
+                _runners[key].Stop();
+            }
+        }
+        #endregion
     }
 }

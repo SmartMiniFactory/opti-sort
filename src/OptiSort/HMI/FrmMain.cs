@@ -34,7 +34,7 @@ namespace OptiSort
         }
         List<Cameras> _camerasList = new List<Cameras> { }; // TODO: review definition
 
-        private optisort_mgr _manager;
+        internal optisort_mgr manager;
 
 
 
@@ -46,10 +46,10 @@ namespace OptiSort
         {
             InitializeComponent();
 
-            _manager = new optisort_mgr(this);
+            manager = new optisort_mgr(this);
 
             // Display default user control
-            ucManualControl ucManualControl = new ucManualControl(_manager);
+            ucManualControl ucManualControl = new ucManualControl(manager);
             ucManualControl.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Clear();
             pnlCurrentUc.Controls.Add(ucManualControl);
@@ -66,32 +66,40 @@ namespace OptiSort
             cmbCameras.DataSource = _camerasList;
             cmbCameras.DisplayMember = "Text";
             cmbCameras.ValueMember = "ID";
-            _manager.StreamingTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
+            manager.StreamingTopic = _camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic;
 
             // init camera view
-            ucCameraStream ucCameraStream = new ucCameraStream(_manager);
+            ucCameraStream ucCameraStream = new ucCameraStream(manager);
             ucCameraStream.Dock = DockStyle.Fill;
             pnlCameraStream.Controls.Clear();
             pnlCameraStream.Controls.Add(ucCameraStream);
 
 
             // Initialize robot panel view
-            ucRobotSimulation ucRobotSimulation = new ucRobotSimulation(_manager);
+            ucRobotSimulation ucRobotSimulation = new ucRobotSimulation(manager);
             ucRobotSimulation.Dock = DockStyle.Fill;
             pnlRobotView.Controls.Clear();
             pnlRobotView.Controls.Add(ucRobotSimulation);
 
 
             // attach events
-            _manager.PropertyChanged += RefreshStatusBar;
-            _manager.NewUserControlRequested += AddNewUc;
+            manager.PropertyChanged += RefreshStatusBar;
+            manager.NewUserControlRequested += AddNewUc;
 
 
             // log box setup
-            _manager.LogEvent += OnLogEvent;
+            manager.LogEvent += OnLogEvent;
             lstLog.ItemHeight = 15; // adjusting interline between log rows
 
-            _manager.Log("OptiSort ready for operation: please connect systems (Scara robot, flexibowl, MQTT service) to begin", false, false);
+            manager.Log("OptiSort ready for operation: please connect systems (Scara robot, flexibowl, MQTT service) to begin", false, false);
+
+            // attach form closing event to process killer
+            this.FormClosing += FrmMain_FormClosing;
+        }
+
+        private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            manager.KillAllProcesses(); // terminate all the python-related background processes
         }
 
 
@@ -128,7 +136,7 @@ namespace OptiSort
 
             CleanPnlCurrentUc();
 
-            ucProcessView ucProcessView = new ucProcessView(_manager);
+            ucProcessView ucProcessView = new ucProcessView(manager);
             ucProcessView.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Add(ucProcessView);
 
@@ -171,7 +179,7 @@ namespace OptiSort
         {
             CleanPnlCurrentUc();
 
-            ucManualControl ucManualControl = new ucManualControl(_manager);
+            ucManualControl ucManualControl = new ucManualControl(manager);
             ucManualControl.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Add(ucManualControl);
 
@@ -192,7 +200,7 @@ namespace OptiSort
         {
             CleanPnlCurrentUc();
 
-            ucConfiguration ucConfiguration = new ucConfiguration(_manager);
+            ucConfiguration ucConfiguration = new ucConfiguration(manager);
             ucConfiguration.Dock = DockStyle.Fill;
             pnlCurrentUc.Controls.Add(ucConfiguration);
 
@@ -222,27 +230,27 @@ namespace OptiSort
             // Check which property changed and trigger corresponding logic
 
             // connection buttons should be enabled when status is false, disabled when status is true
-            btnScaraConnect.Enabled = !_manager.StatusScara;
-            btnEmulateScara.Enabled = !_manager.StatusScara;
-            btnFlexibowlConnect.Enabled = !_manager.StatusFlexibowl;
-            btnMqttConnect.Enabled = !_manager.StatusMqttClient;
-            btnCamerasConnect.Enabled = !_manager.StatusCameraManager;
+            btnScaraConnect.Enabled = !manager.StatusScara;
+            btnEmulateScara.Enabled = !manager.StatusScara;
+            btnFlexibowlConnect.Enabled = !manager.StatusFlexibowl;
+            btnMqttConnect.Enabled = !manager.StatusMqttClient;
+            btnCamerasConnect.Enabled = !manager.StatusCameraManager;
 
             // disconnection buttons should be enabled when status is true, disabled when status is false
-            btnScaraDisconnect.Enabled = _manager.StatusScara;
-            btnFlexibowlDisconnect.Enabled = _manager.StatusFlexibowl;
-            btnMqttDisconnect.Enabled = _manager.StatusMqttClient;
-            btnCamerasDisconnect.Enabled = _manager.StatusCameraManager;
+            btnScaraDisconnect.Enabled = manager.StatusScara;
+            btnFlexibowlDisconnect.Enabled = manager.StatusFlexibowl;
+            btnMqttDisconnect.Enabled = manager.StatusMqttClient;
+            btnCamerasDisconnect.Enabled = manager.StatusCameraManager;
 
-            if (e.PropertyName == nameof(_manager.StatusScara))
+            if (e.PropertyName == nameof(manager.StatusScara))
             {
-                if (_manager.StatusScara == true)
+                if (manager.StatusScara == true)
                 {
                     lblScaraStatusValue.Text = "Online";
                     lblScaraStatusValue.ForeColor = Color.Green;
                     btnScaraConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                     btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
-                    if (_manager.StatusScaraEmulation)
+                    if (manager.StatusScaraEmulation)
                         btnEmulateScara.BackgroundImage = Properties.Resources.emulationDisabled_2x2_pptx;
                     else
                         btnEmulateScara.BackgroundImage = Properties.Resources.robotDisabled_2x2_pptx;
@@ -254,16 +262,16 @@ namespace OptiSort
                     lblScaraStatusValue.ForeColor = Color.Red;
                     btnScaraConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                     btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
-                    if (_manager.StatusScaraEmulation)
+                    if (manager.StatusScaraEmulation)
                         btnEmulateScara.BackgroundImage = Properties.Resources.emulationEnabled_2x2_pptx;
                     else
                         btnEmulateScara.BackgroundImage = Properties.Resources.robotEnabled_2x2_pptx;
                 }
             }
 
-            if (e.PropertyName == nameof(_manager.StatusScaraEmulation))
+            if (e.PropertyName == nameof(manager.StatusScaraEmulation))
             {
-                if (_manager.StatusScaraEmulation)
+                if (manager.StatusScaraEmulation)
                     btnEmulateScara.BackgroundImage = Properties.Resources.emulationEnabled_2x2_pptx;
 
                 else
@@ -272,9 +280,9 @@ namespace OptiSort
 
 
 
-            if (e.PropertyName == nameof(_manager.StatusFlexibowl))
+            if (e.PropertyName == nameof(manager.StatusFlexibowl))
             {
-                if (_manager.StatusFlexibowl == true)
+                if (manager.StatusFlexibowl == true)
                 {
                     lblFlexibowlStatusValue.Text = "Online";
                     lblFlexibowlStatusValue.ForeColor = Color.Green;
@@ -290,9 +298,9 @@ namespace OptiSort
                 }
             }
 
-            if (e.PropertyName == nameof(_manager.StatusMqttClient))
+            if (e.PropertyName == nameof(manager.StatusMqttClient))
             {
-                if (_manager.StatusMqttClient == true)
+                if (manager.StatusMqttClient == true)
                 {
                     lblMqttStatusValue.Text = "Online";
                     lblMqttStatusValue.ForeColor = Color.Green;
@@ -308,9 +316,9 @@ namespace OptiSort
                 }
             }
 
-            if (e.PropertyName == nameof(_manager.StatusCameraManager))
+            if (e.PropertyName == nameof(manager.StatusCameraManager))
             {
-                if (_manager.StatusCameraManager == true)
+                if (manager.StatusCameraManager == true)
                 {
                     lblCamerasStatusValue.Text = "Online";
                     lblCamerasStatusValue.ForeColor = Color.Green;
@@ -330,13 +338,13 @@ namespace OptiSort
         private void btnScaraConnect_Click(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
-            bool success = _manager.ConnectScara();
+            bool success = manager.ConnectScara();
 
             if (success)
             {
                 // add robot rendering to panel
                 pnlRobotView.Controls.Clear();
-                pnlRobotView.Controls.Add(_manager.Cobra600.SimulationContainerControl);
+                pnlRobotView.Controls.Add(manager.Cobra600.SimulationContainerControl);
                 pnlRobotView.Refresh();
             }
 
@@ -346,10 +354,10 @@ namespace OptiSort
         private void btnScaraDisconnect_Click(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
-            bool success = _manager.DisconnectScara();
+            bool success = manager.DisconnectScara();
             if (success)
             {
-                pnlRobotView.Controls.Remove(_manager.Cobra600.SimulationContainerControl);
+                pnlRobotView.Controls.Remove(manager.Cobra600.SimulationContainerControl);
                 pnlRobotView.Controls.Clear();
             }
             Cursor = Cursors.Default;
@@ -358,13 +366,13 @@ namespace OptiSort
 
         private void btnEmulateScara_Click(object sender, EventArgs e)
         {
-            _manager.ToggleScaraEmulationMode();
+            manager.ToggleScaraEmulationMode();
         }
 
         private void btnFlexibowlConnect_Click(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
-            bool success = _manager.ConnectFlexibowl();
+            bool success = manager.ConnectFlexibowl();
             // TODO: useful to do something here?
             Cursor = Cursors.Default;
         }
@@ -372,7 +380,7 @@ namespace OptiSort
         private void btnFlexibowlDisconnect_Click(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
-            bool success = _manager.DisconnectFlexibowl();
+            bool success = manager.DisconnectFlexibowl();
             // TODO: usefult to do something here?
             Cursor = Cursors.Default;
         }
@@ -380,23 +388,23 @@ namespace OptiSort
         private void btnMqttConnect_Click(object sender, EventArgs e)
         {
             // async call, no need for handling cursor
-            _ = _manager.ConnectMQTTClient();
+            _ = manager.ConnectMQTTClient();
         }
 
         private void btnMqttDisconnect_Click(object sender, EventArgs e)
         {
             // async call, no need for handling cursor
-            _ = _manager.DisconnectMqttClient();
+            _ = manager.DisconnectMqttClient();
         }
 
         private void btnCamerasConnect_Click(object sender, EventArgs e)
         {
-            _manager.ConnectCameras();
+            manager.ConnectCameras();
         }
 
         private void btnCamerasDisconnect_Click(object sender, EventArgs e)
         {
-            _manager.DisconnectCameras();
+            manager.DisconnectCameras();
         }
 
         // -----------------------------------------------------------------------------------
@@ -405,7 +413,7 @@ namespace OptiSort
 
         private void cmbCameras_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _manager.UpdateStreamingTopic(_camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic);
+            manager.UpdateStreamingTopic(_camerasList.FirstOrDefault(camera => camera.ID == cmbCameras.SelectedIndex).mqttTopic);
         }
 
         private void OnLogEvent(optisort_mgr.LogEntry logEntry)
