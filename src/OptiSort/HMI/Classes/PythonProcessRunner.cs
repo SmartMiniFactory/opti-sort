@@ -46,7 +46,8 @@ namespace OptiSort.Classes
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                WorkingDirectory = Path.GetDirectoryName(scriptPath)
             };
 
             _process = new Process { StartInfo = processStartInfo };

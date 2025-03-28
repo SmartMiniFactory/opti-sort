@@ -10,9 +10,9 @@ import json
 import xml.etree.ElementTree as ET
 from transitions import Machine
 import cv2
-# from cameras.ids import Ids
-# from cameras.basler import Basler
-# from cameras.luxonis import Luxonis
+from cameras.ids import Ids
+from cameras.basler import Basler
+from cameras.luxonis import Luxonis
 
 # Get script details and localization
 script_dir = pathlib.Path(__file__).parent.resolve()
@@ -20,6 +20,9 @@ script_name = pathlib.Path(__file__).name
 temp_folder = script_dir / "../../OptiSort/HMI/Temp"
 config_folder = script_dir / "../../OptiSort/HMI/Config"
 script_id = str(os.getpid())
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))  # Add script directory to path
+sys.path.append(os.path.join(script_dir, "cameras"))  # Add "cameras" subdirectory
 
 
 def publish(message, result):
@@ -75,12 +78,6 @@ def im2json(imdata):
     return jstr
 
 # Define states
-"""
-init: distinction between test and real camera; connection with camera and resource lock
-idle: waiting for configuration command; landing point after camera activity completes
-config: camera setup that depends on the specific need, next state depends on mqtt parameters
-...
-"""
 states = ['init', 'webcam', 'cameras', 'idle', 'config', 'ready', 'streaming', 'processing', 'ended']
 
 # State Machine Class
@@ -165,15 +162,15 @@ class StateMachine:
             self.webcam = cv2.VideoCapture(0)
 
         else:
-            # self.ids = Ids(camera_id="ids")
+            self.ids = Ids(camera_id="ids")
             self.ids.initialize()
             publish("IDS camera initialized", None)
 
-            # self.basler = Basler(camera_id="basler")
+            self.basler = Basler(camera_id="basler")
             self.basler.initialize()
             publish("Basler camera initalized", None)
 
-            # self.luxonis = Luxonis(camera_id="luxonis")
+            self.luxonis = Luxonis(camera_id="luxonis")
             self.luxonis.initialize()
             publish("Luxonis camera initialized", None)
 

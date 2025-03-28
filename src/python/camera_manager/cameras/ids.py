@@ -3,7 +3,7 @@ DESCRIPTION:
 This file is provided with the specific functionalities to interact with the UI-5240CP-M-G camera by IDS
 """
 
-from python.camera_manager.cameras.base_camera import BaseCamera
+from .base_camera import BaseCamera
 from ids_peak import ids_peak
 import numpy as np
 from ids_peak_ipl import ids_peak_ipl
