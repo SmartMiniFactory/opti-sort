@@ -25,18 +25,31 @@ script_id = str(os.getpid())
 
 # publishes its own messages on optisort/camera_manager/output
 def publish(message, result):
+
     global script_dir
-    if result is None:
-        payload = {"script": {"path": (script_dir / script_name).as_posix(), "PID": script_id}, "message": message}
-    else:
-        payload = {"script": {"path": (script_dir / script_name).as_posix(), "PID": script_id}, "message": message,
-                   "result": result}
-    mqttc.publish('optisort/camera_manager/output', str(json.dumps(payload)))
+    payload = {
+        "script": {
+            "path": (script_dir / script_name).as_posix(),
+            "PID": script_id
+        },
+        "message": message
+    }
+    if result is not None:
+        payload["result"] = result
+
+    mqttc.publish('optisort/camera_manager/output', str(json.dumps(payload)), qos=0)
 
 
 # informs the developer via console about having published a message over MQTT (debug)
 def on_publish(client, userdata, mid):
     print(f"Message Published: {client}, {userdata}, {mid}")
+
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT Broker!")
+        publish("Camera manager online and connected to MQTT", None)  # publish when connection is ensured
+    else:
+        print(f"Failed to connect, return code {rc}")
 
 
 # MQTT SETTINGS
@@ -109,6 +122,7 @@ class CameraManager:
             self.cameras['luxonis'].initialize()
             publish("Luxonis camera initialized", None)
 
+
     def configure(self, target_camera):
         if not self.testing:
             ids_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_configuration.ini").resolve()
@@ -152,7 +166,6 @@ class CameraManager:
         for cam in self.cameras.values():
             if isinstance(cam, cv2.VideoCapture):
                 cam.release()
-        publish("Cameras released", None)
 
 
 class StreamingHandler:
@@ -171,7 +184,7 @@ class StreamingHandler:
         for cam in cameras:
             self.threads[cam] = threading.Thread(target=self.stream_camera, args=(cam,))
             self.threads[cam].start()
-        publish("Streaming started", None)
+
 
     def stream_camera(self, cam_name):
         self.camera_manager.start_acquisition(cam_name)
@@ -196,11 +209,10 @@ class StreamingHandler:
             sleep_duration = max(next_publish_time - now, 0)  # Avoid negative sleep
             time.sleep(sleep_duration)
 
-    def stop_streaming(self):
+    def stop(self):
         self.running.clear()
         for thread in self.threads.values():
             thread.join()
-        publish("Streaming stopped", None)
 
 
 class ProcessingHandler(threading.Thread):
@@ -245,9 +257,10 @@ class StateMachine:
         self.processing_handler = None
         self.testing = False
         self.target_camera = None
+        self.running = True
 
     def on_message(self, client, userdata, msg):
-        print(f"Received message on {msg.topic}: {msg.payload.decode('utf-8')}", None)
+        print(f"Received message on {msg.topic}: {msg.payload.decode('utf-8')}, state: {self.state}")
         try:
             payload = json.loads(msg.payload.decode('utf-8'))
             command = payload.get("command")
@@ -255,40 +268,51 @@ class StateMachine:
             # in the init state is mandatory to tell the machine about using webcams or cameras
             if self.state == 'init':
                 if command != "webcam" and command != "cameras":
-                    publish("You should set webcam or cameras first", None)
+                    publish("Which optics do you want to use? [webcam, cameras]", None)
                 else:
                     if command == "webcam":
+                        publish("Initializing webcam...", None)
                         self.testing = True
                     elif command == "cameras":
+                        publish("Initializing cameras...", None)
                         self.testing = False
+
                     self.camera_manager = CameraManager(self.testing)
                     self.initialize()
 
             else:
 
                 if command == "streaming":
+                    publish("Configuring streaming parameters...", None)
                     self.configure()
 
                 elif command == "processing":
                     self.target_camera = payload.get("camera")
-                    self.configure()
+                    if self.target_camera is None:
+                        publish("Please specify a target camera: [ids, basler, luxonis]", None)
+                    else:
+                        publish("Configuring target camera processing parameters...", None)
+                        self.configure()
 
                 elif command == "start" and self.state == 'ready':
                     if self.target_camera is None:
+                        publish("Starting streaming...", None)
                         self.start_stream()
                     else:
+                        publish("Starting processing...", None)
                         self.start_process()
 
 
                 elif command == "stop":
+                    publish("Streaming/processing stopped!", None)
                     self.set_idle()
 
                 elif command == "exit":
-                    publish("terminating program", None)
+                    publish("Terminating program...", None)
                     self.terminate()
 
                 else:
-                    publish("Command not recognized", None)
+                    publish(f"Command '{command}' not recognized", None)
 
             # print(f"State changed to: {self.state}")  # Debugging line
 
@@ -297,43 +321,53 @@ class StateMachine:
 
     def idle(self):
         self.target_camera = None
-        publish("Cameras initialized; waiting for config parameters", None)
+        publish("Cameras initialized! Send functioning mode [streaming, processing]", None)
 
     def config(self):
         self.camera_manager.configure(self.target_camera)
-        publish("Cameras configured; send start command", None)
+        publish("Cameras configured! Send start command", None)
 
     def stream(self):
         self.streaming_handler = StreamingHandler(self.camera_manager)
         self.streaming_handler.start()
-        publish("Stream started", None)
+        publish("Stream started!", None)
 
     def process(self):
         self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
         self.processing_handler.start()
-        publish("Process started", None)
+        publish("Process started!", None)
 
 
     def exit_script(self):
+
         if self.streaming_handler:
-            self.streaming_handler.stop_streaming()
+            self.streaming_handler.stop()
+
         if self.processing_handler:
             self.processing_handler.stop()
+
         self.camera_manager.release()
-        publish("Terminating", None)
-        sys.exit(0)
+        self.running = False
 
 
 def main():
+    mqttc.on_connect = on_connect  # Register connect callback
     mqttc.on_publish = on_publish  # Register publish callback function
     mqttc.connect(broker, port, MQTT_KEEPALIVE_INTERVAL)  # Connect with MQTT Broker
     mqttc.subscribe("optisort/camera_manager/input")  # subscribe to topic for receiving commands
-
-    publish("Camera manager online and connected to MQTT", None)  # inform subscribers
+    mqttc.loop_start()  # Start the loop in a separate thread
 
     state_machine = StateMachine()  # activate state machine class
     mqttc.on_message = state_machine.on_message  # attach MQTT messages to state machine class
-    mqttc.loop_forever()
+
+    while state_machine.running:
+        time.sleep(0.05)  # Prevents 100% CPU usage
+
+
+    # Ensure cleanup
+    mqttc.loop_stop()
+    mqttc.disconnect()
+
 
 
 if __name__ == "__main__":

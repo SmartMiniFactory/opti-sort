@@ -74,7 +74,7 @@ namespace OptiSort.systems
                         UpdateCameraManagerStatus(status.init);
                         SendCommand("cameras");
                     }
-                    else if (msg.Contains("parameters"))
+                    else if (msg.Contains("mode"))
                     {
                         SendCommand("streaming");
                     }
