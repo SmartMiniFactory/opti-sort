@@ -89,7 +89,12 @@ class CameraManager:
         self.lock = threading.Lock()
 
         if testing:
-            self.cameras['webcam'] = cv2.VideoCapture(0)
+            try:
+                self.cameras['webcam'] = cv2.VideoCapture(0)
+                publish("Webcam initialized", None)
+
+            except Exception as e:
+                publish(f"No available webcam found: {e}", None)
 
         else:
             self.cameras['ids'] = Ids(camera_id="ids")
@@ -113,35 +118,41 @@ class CameraManager:
 
             try:
                 if target_camera is None:
-                    self.cameras['ids'].configure(ids_configfile)
+                    # self.cameras['ids'].configure(ids_configfile)
                     self.cameras['basler'].configure(basler_configfile)
-                    self.cameras['luxonis'].configure(None)
+                    # self.cameras['luxonis'].configure(None)
                 elif target_camera == 'ids':
                     self.cameras['ids'].configure(ids_configfile)
                 elif target_camera == 'basler':
                     self.cameras['basler'].configure(basler_configfile)
                 elif target_camera == 'luxonis':
-                    self.cameras['luxonis'].configure(None)
+                    aaa = True
+                    # self.cameras['luxonis'].configure(None)
                 else:
                     publish("target camera not recognized", None)
 
             except:
                 publish("Cameras configuration failed", None)
 
+    def start_acquisition(self, cam_name):
+        self.cameras[cam_name].acquisition_start()
+
     def capture_frame(self, cam_name):
         with self.lock:
+
             if self.testing and cam_name == 'webcam':
                 ret, frame = self.cameras['webcam'].read()
                 return frame if ret else None
+
             elif cam_name in self.cameras:
-                return self.cameras[cam_name].capture()
+                return self.cameras[cam_name].capture_frame()
         return None
 
     def release(self):
         for cam in self.cameras.values():
             if isinstance(cam, cv2.VideoCapture):
                 cam.release()
-        publish("Cameras released")
+        publish("Cameras released", None)
 
 
 class StreamingHandler:
@@ -160,27 +171,36 @@ class StreamingHandler:
         for cam in cameras:
             self.threads[cam] = threading.Thread(target=self.stream_camera, args=(cam,))
             self.threads[cam].start()
-        publish("Streaming started")
+        publish("Streaming started", None)
 
     def stream_camera(self, cam_name):
+        self.camera_manager.start_acquisition(cam_name)
         while self.running.is_set():
+
+            # Calculate the next publication time (synchronized to a 1-second clock)
+            next_publish_time = time.time() + 0.5
+
             frame = self.camera_manager.capture_frame(cam_name)
             if frame is not None:
-                encoded, buffer = cv2.imencode('.jpg', frame)
+                encoded = cv2.imencode(".png", frame, [cv2.IMWRITE_PNG_COMPRESSION, 0])[1].tobytes()
                 if encoded:
                     if cam_name == 'webcam':
-                        mqttc.publish("optisort/ids/stream", im2json(buffer))
-                        mqttc.publish("optisort/basler/stream", im2json(buffer))
-                        mqttc.publish("optisort/luxonis/stream", im2json(buffer))
+                        mqttc.publish("optisort/ids/stream", im2json(encoded))
+                        mqttc.publish("optisort/basler/stream", im2json(encoded))
+                        mqttc.publish("optisort/luxonis/stream", im2json(encoded))
                     else:
-                        mqttc.publish(f"optisort/{cam_name}/stream", im2json(buffer))
-            time.sleep(0.05)
+                        mqttc.publish(f"optisort/{cam_name}/stream", im2json(encoded))
+
+                        # Calculate sleep duration to sync to the clock
+            now = time.time()
+            sleep_duration = max(next_publish_time - now, 0)  # Avoid negative sleep
+            time.sleep(sleep_duration)
 
     def stop_streaming(self):
         self.running.clear()
         for thread in self.threads.values():
             thread.join()
-        publish("Streaming stopped")
+        publish("Streaming stopped", None)
 
 
 class ProcessingHandler(threading.Thread):

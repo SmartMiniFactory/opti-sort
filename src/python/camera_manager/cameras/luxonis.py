@@ -5,6 +5,7 @@ This file is provided with the specific functionalities to interact with the OAK
 
 from .base_camera import BaseCamera
 import depthai as dai
+import cv2
 
 
 class Luxonis(BaseCamera):
@@ -95,8 +96,11 @@ class Luxonis(BaseCamera):
         :return: Captured frame as a NumPy array.
         """
         try:
+            frame = None
             video = self.video.tryGet() if self.video else None
-            return video
+            if video is not None:
+                frame = video.getCvFrame()
+            return frame
 
         except Exception as e:
             raise RuntimeError(f"Failed to capture frame from Luxonis camera: {e}")

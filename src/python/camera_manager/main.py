@@ -106,16 +106,8 @@ async def capture_and_publish(camera, topic, client, idx):
                         continue  # Skip this camera and continue with the next loop iteration
 
                 else:
-                    # TODO: change topics to dynamic
 
-                    if topic == 'optisort/luxonis/stream':
-                        video = camera.capture_frame()
-                        frame = None
-                        if video is not None:
-                            frame = video.getCvFrame()
-
-                    else:
-                        frame = camera.capture_frame()
+                    frame = camera.capture_frame()
 
                 # Show frame (optional)
                 # cv2.imshow(f"Camera frame - {topic}", frame)

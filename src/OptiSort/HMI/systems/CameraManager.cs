@@ -67,12 +67,12 @@ namespace OptiSort.systems
                 if (message.TryGetProperty("message", out JsonElement messageElement))
                 {
                     string msg = messageElement.GetString();
-                    _manager.Log("Camera manager over MQTT: " + msg, false, false);
+                    _manager.Log($"Camera manager over MQTT ({processID}): " + msg, false, false);
 
                     if (msg.Contains("connected"))
                     {
                         UpdateCameraManagerStatus(status.init);
-                        SendCommand("webcam");
+                        SendCommand("cameras");
                     }
                     else if (msg.Contains("parameters"))
                     {
