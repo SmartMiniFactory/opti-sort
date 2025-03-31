@@ -47,7 +47,7 @@ def on_publish(client, userdata, mid):
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT Broker!")
-        publish("Camera manager online and connected to MQTT", None)  # publish when connection is ensured
+        publish("Camera manager booting...", None)  # publish when connection is ensured
     else:
         print(f"Failed to connect, return code {rc}")
 
@@ -127,30 +127,37 @@ class CameraManager:
 
 
     def configure(self, target_camera):
-        if not self.testing:
-            ids_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_configuration.ini").resolve()
-            basler_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_config.pfs").resolve()
 
-            # TODO: create configure_freerun and configure_triggered in base camera
+            if not self.testing:
+                ids_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_configuration.ini").resolve()
+                basler_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_config.pfs").resolve()
 
-            try:
-                if target_camera is None:
-                    # self.cameras['ids'].configure(ids_configfile)
-                    self.cameras['basler'].configure(basler_configfile)
-                    # self.cameras['luxonis'].configure(None)
-                elif target_camera == 'ids':
-                    self.cameras['ids'].configure(ids_configfile)
-                elif target_camera == 'basler':
-                    self.cameras['basler'].configure(basler_configfile)
-                elif target_camera == 'luxonis':
+                # TODO: create configure_freerun and configure_triggered in base camera
+
+                try:
                     # TODO: fix this
-                    aaa = True
-                    # self.cameras['luxonis'].configure(None)
-                else:
-                    raise ValueError("Target camera not recognized")
+                    if target_camera is None:
+                        # self.cameras['ids'].configure(ids_configfile)
+                        # self.cameras['basler'].configure(basler_configfile)
+                        # self.cameras['luxonis'].configure(None)
+                        aaa = True
 
-            except Exception as e:
-                raise ValueError(f"Cameras configuration failed: {e}") from e
+                    elif target_camera == 'ids':
+                        # self.cameras['ids'].configure(ids_configfile)
+                        aaa = True
+
+                    elif target_camera == 'basler':
+                        # self.cameras['basler'].configure(basler_configfile)
+                        aaa = True
+                    elif target_camera == 'luxonis':
+
+                        aaa = True
+                        # self.cameras['luxonis'].configure(None)
+                    else:
+                        raise ValueError("Target camera not recognized")
+    
+                except Exception as e:
+                    raise ValueError(f"Cameras configuration failed: {e}") from e
 
     def start_acquisition(self, cam_name):
         try:

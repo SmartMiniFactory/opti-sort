@@ -424,6 +424,9 @@ namespace OptiSort
                     Properties.Settings.Default.mqtt_topic_baslerStream
                 };
 
+                if (StatusCameraManager)
+                    topics.Add("optisort/camera_manager/output");
+
                 foreach (string topic in topics)
                 {
                     SubscribeMqttTopic(topic);
@@ -523,18 +526,24 @@ namespace OptiSort
 
         public void ConnectCameras()
         {
-            if (StatusMqttClient)
+            if (!StatusMqttClient)
             {
-                Cameramanager.ConnectCameraManager();
-                StatusCameraManager = true;
-            }
-            else
                 MessageBox.Show("Cannot connect to camera manager: MQTT client is not connected", "MQTT REQUIRED!");
+                return;
+            }
 
+            Cameramanager.ConnectCameraManager();
+            StatusCameraManager = true;
         }
 
         public void DisconnectCameras()
         {
+            if (!StatusMqttClient)
+            {
+                MessageBox.Show("Cannot connect to camera manager: MQTT client is not connected", "MQTT REQUIRED!");
+                return;
+            }
+
             Cameramanager.DisconnectCameraManager();
             StatusCameraManager = false;
         }

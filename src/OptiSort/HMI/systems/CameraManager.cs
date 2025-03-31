@@ -69,9 +69,11 @@ namespace OptiSort.systems
                     string msg = messageElement.GetString();
                     _manager.Log($"Camera manager over MQTT ({processID}): " + msg, false, false);
 
-                    if (msg.Contains("connected"))
+                    // TODO: review interaction mode
+
+                    if (msg.Contains("booting"))
                     {
-                        UpdateCameraManagerStatus(status.init);
+ 
                         if (_manager.StatusCameraTesting)
                             SendCommand("webcam");
                         else
