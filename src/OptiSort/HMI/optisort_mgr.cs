@@ -51,11 +51,13 @@ namespace OptiSort
 
         // Status
         public event PropertyChangedEventHandler PropertyChanged; // declare propertyChanged event (required by the associated interface)
+        private readonly SynchronizationContext _syncContext = SynchronizationContext.Current; // used to update properties from other threads (e.g. CameraManager class)
         private bool _statusScara = false;
         private bool _statusScaraEmulation = true;
         private bool _statusFelxibowl = false;
         private bool _statusMqttClient = false;
         private bool _statusCameraManager = false;
+        private bool _statusCameraTesting = false;
         private string _streamingTopic = null;
         private bool _requestScreenshots = false;
 
@@ -107,6 +109,18 @@ namespace OptiSort
                 }
             }
         }
+        public bool StatusCameraTesting
+        {
+            get { return _statusCameraTesting; }
+            set
+            {
+                if (_statusCameraTesting != value) // setting value different from actual value -> store new value and trigger event
+                {
+                    _statusCameraTesting = value;
+                    OnPropertyChanged(nameof(StatusCameraTesting));
+                }
+            }
+        }
         public bool StatusScaraEmulation
         {
             get { return _statusScaraEmulation; }
@@ -145,7 +159,15 @@ namespace OptiSort
         }
         protected void OnPropertyChanged(string propertyName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            // invoke correct thread to trigger PropertyChanged event (since properties may be changed from other threads)
+            if (_syncContext != null && SynchronizationContext.Current != _syncContext)
+            {
+                _syncContext.Post(_ => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName)), null);
+            }
+            else
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
 
 
@@ -481,6 +503,21 @@ namespace OptiSort
         {
             string mqttClientName = Properties.Settings.Default.mqtt_client;
             _ = await MqttClient.PublishMessage(mqttClientName, topic, message);
+        }
+
+
+        public void ToggleCameraTestingMode()
+        {
+            if (StatusCameraTesting)
+            {
+                StatusCameraTesting = false;
+                Log("Camera manager will now connect to optisort's cameras", false, false);
+            }
+            else
+            {
+                StatusCameraTesting = true;
+                Log("Camera manager will now use host's webcam (if there is any)", false, false);
+            }
         }
 
 

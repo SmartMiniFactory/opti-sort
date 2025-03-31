@@ -72,7 +72,10 @@ namespace OptiSort.systems
                     if (msg.Contains("connected"))
                     {
                         UpdateCameraManagerStatus(status.init);
-                        SendCommand("cameras");
+                        if (_manager.StatusCameraTesting)
+                            SendCommand("webcam");
+                        else
+                            SendCommand("cameras");
                     }
                     else if (msg.Contains("mode"))
                     {
@@ -102,7 +105,6 @@ namespace OptiSort.systems
             if (processID == _scriptID)
             {
                 _manager.Log("Camera manager file has closed!", false, false);
-                // _manager.StatusCameraManager = false;
 
                 _manager.MqttMessageReceived -= MqttMessageReceived;
                 _manager.OnErrorReceived -= PythonErrorHandler;
@@ -110,6 +112,8 @@ namespace OptiSort.systems
                 
                 _manager.UnsubscribeMqttTopic("optisort/camera_manager/output");
                 _manager.StopExecution(_scriptID); // needed to reset active processes memory
+
+                _manager.StatusCameraManager = false;
             }
         }
 

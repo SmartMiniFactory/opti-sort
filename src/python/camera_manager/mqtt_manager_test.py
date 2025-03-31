@@ -104,23 +104,26 @@ class CameraManager:
         if testing:
             try:
                 self.cameras['webcam'] = cv2.VideoCapture(0)
-                publish("Webcam initialized", None)
 
             except Exception as e:
-                publish(f"No available webcam found: {e}", None)
+                raise ValueError(f"No available webcam found: {e}") from e
 
         else:
-            self.cameras['ids'] = Ids(camera_id="ids")
-            self.cameras['ids'].initialize()
-            publish("IDS camera initialized", None)
+            try:
+                self.cameras['ids'] = Ids(camera_id="ids")
+                self.cameras['ids'].initialize()
+                publish("IDS camera initialized", None)
 
-            self.cameras['basler'] = Basler(camera_id="basler")
-            self.cameras['basler'].initialize()
-            publish("Basler camera initalized", None)
+                self.cameras['basler'] = Basler(camera_id="basler")
+                self.cameras['basler'].initialize()
+                publish("Basler camera initalized", None)
 
-            self.cameras['luxonis'] = Luxonis(camera_id="luxonis")
-            self.cameras['luxonis'].initialize()
-            publish("Luxonis camera initialized", None)
+                self.cameras['luxonis'] = Luxonis(camera_id="luxonis")
+                self.cameras['luxonis'].initialize()
+                publish("Luxonis camera initialized", None)
+            except Exception as e:
+                raise ValueError(f"Cameras initialization failed {e}") from e
+
 
 
     def configure(self, target_camera):
@@ -140,29 +143,37 @@ class CameraManager:
                 elif target_camera == 'basler':
                     self.cameras['basler'].configure(basler_configfile)
                 elif target_camera == 'luxonis':
+                    # TODO: fix this
                     aaa = True
                     # self.cameras['luxonis'].configure(None)
                 else:
-                    publish("target camera not recognized", None)
+                    raise ValueError("Target camera not recognized")
 
-            except:
-                publish("Cameras configuration failed", None)
+            except Exception as e:
+                raise ValueError(f"Cameras configuration failed: {e}") from e
 
     def start_acquisition(self, cam_name):
-        self.cameras[cam_name].acquisition_start()
+        try:
+            if not self.testing:
+                self.cameras[cam_name].acquisition_start()
+        except Exception as e:
+            raise ValueError(f"Camera acquisition start failed: {e}") from e
 
     def capture_frame(self, cam_name):
-        with self.lock:
+        try:
+            with self.lock:
+                if self.testing and cam_name == 'webcam':
+                    ret, frame = self.cameras['webcam'].read()
+                    return frame if ret else None
 
-            if self.testing and cam_name == 'webcam':
-                ret, frame = self.cameras['webcam'].read()
-                return frame if ret else None
-
-            elif cam_name in self.cameras:
-                return self.cameras[cam_name].capture_frame()
-        return None
+                elif cam_name in self.cameras:
+                    return self.cameras[cam_name].capture_frame()
+            return None
+        except Exception as e:
+            raise ValueError(f"Frame capturing failed: {e}") from e
 
     def release(self):
+        # TODO: implement
         for cam in self.cameras.values():
             if isinstance(cam, cv2.VideoCapture):
                 cam.release()
@@ -187,27 +198,30 @@ class StreamingHandler:
 
 
     def stream_camera(self, cam_name):
-        self.camera_manager.start_acquisition(cam_name)
-        while self.running.is_set():
+        try:
+            self.camera_manager.start_acquisition(cam_name)
+            while self.running.is_set():
 
-            # Calculate the next publication time (synchronized to a 1-second clock)
-            next_publish_time = time.time() + 0.5
+                # Calculate the next publication time (synchronized to a 1-second clock)
+                next_publish_time = time.time() + 0.5
 
-            frame = self.camera_manager.capture_frame(cam_name)
-            if frame is not None:
-                encoded = cv2.imencode(".png", frame, [cv2.IMWRITE_PNG_COMPRESSION, 0])[1].tobytes()
-                if encoded:
-                    if cam_name == 'webcam':
-                        mqttc.publish("optisort/ids/stream", im2json(encoded))
-                        mqttc.publish("optisort/basler/stream", im2json(encoded))
-                        mqttc.publish("optisort/luxonis/stream", im2json(encoded))
-                    else:
-                        mqttc.publish(f"optisort/{cam_name}/stream", im2json(encoded))
+                frame = self.camera_manager.capture_frame(cam_name)
+                if frame is not None:
+                    encoded = cv2.imencode(".png", frame, [cv2.IMWRITE_PNG_COMPRESSION, 0])[1].tobytes()
+                    if encoded:
+                        if cam_name == 'webcam':
+                            mqttc.publish("optisort/ids/stream", im2json(encoded))
+                            mqttc.publish("optisort/basler/stream", im2json(encoded))
+                            mqttc.publish("optisort/luxonis/stream", im2json(encoded))
+                        else:
+                            mqttc.publish(f"optisort/{cam_name}/stream", im2json(encoded))
 
-                        # Calculate sleep duration to sync to the clock
-            now = time.time()
-            sleep_duration = max(next_publish_time - now, 0)  # Avoid negative sleep
-            time.sleep(sleep_duration)
+                            # Calculate sleep duration to sync to the clock
+                now = time.time()
+                sleep_duration = max(next_publish_time - now, 0)  # Avoid negative sleep
+                time.sleep(sleep_duration)
+        except Exception as e:
+            raise ValueError(f"Streaming failed: {e}") from e
 
     def stop(self):
         self.running.clear()
@@ -225,13 +239,16 @@ class ProcessingHandler(threading.Thread):
         self.running.set()
 
     def run(self):
-        while self.running.is_set():
-            frame = self.camera_manager.capture_frame(self.target_camera)
-            if frame is not None:
-                encoded, buffer = cv2.imencode('.jpg', frame)
-                if encoded:
-                    mqttc.publish(f"optisort/{self.target_camera}/stream", im2json(buffer))
-            time.sleep(0.01)
+        try:
+            while self.running.is_set():
+                frame = self.camera_manager.capture_frame(self.target_camera)
+                if frame is not None:
+                    encoded, buffer = cv2.imencode('.jpg', frame)
+                    if encoded:
+                        mqttc.publish(f"optisort/{self.target_camera}/stream", im2json(buffer))
+                time.sleep(0.01)
+        except Exception as e:
+            raise ValueError(f"Processing failed: {e}") from e
 
     def stop(self):
         self.running.clear()
@@ -277,8 +294,12 @@ class StateMachine:
                         publish("Initializing cameras...", None)
                         self.testing = False
 
-                    self.camera_manager = CameraManager(self.testing)
-                    self.initialize()
+                    try:
+                        self.camera_manager = CameraManager(self.testing)  # instancing fails with wrong optics
+                        self.initialize()
+                    except Exception as e:
+                        publish(f"{e}", None) # publish error message over mqtt
+                        self.terminate()
 
             else:
 
@@ -321,32 +342,52 @@ class StateMachine:
 
     def idle(self):
         self.target_camera = None
-        publish("Cameras initialized! Send functioning mode [streaming, processing]", None)
+        if self.testing:
+            publish("Webcam initialized! Send functioning mode [streaming only]", None)
+        else:
+            publish("Cameras initialized! Send functioning mode [streaming, processing]", None)
+
 
     def config(self):
-        self.camera_manager.configure(self.target_camera)
-        publish("Cameras configured! Send start command", None)
+        try:
+            self.camera_manager.configure(self.target_camera)
+            if self.testing:
+                publish("Webcam configured! Send start command", None)
+            else:
+                publish("Cameras configured! Send start command", None)
+        except Exception as e:
+            publish(f"{e}", None)  # publish error message over mqtt
 
     def stream(self):
-        self.streaming_handler = StreamingHandler(self.camera_manager)
-        self.streaming_handler.start()
-        publish("Stream started!", None)
+        try:
+            self.streaming_handler = StreamingHandler(self.camera_manager)
+            self.streaming_handler.start()
+            publish("Stream started!", None)
+        except Exception as e:
+            publish(f"{e}", None)  # publish error message over mqtt
 
     def process(self):
-        self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
-        self.processing_handler.start()
-        publish("Process started!", None)
-
+        try:
+            if self.testing:
+                publish("Cannot use processing mode while testing", None)
+            else:
+                self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
+                self.processing_handler.start()
+                publish("Process started!", None)
+        except Exception as e:
+            publish(f"{e}", None)  # publish error message over mqtt
 
     def exit_script(self):
+        try:
+            if self.streaming_handler:
+                self.streaming_handler.stop()
 
-        if self.streaming_handler:
-            self.streaming_handler.stop()
+            if self.processing_handler:
+                self.processing_handler.stop()
 
-        if self.processing_handler:
-            self.processing_handler.stop()
-
-        self.camera_manager.release()
+            self.camera_manager.release()
+        except Exception as e:
+            print(f"Error while terminating: {e}")
         self.running = False
 
 

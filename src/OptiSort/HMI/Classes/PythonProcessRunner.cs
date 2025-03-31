@@ -58,12 +58,12 @@ namespace OptiSort.Classes
                     OnOutputReceived?.Invoke(e.Data);
             };
 
+            StringBuilder errorBuffer = new StringBuilder();
             _process.ErrorDataReceived += (sender, e) =>
             {
                 if (!string.IsNullOrEmpty(e.Data))
                 {
-                    Console.WriteLine($"Python Error: {e.Data}"); // Debugging
-                    OnErrorReceived?.Invoke(e.Data);
+                    errorBuffer.AppendLine(e.Data);
                 }
             };
 
@@ -71,6 +71,12 @@ namespace OptiSort.Classes
             _process.Exited += (sender, e) =>
             {
                 _isRunning = false;
+                if (errorBuffer.Length > 0)
+                {
+                    string fullError = errorBuffer.ToString();
+                    Console.WriteLine($"Python Error:\n{fullError}"); // Debugging
+                    OnErrorReceived?.Invoke(fullError);
+                }
                 OnExecutionTerminated?.Invoke(true);
             };
 

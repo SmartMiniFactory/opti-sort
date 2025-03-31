@@ -235,6 +235,7 @@ namespace OptiSort
             btnFlexibowlConnect.Enabled = !manager.StatusFlexibowl;
             btnMqttConnect.Enabled = !manager.StatusMqttClient;
             btnCamerasConnect.Enabled = !manager.StatusCameraManager;
+            btnCameraTesting.Enabled = !manager.StatusCameraManager;
 
             // disconnection buttons should be enabled when status is true, disabled when status is false
             btnScaraDisconnect.Enabled = manager.StatusScara;
@@ -324,6 +325,10 @@ namespace OptiSort
                     lblCamerasStatusValue.ForeColor = Color.Green;
                     btnCamerasConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                     btnCamerasDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
+                    if (manager.StatusCameraTesting)
+                        btnCameraTesting.BackgroundImage = Properties.Resources.webcamDisabled_2x2_pptx;
+                    else
+                        btnCameraTesting.BackgroundImage = Properties.Resources.camerasDisabled_2x2_pptx;
                 }
                 else
                 {
@@ -331,7 +336,20 @@ namespace OptiSort
                     lblCamerasStatusValue.ForeColor = Color.Red;
                     btnCamerasConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                     btnCamerasDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
+                    if (manager.StatusCameraTesting)
+                        btnCameraTesting.BackgroundImage = Properties.Resources.webcamEnabled_2x2_pptx;
+                    else
+                        btnCameraTesting.BackgroundImage = Properties.Resources.camerasEnabled_2x2_pptx;
                 }
+            }
+
+            if (e.PropertyName == nameof(manager.StatusCameraTesting))
+            {
+                if (manager.StatusCameraTesting)
+                    btnCameraTesting.BackgroundImage = Properties.Resources.webcamEnabled_2x2_pptx;
+
+                else
+                    btnCameraTesting.BackgroundImage = Properties.Resources.camerasEnabled_2x2_pptx;
             }
         }
 
@@ -395,6 +413,11 @@ namespace OptiSort
         {
             // async call, no need for handling cursor
             _ = manager.DisconnectMqttClient();
+        }
+
+        private void btnCameraTesting_Click(object sender, EventArgs e)
+        {
+            manager.ToggleCameraTestingMode();
         }
 
         private void btnCamerasConnect_Click(object sender, EventArgs e)

@@ -311,6 +311,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="icons\camerasDisabled_2x2_pptx.png" />
+    <None Include="icons\camerasEnabled_2x2_pptx.png" />
+    <None Include="icons\webcamDisabled_2x2_pptx.png" />
+    <None Include="icons\webcamEnabled_2x2_pptx.png" />
     <Content Include="LedBulb.png" />
     <Content Include="optisort_logo_icon.ico" />
     <None Include="Resources\Optisort_Logo.jpg" />
