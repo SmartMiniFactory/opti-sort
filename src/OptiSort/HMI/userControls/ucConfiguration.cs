@@ -16,16 +16,16 @@ namespace OptiSort.userControls
     public partial class ucConfiguration : UserControl
     {
 
-        private frmMain _frmMain;
+        private optisort_mgr _manager;
         private string _oldValue; // storing value that are about to be changed
         private bool _mqttClientDisconnected;
 
-        public ucConfiguration(frmMain frmMain)
+        internal ucConfiguration(optisort_mgr manager)
         {
             // NOTE: access the settings menu: right click on HMI > properties > settings tab
             InitializeComponent();
             LoadConfigToDgv(); 
-            _frmMain = frmMain;
+            _manager = manager;
         }
 
         /// <summary>
@@ -91,42 +91,41 @@ namespace OptiSort.userControls
                 {
                     Properties.Settings.Default[settingName] = newValue;
                     Properties.Settings.Default.Save();
-                    _frmMain.Log($"Setting {settingName} updated", false, true);
+                    _manager.Log($"Setting {settingName} updated", false, true);
                 }
 
                 // Reconnect services based on which setting changed
                 // MQTT
-                if (settingName.IndexOf("mqtt", StringComparison.OrdinalIgnoreCase) >= 0 && _frmMain.StatusMqttClient)
+                if (settingName.IndexOf("mqtt", StringComparison.OrdinalIgnoreCase) >= 0 && _manager.StatusMqttClient)
                 {
-                    string clientID = _frmMain.MqttClient.GetConnectedClientName();
 
                     if (settingName.IndexOf("client", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        _ = DisconnectAsync(clientID);
+                        _ = DisconnectAsync();
                         _ = ConnectAsync();
                     }
 
                     else if (settingName.IndexOf("topic", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        _frmMain.UnsubscribeMqttTopic(clientID, _oldValue);
-                        _frmMain.SubscribeMqttTopic(clientID, newValue);   
+                        _manager.UnsubscribeMqttTopic(_oldValue);
+                        _manager.SubscribeMqttTopic(newValue);   
                     }
                 }
 
                 // SCARA
-                else if (settingName.IndexOf("scara", StringComparison.OrdinalIgnoreCase) >= 0 && _frmMain.StatusScara)
+                else if (settingName.IndexOf("scara", StringComparison.OrdinalIgnoreCase) >= 0 && _manager.StatusScara)
                 {
-                    _frmMain.Log("Reconnection to cobra in progress...", false, false);
-                    _frmMain.DisconnectScara();
-                    _frmMain.ConnectScara();
+                    _manager.Log("Reconnection to cobra in progress...", false, false);
+                    _manager.DisconnectScara();
+                    _manager.ConnectScara();
                 }
 
                 // FLEXIBOWL
-                else if (settingName.IndexOf("flexibowl", StringComparison.OrdinalIgnoreCase) >= 0 && _frmMain.StatusFlexibowl)
+                else if (settingName.IndexOf("flexibowl", StringComparison.OrdinalIgnoreCase) >= 0 && _manager.StatusFlexibowl)
                 {
-                    _frmMain.Log("Reconnection to flexibowl in progress...", false, false);
-                    _frmMain.DisconnectFlexibowl();
-                    _frmMain.ConnectFlexibowl();
+                    _manager.Log("Reconnection to flexibowl in progress...", false, false);
+                    _manager.DisconnectFlexibowl();
+                    _manager.ConnectFlexibowl();
                 }
             }
         }
@@ -145,19 +144,19 @@ namespace OptiSort.userControls
                 dgvConfig.Columns.Clear();
 
                 // storing to reconnect after change
-                bool wasMqttConnected = _frmMain.StatusMqttClient;
-                bool wasFlexibowlConnected = _frmMain.StatusFlexibowl;
-                bool wasScaraConnected = _frmMain.StatusScara;
+                bool wasMqttConnected = _manager.StatusMqttClient;
+                bool wasFlexibowlConnected = _manager.StatusFlexibowl;
+                bool wasScaraConnected = _manager.StatusScara;
 
                 // Disconnect services before changing 
-                if (_frmMain.StatusMqttClient)
-                    _ = DisconnectAsync(Properties.Settings.Default.mqtt_client);
+                if (_manager.StatusMqttClient)
+                    _ = DisconnectAsync();
 
-                if (_frmMain.StatusFlexibowl)
-                    _frmMain.DisconnectFlexibowl();
+                if (_manager.StatusFlexibowl)
+                    _manager.DisconnectFlexibowl();
 
-                if(_frmMain.StatusScara)
-                    _frmMain.DisconnectScara();
+                if(_manager.StatusScara)
+                    _manager.DisconnectScara();
 
                 // FLEXIBOWL
                 Properties.Settings.Default.flexibowl_IP = "10.90.90.20";
@@ -182,27 +181,27 @@ namespace OptiSort.userControls
 
                 // Reconnect to services after changing 
                 if (wasFlexibowlConnected)
-                    _frmMain.ConnectFlexibowl();
+                    _manager.ConnectFlexibowl();
 
                 if (wasScaraConnected)
-                    _frmMain.ConnectScara();
+                    _manager.ConnectScara();
 
                 if (wasMqttConnected)
                     _ = ConnectAsync();
                 
 
                 LoadConfigToDgv();
-                _frmMain.Log("Settings restored to development defaults", false, true);
+                _manager.Log("Settings restored to development defaults", false, true);
             }
         }
 
 
-        public async Task DisconnectAsync(string client)
+        public async Task DisconnectAsync()
         {
             try
             {
                 _mqttClientDisconnected = false; 
-                await _frmMain.DisconnectMqttClient(client);
+                await _manager.DisconnectMqttClient();
                 _mqttClientDisconnected = true;
             }
             catch (Exception ex)
@@ -221,7 +220,7 @@ namespace OptiSort.userControls
 
             try
             {
-                _frmMain.ConnectMQTTClient();
+                _ = _manager.ConnectMQTTClient();
             }
             catch (Exception ex)
             {

@@ -15,73 +15,102 @@ namespace OptiSort.userControls
     public partial class ucManualControl : UserControl
     {
 
-        private frmMain _frmMain;
+        private optisort_mgr _manager;
+        private int _ringLight = 99;
 
-        public ucManualControl(frmMain frmMain)
+        internal ucManualControl(optisort_mgr manager)
         {
             InitializeComponent();
-            _frmMain = frmMain;
+            _manager = manager;
+
+            _manager.PropertyChanged += PropertyChanged;
+
+            RefreshButtons();
+        }
+
+        private void PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(_manager.StatusScara) && _manager.StatusScara)
+                RefreshButtons();
+        }
+
+        private void RefreshButtons()
+        {
+            if (_manager.StatusScara && !_manager.StatusScaraEmulation)
+            {
+                bool status = _manager.Cobra600.getDigitalOutput(_ringLight);
+                if (status)
+                {
+                    btnLight.Text = "Turn ring light off";
+                }
+                else
+                {
+                    btnLight.Text = "Turn ring light on";
+                }
+            }
+            else
+                btnLight.Text = "Toggle ring light";
         }
 
         private void btnScaraJog_Click(object sender, EventArgs e)
         {
-            if (!_frmMain.StatusScara)
+            if (!_manager.StatusScara)
             {
                 MessageBox.Show("You should connect to a robot first");
                 return;
             }
 
-            _frmMain.Cobra600.OpenJobControl(this);
+            _manager.Cobra600.OpenJobControl(this);
         }
 
         private void btnFlexibowlFw_Click(object sender, EventArgs e)
         {
-            if (!_frmMain.StatusFlexibowl)
+            if (!_manager.StatusFlexibowl)
             {
                 MessageBox.Show("You should connect to the Flexibowl first");
                 return;
             }
 
             Flexibowl.Move.Forward();
-            _frmMain.Log("Flexibowl: forward command sent", false, false);
+            _manager.Log("Flexibowl: forward command sent", false, false);
 
         }
 
         private void btnFlexibowlBw_Click(object sender, EventArgs e)
         {
-            if (!_frmMain.StatusFlexibowl)
+            if (!_manager.StatusFlexibowl)
             {
                 MessageBox.Show("You should connect to the Flexibowl first");
                 return;
             }
 
             Flexibowl.Move.Backward();
-            _frmMain.Log("Flexibowl: backward command sent", false, false);
+            _manager.Log("Flexibowl: backward command sent", false, false);
         }
 
         private void btnFlexibowlFlip_Click(object sender, EventArgs e)
         {
-            if (!_frmMain.StatusFlexibowl)
+            if (!_manager.StatusFlexibowl)
             {
                 MessageBox.Show("You should connect to the Flexibowl first");
                 return;
             }
 
             Flexibowl.Move.Flip(1); // TODO: 1 or 2?
-            _frmMain.Log("Flexibowl: piston 1 activated (flip)", false, false);
+            _manager.Log("Flexibowl: piston 1 activated (flip)", false, false);
 
         }
 
         private void btnFlexibowlShake_Click(object sender, EventArgs e)
         {
-            if (!_frmMain.StatusFlexibowl)
+            if (!_manager.StatusFlexibowl)
             {
                 MessageBox.Show("You should connect to the Flexibowl first");
                 return;
             }
 
             Flexibowl.Move.Shake();
-            _frmMain.Log("Flexibowl: shake command sent", false, false);
+            _manager.Log("Flexibowl: shake command sent", false, false);
 
         }
 
@@ -92,8 +121,25 @@ namespace OptiSort.userControls
 
         private void btn_lensCalibration_Click(object sender, EventArgs e)
         {
-            ucCameraLensCalibration ucLensDistortionCalibration = new ucCameraLensCalibration(_frmMain);
-            _frmMain.AddNewUc(ucLensDistortionCalibration);
+            ucCameraLensCalibration ucLensDistortionCalibration = new ucCameraLensCalibration(_manager);
+            _manager.RequestNewUcLoading(ucLensDistortionCalibration);
+        }
+
+        private void btn_coordinateCalibration_Click(object sender, EventArgs e)
+        {
+            ucCoordinateReferenceFrame ucCoordinateReferenceFrame = new ucCoordinateReferenceFrame(_manager);
+            _manager.RequestNewUcLoading(ucCoordinateReferenceFrame);
+        }
+
+        private void btnLight_Click(object sender, EventArgs e)
+        {
+            if (!_manager.StatusScara)
+            {
+                MessageBox.Show("You should connect to the Scara robot first");
+                return;
+            }
+            _manager.Cobra600.ToggleDigitalOutput(_ringLight);
+            RefreshButtons();
         }
     }
 }

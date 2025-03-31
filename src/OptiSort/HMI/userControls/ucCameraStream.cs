@@ -1,5 +1,8 @@
-﻿using System;
+﻿using ActiproSoftware.SyntaxEditor;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -16,149 +19,134 @@ namespace OptiSort
 
     public partial class ucCameraStream : UserControl
     {
-        private frmMain _frmMain;
-        private readonly object _lock = new object(); // should be used each time different threads try access (write or read) shared resources
-
-        public string StreamTopic { get; set; }
-        public Bitmap Image { get; private set; }
-
-        private DateTime _imgDate = DateTime.MinValue;
-        private readonly System.Threading.Timer _timeoutTimer;
+        private optisort_mgr _manager;
 
         // Performance computation
+        private Stopwatch _stopwatch = Stopwatch.StartNew();
         private int _frameCount = 0;
-        private int _fps = 0;
-        private DateTime _lastFpsUpdate = DateTime.Now;
-        private int _latencyMilliseconds = 0;
+        private double _mqttLatency;
+        private double _renderingLatency;
+        private double _totalLatency;
+        private double _fps;
+        private double _maxAllowedLatency = 5000; // milliseconds
+        
+        private bool _mqttLatencyError = false;
 
-        // Screenshot requests
-        private bool _screenshotRequested = false;
-        private Dictionary<string, Bitmap> _screenshotBuffer = new Dictionary<string, Bitmap>();
-        public event Action<Dictionary<string, Bitmap>> ScreenshotsReady;
-        private Dictionary<string, DateTime> _topicLastReceived = new Dictionary<string, DateTime>();
-        private TimeSpan _topicTimeoutThreshold = TimeSpan.FromSeconds(2);
+        // watchdog
+        private Classes.Watchdog _watchdog;
 
-        internal ucCameraStream(frmMain frmMain)
+
+        internal ucCameraStream(optisort_mgr manager)
         {
             InitializeComponent();
-            _frmMain = frmMain;
+            _manager = manager;
 
-            // Create a transparent placeholder Bitmap
-            Image = CreateTransparentBitmap(pictureBox.Width, pictureBox.Height);
+            // Subscribe to bitmap queuing updates
+            _manager.BitmapQueued += OnBitmapQueued;
 
-            // Create timer
-            _timeoutTimer = new System.Threading.Timer(OnTimeout, null, TimeSpan.Zero, _topicTimeoutThreshold);
+            // Subscribe to propery changed
+            _manager.PropertyChanged += OnPropertyChange;
+
+            // Create watchdog to trigger repaint in case of mqtt connection loss
+            _watchdog = new Classes.Watchdog(500);
+            _watchdog.Elapsed += Watchdog_Elapsed;
+            _watchdog.Start();
+
+            // Start the timer to reset FPS metrics periodically
+            StartMetricsResetTimer();
         }
 
-
-        /// <summary>
-        /// Called each time a new MQTT message is received, based on the topic reconstructs the image streaming and paints the control
-        /// </summary>
-        /// <param name="topic"></param>
-        /// <param name="message"></param>
-        public void OnMessageReceived(string topic, JsonElement message)
+        private void Watchdog_Elapsed(object sender, EventArgs e)
         {
-            // coverting json into bitmap
-            string base64Image = message.GetProperty("image").GetString();
-            Bitmap image = JsonToBitmap(base64Image); // Decode the base64 image
-
-            string timestampString = message.GetProperty("timestamp").GetString();
-            DateTime messageTimestamp = DateTime.Parse(timestampString, null, System.Globalization.DateTimeStyles.RoundtripKind); // Decode timestamp
-
-            lock (_lock)
-            {
-                // Regular streaming logic
-                if (!_screenshotRequested || topic == StreamTopic)
-                {
-                    Bitmap previousImage = Image;
-                    Image = image;
-                    _imgDate = DateTime.Now;
-                    previousImage?.Dispose();
-
-                    TimeSpan latency = DateTime.Now - messageTimestamp;
-                    _latencyMilliseconds = (int)latency.TotalMilliseconds;
-                    _frameCount++;
-                }
-
-                // Handle screenshot request
-                if (_screenshotRequested)
-                {
-                    // Add the current image to the buffer for the topic
-                    _screenshotBuffer[topic] = image;
-                    _topicLastReceived[topic] = DateTime.Now;
-
-                    // Check if all required topics have been captured
-                    var requiredTopics = new[]
-                    {
-                        Properties.Settings.Default.mqtt_topic_idsStream,
-                        Properties.Settings.Default.mqtt_topic_luxonisStream,
-                        Properties.Settings.Default.mqtt_topic_baslerStream
-                    };
-
-                    if (requiredTopics.All(_screenshotBuffer.ContainsKey))
-                    {
-                        // Notify that screenshots are ready
-                        ScreenshotsReady?.Invoke(new Dictionary<string, Bitmap>(_screenshotBuffer));
-                        _screenshotRequested = false;
-                    }
-                }
-            }
-
-            // Calculate FPS every second
-            if ((DateTime.Now - _lastFpsUpdate).TotalSeconds >= 1)
-            {
-                _fps = _frameCount;
-                _frameCount = 0;
-                _lastFpsUpdate = DateTime.Now;
-            }
-
-            // trigger repaint
             pictureBox.Invalidate();
         }
 
-
-        /// <summary>
-        /// Method to trigger screenshot requests
-        /// </summary>
-        public void RequestScreenshots()
+        private void OnPropertyChange(object sender, PropertyChangedEventArgs e)
         {
-            lock (_lock)
+            if (e.PropertyName == nameof(_manager.StatusMqttClient))
             {
-                _screenshotRequested = true;
-                _screenshotBuffer.Clear(); // Clear buffer for new screenshots
-
-                // Initialize last received times for all required topics
-                var requiredTopics = new[]
-                {
-                    Properties.Settings.Default.mqtt_topic_idsStream,
-                    Properties.Settings.Default.mqtt_topic_luxonisStream,
-                    Properties.Settings.Default.mqtt_topic_baslerStream
-                };
-
-                // save creation time in timeout buffer
-                foreach (var topic in requiredTopics)
-                {
-                    if (!_topicLastReceived.ContainsKey(topic))
-                    {
-                        _topicLastReceived[topic] = DateTime.Now;
-                    }
-                }
+                pictureBox.Invalidate(); // Trigger re-paint
+                _mqttLatencyError = false;
             }
         }
+
+        private void OnBitmapQueued(string messageFromTopic)
+        {
+            // render Bitmap only when coming from the camera selected for streaming
+            if (messageFromTopic == _manager.StreamingTopic)
+            {
+                pictureBox.Invalidate(); // Trigger re-paint
+            }
+        }
+
+
 
 
         private void pictureBox_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            Bitmap currentImage;
+            Bitmap currentImage = null;
+            DateTime published = DateTime.MinValue;
+            DateTime received = DateTime.MinValue;
+            int queueCount = 0;
 
-            lock (_lock) // Lock for thread safety
+
+            if (_manager.StreamingTopic == Properties.Settings.Default.mqtt_topic_idsStream)
             {
-                currentImage = Image; // Read the image safely
+                if (_manager._idsQueue.TryDequeue(out var item))
+                {
+                    queueCount = _manager._idsQueue.Count;
+                    currentImage = item.Frame;
+                    published = item.messageTimestamp;
+                    received = item.receptionTimestamp;
+                    CalculateLatency(received, published);
+                }
+                else // Queue is empty
+                {
+                    RenderTimeoutOverlay(g);
+                    return;
+                }
             }
 
+            if (_manager.StreamingTopic == Properties.Settings.Default.mqtt_topic_baslerStream)
+            {
+                if (_manager._baslerQueue.TryDequeue(out var item))
+                {
+                    queueCount = _manager._baslerQueue.Count;
+                    currentImage = item.Frame;
+                    published = item.messageTimestamp;
+                    received = item.receptionTimestamp;
+                    CalculateLatency(received, published);
+
+                }
+                else // Queue is empty
+                {
+                    RenderTimeoutOverlay(g);
+                    return;
+                }
+            }
+
+            if (_manager.StreamingTopic == Properties.Settings.Default.mqtt_topic_luxonisStream)
+            {
+                if (_manager._luxonisQueue.TryDequeue(out var item))
+                {
+                    queueCount = _manager._luxonisQueue.Count;
+                    currentImage = item.Frame;
+                    published = item.messageTimestamp;
+                    received = item.receptionTimestamp;
+                    CalculateLatency(received, published);
+                }
+                else // Queue is empty
+                {
+                    RenderTimeoutOverlay(g);
+                    return;
+                }
+            }
+
+            _frameCount++;
+
             // Check for timeout condition
-            if (_imgDate.AddSeconds(2) < DateTime.Now)
+            if (received.AddSeconds(2) < DateTime.Now)
             {
                 RenderTimeoutOverlay(g);
             }
@@ -168,9 +156,33 @@ namespace OptiSort
                 {
                     try
                     {
+
+                        double overload = Math.Round(_totalLatency / _maxAllowedLatency * 100, 1, MidpointRounding.AwayFromZero);
+                        if (overload > 100 && _mqttLatencyError == false)
+                        {
+                            _mqttLatencyError = true;
+                            _ = _manager.DisconnectMqttClient();
+                            MessageBox.Show("MQTT service interrupted because of a latency overload. Please try restarting the service");
+                            return;
+                        }
+
+                        int y = 10;
+                        int increment = 20;
                         g.DrawImage(currentImage, new Rectangle(0, 0, pictureBox.Width, pictureBox.Height));
-                        g.DrawString($"FPS: {_fps}", new Font("Arial", 16), Brushes.White, new PointF(10, 10)); // Draw FPS overlay
-                        g.DrawString($"Latency: {_latencyMilliseconds} ms", new Font("Arial", 16), Brushes.White, new PointF(10, 40)); // Draw Latency overlay 
+                        g.DrawString($"Topic: {_manager.StreamingTopic}", new Font("Arial", 10), Brushes.White, new PointF(10, y));
+                        g.DrawString($"FPS: {_fps}", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        g.DrawString($"Mqtt latency: {_mqttLatency} ms", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        g.DrawString($"Rendering latency: {_renderingLatency} ms", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        
+                        if (overload <= 20)
+                            g.DrawString($"Latency overload: {overload}%", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        else if(overload > 20 && overload <= 60)
+                            g.DrawString($"Latency overload: {overload}%", new Font("Arial", 10), Brushes.Yellow, new PointF(10, y = y + increment));
+                        else
+                            g.DrawString($"Latency overload: {overload}%", new Font("Arial", 10), Brushes.Red, new PointF(10, y = y + increment));
+
+                        g.DrawString($"Queued frames: {queueCount}", new Font("Arial", 10), Brushes.White, new PointF(10, y = y + increment));
+                        _watchdog.Reset();
                     }
                     catch (Exception ex)
                     {
@@ -180,14 +192,14 @@ namespace OptiSort
             }
         }
 
-
+        
         /// <summary>
         /// Rendering image 
         /// </summary>
         /// <param name="g"></param>
         private void RenderTimeoutOverlay(Graphics g)
         {
-            if (_frmMain.StatusMqttClient)
+            if (_manager.StatusMqttClient)
             {
                 g.Clear(Color.Black);
                 using (var pen = new Pen(Color.Red, 10))
@@ -216,87 +228,27 @@ namespace OptiSort
         }
 
 
-        /// <summary>
-        /// This method will be called periodically by the timer
-        /// </summary>
-        /// <param name="state"></param>
-        private void OnTimeout(object state)
+        private void CalculateLatency(DateTime rxTimestamp, DateTime msgTimestamp)
         {
-            if (_screenshotRequested)
-            {
-                lock (_lock)
-                {
-                    DateTime currentTime = DateTime.Now;
-
-                    var requiredTopics = new[]
-                    {
-                        Properties.Settings.Default.mqtt_topic_idsStream,
-                        Properties.Settings.Default.mqtt_topic_luxonisStream,
-                        Properties.Settings.Default.mqtt_topic_baslerStream
-                    };
-
-                    // Check if any topic has timed out
-                    foreach (var topic in requiredTopics)
-                    {
-                        if (currentTime - _topicLastReceived[topic] > TimeSpan.FromSeconds(4))
-                        {
-                            // Replace the image with a placeholder bitmap for this topic
-                            Console.WriteLine($"{topic} timed out");
-                            _screenshotBuffer[topic] = CreateTransparentBitmap(pictureBox.Width, pictureBox.Height);
-                        }
-                    }
-
-                    // If all required topics have been captured (including placeholders), invoke ScreenshotsReady
-                    if (requiredTopics.All(t => _screenshotBuffer.ContainsKey(t)))
-                    {
-                        ScreenshotsReady?.Invoke(new Dictionary<string, Bitmap>(_screenshotBuffer));
-
-                        // Reset request flag
-                        _screenshotRequested = false;
-                    }
-                }
-            }
-
-            pictureBox.Invalidate(); // Trigger re-paint
+            _mqttLatency = Math.Round((rxTimestamp - msgTimestamp).TotalMilliseconds, 2, MidpointRounding.AwayFromZero);
+            _renderingLatency = Math.Round((DateTime.Now - rxTimestamp).TotalMilliseconds, 2, MidpointRounding.AwayFromZero);
+            _totalLatency = Math.Round((DateTime.Now - msgTimestamp).TotalMilliseconds, 2, MidpointRounding.AwayFromZero);
         }
 
-
-        /// <summary>
-        /// Converts the image MQTT image (base64) to a bitmap
-        /// </summary>
-        /// <param name="base64Image"></param>
-        /// <returns></returns>
-        private Bitmap JsonToBitmap(string base64Image)
+        // Periodic reset to ensure FPS calculation is accurate over time
+        private void ResetMetrics()
         {
-            // Trim off any metadata if present
-            if (base64Image.Contains(","))
-            {
-                base64Image = base64Image.Substring(base64Image.IndexOf(",") + 1);
-            }
-
-            // Convert from Base64 to Bitmap
-            byte[] imageBytes = Convert.FromBase64String(base64Image);
-            using (var ms = new MemoryStream(imageBytes))
-            {
-                return new Bitmap(ms);
-            }
+            _fps = Math.Round(_frameCount / _stopwatch.Elapsed.TotalSeconds, 0, MidpointRounding.AwayFromZero);
+            _frameCount = 0;
+            _stopwatch.Restart();
         }
 
-
-        /// <summary>
-        /// Creates bitmap placeholder to instance an empty pictureBox for the constructor
-        /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
-        private Bitmap CreateTransparentBitmap(int width, int height)
+        // Start a timer to reset FPS metrics every second
+        private void StartMetricsResetTimer()
         {
-            var bitmap = new Bitmap(width, height);
-            using (var g = Graphics.FromImage(bitmap))
-            {
-                g.Clear(Color.Transparent);
-            }
-            return bitmap;
+            var timer = new System.Timers.Timer(1000); // 1 second interval
+            timer.Elapsed += (sender, e) => ResetMetrics();
+            timer.Start();
         }
 
     }

@@ -1,11 +1,14 @@
 ﻿using Ace.UIBuilder.Client.Controls.Tools.WindowsForms;
+using ActiproSoftware.SyntaxEditor;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Text.Json;
 using System.Windows.Forms;
@@ -14,8 +17,14 @@ namespace OptiSort.userControls
 {
     public partial class ucCameraLensCalibration : UserControl
     {
-        private frmMain _frmMain;
+        private optisort_mgr _manager;
         private int _shots;
+        private bool _idsShot = false;
+        private bool _luxonisShot = false;
+        private bool _baslerShot = false;
+        private DateTime _elapsedTime;
+        private int _pythonProcessId;
+
         public int Shots
         {
             get => _shots;
@@ -29,67 +38,182 @@ namespace OptiSort.userControls
             }
         }
 
-        private FileSystemWatcher _fileWatcher;
-        private bool _isFileWatcherPaused;
 
-        private static string _tempFolder = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Temp"));
-        private static string _configFolder = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Config"));
-
-
-        // TODO: move general methods to app manager
-
-
-        public ucCameraLensCalibration(frmMain frmMain)
+        internal ucCameraLensCalibration(optisort_mgr manager)
         {
             InitializeComponent();
+            _manager = manager;
 
             Shots = 0;
-            
-            _frmMain = frmMain;
 
             this.Load += ucLensDistortionCalibration_Load; // Attach the Load event to call the method after the control is fully initialized
         }
 
+        // Perform a series of actions on form loading
         private void ucLensDistortionCalibration_Load(object sender, EventArgs e)
         {
             RefreshCalibrationTimestamp();
             LoadExistingThumbnails();
-            SetupFileSystemWatcher();
+
+            _manager.SetupTempFolderWatcher(); // create file watcher
+
+            _manager.TempFileDeleted += OnTempFileDeleted; // Subscribe to manager's file deletion event from TEMP folder
+            _manager.TempFolderWatcherResumed += OnWatcherResumed; // Subscribe to manager's file watcher resume event
+            _manager.PropertyChanged += OnPropertyChange; // Subscribe to manager's propery changed event
+
+            RefreshBottomControls(); 
+
         }
+
+        /// <summary>
+       /// Refresh pushbuttons based on manager's properties status
+       /// </summary>
+       /// <param name="sender"></param>
+       /// <param name="e"></param>
+        private void OnPropertyChange(object sender, PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName == nameof(_manager.StatusMqttClient) || e.PropertyName == nameof(_manager.RequestScreenshots))
+            {
+                RefreshBottomControls();
+            }
+        }
+
+        /// <summary>
+        /// If an image gets deleted from the folder, the other two are also deleted and the flow panels are updated
+        /// </summary>
+        private void OnTempFileDeleted()
+        {
+            DeleteIncompleteTriplets();
+            RefreshFlowPanels();
+        }
+
+        /// <summary>
+        /// Reload flow panels on file watcher resume to catch up with current folder condition
+        /// </summary>
+        private void OnWatcherResumed()
+        {
+            LoadExistingThumbnails();
+        }
+
+        /// <summary>
+        /// Launches calibration output receival
+        /// </summary>
+        /// <param name="processID"></param>
+        /// <param name="output"></param>
+        private void MqttMessageReceived(string topic, JsonElement message, int processID)
+        {
+            // check if mqtt message is sent by expected script
+            if (processID == _pythonProcessId)
+            {
+                // check if message contains results
+                if (message.TryGetProperty("result", out JsonElement resultElement))
+                {
+                    this.Invoke((MethodInvoker)(() =>
+                    {
+                        CalibrationResult(resultElement);
+                    }));
+                }
+
+                // in any case: log "message" string coming from the python file
+                if (message.TryGetProperty("message", out JsonElement messageElement))
+                {
+                    string msg = messageElement.GetString();
+
+                    this.Invoke((MethodInvoker)(() =>
+                    {
+                        _manager.Log(msg, false, false); 
+                    }));
+                }
+            } 
+        }
+
+        /// <summary>
+        /// Logs python error and shows msgbox
+        /// </summary>
+        /// <param name="processID"></param>
+        /// <param name="output"></param>
+        private void PythonErrorHandler(int processID, string output)
+        {
+            if (processID == _pythonProcessId)
+            {
+                this.Invoke((MethodInvoker)(() =>
+                {
+                    _manager.Log("Python camera calibration file threw an error!", true, false);
+                    MessageBox.Show("Python camera calibration file threw an error", "Python error!");
+                }));
+            }
+        }
+
+        private void PythonTerminationHandler(int processID, bool executionTerminated)
+        {
+            if (processID == _pythonProcessId)
+            {
+                this.Invoke((MethodInvoker)(() =>
+                {                
+                    _manager.Log("Python camera calibration file has closed!", false, false);
+                    _manager.MqttMessageReceived -= MqttMessageReceived;
+                    _manager.OnErrorReceived -= PythonErrorHandler;
+                    _manager.OnExecutionTerminated -= PythonTerminationHandler;
+                    _manager.UnsubscribeMqttTopic("optisort/camera_calibration");
+                    _manager.StopExecution(_pythonProcessId); // needed to reset active processes memory
+                }));
+            }
+        }
+
+
+
+
+
+
+        // ----------------------------------------------------------------------------------------
+        // ------------------------------------ PUSHBUTTONS ---------------------------------------
+        // ----------------------------------------------------------------------------------------
 
         private void btn_acquire_Click(object sender, EventArgs e)
         {
-            if (!_frmMain.StatusMqttClient)
+            if (!_manager.StatusMqttClient)
             {
                 MessageBox.Show("Enable camera streaming first (MQTT service)");
                 return;
             }
 
             Cursor = Cursors.WaitCursor;
-            _frmMain._ucCameraStream.ScreenshotsReady += SaveShot;
-            _frmMain._ucCameraStream.RequestScreenshots();
+            _manager.RequestScreenshots = true;
+            _manager.BitmapQueued += SaveShots;
+            _elapsedTime = DateTime.Now;
         }
+
 
         private void btn_calibrate_Click(object sender, EventArgs e)
         {
             Cursor = Cursors.WaitCursor;
 
-            _frmMain.Log("Calibration process in progress...", false, false);
+            // subscribe to mqtt topic to receive updates from python file
+            _manager.SubscribeMqttTopic("optisort/camera_calibration");
+            _manager.MqttMessageReceived += MqttMessageReceived;
 
-            string script = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Cameras\workingScripts\camerasCalibration.py"));
-            RunPythonScript(script);
+            // subscribe termination events to handler
+            _manager.OnErrorReceived += PythonErrorHandler;
+            _manager.OnExecutionTerminated += PythonTerminationHandler;
+
+            // launch python file and memorize processId
+            string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
+            _pythonProcessId = _manager.ExecuteScript(scriptPath);
+            Console.Write($"Pythnon started with process {_pythonProcessId}");
+            _manager.Log("Camera calibration file launched", false, false);
         }
 
         private void btn_clear_Click(object sender, EventArgs e)
         {
-            ClearTempDirectory(); 
+            _manager.ClearTempDirectory();
         }
+
 
         private void btn_home_Click(object sender, EventArgs e)
         {
-            _fileWatcher.Dispose();
-            ucManualControl ucManualControl = new ucManualControl(_frmMain);
-            _frmMain.AddNewUc(ucManualControl);
+            _manager.DisposeTempFolderWatcher();
+            ucManualControl ucManualControl = new ucManualControl(_manager);
+            _manager.RequestNewUcLoading(ucManualControl);
         }
 
 
@@ -98,56 +222,88 @@ namespace OptiSort.userControls
         // ----------------------------------------------------------------------------------------
 
 
-        /// <summary>
-        /// When this is triggered, three screenshots are ready to be processed. The method saves the screenshots as files and adds their thumbnails to the flow panels
-        /// </summary>
-        /// <param name="screenshots"></param>
-        private void SaveShot(Dictionary<string, Bitmap> screenshots)
-        {
-            // Handle the screenshots when they are ready
-            Invoke(new Action(() =>
-            {
-                // Get the earliest available index (gap in the sequence)
-                int earliestAvailableIndex = GetEarliestAvailableIndex();
 
-                foreach (var kvp in screenshots)
+        private void SaveShots(string topic)
+        {
+            if (_manager.RequestScreenshots) // this check is needed because the event is not unsubscribed immediately and late coming triggers may generate additional screenshots
+            {
+
+                Invoke(new Action(() =>
                 {
-                    string topic = kvp.Key;
-                    Bitmap image = kvp.Value;
+                    int imageIndex = GetEarliestAvailableIndex();
 
                     string prefix = string.Empty;
                     FlowLayoutPanel panel = null;
+                    Bitmap image = null;
 
-                    if (topic == Properties.Settings.Default.mqtt_topic_idsStream)
+                    if (topic == Properties.Settings.Default.mqtt_topic_idsStream && _idsShot == false)
                     {
+                        if (_manager._idsQueue.TryDequeue(out var item))
+                        {
+                            image = item.Frame;
+                            _idsShot = true;
+                        }
+                        else return; // in case queue is empty, saving cannot continue because bitmaps cannot be null to be saved
+
                         prefix = "ids";
                         panel = flp_ids;
                     }
-                    else if (topic == Properties.Settings.Default.mqtt_topic_baslerStream)
+                    else if (topic == Properties.Settings.Default.mqtt_topic_baslerStream && _baslerShot == false)
                     {
+                        if (_manager._baslerQueue.TryDequeue(out var item))
+                        {
+                            image = item.Frame;
+                            _baslerShot = true;
+                        }
+                        else return;
+
                         prefix = "basler";
                         panel = flp_basler;
                     }
-                    else if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream)
+                    else if (topic == Properties.Settings.Default.mqtt_topic_luxonisStream && _luxonisShot == false)
                     {
+                        if (_manager._luxonisQueue.TryDequeue(out var item))
+                        {
+                            image = item.Frame;
+                            _luxonisShot = true;
+                        }
+                        else return;
+
                         prefix = "luxonis";
                         panel = flp_luxonis;
                     }
 
                     if (!string.IsNullOrEmpty(prefix) && panel != null)
                     {
-                        string filename = $"{prefix}_CalibrationImage_{earliestAvailableIndex.ToString("D2")}";
-                        SaveBitmapAsFile(image, filename);
+                        string filename = $"{prefix}_CalibrationImage_{imageIndex.ToString("D2")}";
+                        _manager.SaveBitmapAsFile(image, filename);
                         AddThumbnailToColumn(panel, image, filename);
                     }
-                }
 
-                _frmMain._ucCameraStream.ScreenshotsReady -= SaveShot;
-                Shots++;
-                Cursor = Cursors.Default;
-            }));
+                    if (_idsShot && _baslerShot && _luxonisShot)
+                    {
+                        _manager.BitmapQueued -= SaveShots;
+                        _manager.RequestScreenshots = false;
+                        _idsShot = false;
+                        _luxonisShot = false;
+                        _baslerShot = false;
+                        Cursor = Cursors.Default;
+                        Shots++;
+                    }else if ((DateTime.Now - _elapsedTime).TotalSeconds > 5)
+                    {
+                        _manager.BitmapQueued -= SaveShots;
+                        _manager.RequestScreenshots = false;
+                        _idsShot = false;
+                        _luxonisShot = false;
+                        _baslerShot = false;
+                        Cursor = Cursors.Default;
+                        Shots++;
+                        MessageBox.Show("Timeout reached. MQTT streamings might have a problem: check all the topics or inform the developer.");
+                    }
+                }));
+            }
+
         }
-
 
 
         /// <summary>
@@ -156,14 +312,13 @@ namespace OptiSort.userControls
         /// <returns>The earliest available numeric index.</returns>
         private int GetEarliestAvailableIndex()
         {
-            
-            if (!Directory.Exists(_tempFolder))
+            if (!Directory.Exists(_manager.TempFolder))
                 return 1; // Start from 1 if the directory does not exist
 
-            var existingFiles = Directory.GetFiles(_tempFolder, "*_CalibrationImage_*.bmp");
+            var existingFiles = Directory.GetFiles(_manager.TempFolder, "*_CalibrationImage_*.bmp");
 
             // Extract indices from filenames
-            var indices = existingFiles
+            var indexCounts = existingFiles
                 .Select(file =>
                 {
                     string fileName = Path.GetFileNameWithoutExtension(file);
@@ -175,51 +330,55 @@ namespace OptiSort.userControls
                     return -1; // Invalid index
                 })
                 .Where(index => index > 0) // Filter out invalid indices
-                .OrderBy(index => index) // Sort in ascending order
-                .ToList();
+                .GroupBy(index => index) // Count occurrences
+                .ToDictionary(g => g.Key, g => g.Count());
 
-            // If no files exist, start with index 1
-            if (indices.Count == 0)
-                return 1;
-
-            // Find the first missing index (gap)
-            for (int i = 1; i <= indices.Count + 1; i++)
+            // Start checking from index 1
+            int i = 1;
+            while (true)
             {
-                if (!indices.Contains(i))
-                {
-                    // Return the first missing index
-                    return i;
-                }
-            }
+                if (!indexCounts.ContainsKey(i) || indexCounts[i] < 3)
+                    return i; // Return the first index that has fewer than 3 occurrences
 
-            // If no gaps, return the next index after the largest one
-            return indices.Max() + 1;
+                i++; // Move to the next index
+            }
         }
+
 
 
         /// <summary>
         /// Parse py's output and interpret result (calibration failed or succeded)
         /// </summary>
         /// <param name="pythonOutput"></param>
-        private void CalibrationResult(string pythonOutput)
+        private void CalibrationResult(JsonElement pythonOutput)
         {
 
-            PauseFileWatcher();
+            _manager.PauseFileWatcher();
 
             try
             {
-                var jsonDocument = JsonDocument.Parse(pythonOutput); // Parse JSON
-                var root = jsonDocument.RootElement; // Access elements
 
-                // Extract "bad_image" -> "ids", "basler", "luxonis" into C# arrays
-                int[] badImage_ids = JsonSerializer.Deserialize<int[]>(root.GetProperty("bad_image").GetProperty("ids").GetRawText());
-                int[] badImage_basler = JsonSerializer.Deserialize<int[]>(root.GetProperty("bad_image").GetProperty("basler").GetRawText());
-                int[] badImage_luxonis = JsonSerializer.Deserialize<int[]>(root.GetProperty("bad_image").GetProperty("luxonis").GetRawText());
+                // Extracting "bad_image" indexes
+                int[] GetIntArray(JsonElement parent, string key) => parent
+                    .TryGetProperty(key, out JsonElement element) && element.ValueKind == JsonValueKind.Array ? element
+                    .EnumerateArray().Select(e => e.GetInt32()).ToArray() : Array.Empty<int>();
 
-                // Extract "calibration_fail" -> "ids", "basler", "luxonis" into booleans
-                bool calibrationFail_ids = root.GetProperty("calibration_fail").GetProperty("ids").GetBoolean();
-                bool calibrationFail_basler = root.GetProperty("calibration_fail").GetProperty("basler").GetBoolean();
-                bool calibrationFail_luxonis = root.GetProperty("calibration_fail").GetProperty("luxonis").GetBoolean();
+                JsonElement badImage = pythonOutput.GetProperty("bad_image");
+
+                int[] badImage_ids = GetIntArray(badImage, "ids");
+                int[] badImage_basler = GetIntArray(badImage, "basler");
+                int[] badImage_luxonis = GetIntArray(badImage, "luxonis");
+
+
+                // extracting cameras who failed calibration
+                bool GetBoolValue(JsonElement parent, string key) => parent
+                    .TryGetProperty(key, out JsonElement element) && element.ValueKind == JsonValueKind.True?true:false;
+
+                JsonElement calibrationFail = pythonOutput.GetProperty("calibration_fail");
+
+                bool calibrationFail_ids = GetBoolValue(calibrationFail, "ids");
+                bool calibrationFail_basler = GetBoolValue(calibrationFail, "basler");
+                bool calibrationFail_luxonis = GetBoolValue(calibrationFail, "luxonis");
 
                 if (calibrationFail_ids || calibrationFail_luxonis || calibrationFail_basler)
                 {
@@ -229,9 +388,10 @@ namespace OptiSort.userControls
                 if (badImage_ids.Length == 0 && badImage_basler.Length == 0 && badImage_luxonis.Length == 0)
                 {
                     Shots = 0;
-                    ClearTempDirectory();
+                    _manager.ClearTempDirectory();
                     RefreshCalibrationTimestamp();
                     MessageBox.Show($"CALIBRATION SUCCEDED!");
+                    _manager.Log("Lens calibration successfull", false, true);
                 }
                 else
                 {
@@ -246,38 +406,38 @@ namespace OptiSort.userControls
                     // deleting bad images IDs for all the cameras
                     foreach (int id in badImages_all)
                     {
-                        DeleteImage("ids_CalibrationImage_" + id.ToString("D2") + ".bmp");
-                        DeleteImage("basler_CalibrationImage_" + id.ToString("D2") + ".bmp");
-                        DeleteImage("luxonis_CalibrationImage_" + id.ToString("D2") + ".bmp");
+                        _manager.DeleteFile("ids_CalibrationImage_" + id.ToString("D2") + ".bmp");
+                        _manager.DeleteFile("basler_CalibrationImage_" + id.ToString("D2") + ".bmp");
+                        _manager.DeleteFile("luxonis_CalibrationImage_" + id.ToString("D2") + ".bmp");
                     }
 
                     Shots -= badImages_all.Count;
                     MessageBox.Show($"BAD IMAGES DETECTED!\nCalibration failed because the chess board was not found in {badImages_all.Count} triplets. These were deleted. Please proceed to retaking the images again.");
+                    _manager.Log("Bad images detected! Please retake some screenshots", false, false);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error parsing JSON: {ex.Message}");
+                _manager.Log("Error parsing calibration result", true, false);
             }
-        
-            ResumeFileWatcher();
+
+            _manager.ResumeFileWatcher();
             Cursor = Cursors.Default;
-            _frmMain.Log("Calibration process ended", false, false);
+            _manager.Log("Calibration process ended", false, false);
         }
 
-        // ----------------------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------------------
+
 
         /// <summary>
         /// Deletes incomplete triplets in the TEMP folder.
         /// </summary>
         private void DeleteIncompleteTriplets()
         {
-            if (!Directory.Exists(_tempFolder))
+            if (!Directory.Exists(_manager.TempFolder))
                 return;
 
-            var imageFiles = Directory.GetFiles(_tempFolder, "*.bmp");
+            var imageFiles = Directory.GetFiles(_manager.TempFolder, "*.bmp");
 
             // Group files by their numeric identifier
             var groupedFiles = imageFiles
@@ -319,31 +479,35 @@ namespace OptiSort.userControls
                 {
                     // Delete incomplete triplet
                     if (idsImage != null)
-                        DeleteImage(idsImage.FullPath);
+                        _manager.DeleteFile(idsImage.FullPath);
                     if (baslerImage != null)
-                        DeleteImage(baslerImage.FullPath);
+                        _manager.DeleteFile(baslerImage.FullPath);
                     if (luxonisImage != null)
-                        DeleteImage(luxonisImage.FullPath);
+                        _manager.DeleteFile(luxonisImage.FullPath);
 
                     Debug.WriteLine($"Incomplete triplet for calibration image nr.: {group.Key} - deleted remaining images.");
                 }
             }
         }
 
+
         /// <summary>
         /// Loads existing valid images into the flow panels.
         /// </summary>
         private void LoadExistingThumbnails()
         {
-            if (!Directory.Exists(_tempFolder))
+
+            if (!Directory.Exists(_manager.TempFolder))
                 return;
+
+            Shots = 0;
 
             // Clear the panels before repopulating
             flp_ids.Controls.Clear();
             flp_basler.Controls.Clear();
             flp_luxonis.Controls.Clear();
 
-            var imageFiles = Directory.GetFiles(_tempFolder, "*.bmp");
+            var imageFiles = Directory.GetFiles(_manager.TempFolder, "*.bmp");
 
             // Group files by their numeric identifier
             var groupedFiles = imageFiles
@@ -474,315 +638,98 @@ namespace OptiSort.userControls
             panel.Invoke(new Action(() => panel.Controls.Add(pictureBox)));
         }
 
-       
-        // ----------------------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------------------
+
 
         private void RefreshCalibrationTimestamp()
         {
             try
             {
+                // Define calibration file paths
+                var calibrationFiles = new Dictionary<string, System.Windows.Forms.Label>
+                {
+                    { "ids_calibration.yaml", lbl_idsCalibTimestamp },
+                    { "basler_calibration.yaml", lbl_baslerCalibTimestamp },
+                    { "luxonis_calibration.yaml", lbl_luxonisCalibTimestamp }
+                };
 
-                if (!File.Exists(Path.Combine(_configFolder, "ids_calibration.yaml")))
-                    this.Invoke(new Action(() => lbl_idsCalibTimestamp.Text = "Last calibration: NEVER!"));
-                else
-                    this.Invoke(new Action(() => lbl_idsCalibTimestamp.Text = "Last calibration: " + File.GetLastWriteTime(Path.Combine(_configFolder, "ids_calibration.yaml")).ToString("dd/MM/yyyy HH:mm")));
-
-                if (!File.Exists(Path.Combine(_configFolder, "basler_calibration.yaml")))
-                    this.Invoke(new Action(() => lbl_baslerCalibTimestamp.Text = "Last calibration: NEVER!"));
-                else
-                    this.Invoke(new Action(() => lbl_baslerCalibTimestamp.Text = "Last calibration: " + File.GetLastWriteTime(Path.Combine(_configFolder, "basler_calibration.yaml")).ToString("dd/MM/yyyy HH:mm")));
-
-                if (!File.Exists(Path.Combine(_configFolder, "luxonis_calibration.yaml")))
-                    this.Invoke(new Action(() => lbl_luxonisCalibTimestamp.Text = "Last calibration: NEVER!"));
-                else
-                    this.Invoke(new Action(() => lbl_luxonisCalibTimestamp.Text = "Last calibration: " + File.GetLastWriteTime(Path.Combine(_configFolder, "luxonis_calibration.yaml")).ToString("dd/MM/yyyy HH:mm")));
+                foreach (var file in calibrationFiles)
+                {
+                    UpdateCalibrationTimestamp(file.Key, file.Value);
+                }
             }
             catch (Exception ex)
             {
-                this.Invoke(new Action(() => lbl_idsCalibTimestamp.Text = "Last calibration: dd/mm/yyyy hh:mm" ));
-                this.Invoke(new Action(() => lbl_baslerCalibTimestamp.Text = "Last calibration: dd/mm/yyyy hh:mm"));
-                this.Invoke(new Action(() => lbl_luxonisCalibTimestamp.Text = "Last calibration: dd/mm/yyyy hh:mm"));
+                // Fallback in case of an error
+                HandleCalibrationError();
                 Debug.WriteLine(ex);
             }
         }
 
+        private void UpdateCalibrationTimestamp(string fileName, System.Windows.Forms.Label label)
+        {
+            // Ensure UI updates are thread-safe
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => UpdateCalibrationTimestamp(fileName, label)));
+                return;
+            }
+
+            // Generate file path
+            string filePath = Path.Combine(_manager.ConfigFolder, fileName);
+
+            // Update the label text
+            if (!File.Exists(filePath))
+            {
+                label.Text = "Last calibration: NEVER!";
+            }
+            else
+            {
+                string timestamp = File.GetLastWriteTime(filePath).ToString("dd/MM/yyyy HH:mm");
+                label.Text = $"Last calibration: {timestamp}";
+            }
+        }
+
+        private void HandleCalibrationError()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(HandleCalibrationError));
+                return;
+            }
+
+            lbl_idsCalibTimestamp.Text = "Last calibration: dd/mm/yyyy hh:mm";
+            lbl_baslerCalibTimestamp.Text = "Last calibration: dd/mm/yyyy hh:mm";
+            lbl_luxonisCalibTimestamp.Text = "Last calibration: dd/mm/yyyy hh:mm";
+        }
+
+
         private void RefreshFlowPanels()
         {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(RefreshFlowPanels)); // Ensure execution on the UI thread
+                return;
+            }
+
             flp_ids.Controls.Clear();
             flp_luxonis.Controls.Clear();
             flp_basler.Controls.Clear();
-            Shots = 0;
 
             LoadExistingThumbnails();
-            
+
             flp_ids.Refresh();
             flp_luxonis.Refresh();
             flp_basler.Refresh();
         }
 
+
         private void RefreshBottomControls()
         {
             lbl_shots.Text = $"{Shots}/15";
-            btn_acquire.Enabled = Shots < 15;
-            btn_calibrate.Enabled = Shots == 15;
+            btn_calibrate.Enabled = _manager.StatusMqttClient == true && _manager.RequestScreenshots == false && Shots == 15;
             btn_clear.Enabled = Shots > 0;
+            btn_acquire.Enabled = _manager.StatusMqttClient == true && _manager.RequestScreenshots == false && Shots < 15;
         }
 
-        // ----------------------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------------------
-
-        /// <summary>
-        /// Creates an agent that checks on updates within the TEMP folder to update the flow panels respectively
-        /// </summary>
-        private void SetupFileSystemWatcher()
-        {
-            _fileWatcher = new FileSystemWatcher
-            {
-                Path = _tempFolder, // Directory to watch
-                Filter = "*.bmp", // Monitor only BMP files
-                NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.CreationTime
-            };
-
-            // Subscribe to events
-            //_fileWatcher.Created += OnFileChanged; // too aggressive (three images cannot be added simultaneously, not even by pasting)
-            _fileWatcher.Deleted += OnFileChanged;
-            //_fileWatcher.Changed += OnFileChanged; // too aggressive (three images cannot changed simultaneously)
-            //_fileWatcher.Renamed += OnFileRenamed; // too aggressive (three images cannot renamed simultaneously)
-
-            // Enable the watcher
-            _fileWatcher.EnableRaisingEvents = true;
-        }
-
-        private void PauseFileWatcher()
-        {
-            _isFileWatcherPaused = true;
-        }
-
-        private void ResumeFileWatcher()
-        {
-            _isFileWatcherPaused = false;
-            LoadExistingThumbnails();
-        }
-
-        private void OnFileChanged(object sender, FileSystemEventArgs e)
-        {
-            if (_isFileWatcherPaused)
-                return;
-
-            if (InvokeRequired)
-            {
-                Invoke(new Action(() => OnFileChanged(sender, e)));
-                return;
-            }
-
-            Debug.WriteLine($"File {e.ChangeType}: {e.FullPath}");
-
-            DeleteIncompleteTriplets();
-            RefreshFlowPanels();
-        }
-
-        /*
-        private void OnFileRenamed(object sender, RenamedEventArgs e)
-        {
-            if (InvokeRequired)
-            {
-                Invoke(new Action(() => OnFileRenamed(sender, e)));
-                return;
-            }
-
-            Debug.WriteLine($"File Renamed: {e.OldFullPath} -> {e.FullPath}");
-
-            // Refresh thumbnails to reflect the current folder's content
-            RefreshFlowPanels();
-        }
-        */
-
-        /// <summary>
-        /// Export screenshots as bmp files to the TEMP folder
-        /// </summary>
-        /// <param name="bitmap"></param>
-        /// <param name="fileName"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="ArgumentException"></exception>
-        private static void SaveBitmapAsFile(Bitmap bitmap, string fileName)
-        {
-            if (bitmap == null)
-            {
-                throw new ArgumentNullException(nameof(bitmap), "Bitmap cannot be null.");
-            }
-
-            if (string.IsNullOrWhiteSpace(fileName))
-            {
-                throw new ArgumentException("File name cannot be null or empty.", nameof(fileName));
-            }
-
-
-            if (!Directory.Exists(_tempFolder))
-            {
-                Directory.CreateDirectory(_tempFolder);
-            }
-
-            // Combine the output folder with the file name
-            string tempFilePath = Path.Combine(_tempFolder, fileName + ".bmp");
-
-            // Save the bitmap as a BMP file
-            bitmap.Save(tempFilePath, ImageFormat.Bmp);
-
-            Console.WriteLine($"Bitmap saved as BMP at: {tempFilePath}");
-        }
-
-
-        /// <summary>
-        /// Delete all the contents of the TEMP folder (calibration screenshots of the cameras)
-        /// </summary>
-        /// <exception cref="ArgumentException"></exception>
-        private static void ClearTempDirectory()
-        {
-            if (string.IsNullOrWhiteSpace(_tempFolder))
-            {
-                throw new ArgumentException("Temporary directory path cannot be null or empty.", nameof(_tempFolder));
-            }
-
-            try
-            {
-                // Ensure the temporary directory exists
-                if (Directory.Exists(_tempFolder))
-                {
-                    // Get all files in the temporary directory
-                    var files = Directory.GetFiles(_tempFolder);
-
-                    // Delete each file
-                    foreach (var file in files)
-                    {
-                        try
-                        {
-                            File.Delete(file);
-                            Console.WriteLine($"Deleted: {file}");
-                        }
-                        catch (Exception ex)
-                        {
-                            // Log the error (or handle it accordingly)
-                            Console.WriteLine($"Failed to delete file: {file}. Error: {ex.Message}");
-                        }
-                    }
-
-                    // Optionally, delete empty subdirectories
-                    var directories = Directory.GetDirectories(_tempFolder);
-                    foreach (var directory in directories)
-                    {
-                        try
-                        {
-                            Directory.Delete(directory, true); // Recursive delete
-                            Console.WriteLine($"Deleted directory: {directory}");
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Failed to delete directory: {directory}. Error: {ex.Message}");
-                        }
-                    }
-                }
-                else
-                {
-                    // If the directory doesn't exist, create it
-                    Directory.CreateDirectory(_tempFolder);
-                    Console.WriteLine($"Temporary directory created: {_tempFolder}");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to clean temporary directory. Error: {ex.Message}",
-                                "Error",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Error);
-            }
-        }
-
-
-        /// <summary>
-        /// Delete specific image from the TEMP folder, shift other indexes to occupy that groupId
-        /// </summary>
-        /// <param name="name"></param>
-        private static void DeleteImage(string name)
-        {
-            try
-            {
-                string filePath = Path.Combine(_tempFolder, name);
-                if (File.Exists(filePath))
-                    File.Delete(filePath);
-                else
-                    Console.WriteLine($"Delete failed because file is not found: {filePath}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error deleting file: {ex.Message}");
-            }
-        }
-
-        // ----------------------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------------------
-        // ----------------------------------------------------------------------------------------
-
-        /// <summary>
-        /// Run a python script in background and collect output
-        /// </summary>
-        /// <param name="scriptPath"></param>
-        private void RunPythonScript(string scriptPath)
-        {
-            var pythonExe = @"C:\Users\dylan\AppData\Local\Programs\Python\Python312\python.exe"; // Path to Python executable
-            var processStartInfo = new ProcessStartInfo
-            {
-                FileName = pythonExe,
-                Arguments = scriptPath, // Path to the script
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
-
-            var process = new Process { StartInfo = processStartInfo };
-
-            // Use StringBuilder to collect output data
-            var outputBuilder = new StringBuilder();
-            var errorBuilder = new StringBuilder();
-
-            process.OutputDataReceived += (sender, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                {
-                    outputBuilder.AppendLine(e.Data);
-                }
-            };
-            process.ErrorDataReceived += (sender, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                {
-                    errorBuilder.AppendLine(e.Data);
-                }
-            };
-
-            // Start the process
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-
-            // Wait for the process to complete (or temporary imaged used will overlap)
-            process.WaitForExit();
-
-            // Handle errors if any
-            if (errorBuilder.Length > 0)
-            {
-                Console.WriteLine("ERROR: " + errorBuilder.ToString());
-                // Optionally, handle errors here (e.g., log them or throw an exception)
-            }
-
-            // Trigger the CalibrationResult method with the collected output
-            if (outputBuilder.Length > 0)
-            {
-                CalibrationResult(outputBuilder.ToString()); // call explicitly the calibration result method
-            }
-        }
     }
 }

@@ -29,7 +29,8 @@
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.button3 = new System.Windows.Forms.Button();
+            this.btnLight = new System.Windows.Forms.Button();
+            this.btn_detectionAlgorithm = new System.Windows.Forms.Button();
             this.btn_coordinateCalibration = new System.Windows.Forms.Button();
             this.btn_lensCalibration = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -49,7 +50,8 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Controls.Add(this.button3, 0, 8);
+            this.tableLayoutPanel1.Controls.Add(this.btnLight, 1, 5);
+            this.tableLayoutPanel1.Controls.Add(this.btn_detectionAlgorithm, 0, 8);
             this.tableLayoutPanel1.Controls.Add(this.btn_coordinateCalibration, 1, 7);
             this.tableLayoutPanel1.Controls.Add(this.btn_lensCalibration, 0, 7);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 6);
@@ -77,17 +79,30 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1166, 677);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
-            // button3
+            // btnLight
             // 
-            this.button3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.button3.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.Location = new System.Drawing.Point(100, 602);
-            this.button3.Margin = new System.Windows.Forms.Padding(100, 2, 100, 2);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(383, 73);
-            this.button3.TabIndex = 11;
-            this.button3.Text = "---";
-            this.button3.UseVisualStyleBackColor = true;
+            this.btnLight.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnLight.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnLight.Location = new System.Drawing.Point(683, 377);
+            this.btnLight.Margin = new System.Windows.Forms.Padding(100, 2, 100, 2);
+            this.btnLight.Name = "btnLight";
+            this.btnLight.Size = new System.Drawing.Size(383, 71);
+            this.btnLight.TabIndex = 12;
+            this.btnLight.Text = "Toggle ring light";
+            this.btnLight.UseVisualStyleBackColor = true;
+            this.btnLight.Click += new System.EventHandler(this.btnLight_Click);
+            // 
+            // btn_detectionAlgorithm
+            // 
+            this.btn_detectionAlgorithm.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btn_detectionAlgorithm.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_detectionAlgorithm.Location = new System.Drawing.Point(100, 602);
+            this.btn_detectionAlgorithm.Margin = new System.Windows.Forms.Padding(100, 2, 100, 2);
+            this.btn_detectionAlgorithm.Name = "btn_detectionAlgorithm";
+            this.btn_detectionAlgorithm.Size = new System.Drawing.Size(383, 73);
+            this.btn_detectionAlgorithm.TabIndex = 11;
+            this.btn_detectionAlgorithm.Text = "Define detection algorithm";
+            this.btn_detectionAlgorithm.UseVisualStyleBackColor = true;
             // 
             // btn_coordinateCalibration
             // 
@@ -100,6 +115,7 @@
             this.btn_coordinateCalibration.TabIndex = 10;
             this.btn_coordinateCalibration.Text = "Coordinate reference frame";
             this.btn_coordinateCalibration.UseVisualStyleBackColor = true;
+            this.btn_coordinateCalibration.Click += new System.EventHandler(this.btn_coordinateCalibration_Click);
             // 
             // btn_lensCalibration
             // 
@@ -258,6 +274,7 @@
         private System.Windows.Forms.Button btn_coordinateCalibration;
         private System.Windows.Forms.Button btn_lensCalibration;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btn_detectionAlgorithm;
+        private System.Windows.Forms.Button btnLight;
     }
 }

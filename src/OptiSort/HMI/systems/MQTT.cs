@@ -228,5 +228,62 @@ namespace OptiSort
             }
         }
 
+
+
+        /// <summary>
+        /// Publishes a message to a specified topic.
+        /// </summary>
+        /// <param name="clientId">The ID of the client publishing the message.</param>
+        /// <param name="topic">The topic to publish to.</param>
+        /// <param name="message">The message to be published.</param>
+        /// <returns>True if the message was successfully published; otherwise, false.</returns>
+        /// <summary>
+        /// Publishes a JSON message to a specified topic.
+        /// </summary>
+        /// <param name="clientId">The ID of the client publishing the message.</param>
+        /// <param name="topic">The topic to publish to.</param>
+        /// <param name="payload">The object to be serialized as JSON and published.</param>
+        /// <returns>True if the message was successfully published; otherwise, false.</returns>
+        public async Task<bool> PublishMessage(string clientId, string topic, object payload)
+        {
+            try
+            {
+                if (!_clients.ContainsKey(clientId))
+                {
+                    Console.WriteLine($"Client '{clientId}' does not exist.");
+                    return false;
+                }
+
+                var client = _clients[clientId];
+
+                if (!client.IsConnected)
+                {
+                    Console.WriteLine($"Client '{clientId}' is not connected.");
+                    return false;
+                }
+
+                // Serialize the payload to JSON
+                string jsonPayload = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+                var mqttMessage = new MQTTnet.MqttApplicationMessageBuilder()
+                    .WithTopic(topic)
+                    .WithPayload(jsonPayload)
+                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
+                    .WithContentType("application/json") // Explicitly set content type
+                    .Build();
+
+                await client.PublishAsync(mqttMessage);
+                Console.WriteLine($"JSON message published to topic '{topic}': {jsonPayload}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error publishing JSON message from client '{clientId}': {ex.Message}");
+                return false;
+            }
+        }
+
+
+
     }
 }

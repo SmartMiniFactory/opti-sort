@@ -198,6 +198,40 @@ namespace OptiSort
         }
 
 
+        public void ToggleDigitalOutput(int channel)
+        {
+            try
+            {
+                bool ioStatus = Controller.GetDigitalIO(channel);
+
+                if(ioStatus)
+                    Controller.SetDigitalIO(-channel);
+                else
+                    Controller.SetDigitalIO(channel);
+
+                bool newStatus = Controller.GetDigitalIO(channel);
+
+                Console.WriteLine($"Digital output channel {channel} set to {newStatus}");
+            }
+            catch (Exception)
+            {
+                Trace.WriteLine("Failed to access to the robot I/O.");
+            }
+        }
+
+        public bool getDigitalOutput(int channel)
+        {
+            try
+            {
+                bool status = Controller.GetDigitalIO(channel);
+                return status;
+            }
+            catch (Exception)
+            {
+                Trace.WriteLine("Failed to access to the robot I/O.");
+                return false;
+            }
+        }
 
         public class Motion
         {

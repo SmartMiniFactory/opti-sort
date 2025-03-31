@@ -41,13 +41,17 @@ def im2json(imdata):
         {"image": base64.b64encode(imdata).decode('ascii'), "timestamp": datetime.datetime.now().isoformat()})
     return jstr
 
-
+# Compute the actual framerate
 def calculateFps(time):
     if time != 0:
         fps = 1 / time
     else:
         fps = 0
     return fps
+
+# Choose the boundaries between two values
+def clamp(num, v0, v1):
+    return max(v0, min(num, v1))
 
 
 # IDS ------------------------------------------------------------------------------------------------
@@ -88,24 +92,24 @@ nRet = ueye.is_SetDisplayMode(hCam, ueye.IS_SET_DM_DIB)
 
 # Set the right color mode
 if int.from_bytes(sInfo.nColorMode.value, byteorder='big') == ueye.IS_COLORMODE_BAYER:
-    # setup the color depth to the current windows setting
+    # Set up the color depth to the current windows setting
     ueye.is_GetColorDepth(hCam, nBitsPerPixel, m_nColorMode)
     bytes_per_pixel = int(nBitsPerPixel / 8)
 
 elif int.from_bytes(sInfo.nColorMode.value, byteorder='big') == ueye.IS_COLORMODE_CBYCRY:
-    # for color camera models use RGB32 mode
+    # For color camera models use RGB32 mode
     m_nColorMode = ueye.IS_CM_BGRA8_PACKED
     nBitsPerPixel = ueye.INT(32)
     bytes_per_pixel = int(nBitsPerPixel / 8)
 
 elif int.from_bytes(sInfo.nColorMode.value, byteorder='big') == ueye.IS_COLORMODE_MONOCHROME:
-    # for color camera models use RGB32 mode
+    # For color camera models use RGB32 mode
     m_nColorMode = ueye.IS_CM_MONO8
     nBitsPerPixel = ueye.INT(8)
     bytes_per_pixel = int(nBitsPerPixel / 8)
 
 else:
-    # for monochrome camera models use Y8 mode
+    # For monochrome camera models use Y8 mode
     m_nColorMode = ueye.IS_CM_MONO8
     nBitsPerPixel = ueye.INT(8)
     bytes_per_pixel = int(nBitsPerPixel / 8)
@@ -154,17 +158,41 @@ baslerConverter.OutputPixelFormat = pylon.PixelType_BGR8packed
 baslerConverter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
 
 # LUXONIS ------------------------------------------------------------------------------------------------
-pipeline = dai.Pipeline()# Create pipeline
+sendCamConfig = False
 
-camRgb = pipeline.create(dai.node.ColorCamera) # Define source
-xoutRgb = pipeline.create(dai.node.XLinkOut) # Define output
-xoutRgb.setStreamName("rgb")
+# Create pipeline
+pipeline = dai.Pipeline()
 
-camRgb.setPreviewSize(640, 480)
-camRgb.setInterleaved(False)
-camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
+# Define sources
+monoRight = pipeline.create(dai.node.MonoCamera)
+manipRight = pipeline.create(dai.node.ImageManip)
+controlIn = pipeline.create(dai.node.XLinkIn)
+configIn = pipeline.create(dai.node.XLinkIn)
 
-camRgb.preview.link(xoutRgb.input)
+# Define outputs
+manipOutRight = pipeline.create(dai.node.XLinkOut)
+
+# Set the stream names
+controlIn.setStreamName('control')
+configIn.setStreamName('config')
+manipOutRight.setStreamName("right")
+
+# Crop range
+topLeft = dai.Point2f(0.2, 0.2)
+bottomRight = dai.Point2f(0.7, 0.7)
+
+# Set the camera properties
+monoRight.setCamera("right")
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
+monoRight.setFps(50) # Set framerate to 50 FPS
+manipRight.initialConfig.setCropRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
+manipRight.setMaxOutputFrameSize(monoRight.getResolutionHeight()*monoRight.getResolutionWidth()*3)
+
+# Linking
+monoRight.out.link(manipRight.inputImage)
+controlIn.out.link(monoRight.inputControl)
+configIn.out.link(manipRight.inputConfig)
+manipRight.out.link(manipOutRight.input)
 
 # STREAMING  ------------------------------------------------------------------------------------------------
 loopingCondition = True
@@ -172,8 +200,21 @@ keyPressed = False
 
 with dai.Device(pipeline) as device:
 
-    qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+    # Additional Luxonis settings
+    # Output queues will be used to get the grayscale frames
+    #qRight = device.getOutputQueue(manipOutRight.getStreamName(), maxSize=4, blocking=False)
+    qRight = device.getOutputQueue(manipOutRight.getStreamName())
+    configQueue = device.getInputQueue(configIn.getStreamName())
+    controlQueue = device.getInputQueue(controlIn.getStreamName())
 
+    expTime = 500  # [microseconds] min 1, max 33000
+    sensIso = 300  # min 100, max 1600
+    ctrl = dai.CameraControl()
+    ctrl.setAutoExposureEnable()
+    ctrl.setAutoExposureLimit(500)
+    controlQueue.send(ctrl)
+
+    # Streming loop
     while loopingCondition:
         # IDS
         start = time.time()  # Start time
@@ -207,12 +248,12 @@ with dai.Device(pipeline) as device:
 
 
         # LUXONIS
-        inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
+        inRight = qRight.get() # blocking call, will wait until a new data has arrived
         start = time.time()
-        frame = inRgb.getCvFrame()
+        frame = inRight.getCvFrame()
         _frame = cv2.imencode('.png', frame, encode_param_png)[1].tobytes()
         client.publish(MQTT_LUXONIS_TOPIC, im2json(_frame))  # Publish the Frame on the Topic home/server
-        cv2.imshow("Stream input", frame)  # Show the frame
+        cv2.imshow("Luxonis Camera Stream", frame)  # Show the frame
         end = time.time()  # End time
         t = end - start
         fps = calculateFps(t)

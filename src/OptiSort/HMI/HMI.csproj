@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>optisort_logo_icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ace.Adept">
       <HintPath>..\CobraLibrary\references\Ace.Adept.dll</HintPath>
@@ -104,6 +107,9 @@
       <HintPath>..\CobraLibrary\references\Interop.HSDISPLAYLib.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="LedBulb, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LedBulb.1.0.0\lib\net48\LedBulb.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.9.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -173,6 +179,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\PythonProcessRunner.cs" />
+    <Compile Include="Classes\Watchdog.cs" />
+    <Compile Include="optisort_mgr.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -185,6 +194,7 @@
     <Compile Include="Splashscreen.Designer.cs">
       <DependentUpon>Splashscreen.cs</DependentUpon>
     </Compile>
+    <Compile Include="systems\CameraManager.cs" />
     <Compile Include="systems\Cobra600.cs" />
     <Compile Include="systems\Flexibowl.cs" />
     <Compile Include="systems\MQTT.cs" />
@@ -208,11 +218,11 @@
     <Compile Include="userControls\ucConfiguration.Designer.cs">
       <DependentUpon>ucConfiguration.cs</DependentUpon>
     </Compile>
-    <Compile Include="userControls\ucFlexibowl.cs">
+    <Compile Include="userControls\ucCoordinateReferenceFrame.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="userControls\ucFlexibowl.Designer.cs">
-      <DependentUpon>ucFlexibowl.cs</DependentUpon>
+    <Compile Include="userControls\ucCoordinateReferenceFrame.Designer.cs">
+      <DependentUpon>ucCoordinateReferenceFrame.cs</DependentUpon>
     </Compile>
     <Compile Include="userControls\ucCameraLensCalibration.cs">
       <SubType>UserControl</SubType>
@@ -232,6 +242,12 @@
     <Compile Include="userControls\ucProcessView.Designer.cs">
       <DependentUpon>ucProcessView.cs</DependentUpon>
     </Compile>
+    <Compile Include="userControls\ucRobotSimulation.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucRobotSimulation.Designer.cs">
+      <DependentUpon>ucRobotSimulation.cs</DependentUpon>
+    </Compile>
     <Compile Include="userControls\ucScaraTargets.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -246,6 +262,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -255,8 +272,8 @@
     <EmbeddedResource Include="userControls\ucConfiguration.resx">
       <DependentUpon>ucConfiguration.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="userControls\ucFlexibowl.resx">
-      <DependentUpon>ucFlexibowl.cs</DependentUpon>
+    <EmbeddedResource Include="userControls\ucCoordinateReferenceFrame.resx">
+      <DependentUpon>ucCoordinateReferenceFrame.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucCameraLensCalibration.resx">
       <DependentUpon>ucCameraLensCalibration.cs</DependentUpon>
@@ -266,6 +283,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucProcessView.resx">
       <DependentUpon>ucProcessView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="userControls\ucRobotSimulation.resx">
+      <DependentUpon>ucRobotSimulation.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucScaraTargets.resx">
       <DependentUpon>ucScaraTargets.cs</DependentUpon>
@@ -291,6 +311,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="icons\camerasDisabled_2x2_pptx.png" />
+    <None Include="icons\camerasEnabled_2x2_pptx.png" />
+    <None Include="icons\webcamDisabled_2x2_pptx.png" />
+    <None Include="icons\webcamEnabled_2x2_pptx.png" />
+    <Content Include="LedBulb.png" />
+    <Content Include="optisort_logo_icon.ico" />
+    <None Include="Resources\Optisort_Logo.jpg" />
+    <None Include="Resources\Logo.bmp" />
+    <None Include="Resources\Logo.ico" />
     <None Include="Resources\OptisortLogo.jpg" />
     <None Include="icons\stopPassivated_2x2_pptx.png" />
     <None Include="icons\autoDisabled_2x2_pptx.png" />
