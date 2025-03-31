@@ -219,6 +219,20 @@ namespace OptiSort
             }
         }
 
+        public bool getDigitalOutput(int channel)
+        {
+            try
+            {
+                bool status = Controller.GetDigitalIO(channel);
+                return status;
+            }
+            catch (Exception)
+            {
+                Trace.WriteLine("Failed to access to the robot I/O.");
+                return false;
+            }
+        }
+
         public class Motion
         {
             public static double[] GetJointPositions(IAdeptRobot robot)

@@ -16,11 +16,40 @@ namespace OptiSort.userControls
     {
 
         private optisort_mgr _manager;
+        private int _ringLight = 99;
 
         internal ucManualControl(optisort_mgr manager)
         {
             InitializeComponent();
             _manager = manager;
+
+            _manager.PropertyChanged += PropertyChanged;
+
+            RefreshButtons();
+        }
+
+        private void PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(_manager.StatusScara) && _manager.StatusScara)
+                RefreshButtons();
+        }
+
+        private void RefreshButtons()
+        {
+            if (_manager.StatusScara && !_manager.StatusScaraEmulation)
+            {
+                bool status = _manager.Cobra600.getDigitalOutput(_ringLight);
+                if (status)
+                {
+                    btnLight.Text = "Turn ring light off";
+                }
+                else
+                {
+                    btnLight.Text = "Turn ring light on";
+                }
+            }
+            else
+                btnLight.Text = "Toggle ring light";
         }
 
         private void btnScaraJog_Click(object sender, EventArgs e)
@@ -104,7 +133,13 @@ namespace OptiSort.userControls
 
         private void btnLight_Click(object sender, EventArgs e)
         {
-            _manager.Cobra600.ToggleDigitalOutput(99);
+            if (!_manager.StatusScara)
+            {
+                MessageBox.Show("You should connect to the Scara robot first");
+                return;
+            }
+            _manager.Cobra600.ToggleDigitalOutput(_ringLight);
+            RefreshButtons();
         }
     }
 }
