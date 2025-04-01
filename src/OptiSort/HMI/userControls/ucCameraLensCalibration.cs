@@ -118,11 +118,7 @@ namespace OptiSort.userControls
                 if (message.TryGetProperty("message", out JsonElement messageElement))
                 {
                     string msg = messageElement.GetString();
-
-                    this.Invoke((MethodInvoker)(() =>
-                    {
-                        _manager.Log(msg, false, false); 
-                    }));
+                    _manager.Log(msg, false, false);
                 }
             } 
         }
@@ -136,11 +132,8 @@ namespace OptiSort.userControls
         {
             if (processID == _pythonProcessId)
             {
-                this.Invoke((MethodInvoker)(() =>
-                {
-                    _manager.Log("Python camera calibration file threw an error!", true, false);
-                    _manager.NonBlockingMessageBox("Python camera calibration file threw an error", "Python error!", MessageBoxIcon.Error);
-                }));
+                _manager.Log("Python camera calibration file threw an error!", true, false);
+                _manager.NonBlockingMessageBox("Python camera calibration file threw an error", "Python error!", MessageBoxIcon.Error);
             }
         }
 
@@ -148,15 +141,12 @@ namespace OptiSort.userControls
         {
             if (processID == _pythonProcessId)
             {
-                this.Invoke((MethodInvoker)(() =>
-                {                
-                    _manager.Log("Python camera calibration file has closed!", false, false);
-                    _manager.MqttMessageReceived -= MqttMessageReceived;
-                    _manager.OnErrorReceived -= PythonErrorHandler;
-                    _manager.OnExecutionTerminated -= PythonTerminationHandler;
-                    _manager.UnsubscribeMqttTopic("optisort/camera_calibration");
-                    _manager.StopExecution(_pythonProcessId); // needed to reset active processes memory
-                }));
+                _manager.Log("Python camera calibration file has closed!", false, false);
+                _manager.MqttMessageReceived -= MqttMessageReceived;
+                _manager.OnErrorReceived -= PythonErrorHandler;
+                _manager.OnExecutionTerminated -= PythonTerminationHandler;
+                _manager.UnsubscribeMqttTopic("optisort/camera_calibration");
+                _manager.StopExecution(_pythonProcessId); // needed to reset active processes memory
             }
         }
 
