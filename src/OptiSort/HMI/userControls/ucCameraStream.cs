@@ -162,7 +162,7 @@ namespace OptiSort
                         {
                             _mqttLatencyError = true;
                             _ = _manager.DisconnectMqttClient();
-                            MessageBox.Show("MQTT service interrupted because of a latency overload. Please try restarting the service");
+                            _manager.NonBlockingMessageBox("MQTT service interrupted because of a latency overload. Please try restarting the service", "Overload!", MessageBoxIcon.Warning);
                             return;
                         }
 

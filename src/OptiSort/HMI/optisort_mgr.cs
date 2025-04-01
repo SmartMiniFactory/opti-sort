@@ -13,6 +13,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Text.Json;
@@ -200,6 +201,9 @@ namespace OptiSort
             public override string ToString() => Message; // Fallback for ListBox's default behavior
         }
 
+        public event Action<string, string, MessageBoxIcon> MessageBoxEvent; // Event to notify subscribers
+
+
         // -----------------------------------------------------------------------------------
         // ---------------------------------- CONSTRUCTOR -------------------------------------
         // -----------------------------------------------------------------------------------
@@ -277,7 +281,7 @@ namespace OptiSort
             Process[] ProcessList = Process.GetProcessesByName("Ace");
             if (ProcessList.Length != 1)
             {
-                MessageBox.Show("ACE is not running: please open the robot server");
+                NonBlockingMessageBox("ACE is not running: please open the robot server", "Interlock!", MessageBoxIcon.Hand);
                 return false;
             }
             Log("Trying to connect to robot", false, false);
@@ -296,12 +300,12 @@ namespace OptiSort
             {
                 StatusScara = true;
                 Log("Robot successfully connected", false, true);
-                MessageBox.Show("Scara connected, enabling power. Please press the physical button on the front panel!");
+                NonBlockingMessageBox("Scara connected, enabling power. Please press the physical button on the front panel!", "Success!", MessageBoxIcon.Information);
                 return true;
             }
             else
             {
-                MessageBox.Show($"{ex}");
+                NonBlockingMessageBox($"{ex}", "Error!", MessageBoxIcon.Error);
                 Log("Failed to connect to robot", true, false);
                 return false;
             }
@@ -365,7 +369,7 @@ namespace OptiSort
             catch (Exception ex)
             {
                 Log($"Failed to connect Flexibowl UDP client", true, false);
-                MessageBox.Show($"{ex}");
+                NonBlockingMessageBox($"{ex}", "Error!", MessageBoxIcon.Error);
                 return false;
             }
         }
@@ -528,7 +532,7 @@ namespace OptiSort
         {
             if (!StatusMqttClient)
             {
-                MessageBox.Show("Cannot connect to camera manager: MQTT client is not connected", "MQTT REQUIRED!");
+                NonBlockingMessageBox("Cannot connect to camera manager: MQTT client is not connected", "Interlock!", MessageBoxIcon.Hand);
                 return;
             }
 
@@ -540,7 +544,7 @@ namespace OptiSort
         {
             if (!StatusMqttClient)
             {
-                MessageBox.Show("Cannot connect to camera manager: MQTT client is not connected", "MQTT REQUIRED!");
+                NonBlockingMessageBox("Cannot connect to camera manager: MQTT client is not connected", "Interlock!", MessageBoxIcon.Hand);
                 return;
             }
 
@@ -913,6 +917,12 @@ namespace OptiSort
             // Raise the log event
             LogEvent?.Invoke(logEntry);
         }
+
+        public void NonBlockingMessageBox(string text, string title = "Message", MessageBoxIcon icon = MessageBoxIcon.None)
+        {
+            MessageBoxEvent?.Invoke(text, title, icon);
+        }
+
 
         // -----------------------------------------------------------------------------------
         // ------------------------------------- PYTHON -------------------------------------

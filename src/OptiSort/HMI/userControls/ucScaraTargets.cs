@@ -110,7 +110,7 @@ namespace OptiSort
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error adding new entry: {ex.Message}");
+                        _manager.NonBlockingMessageBox($"Error adding new entry: {ex.Message}", "Error!", MessageBoxIcon.Error);
                     }
                 }
             }
@@ -131,7 +131,7 @@ namespace OptiSort
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error removing an entry: " + ex.ToString());
+                    _manager.NonBlockingMessageBox($"Error removing an entry: " + ex.ToString(), "Error!", MessageBoxIcon.Error);
                 }
             }
         }
@@ -167,7 +167,7 @@ namespace OptiSort
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error moving: {ex}");
+                    _manager.NonBlockingMessageBox($"Error moving: {ex}", "Error!", MessageBoxIcon.Error);
                     if (ex is System.ObjectDisposedException)
                         break;
                 }

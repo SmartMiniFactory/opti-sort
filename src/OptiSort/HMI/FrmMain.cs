@@ -91,6 +91,9 @@ namespace OptiSort
             manager.LogEvent += OnLogEvent;
             lstLog.ItemHeight = 15; // adjusting interline between log rows
 
+            // non blocking message box setup
+            manager.MessageBoxEvent += ShowMessage;
+
             manager.Log("OptiSort ready for operation: please connect systems (Scara robot, flexibowl, MQTT service) to begin", false, false);
 
             // attach form closing event to process killer
@@ -130,7 +133,7 @@ namespace OptiSort
 
             //if (!StatusScara || !StatusMqttClient || !StatusFlexibowl)
             //{
-            //    MessageBox.Show("You should connect all the entities (Scara robot, Flexibowl, MQTT Client) to start the automatic process");
+            //    manager.NonBlockingMessageBox("You should connect all the entities (Scara robot, Flexibowl, MQTT Client) to start the automatic process");
             //    return;
             //}
 
@@ -154,7 +157,7 @@ namespace OptiSort
 
             if (!ucProcessView.AutomaticProcess)
             {
-                MessageBox.Show("Click the start button to activate automatic process");
+                manager.NonBlockingMessageBox("Click the start button to activate automatic process", "Interlock!", MessageBoxIcon.Hand);
             }
 
         }
@@ -471,6 +474,18 @@ namespace OptiSort
             e.DrawBackground();
             e.Graphics.DrawString(logEntry.Message, e.Font, textBrush, e.Bounds);
             e.DrawFocusRectangle();
+        }
+
+
+        private void ShowMessage(string message, string title, MessageBoxIcon icon)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => ShowMessage(message, title, icon)));
+                return;
+            }
+
+            MessageBox.Show(message, title, MessageBoxButtons.OK, icon);
         }
 
     }

@@ -56,7 +56,7 @@ namespace OptiSort.userControls
         {
             if (!_manager.StatusScara)
             {
-                MessageBox.Show("You should connect to a robot first");
+                _manager.NonBlockingMessageBox("You should connect to a robot first", "Interlock!", MessageBoxIcon.Hand);
                 return;
             }
 
@@ -67,7 +67,7 @@ namespace OptiSort.userControls
         {
             if (!_manager.StatusFlexibowl)
             {
-                MessageBox.Show("You should connect to the Flexibowl first");
+                _manager.NonBlockingMessageBox("You should connect to the Flexibowl first", "Intelock!", MessageBoxIcon.Hand);
                 return;
             }
 
@@ -80,7 +80,7 @@ namespace OptiSort.userControls
         {
             if (!_manager.StatusFlexibowl)
             {
-                MessageBox.Show("You should connect to the Flexibowl first");
+                _manager.NonBlockingMessageBox("You should connect to the Flexibowl first", "Interlock!", MessageBoxIcon.Hand);
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace OptiSort.userControls
         {
             if (!_manager.StatusFlexibowl)
             {
-                MessageBox.Show("You should connect to the Flexibowl first");
+                _manager.NonBlockingMessageBox("You should connect to the Flexibowl first", "Interlock!", MessageBoxIcon.Hand);
                 return;
             }
 
@@ -105,7 +105,7 @@ namespace OptiSort.userControls
         {
             if (!_manager.StatusFlexibowl)
             {
-                MessageBox.Show("You should connect to the Flexibowl first");
+                _manager.NonBlockingMessageBox("You should connect to the Flexibowl first", "Interlock!", MessageBoxIcon.Hand);
                 return;
             }
 
@@ -135,7 +135,7 @@ namespace OptiSort.userControls
         {
             if (!_manager.StatusScara)
             {
-                MessageBox.Show("You should connect to the Scara robot first");
+                _manager.NonBlockingMessageBox("You should connect to the Scara robot first", "Interlock!", MessageBoxIcon.Hand);
                 return;
             }
             _manager.Cobra600.ToggleDigitalOutput(_ringLight);

@@ -98,7 +98,7 @@ namespace OptiSort.systems
             if (processID == _scriptID)
             {
                 _manager.Log("Camera manager file threw an error!", true, false);
-                MessageBox.Show($"Camera manager file threw an error {output}", "Python error!");
+                _manager.NonBlockingMessageBox($"Camera manager file threw an error {output}", "Python error!", MessageBoxIcon.Error);
             }
         }
 

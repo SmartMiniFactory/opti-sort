@@ -139,7 +139,7 @@ namespace OptiSort.userControls
                 this.Invoke((MethodInvoker)(() =>
                 {
                     _manager.Log("Python camera calibration file threw an error!", true, false);
-                    MessageBox.Show("Python camera calibration file threw an error", "Python error!");
+                    _manager.NonBlockingMessageBox("Python camera calibration file threw an error", "Python error!", MessageBoxIcon.Error);
                 }));
             }
         }
@@ -173,7 +173,7 @@ namespace OptiSort.userControls
         {
             if (!_manager.StatusMqttClient)
             {
-                MessageBox.Show("Enable camera streaming first (MQTT service)");
+                _manager.NonBlockingMessageBox("Enable camera streaming first (MQTT service)", "Interlock!", MessageBoxIcon.Hand);
                 return;
             }
 
@@ -298,7 +298,7 @@ namespace OptiSort.userControls
                         _baslerShot = false;
                         Cursor = Cursors.Default;
                         Shots++;
-                        MessageBox.Show("Timeout reached. MQTT streamings might have a problem: check all the topics or inform the developer.");
+                        _manager.NonBlockingMessageBox("Timeout reached. MQTT streamings might have a problem: check all the topics or inform the developer.", "Timeout!", MessageBoxIcon.Exclamation);
                     }
                 }));
             }
@@ -382,7 +382,7 @@ namespace OptiSort.userControls
 
                 if (calibrationFail_ids || calibrationFail_luxonis || calibrationFail_basler)
                 {
-                    MessageBox.Show($"OPENCV CALIBRATION FAILED!\nIDS: {calibrationFail_ids}\nBASLER: {calibrationFail_basler}\nLUXONIS: {calibrationFail_luxonis}");
+                    _manager.NonBlockingMessageBox($"OPENCV CALIBRATION FAILED!\nIDS: {calibrationFail_ids}\nBASLER: {calibrationFail_basler}\nLUXONIS: {calibrationFail_luxonis}", "Error!", MessageBoxIcon.Exclamation);
                 }
 
                 if (badImage_ids.Length == 0 && badImage_basler.Length == 0 && badImage_luxonis.Length == 0)
@@ -390,7 +390,7 @@ namespace OptiSort.userControls
                     Shots = 0;
                     _manager.ClearTempDirectory();
                     RefreshCalibrationTimestamp();
-                    MessageBox.Show($"CALIBRATION SUCCEDED!");
+                    _manager.NonBlockingMessageBox($"Calibration completed!", "Success!", MessageBoxIcon.Information);
                     _manager.Log("Lens calibration successfull", false, true);
                 }
                 else
@@ -412,7 +412,7 @@ namespace OptiSort.userControls
                     }
 
                     Shots -= badImages_all.Count;
-                    MessageBox.Show($"BAD IMAGES DETECTED!\nCalibration failed because the chess board was not found in {badImages_all.Count} triplets. These were deleted. Please proceed to retaking the images again.");
+                    _manager.NonBlockingMessageBox($"BAD IMAGES DETECTED!\nCalibration failed because the chess board was not found in {badImages_all.Count} triplets. These were deleted. Please proceed to retaking the images again.", "Error!", MessageBoxIcon.Exclamation);
                     _manager.Log("Bad images detected! Please retake some screenshots", false, false);
                 }
             }
