@@ -765,11 +765,24 @@ namespace OptiSort
                 base64Image = base64Image.Substring(base64Image.IndexOf(",") + 1);
             }
 
-            // Convert from Base64 to Bitmap
-            byte[] imageBytes = Convert.FromBase64String(base64Image);
-            using (var ms = new MemoryStream(imageBytes))
+            try
             {
-                return new Bitmap(ms);
+                // Convert from Base64 to Bitmap
+                byte[] imageBytes = Convert.FromBase64String(base64Image);
+                using (var ms = new MemoryStream(imageBytes))
+                {
+                    return new Bitmap(ms);
+                }
+            }
+            catch (FormatException ex)
+            {
+                // Handle invalid Base64 format
+                throw new ArgumentException("The provided Base64 string is not valid.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions (e.g., memory issues, invalid image data)
+                throw new InvalidOperationException("An error occurred while converting the Base64 string to a Bitmap.", ex);
             }
         }
 
@@ -799,12 +812,15 @@ namespace OptiSort
             }
 
             // Combine the output folder with the file name
-            string tempFilePath = Path.Combine(TempFolder, fileName + ".bmp");
+            string tempFilePath = Path.Combine(TempFolder, fileName + ".jpg");
 
             // Save the bitmap as a BMP file
-            bitmap.Save(tempFilePath, ImageFormat.Bmp);
+            using (Image img = new Bitmap(bitmap))
+            {
+                img.Save(tempFilePath, ImageFormat.Jpeg);
+            }
 
-            Console.WriteLine($"Bitmap saved as BMP at: {tempFilePath}");
+            Console.WriteLine($"Bitmap saved as JPG at: {tempFilePath}");
         }
 
         /// <summary>

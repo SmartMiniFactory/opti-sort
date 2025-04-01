@@ -305,7 +305,7 @@ namespace OptiSort.userControls
             if (!Directory.Exists(_manager.TempFolder))
                 return 1; // Start from 1 if the directory does not exist
 
-            var existingFiles = Directory.GetFiles(_manager.TempFolder, "*_CalibrationImage_*.bmp");
+            var existingFiles = Directory.GetFiles(_manager.TempFolder, "*_CalibrationImage_*.jpg");
 
             // Extract indices from filenames
             var indexCounts = existingFiles
@@ -396,9 +396,9 @@ namespace OptiSort.userControls
                     // deleting bad images IDs for all the cameras
                     foreach (int id in badImages_all)
                     {
-                        _manager.DeleteFile("ids_CalibrationImage_" + id.ToString("D2") + ".bmp");
-                        _manager.DeleteFile("basler_CalibrationImage_" + id.ToString("D2") + ".bmp");
-                        _manager.DeleteFile("luxonis_CalibrationImage_" + id.ToString("D2") + ".bmp");
+                        _manager.DeleteFile("ids_CalibrationImage_" + id.ToString("D2") + ".jpg");
+                        _manager.DeleteFile("basler_CalibrationImage_" + id.ToString("D2") + ".jpg");
+                        _manager.DeleteFile("luxonis_CalibrationImage_" + id.ToString("D2") + ".jpg");
                     }
 
                     Shots -= badImages_all.Count;
@@ -427,7 +427,7 @@ namespace OptiSort.userControls
             if (!Directory.Exists(_manager.TempFolder))
                 return;
 
-            var imageFiles = Directory.GetFiles(_manager.TempFolder, "*.bmp");
+            var imageFiles = Directory.GetFiles(_manager.TempFolder, "*.jpg");
 
             // Group files by their numeric identifier
             var groupedFiles = imageFiles
@@ -497,7 +497,7 @@ namespace OptiSort.userControls
             flp_basler.Controls.Clear();
             flp_luxonis.Controls.Clear();
 
-            var imageFiles = Directory.GetFiles(_manager.TempFolder, "*.bmp");
+            var imageFiles = Directory.GetFiles(_manager.TempFolder, "*.jpg");
 
             // Group files by their numeric identifier
             var groupedFiles = imageFiles

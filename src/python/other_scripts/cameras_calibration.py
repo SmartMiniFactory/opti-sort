@@ -94,7 +94,7 @@ for camera in ["ids", "basler", "luxonis"]:
 
         # get picture path
         filename = f"{camera}_CalibrationImage_{picture_nr + 1:02d}"  # using format 01, 02, ... for digits
-        absolutePath = (temp_folder / f"{filename}.bmp").resolve()
+        absolutePath = (temp_folder / f"{filename}.jpg").resolve()
 
         # check picture existence
         if absolutePath.exists():
@@ -117,7 +117,7 @@ for camera in ["ids", "basler", "luxonis"]:
                 cv2.drawChessboardCorners(image, (rows, cols), corners2, ret)
 
                 # saving image with grid (cool but unuseful)
-                # cv2.imwrite(str(temp_folder / f"{filename}_grid.bmp"), image)
+                # cv2.imwrite(str(temp_folder / f"{filename}_grid.jpg"), image)
 
             # chess board not found
             else:

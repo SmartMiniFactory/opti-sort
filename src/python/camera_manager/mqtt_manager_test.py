@@ -214,7 +214,7 @@ class StreamingHandler:
 
                 frame = self.camera_manager.capture_frame(cam_name)
                 if frame is not None:
-                    encoded = cv2.imencode(".png", frame, [cv2.IMWRITE_PNG_COMPRESSION, 0])[1].tobytes()
+                    encoded = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])[1].tobytes()
                     if encoded:
                         if cam_name == 'webcam':
                             mqttc.publish("optisort/ids/stream", im2json(encoded))
