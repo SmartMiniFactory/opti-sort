@@ -16,7 +16,8 @@ namespace OptiSort.systems
         private optisort_mgr _manager;
         private frmMain _frmMain;
         private int _scriptID;
-        
+        private string _mqttClient = Properties.Settings.Default.mqtt_client;
+
         public int Status { get; private set; }
 
         public enum status
@@ -43,7 +44,7 @@ namespace OptiSort.systems
         public void ConnectCameraManager()
         {
             // subscribe to mqtt topic to receive updates from python file
-            _manager.SubscribeMqttTopic("optisort/camera_manager/output");
+            _manager.SubscribeMqttTopic(_mqttClient, "optisort/camera_manager/output");
             _manager.MqttMessageReceived += MqttMessageReceived;
 
             // subscribe termination events to handler
@@ -112,7 +113,7 @@ namespace OptiSort.systems
                 _manager.OnErrorReceived -= PythonErrorHandler;
                 _manager.OnExecutionTerminated -= PythonTerminationHandler;
                 
-                _manager.UnsubscribeMqttTopic("optisort/camera_manager/output");
+                _manager.UnsubscribeMqttTopic(_mqttClient, "optisort/camera_manager/output");
                 _manager.StopExecution(_scriptID); // needed to reset active processes memory
 
                 _manager.StatusCameraManager = false;
@@ -130,7 +131,7 @@ namespace OptiSort.systems
             {
                 command = cmd
             };
-            _manager.PublishMqttMessage("optisort/camera_manager/input", data);
+            _manager.PublishMqttMessage(_mqttClient, "optisort/camera_manager/input", data);
         }
 
     }

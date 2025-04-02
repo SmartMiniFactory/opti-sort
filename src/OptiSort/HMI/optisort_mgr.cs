@@ -213,9 +213,7 @@ namespace OptiSort
             _frmMain = frmMain;
 
             // Instance MQTT class
-            string mqttBroker = Properties.Settings.Default.mqtt_broker;
-            string mqttPort = Properties.Settings.Default.mqtt_port;
-            MqttClient = new MQTT(mqttBroker, mqttPort);
+            MqttClient = new MQTT();
 
             // Attach mqtt messages to handler
             MqttClient.MessageReceived += OnMessageReceived;
@@ -400,7 +398,7 @@ namespace OptiSort
         /// Create MQTT client and connect to a broker
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> ConnectMQTTClient()
+        public async Task<bool> ConnectMQTTClient(string client, string broker)
         {
             if (StatusMqttClient)
             {
@@ -410,14 +408,14 @@ namespace OptiSort
 
             Log("Trying to create new MQTT client", false, false);
 
-            string mqttClientName = Properties.Settings.Default.mqtt_client;
-            Task<bool> createClient = MqttClient.CreateClient(mqttClientName);
+            string mqttPort = Properties.Settings.Default.mqtt_port;
+            Task<bool> createClient = MqttClient.CreateClient(client, broker, mqttPort);
 
             if (await createClient)
             {
                 StatusMqttClient = true;
 
-                Log($"MQTT client '{mqttClientName}' created", false, true);
+                Log($"MQTT client '{client}' created", false, true);
 
                 List<string> topics = new List<string>
                 {
@@ -433,14 +431,14 @@ namespace OptiSort
 
                 foreach (string topic in topics)
                 {
-                    SubscribeMqttTopic(topic);
+                    SubscribeMqttTopic(client, topic);
                 }
 
                 return true;
             }
             else
             {
-                Log($"Failed to create '{mqttClientName}' MQTT client", true, false);
+                Log($"Failed to create '{client}' MQTT client", true, false);
                 return false;
             }
         }
@@ -449,21 +447,20 @@ namespace OptiSort
         /// Disconnect MQTT client from a broker, then destroy client
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> DisconnectMqttClient()
+        public async Task<bool> DisconnectMqttClient(string client)
         {
-            string mqttClientName = Properties.Settings.Default.mqtt_client;
-            Log($"Trying to destroy MQTT client {mqttClientName}", false, false);
+            Log($"Trying to destroy MQTT client {client}", false, false);
 
-            Task<bool> destroyClient = MqttClient.DestroyClient(mqttClientName);
+            Task<bool> destroyClient = MqttClient.DestroyClient(client);
             if (await destroyClient)
             {
                 StatusMqttClient = false;
-                Log($"MQTT client '{mqttClientName}' destroyed", false, true);
+                Log($"MQTT client '{client}' destroyed", false, true);
                 return true;
             }
             else
             {
-                Log($"Error destroying '{mqttClientName}'", true, false);
+                Log($"Error destroying '{client}'", true, false);
                 return false;
             }
         }
@@ -472,28 +469,26 @@ namespace OptiSort
         /// Subscribe the connected MQTT client to a specific topic of the broker
         /// </summary>
         /// <param name="topic"></param>
-        public async void SubscribeMqttTopic(string topic)
+        public async void SubscribeMqttTopic(string client, string topic)
         {
-            string mqttClientName = Properties.Settings.Default.mqtt_client;
-            bool subscribed = await MqttClient.SubscribeClientToTopic(mqttClientName, topic);
+            bool subscribed = await MqttClient.SubscribeClientToTopic(client, topic);
             if (subscribed)
-                Log($"{mqttClientName} subscribed to {topic}", false, true);
+                Log($"{client} subscribed to {topic}", false, true);
             else
-                Log($"Unable subscribing {mqttClientName} to {topic}", true, false);
+                Log($"Unable subscribing {client} to {topic}", true, false);
         }
 
         /// <summary>
         /// Unsubscribe MQTT client from topic
         /// </summary>
         /// <param name="topic"></param>
-        public async void UnsubscribeMqttTopic(string topic)
+        public async void UnsubscribeMqttTopic(string client, string topic)
         {
-            string mqttClientName = Properties.Settings.Default.mqtt_client;
-            bool unsubscribed = await MqttClient.UnsubscribeClientFromTopic(mqttClientName, topic);
+            bool unsubscribed = await MqttClient.UnsubscribeClientFromTopic(client, topic);
             if (unsubscribed)
-                Log($"{mqttClientName} unsubscribed to {topic}", false, true);
+                Log($"{client} unsubscribed to {topic}", false, true);
             else
-                Log($"Unable unsubscribing {mqttClientName} to {topic}", true, false);
+                Log($"Unable unsubscribing {client} to {topic}", true, false);
         }
 
 
@@ -506,10 +501,9 @@ namespace OptiSort
         }
 
 
-        public async void PublishMqttMessage(string topic, object message)
+        public async void PublishMqttMessage(string client, string topic, object message)
         {
-            string mqttClientName = Properties.Settings.Default.mqtt_client;
-            _ = await MqttClient.PublishMessage(mqttClientName, topic, message);
+            _ = await MqttClient.PublishMessage(client, topic, message);
         }
 
 
@@ -526,7 +520,6 @@ namespace OptiSort
                 Log("Camera manager will now use host's webcam (if there is any)", false, false);
             }
         }
-
 
         public void ConnectCameras()
         {
@@ -676,6 +669,54 @@ namespace OptiSort
             while (_idsQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
             while (_baslerQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
             while (_luxonisQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
+        }
+
+
+        public async void ForecastDigitalTwinInfo()
+        {
+            string clientNameDT = "OptisortDT";
+            string mqttPort = Properties.Settings.Default.mqtt_port;
+
+            // TODO: change with regular connnectClient method
+            Task<bool> createClient = MqttClient.CreateClient(clientNameDT, "10.12.238.20", mqttPort);
+
+            if (await createClient)
+            {
+                Log("Digital Twin client created", false, true);
+                SubscribeMqttTopic(clientNameDT, "DT_BROADCAST");
+
+                Thread.Sleep(2000);
+
+                double[] values = { 1.23, 4.56, 7.89, 0.12 };
+                var message = new
+                {
+                    sender = "SCARA",
+                    receiver = "IPHYSICS",
+                    command = 10,
+                    payload = new
+                    {
+                        q1 = values[0],
+                        q2 = values[1],
+                        q3 = values[2],
+                        q4 = values[3]
+                    }
+                };
+                string jsonMessage = JsonSerializer.Serialize(message, new JsonSerializerOptions { WriteIndented = true });
+
+                PublishMqttMessage(clientNameDT, "DT_BROADCAST", jsonMessage);
+
+                Thread.Sleep(2000);
+
+                UnsubscribeMqttTopic(clientNameDT, "DT_BROADCAST");
+
+                Thread.Sleep(2000);
+
+                _ = DisconnectMqttClient(clientNameDT);
+
+            }
+
+
+
         }
 
         #endregion

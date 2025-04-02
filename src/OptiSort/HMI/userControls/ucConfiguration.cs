@@ -19,6 +19,7 @@ namespace OptiSort.userControls
         private optisort_mgr _manager;
         private string _oldValue; // storing value that are about to be changed
         private bool _mqttClientDisconnected;
+        private string _mqttClient = Properties.Settings.Default.mqtt_client;
 
         internal ucConfiguration(optisort_mgr manager)
         {
@@ -107,8 +108,8 @@ namespace OptiSort.userControls
 
                     else if (settingName.IndexOf("topic", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        _manager.UnsubscribeMqttTopic(_oldValue);
-                        _manager.SubscribeMqttTopic(newValue);   
+                        _manager.UnsubscribeMqttTopic(_mqttClient, _oldValue);
+                        _manager.SubscribeMqttTopic(_mqttClient, newValue);   
                     }
                 }
 
@@ -201,7 +202,7 @@ namespace OptiSort.userControls
             try
             {
                 _mqttClientDisconnected = false; 
-                await _manager.DisconnectMqttClient();
+                await _manager.DisconnectMqttClient(_mqttClient);
                 _mqttClientDisconnected = true;
             }
             catch (Exception ex)
@@ -220,7 +221,7 @@ namespace OptiSort.userControls
 
             try
             {
-                _ = _manager.ConnectMQTTClient();
+                _ = _manager.ConnectMQTTClient(_mqttClient, Properties.Settings.Default.mqtt_broker);
             }
             catch (Exception ex)
             {

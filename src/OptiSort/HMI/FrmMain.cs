@@ -23,8 +23,10 @@ namespace OptiSort
         // ---------------------------------- DECLARATIONS -----------------------------------
         // -----------------------------------------------------------------------------------
 
-
         //NOTE: remember to reactivate exception settings > managed debugging assistant > loader lock for release to prod
+
+
+        internal optisort_mgr manager;
 
         private class Cameras
         {
@@ -34,7 +36,8 @@ namespace OptiSort
         }
         List<Cameras> _camerasList = new List<Cameras> { }; // TODO: review definition
 
-        internal optisort_mgr manager;
+        private string _mqttClient = Properties.Settings.Default.mqtt_client;
+        private string _mqttBroker = Properties.Settings.Default.mqtt_broker;
 
 
 
@@ -409,13 +412,13 @@ namespace OptiSort
         private void btnMqttConnect_Click(object sender, EventArgs e)
         {
             // async call, no need for handling cursor
-            _ = manager.ConnectMQTTClient();
+            _ = manager.ConnectMQTTClient(_mqttClient, _mqttBroker);
         }
 
         private void btnMqttDisconnect_Click(object sender, EventArgs e)
         {
             // async call, no need for handling cursor
-            _ = manager.DisconnectMqttClient();
+            _ = manager.DisconnectMqttClient(_mqttClient);
         }
 
         private void btnCameraTesting_Click(object sender, EventArgs e)

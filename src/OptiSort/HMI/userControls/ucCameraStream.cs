@@ -20,6 +20,7 @@ namespace OptiSort
     public partial class ucCameraStream : UserControl
     {
         private optisort_mgr _manager;
+        private string _mqttClient = Properties.Settings.Default.mqtt_client;
 
         // Performance computation
         private Stopwatch _stopwatch = Stopwatch.StartNew();
@@ -161,7 +162,7 @@ namespace OptiSort
                         if (overload > 100 && _mqttLatencyError == false)
                         {
                             _mqttLatencyError = true;
-                            _ = _manager.DisconnectMqttClient();
+                            _ = _manager.DisconnectMqttClient(_mqttClient);
                             _manager.NonBlockingMessageBox("MQTT service interrupted because of a latency overload. Please try restarting the service", "Overload!", MessageBoxIcon.Warning);
                             return;
                         }

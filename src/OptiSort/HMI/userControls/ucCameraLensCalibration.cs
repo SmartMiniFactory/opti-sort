@@ -25,6 +25,8 @@ namespace OptiSort.userControls
         private DateTime _elapsedTime;
         private int _pythonProcessId;
 
+        private string _mqttClient = Properties.Settings.Default.mqtt_client;
+
         public int Shots
         {
             get => _shots;
@@ -145,7 +147,7 @@ namespace OptiSort.userControls
                 _manager.MqttMessageReceived -= MqttMessageReceived;
                 _manager.OnErrorReceived -= PythonErrorHandler;
                 _manager.OnExecutionTerminated -= PythonTerminationHandler;
-                _manager.UnsubscribeMqttTopic("optisort/camera_calibration");
+                _manager.UnsubscribeMqttTopic(_mqttClient, "optisort/camera_calibration");
                 _manager.StopExecution(_pythonProcessId); // needed to reset active processes memory
             }
         }
@@ -179,7 +181,7 @@ namespace OptiSort.userControls
             Cursor = Cursors.WaitCursor;
 
             // subscribe to mqtt topic to receive updates from python file
-            _manager.SubscribeMqttTopic("optisort/camera_calibration");
+            _manager.SubscribeMqttTopic(_mqttClient, "optisort/camera_calibration");
             _manager.MqttMessageReceived += MqttMessageReceived;
 
             // subscribe termination events to handler

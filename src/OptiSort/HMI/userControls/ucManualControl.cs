@@ -141,5 +141,10 @@ namespace OptiSort.userControls
             _manager.Cobra600.ToggleDigitalOutput(_ringLight);
             RefreshButtons();
         }
+
+        private void btnTestDTMQTT_Click(object sender, EventArgs e)
+        {
+            _manager.ForecastDigitalTwinInfo();
+        }
     }
 }
