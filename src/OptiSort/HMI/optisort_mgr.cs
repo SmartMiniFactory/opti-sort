@@ -701,9 +701,8 @@ namespace OptiSort
                         q4 = values[3]
                     }
                 };
-                string jsonMessage = JsonSerializer.Serialize(message, new JsonSerializerOptions { WriteIndented = true });
-
-                PublishMqttMessage(clientNameDT, "DT_BROADCAST", jsonMessage);
+   
+                PublishMqttMessage(clientNameDT, "DT_BROADCAST", message);
 
                 Thread.Sleep(2000);
 
