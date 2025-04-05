@@ -687,7 +687,8 @@ namespace OptiSort
 
                 Thread.Sleep(2000);
 
-                double[] values = { 1.23, 4.56, 7.89, 0.12 };
+                var joints = Cobra600.Motion.GetJointPositions(Cobra600.Robot);
+ 
                 var message = new
                 {
                     sender = "SCARA",
@@ -695,10 +696,10 @@ namespace OptiSort
                     command = 10,
                     payload = new
                     {
-                        q1 = values[0],
-                        q2 = values[1],
-                        q3 = values[2],
-                        q4 = values[3]
+                        q1 = joints[0],
+                        q2 = joints[1],
+                        q3 = joints[2],
+                        q4 = joints[3]
                     }
                 };
    
