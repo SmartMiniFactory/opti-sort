@@ -64,7 +64,8 @@ Inside the project's folder, you will find a directory called "installers", from
 2. Copy elsewhere ids-software-suite-win-full-4.94.2-64.zip folder, extract, and install it: select **USB and GigE** options
 3. Copy elsewhere the ids-peak-win-standard-setup-64-2.14.0.0.zip folder, extract, and install it: install **transport layer** (required to access UI camera models)
 
-
+### Install Python Dependancies
+As soon as you open Pycharm, you will need to navigate to where you saved your clone of this directory and open the "python" folder as project. Pycharm will detect the "requirements.txt" file and ask to install dependancies for you.
 
 ## License
 
