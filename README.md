@@ -32,10 +32,13 @@ B. Follow the Installation guide
 
 ### Description of the VM environment
 All the software required for the OptiSort system is already installed and prepared for you to use. Software types:
+
 - Development (Visual Studio Community, Pycharm): used to write code and contribute to project's repository (you might need to login to github)
 - Robotics (ACE 3.6, Flexibowl parameters): used to control Scara and Flexibowls robot
 - Cameras (IDS cockpits, Basler cockpits, Luxonis packages, SDKs, ...): used to connect or parameterize cameras
-- MQTT (background broker, MQTTX): needed for internal or external messages exchange or for development supervision
+- MQTT (background broker, MQTTX): needed for internal or external message exchange or development supervision
+
+The document folder contains all the installers used for the virtual machine in case you might need to replicate installations somewhere else. On the desktop, you will find a folder called "OptiSort_project", which contains the source code (this repository cloned). Remember to pull the last version of the right branch before modifying something.
 
 ## B. Install Optisort System Manually
 
@@ -57,7 +60,7 @@ Open Visual Studio and clone (```https://github.com/SmartMiniFactory/opti-sort.g
 ### Install Vendor-specific software
 
 Inside the project's folder, you will find a directory called "installers", from here:
-1. Copy elsewhere the ACE 3.6.zip folder, extract, and install it: **installation of dependancies will probably fail!!** To fix this, enter the "dependencies" folder and manually launch the installer inside the folders "OPC" and "Sentinel"
+1. Copy elsewhere the ACE 3.6.zip folder, extract, and install it: **installation of dependancies will probably fail!!** If thet's your case, enter the "dependencies" folder and manually launch the installers inside the folders "OPC" and "Sentinel", or whatever installation failed in your case
 2. Copy elsewhere ids-software-suite-win-full-4.94.2-64.zip folder, extract, and install it: select **USB and GigE** options
 3. Copy elsewhere the ids-peak-win-standard-setup-64-2.14.0.0.zip folder, extract, and install it: install **transport layer** (required to access UI camera models)
 
