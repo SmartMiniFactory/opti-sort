@@ -223,6 +223,16 @@ namespace OptiSort.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap off_2x2_pptx1 {
+            get {
+                object obj = ResourceManager.GetObject("off_2x2_pptx1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap on_2x2_pptx {
             get {
                 object obj = ResourceManager.GetObject("on_2x2_pptx", resourceCulture);

@@ -253,8 +253,7 @@ namespace OptiSort
             {
                 if (manager.StatusScara == true)
                 {
-                    lblScaraStatusValue.Text = "Online";
-                    lblScaraStatusValue.ForeColor = Color.Green;
+                    pbScaraStatus.Image = Properties.Resources.on_2x2_pptx;
                     btnScaraConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                     btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
                     if (manager.StatusScaraEmulation)
@@ -265,8 +264,7 @@ namespace OptiSort
                 }
                 else
                 {
-                    lblScaraStatusValue.Text = "Offline";
-                    lblScaraStatusValue.ForeColor = Color.Red;
+                    pbScaraStatus.Image = Properties.Resources.off_2x2_pptx;
                     btnScaraConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                     btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                     if (manager.StatusScaraEmulation)
@@ -291,15 +289,13 @@ namespace OptiSort
             {
                 if (manager.StatusFlexibowl == true)
                 {
-                    lblFlexibowlStatusValue.Text = "Online";
-                    lblFlexibowlStatusValue.ForeColor = Color.Green;
+                    pbFlexibowlStatus.Image = Properties.Resources.on_2x2_pptx;
                     btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                     btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
                 }
                 else
                 {
-                    lblFlexibowlStatusValue.Text = "Offline";
-                    lblFlexibowlStatusValue.ForeColor = Color.Red;
+                    pbFlexibowlStatus.Image = Properties.Resources.off_2x2_pptx;
                     btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                     btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                 }
@@ -309,15 +305,13 @@ namespace OptiSort
             {
                 if (manager.StatusMqttClient == true)
                 {
-                    lblMqttStatusValue.Text = "Online";
-                    lblMqttStatusValue.ForeColor = Color.Green;
+                    pbMqttStatus.Image = Properties.Resources.on_2x2_pptx;
                     btnMqttConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                     btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
                 }
                 else
                 {
-                    lblMqttStatusValue.Text = "Offline";
-                    lblMqttStatusValue.ForeColor = Color.Red;
+                    pbMqttStatus.Image = Properties.Resources.off_2x2_pptx;
                     btnMqttConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                     btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                 }
@@ -327,8 +321,7 @@ namespace OptiSort
             {
                 if (manager.StatusCameraManager == true)
                 {
-                    lblCamerasStatusValue.Text = "Online";
-                    lblCamerasStatusValue.ForeColor = Color.Green;
+                    pbCameraStatus.Image = Properties.Resources.on_2x2_pptx;
                     btnCamerasConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
                     btnCamerasDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
                     if (manager.StatusCameraTesting)
@@ -338,8 +331,7 @@ namespace OptiSort
                 }
                 else
                 {
-                    lblCamerasStatusValue.Text = "Offline";
-                    lblCamerasStatusValue.ForeColor = Color.Red;
+                    pbCameraStatus.Image = Properties.Resources.off_2x2_pptx;
                     btnCamerasConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
                     btnCamerasDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
                     if (manager.StatusCameraTesting)

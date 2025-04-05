@@ -146,5 +146,6 @@ namespace OptiSort.userControls
         {
             _manager.ForecastDigitalTwinInfo();
         }
+
     }
 }
