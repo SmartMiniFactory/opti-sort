@@ -27,7 +27,15 @@ B. Follow the Installation guide
 ## A. Install OptiSort Virtual Machine
 
 1. Install VirtualBox: https://www.virtualbox.org/
-2. Download OptiSort VM: ...
+2. Download OptiSort VM (.vdi file) from the SMF's onedrive (you will need to request access): ...
+3. You will find login credentials inside the SMF's onedrive folder
+
+### Description of the VM environment
+All the software required for the OptiSort system is already installed and prepared for you to use. Software types:
+- Development (Visual Studio Community, Pycharm): used to write code and contribute to project's repository (you might need to login to github)
+- Robotics (ACE 3.6, Flexibowl parameters): used to control Scara and Flexibowls robot
+- Cameras (IDS cockpits, Basler cockpits, Luxonis packages, SDKs, ...): used to connect or parameterize cameras
+- MQTT (background broker, MQTTX): needed for internal or external messages exchange or for development supervision
 
 ## B. Install Optisort System Manually
 
@@ -43,8 +51,8 @@ B. Follow the Installation guide
 
 ### Download source code
 
-Open Visual Studio and clone the OptiSort repository in a local folder of your preference: 
-```https://github.com/SmartMiniFactory/opti-sort.git```
+Open Visual Studio and clone (```https://github.com/SmartMiniFactory/opti-sort.git```) the OptiSort repository in a local folder of your preference: 
+
 
 ### Install Vendor-specific software
 
