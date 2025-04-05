@@ -38,7 +38,8 @@ B. Follow the Installation guide
 3. [Download](https://www.jetbrains.com/pycharm/download/?section=window) Pycharm Community: Add it to PATH when asked by the installer
 4. [Download](https://mosquitto.org/download/) and install Eclipse Mosquitto (MQTT broker)
 5. [Download](https://mqttx.app/downloads) and install MQTTX (for MQTT supervision during development)
-6. Restart your PC
+6. [Download](https://www.baslerweb.com/en/downloads/software/2012599532/?srsltid=AfmBOorplO9MAmNuyzK0a-u_12KqZsKkbDvuvwWtmepAgUatpbWpUdGQ) and install Pylon 8.1.0 (basler camera cockpit and parametrization)
+7. Restart your PC
 
 ### Download source code
 
@@ -47,8 +48,11 @@ Open Visual Studio and clone the OptiSort repository in a local folder of your p
 
 ### Install Vendor-specific software
 
-Inside the project's folder you will find a directory called "installers", from here:
-1. Install 
+Inside the project's folder, you will find a directory called "installers", from here:
+1. Copy elsewhere the ACE 3.6.zip folder, extract, and install it: **installation of dependancies will probably fail!!** To fix this, enter the "dependencies" folder and manually launch the installer inside the folders "OPC" and "Sentinel"
+2. Copy elsewhere ids-software-suite-win-full-4.94.2-64.zip folder, extract, and install it: select **USB and GigE** options
+3. Copy elsewhere the ids-peak-win-standard-setup-64-2.14.0.0.zip folder, extract, and install it: install **transport layer** (required to access UI camera models)
+
 
 
 ## License
