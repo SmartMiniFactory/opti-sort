@@ -129,30 +129,39 @@ class CameraManager:
     def configure(self, target_camera):
 
             if not self.testing:
-                ids_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_configuration.ini").resolve()
-                basler_configfile = (script_dir / "../../OptiSort/HMI/Config/camera_config.pfs").resolve()
+                config_folder = pathlib.Path("../../OptiSort/HMI/Config").resolve()
+                ids_configfile = (config_folder / "ids_configuration.ini").resolve()
+                basler_configfile = (config_folder / "basler_configuration.pfs").resolve()
+
+                if not ids_configfile.is_file():
+                    raise FileNotFoundError(f"The IDS file {ids_configfile} does not exist.")
+                if not os.access(ids_configfile, os.R_OK):  # os.access can still be used for checking readability
+                    raise PermissionError(f"The IDS file {ids_configfile} is not readable.")
+
+                if not basler_configfile.is_file():
+                    raise FileNotFoundError(f"The IDS file {basler_configfile} does not exist.")
+                if not os.access(basler_configfile, os.R_OK):  # os.access can still be used for checking readability
+                    raise PermissionError(f"The IDS file {basler_configfile} is not readable.")
 
                 # TODO: create configure_freerun and configure_triggered in base camera
 
                 try:
                     # TODO: fix this
                     if target_camera is None:
-                        # self.cameras['ids'].configure(ids_configfile)
-                        # self.cameras['basler'].configure(basler_configfile)
-                        # self.cameras['luxonis'].configure(None)
-                        aaa = True
+                        self.cameras['ids'].configure(ids_configfile)
+                        self.cameras['basler'].configure(basler_configfile)
+                        self.cameras['luxonis'].configure(None)
+
 
                     elif target_camera == 'ids':
-                        # self.cameras['ids'].configure(ids_configfile)
-                        aaa = True
+                        self.cameras['ids'].configure(ids_configfile)
 
                     elif target_camera == 'basler':
-                        # self.cameras['basler'].configure(basler_configfile)
-                        aaa = True
-                    elif target_camera == 'luxonis':
+                        self.cameras['basler'].configure(basler_configfile)
 
-                        aaa = True
-                        # self.cameras['luxonis'].configure(None)
+                    elif target_camera == 'luxonis':
+                        self.cameras['luxonis'].configure(None)
+
                     else:
                         raise ValueError("Target camera not recognized")
     

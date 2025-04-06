@@ -56,6 +56,7 @@ class Ids(BaseCamera):
 
     def configure(self, config_path):
         try:
+
             # Determine the current UEyeParametersetPath (str)
             # value = self.node_map.FindNode("UEyeParametersetPath").Value()
 
@@ -140,15 +141,15 @@ class Ids(BaseCamera):
                 buffer.Height()
             )
 
-            image = image.ConvertTo(ids_peak_ipl.PixelFormatName_BGRa8, ids_peak_ipl.ConversionMode_Fast)
+            # No conversion needed, just get the numpy array
             img_array = image.get_numpy()
 
             if img_array is None:
                 raise RuntimeError("Image conversion failed, got None.")
 
-            # Ensure correct format for OpenCV
             img_array = img_array.astype(np.uint8)
-            img_array = img_array[:, :, :3]  # Remove alpha channel
+            # Optional: convert to 3-channel grayscale if needed by OpenCV or downstream
+            # img_array = cv2.cvtColor(img_array, cv2.COLOR_GRAY2BGR)
 
             self.data_stream.QueueBuffer(buffer)
 
