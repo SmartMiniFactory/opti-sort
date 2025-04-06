@@ -70,7 +70,22 @@ Open Visual Studio and clone (```https://github.com/SmartMiniFactory/opti-sort.g
 
 <img width="455" alt="image" src="https://github.com/user-attachments/assets/d3464641-75ca-4748-91b4-16ce54cd6d8d" />
 
-This will automatically install all the needed dependencies in a dedicated environment, so to avoid conflicts with eventual global installations
+This will automatically install all the needed dependencies in a dedicated environment to avoid conflicts with eventual global installations. Some final notes:
+- take note of the installation output: if something fails, you will need to proceed with manual installation; search for the package online and ensure you are installing the correct version
+- remember to install dependancies within the venv
+- remember to setup a PyCharm interpreter or the project will not run
+
+
+
+# Development
+
+## Maintenance
+
+### Python requirements
+If you modified dependencies, remember to update the requirements.txt file accordingly. You can automate this process by following the next steps. If you are using a VENV, you can copy the following command to the VENV's bash:
+```pip freeze > requirements.txt```
+Otherwise, if you are not using a VENV, the command above would track all the libraries isntalled in your system rather than used in the project. Thus, you need to install the [pipreqs](https://pypi.org/project/pipreqs/0.1.4/) library and run the following command:
+```pipreqs /path/to/project```
 
 ## License
 
