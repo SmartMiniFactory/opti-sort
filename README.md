@@ -103,9 +103,11 @@ pipreqs /path/to/project
 
 
 Example of wrong requirements.txt:
+
 <img width="455" alt="image" src="https://github.com/user-attachments/assets/d3464641-75ca-4748-91b4-16ce54cd6d8d" />
 
 Example of correct requirements.txt:
+
 <img width="455" alt="image" src="https://github.com/user-attachments/assets/d3464641-75ca-4748-91b4-16ce54cd6d8d" />
 
 
