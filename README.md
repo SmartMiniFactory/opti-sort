@@ -82,10 +82,17 @@ This will automatically install all the needed dependencies in a dedicated envir
 ## Maintenance
 
 ### Python requirements
-If you modified dependencies, remember to update the requirements.txt file accordingly. You can automate this process by following the next steps. If you are using a VENV, you can copy the following command to the VENV's bash:
-```pip freeze > requirements.txt```
-Otherwise, if you are not using a VENV, the command above would track all the libraries isntalled in your system rather than used in the project. Thus, you need to install the [pipreqs](https://pypi.org/project/pipreqs/0.1.4/) library and run the following command:
-```pipreqs /path/to/project```
+If you modify dependencies, please make sure to update the requirements.txt file accordingly. You can automate this process by following the next steps. If you are using a VENV, you can copy the following command to the VENV's bash:
+
+```
+pip freeze > requirements.txt
+```
+
+Otherwise, if you are not using a VENV, the command above would track all the libraries installed in your system rather than used in the project. Thus, you need to install the [pipreqs](https://pypi.org/project/pipreqs/0.1.4/) library and run the following command:
+
+```
+pipreqs /path/to/project
+```
 
 ## License
 
