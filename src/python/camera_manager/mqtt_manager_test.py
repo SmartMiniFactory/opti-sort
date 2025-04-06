@@ -254,15 +254,17 @@ class ProcessingHandler(threading.Thread):
         self.queue = queue.Queue()
         self.running = threading.Event()
         self.running.set()
+        self.processor = None
 
     def run(self):
         try:
-            processor = ImageProcessor()
+            self.processor = ImageProcessor()
+            self.camera_manager.start_acquisition(self.target_camera)
 
             while self.running.is_set():
                 frame = self.camera_manager.capture_frame(self.target_camera)
                 if frame is not None:
-                    processor.calculate_image_quality(frame)
+                    self.processor.calculate_image_quality(frame)
                     encoded, buffer = cv2.imencode('.jpg', frame)
                     if encoded:
                         mqttc.publish(f"optisort/{self.target_camera}/stream", im2json(buffer))
@@ -271,6 +273,7 @@ class ProcessingHandler(threading.Thread):
             raise ValueError(f"Processing failed: {e}") from e
 
     def stop(self):
+        publish("Processing ended", self.processor.get_metrics())
         self.running.clear()
 
 
@@ -361,7 +364,17 @@ class StateMachine:
             print(f"Error processing message: {e}")
 
     def idle(self):
+
+        if self.streaming_handler is not None:
+            self.streaming_handler.stop()
+            self.streaming_handler = None
+
+        if self.processing_handler is not None:
+            self.processing_handler.stop()
+            self.processing_handler = None
+
         self.target_camera = None
+
         if self.testing:
             publish("Webcam initialized! Send functioning mode [streaming only]", None)
         else:
