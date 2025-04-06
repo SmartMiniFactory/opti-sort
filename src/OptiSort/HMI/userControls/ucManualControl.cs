@@ -147,5 +147,9 @@ namespace OptiSort.userControls
             _manager.ForecastDigitalTwinInfo();
         }
 
+        private void btn_detectionAlgorithm_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
