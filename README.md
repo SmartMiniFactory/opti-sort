@@ -71,10 +71,13 @@ Open Visual Studio and clone (```https://github.com/SmartMiniFactory/opti-sort.g
 <img width="455" alt="image" src="https://github.com/user-attachments/assets/d3464641-75ca-4748-91b4-16ce54cd6d8d" />
 
 This will automatically install all the needed dependencies in a dedicated environment to avoid conflicts with eventual global installations. Some final notes:
-- take note of the installation output: if something fails, you will need to proceed with manual installation; search for the package online and ensure you are installing the correct version
+- note the installation output: if something fails, you will need to proceed with manual installation; search for the package online and ensure you are installing the correct version
 - remember to install dependancies within the venv
-- remember to setup a PyCharm interpreter or the project will not run
+- remember to setup a PyCharm interpreter (venv's interpreter) or the project will not run
 
+**Important**: most of the dependancies can be installed at higher versions, except for paho-mqtt. Higher versions of this dependency include deprecated functionalities that continuously generate errors. Make sure to install exactly version 1.6.1 or find a way to fix such issues.
+
+**Tip**: in case the automated installation process failed installation of some dependancies, or installed at higher versions than required, use the PyCharm integrated bash to be directly located in your VENV, so reinstallation commands are already executed at the right spot:
 
 
 # Development
@@ -88,11 +91,15 @@ If you modify dependencies, please make sure to update the requirements.txt file
 pip freeze > requirements.txt
 ```
 
-Otherwise, if you are not using a VENV, the command above would track all the libraries installed in your system rather than used in the project. Thus, you need to install the [pipreqs](https://pypi.org/project/pipreqs/0.1.4/) library and run the following command:
+Otherwise, if you are not using a VENV, the command above would track all the libraries installed in your system rather than those used in the project. Thus, you need to install the [pipreqs](https://pypi.org/project/pipreqs/0.1.4/) package and run the following command:
 
 ```
 pipreqs /path/to/project
 ```
+
+**IMPORTANT**: _pipreqs_ tries to infer the package names, but it might confuse hyphens (`-`) for underscores (`_`). This is an unwanted behavior when exporting the requirements.txt file because subsequent dependency installations will fail. Make sure to check every suspicious underscore and substitute it with the correct package name.
+
+**Tip**: _pipreqs_ generates a strict dependency relationship requiring specific versions to be installed (e.g. numpy==1.0.0); you can manually modify this syntax to allow installation of higher versions if you are sure this won't generate errors (e.g. numpy>=1.0.0)
 
 ## License
 
