@@ -101,6 +101,14 @@ pipreqs /path/to/project
 
 **Tip**: _pipreqs_ generates a strict dependency relationship requiring specific versions to be installed (e.g. numpy==1.0.0); you can manually modify this syntax to allow installation of higher versions if you are sure this won't generate errors (e.g. numpy>=1.0.0)
 
+
+Example of wrong requirements.txt:
+![image](https://github.com/user-attachments/assets/01aa00e8-554e-4d68-8f80-3cc2752a97a0)
+
+Example of correct requirements.txt:
+![image](https://github.com/user-attachments/assets/42bceaae-e38a-402c-bd75-3f3eaeb8ad25)
+
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
