@@ -308,12 +308,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CobraLibrary\CobraLibrary.csproj">
-      <Project>{efdce63d-f10d-46bf-b928-20d25a5581ac}</Project>
-      <Name>CobraLibrary</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="icons\camerasDisabled_2x2_pptx.png" />
     <None Include="icons\camerasEnabled_2x2_pptx.png" />
     <None Include="icons\webcamDisabled_2x2_pptx.png" />

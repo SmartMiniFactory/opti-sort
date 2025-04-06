@@ -3,22 +3,14 @@ using Ace.Adept.Server.Device;
 using Ace.Adept.Server.Motion;
 using Ace.Adept.Server.Motion.Robots;
 using Ace.Core.Client;
-using Ace.Core.Client.Sim3d;
 using Ace.Core.Client.Sim3d.Controls;
 using Ace.Core.Server;
 using Ace.Core.Server.Device;
-using Ace.Core.Server.Motion;
 using Ace.Core.Util;
-using ActiproSoftware.SyntaxEditor;
-using HSCLASSLIBRARYLib;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OptiSort
