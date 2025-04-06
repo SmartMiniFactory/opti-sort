@@ -50,19 +50,15 @@ The document folder contains all the installers used for the virtual machine in 
 4. [Download](https://mosquitto.org/download/) and install Eclipse Mosquitto (MQTT broker)
 5. [Download](https://mqttx.app/downloads) and install MQTTX (for MQTT supervision during development)
 6. [Download](https://www.baslerweb.com/en/downloads/software/2012599532/?srsltid=AfmBOorplO9MAmNuyzK0a-u_12KqZsKkbDvuvwWtmepAgUatpbWpUdGQ) and install Pylon 8.1.0 (basler camera cockpit and parametrization)
-7. Restart your PC
+7. [Download]() the ACE 3.6.zip folder, extract, and install it: **installation of dependancies will probably fail!!** If that's your case, enter the "dependencies" folder and manually launch the installers inside the folders "OPC" and "Sentinel" or whatever installation failed in your case
+8. [Download]() ids-software-suite-win-full-4.94.2-64.zip file, extract, and install it: select **USB and GigE** options
+3. [Download]() the ids-peak-win-standard-setup-64-2.14.0.0.zip folder, extract, and install it: install **transport layer** (required to access UI camera models)
+9. Restart your PC
 
 ### Download source code
 
 Open Visual Studio and clone (```https://github.com/SmartMiniFactory/opti-sort.git```) the OptiSort repository in a local folder of your preference: 
 
-
-### Install Vendor-specific software
-
-Inside the project's folder, you will find a directory called "installers", from here:
-1. Copy elsewhere the ACE 3.6.zip folder, extract, and install it: **installation of dependancies will probably fail!!** If thet's your case, enter the "dependencies" folder and manually launch the installers inside the folders "OPC" and "Sentinel", or whatever installation failed in your case
-2. Copy elsewhere ids-software-suite-win-full-4.94.2-64.zip folder, extract, and install it: select **USB and GigE** options
-3. Copy elsewhere the ids-peak-win-standard-setup-64-2.14.0.0.zip folder, extract, and install it: install **transport layer** (required to access UI camera models)
 
 ### Install Python Dependancies
 As soon as you open Pycharm, you will need to navigate to where you saved your clone of this directory and open the "python" folder as project. Pycharm will detect the "requirements.txt" file and ask to install dependancies for you.
