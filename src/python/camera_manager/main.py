@@ -1,9 +1,8 @@
 import pathlib
 import xml.etree.ElementTree as ET
 import cv2
-import numpy as np
 import asyncio
-from MQTT.mqtt_publisher import MQTTClient
+from python.camera_manager.tests.mqtt_publisher import MQTTClient
 from cameras.ids import Ids
 from cameras.basler import Basler
 from cameras.luxonis import Luxonis

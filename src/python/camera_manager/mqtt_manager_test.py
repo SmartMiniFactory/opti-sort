@@ -14,6 +14,7 @@ import cv2
 from cameras.ids import Ids
 from cameras.basler import Basler
 from cameras.luxonis import Luxonis
+from processing.image_processor import ImageProcessor
 
 # Get script details and localization
 script_dir = pathlib.Path(__file__).parent.resolve()
@@ -256,9 +257,12 @@ class ProcessingHandler(threading.Thread):
 
     def run(self):
         try:
+            processor = ImageProcessor()
+
             while self.running.is_set():
                 frame = self.camera_manager.capture_frame(self.target_camera)
                 if frame is not None:
+                    processor.calculate_image_quality(frame)
                     encoded, buffer = cv2.imencode('.jpg', frame)
                     if encoded:
                         mqttc.publish(f"optisort/{self.target_camera}/stream", im2json(buffer))
