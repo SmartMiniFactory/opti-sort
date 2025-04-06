@@ -104,11 +104,11 @@ pipreqs /path/to/project
 
 Example of wrong requirements.txt:
 
-<img width="455" alt="image" src="https://github.com/user-attachments/assets/d3464641-75ca-4748-91b4-16ce54cd6d8d" />
+<img width="455" alt="image" src="https://github.com/user-attachments/assets/3a2869bd-255d-4d24-ac83-be5f987eee32" />
 
 Example of correct requirements.txt:
 
-<img width="455" alt="image" src="https://github.com/user-attachments/assets/d3464641-75ca-4748-91b4-16ce54cd6d8d" />
+<img width="455" alt="image" src="https://github.com/user-attachments/assets/ebbded26-296d-46e2-8410-b8e8c5d8f8b8" />
 
 
 ## License
