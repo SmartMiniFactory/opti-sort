@@ -61,7 +61,16 @@ Open Visual Studio and clone (```https://github.com/SmartMiniFactory/opti-sort.g
 
 
 ### Install Python Dependancies
-As soon as you open Pycharm, you will need to navigate to where you saved your clone of this directory and open the "python" folder as project. Pycharm will detect the "requirements.txt" file and ask to install dependancies for you.
+1. Open Pycharm
+3. Select "Open Project"
+4. Search for the local folder where you cloned this directory, and find src>python
+5. Select the python folder as project folder
+6. When PyCharm asks to install git, accept the package installation
+7. PyCharm will detect a requirements.txt file indicating which dependancies and versions need to be installed and will ask to create a virtual environment (venv); accept it and ensure the interpreter, requirement, and venv are correctly detected/set:
+
+<img width="455" alt="image" src="https://github.com/user-attachments/assets/d3464641-75ca-4748-91b4-16ce54cd6d8d" />
+
+This will automatically install all the needed dependencies in a dedicated environment, so to avoid conflicts with eventual global installations
 
 ## License
 
