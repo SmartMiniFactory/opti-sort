@@ -4,8 +4,8 @@ ids_peak>=1.10.0.0.3
 ids_peak_ipl>=1.14.0.0.2
 keyboard>=0.13.5
 numpy>=2.2.4
-opencv_python>=4.10.0.84
-paho_mqtt==1.6.1
+opencv-python>=4.10.0.84
+paho-mqtt==1.6.1
 pypylon>=4.0.0
 pyueye>=4.96.952
 PyYAML>=6.0.1
