@@ -182,6 +182,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\DigitalTwin.cs" />
     <Compile Include="Classes\PythonProcessRunner.cs" />
     <Compile Include="Classes\Watchdog.cs" />
     <Compile Include="optisort_mgr.cs" />
@@ -197,10 +198,10 @@
     <Compile Include="Splashscreen.Designer.cs">
       <DependentUpon>Splashscreen.cs</DependentUpon>
     </Compile>
-    <Compile Include="systems\CameraManager.cs" />
-    <Compile Include="systems\Cobra600.cs" />
-    <Compile Include="systems\Flexibowl.cs" />
-    <Compile Include="systems\MQTT.cs" />
+    <Compile Include="Classes\CameraManager.cs" />
+    <Compile Include="Classes\Cobra600.cs" />
+    <Compile Include="Classes\Flexibowl.cs" />
+    <Compile Include="Classes\MQTT.cs" />
     <Compile Include="userControls\ucCameraStream.cs">
       <SubType>UserControl</SubType>
     </Compile>

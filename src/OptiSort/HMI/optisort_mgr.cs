@@ -35,6 +35,7 @@ namespace OptiSort
         public Cobra600 Cobra600 { get; set; }
         public Flexibowl Flexibowl { get; set; }
         public CameraManager Cameramanager { get; set; }
+        public DigitalTwin DigitalTwin { get; set; } 
 
 
 
@@ -59,6 +60,7 @@ namespace OptiSort
         private bool _statusMqttClient = false;
         private bool _statusCameraManager = false;
         private bool _statusCameraTesting = false;
+        private bool _statusDigitalTwin = false;
         private string _streamingTopic = null;
         private bool _requestScreenshots = false;
 
@@ -71,6 +73,18 @@ namespace OptiSort
                 {
                     _statusScara = value;
                     OnPropertyChanged(nameof(StatusScara));
+                }
+            }
+        }
+        public bool StatusScaraEmulation
+        {
+            get { return _statusScaraEmulation; }
+            set
+            {
+                if (_statusScaraEmulation != value) // setting value different from actual value -> store new value and trigger event
+                {
+                    _statusScaraEmulation = value;
+                    OnPropertyChanged(nameof(StatusScaraEmulation));
                 }
             }
         }
@@ -122,15 +136,15 @@ namespace OptiSort
                 }
             }
         }
-        public bool StatusScaraEmulation
+        public bool StatusDigitalTwin
         {
-            get { return _statusScaraEmulation; }
+            get { return _statusDigitalTwin; }
             set
             {
-                if (_statusScaraEmulation != value) // setting value different from actual value -> store new value and trigger event
+                if (_statusDigitalTwin != value) // setting value different from actual value -> store new value and trigger event
                 {
-                    _statusScaraEmulation = value;
-                    OnPropertyChanged(nameof(StatusScaraEmulation));
+                    _statusDigitalTwin = value;
+                    OnPropertyChanged(nameof(StatusDigitalTwin));
                 }
             }
         }
@@ -234,6 +248,9 @@ namespace OptiSort
 
             // Instance class dedicated to managing cameras
             Cameramanager = new CameraManager(this, frmMain);
+
+            // Instance class dedicated to managing digital twin
+            DigitalTwin = new DigitalTwin(this, MqttClient, Properties.Settings.Default.mqtt_port, Cobra600); 
 
             // Instance class dedicated to running python files
             _activeProcesses = new Dictionary<int, string>();
@@ -545,20 +562,38 @@ namespace OptiSort
             StatusCameraManager = false;
         }
 
+        public void ConnectDigitalTwin()
+        {
+            if (!StatusScara)
+            {
+                NonBlockingMessageBox("Cannot connect to digital twin: SCARA robot is not connected", "Interlock!", MessageBoxIcon.Hand);
+                return;
+            }
+            StatusDigitalTwin = true;
+            DigitalTwin.Start(); 
+        }
+
+        public void DisconnectDigitalTwin()
+        {
+            StatusDigitalTwin = false;
+            DigitalTwin.Stop();
+        }
+
+
 
         #endregion
 
-        // -----------------------------------------------------------------------------------
-        // ---------------------------------- MQTT MANAGEMENT --------------------------------
-        // -----------------------------------------------------------------------------------
+            // -----------------------------------------------------------------------------------
+            // ---------------------------------- MQTT MANAGEMENT --------------------------------
+            // -----------------------------------------------------------------------------------
 
-        #region MQTT
+            #region MQTT
 
-        /// <summary>
-        /// Triggered each time an MQTT arrives
-        /// </summary>
-        /// <param name="topic"></param>
-        /// <param name="message"></param>
+            /// <summary>
+            /// Triggered each time an MQTT arrives
+            /// </summary>
+            /// <param name="topic"></param>
+            /// <param name="message"></param>
         private void OnMessageReceived(string topic, JsonElement message)
         {
             // launch bitmap conversion only if message comes from streaming topics
@@ -669,54 +704,6 @@ namespace OptiSort
             while (_idsQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
             while (_baslerQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
             while (_luxonisQueue.TryDequeue(out _)) { } // Clear the queue (remove all elements)
-        }
-
-
-        public async void ForecastDigitalTwinInfo()
-        {
-            string clientNameDT = "OptisortDT";
-            string mqttPort = Properties.Settings.Default.mqtt_port;
-
-            // TODO: change with regular connnectClient method
-            Task<bool> createClient = MqttClient.CreateClient(clientNameDT, "10.12.238.20", mqttPort);
-
-            if (await createClient)
-            {
-                Log("Digital Twin client created", false, true);
-                SubscribeMqttTopic(clientNameDT, "DT_BROADCAST");
-
-                Thread.Sleep(2000);
-
-                var joints = Cobra600.Motion.GetJointPositions(Cobra600.Robot);
- 
-                var message = new
-                {
-                    sender = "SCARA",
-                    receiver = "IPHYSICS",
-                    command = 10,
-                    payload = new
-                    {
-                        q1 = joints[0],
-                        q2 = joints[1],
-                        q3 = joints[2],
-                        q4 = joints[3]
-                    }
-                };
-   
-                PublishMqttMessage(clientNameDT, "DT_BROADCAST", message);
-
-                Thread.Sleep(2000);
-
-                UnsubscribeMqttTopic(clientNameDT, "DT_BROADCAST");
-
-                Thread.Sleep(2000);
-
-                _ = DisconnectMqttClient(clientNameDT);
-
-            }
-
-
-
         }
 
         #endregion

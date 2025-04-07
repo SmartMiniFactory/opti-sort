@@ -28,10 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.btn_detectionAlgorithm = new System.Windows.Forms.Button();
             this.btn_coordinateCalibration = new System.Windows.Forms.Button();
             this.btn_lensCalibration = new System.Windows.Forms.Button();
-            this.btnTestDTMQTT = new System.Windows.Forms.Button();
             this.btnLight = new System.Windows.Forms.Button();
             this.btnScaraJog = new System.Windows.Forms.Button();
             this.btnFaultReset = new System.Windows.Forms.Button();
@@ -45,19 +43,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // btn_detectionAlgorithm
-            // 
-            this.btn_detectionAlgorithm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn_detectionAlgorithm.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btn_detectionAlgorithm.Location = new System.Drawing.Point(902, 710);
-            this.btn_detectionAlgorithm.Margin = new System.Windows.Forms.Padding(20);
-            this.btn_detectionAlgorithm.Name = "btn_detectionAlgorithm";
-            this.btn_detectionAlgorithm.Size = new System.Drawing.Size(403, 91);
-            this.btn_detectionAlgorithm.TabIndex = 11;
-            this.btn_detectionAlgorithm.Text = "Define detection algorithm";
-            this.btn_detectionAlgorithm.UseVisualStyleBackColor = true;
-            this.btn_detectionAlgorithm.Click += new System.EventHandler(this.btn_detectionAlgorithm_Click);
             // 
             // btn_coordinateCalibration
             // 
@@ -84,19 +69,6 @@
             this.btn_lensCalibration.Text = "Camera lenses";
             this.btn_lensCalibration.UseVisualStyleBackColor = true;
             this.btn_lensCalibration.Click += new System.EventHandler(this.btn_lensCalibration_Click);
-            // 
-            // btnTestDTMQTT
-            // 
-            this.btnTestDTMQTT.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnTestDTMQTT.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btnTestDTMQTT.Location = new System.Drawing.Point(902, 480);
-            this.btnTestDTMQTT.Margin = new System.Windows.Forms.Padding(20);
-            this.btnTestDTMQTT.Name = "btnTestDTMQTT";
-            this.btnTestDTMQTT.Size = new System.Drawing.Size(403, 90);
-            this.btnTestDTMQTT.TabIndex = 13;
-            this.btnTestDTMQTT.Text = "Test DT MQTT";
-            this.btnTestDTMQTT.UseVisualStyleBackColor = true;
-            this.btnTestDTMQTT.Click += new System.EventHandler(this.btnTestDTMQTT_Click);
             // 
             // btnLight
             // 
@@ -211,10 +183,8 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
             this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.btn_detectionAlgorithm, 2, 6);
             this.tableLayoutPanel2.Controls.Add(this.label3, 0, 5);
             this.tableLayoutPanel2.Controls.Add(this.btn_coordinateCalibration, 1, 6);
-            this.tableLayoutPanel2.Controls.Add(this.btnTestDTMQTT, 2, 4);
             this.tableLayoutPanel2.Controls.Add(this.btn_lensCalibration, 0, 6);
             this.tableLayoutPanel2.Controls.Add(this.label2, 0, 3);
             this.tableLayoutPanel2.Controls.Add(this.btnLight, 1, 4);
@@ -288,9 +258,7 @@
         private System.Windows.Forms.Button btnFaultReset;
         private System.Windows.Forms.Button btn_coordinateCalibration;
         private System.Windows.Forms.Button btn_lensCalibration;
-        private System.Windows.Forms.Button btn_detectionAlgorithm;
         private System.Windows.Forms.Button btnLight;
-        private System.Windows.Forms.Button btnTestDTMQTT;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label1;

@@ -142,14 +142,5 @@ namespace OptiSort.userControls
             RefreshButtons();
         }
 
-        private void btnTestDTMQTT_Click(object sender, EventArgs e)
-        {
-            _manager.ForecastDigitalTwinInfo();
-        }
-
-        private void btn_detectionAlgorithm_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }

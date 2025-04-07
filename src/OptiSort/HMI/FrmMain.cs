@@ -153,11 +153,6 @@ namespace OptiSort
             btnConfig.Enabled = true;
             btnConfig.BackgroundImage = Properties.Resources.configDisabled_2x2_pptx;
 
-            btnRun.Enabled = true;
-            btnRun.BackgroundImage = Properties.Resources.playPassivated_2x2_pptx;
-            btnStop.Enabled = false;
-            btnStop.BackgroundImage = Properties.Resources.stopEnabled_2x2_pptx;
-
             if (!ucProcessView.AutomaticProcess)
             {
                 manager.NonBlockingMessageBox("Click the start button to activate automatic process", "Interlock!", MessageBoxIcon.Hand);
@@ -165,21 +160,6 @@ namespace OptiSort
 
         }
 
-        private void btnRun_Click(object sender, EventArgs e)
-        {
-            btnRun.Enabled = false;
-            btnRun.BackgroundImage = Properties.Resources.playEnabled_2x2_pptx;
-            btnStop.Enabled = true;
-            btnStop.BackgroundImage = Properties.Resources.stopPassivated_2x2_pptx;
-        }
-
-        private void btnStop_Click(object sender, EventArgs e)
-        {
-            btnRun.Enabled = true;
-            btnRun.BackgroundImage = Properties.Resources.playPassivated_2x2_pptx;
-            btnStop.Enabled = false;
-            btnStop.BackgroundImage = Properties.Resources.stopEnabled_2x2_pptx;
-        }
 
         private void btnManual_Click(object sender, System.EventArgs e)
         {
@@ -196,10 +176,6 @@ namespace OptiSort
             btnConfig.Enabled = true;
             btnConfig.BackgroundImage = Properties.Resources.configDisabled_2x2_pptx;
 
-            btnRun.Enabled = false;
-            btnRun.BackgroundImage = Properties.Resources.playDisabled_2x2_pptx;
-            btnStop.Enabled = false;
-            btnStop.BackgroundImage = Properties.Resources.stopDisabled_2x2_pptx;
         }
 
         private void btnConfig_Click(object sender, System.EventArgs e)
@@ -217,10 +193,6 @@ namespace OptiSort
             btnConfig.Enabled = false;
             btnConfig.BackgroundImage = Properties.Resources.configEnabled_2x2_pptx;
 
-            btnRun.Enabled = false;
-            btnRun.BackgroundImage = Properties.Resources.playDisabled_2x2_pptx;
-            btnStop.Enabled = false;
-            btnStop.BackgroundImage = Properties.Resources.stopDisabled_2x2_pptx;
         }
 
 
@@ -233,123 +205,132 @@ namespace OptiSort
 
         private void RefreshStatusBar(object sender, PropertyChangedEventArgs e)
         {
-            // Check which property changed and trigger corresponding logic
+            // Update connect/disconnect button states based on statuses
+            UpdateConnectionButtons();
 
-            // connection buttons should be enabled when status is false, disabled when status is true
+            switch (e.PropertyName)
+            {
+                case nameof(manager.StatusScara):
+                    UpdateScaraStatus();
+                    break;
+
+                case nameof(manager.StatusScaraEmulation):
+                    UpdateScaraEmulation();
+                    break;
+
+                case nameof(manager.StatusFlexibowl):
+                    UpdateFlexibowlStatus();
+                    break;
+
+                case nameof(manager.StatusMqttClient):
+                    UpdateMqttStatus();
+                    break;
+
+                case nameof(manager.StatusCameraManager):
+                    UpdateCameraStatus();
+                    break;
+
+                case nameof(manager.StatusCameraTesting):
+                    UpdateCameraTesting();
+                    break;
+
+                case nameof(manager.StatusDigitalTwin):
+                    UpdateDigitalTwin();
+                    break;
+            }
+        }
+
+        private void UpdateConnectionButtons()
+        {
             btnScaraConnect.Enabled = !manager.StatusScara;
             btnEmulateScara.Enabled = !manager.StatusScara;
             btnFlexibowlConnect.Enabled = !manager.StatusFlexibowl;
             btnMqttConnect.Enabled = !manager.StatusMqttClient;
             btnCamerasConnect.Enabled = !manager.StatusCameraManager;
             btnCameraTesting.Enabled = !manager.StatusCameraManager;
+            btnDtConnect.Enabled = !manager.StatusDigitalTwin;
 
-            // disconnection buttons should be enabled when status is true, disabled when status is false
             btnScaraDisconnect.Enabled = manager.StatusScara;
             btnFlexibowlDisconnect.Enabled = manager.StatusFlexibowl;
             btnMqttDisconnect.Enabled = manager.StatusMqttClient;
             btnCamerasDisconnect.Enabled = manager.StatusCameraManager;
+            btnDtDisconnect.Enabled = manager.StatusDigitalTwin;
+        }
 
-            if (e.PropertyName == nameof(manager.StatusScara))
+        private void UpdateScaraStatus()
+        {
+            pbScaraStatus.Image = manager.StatusScara ? Properties.Resources.on_2x2_pptx : Properties.Resources.off_2x2_pptx;
+            btnScaraConnect.BackgroundImage = manager.StatusScara ? Properties.Resources.connectedDisabled_2x2_pptx : Properties.Resources.connectedEnabled_2x2_pptx;
+            btnScaraDisconnect.BackgroundImage = manager.StatusScara ? Properties.Resources.disconnectedEnabled_2x2_pptx : Properties.Resources.disconnectedDisabled_2x2_pptx;
+
+            UpdateScaraEmulation(); // StatusEmulation also affects this
+        }
+
+        private void UpdateScaraEmulation()
+        {
+            if (manager.StatusScara)
             {
-                if (manager.StatusScara == true)
-                {
-                    pbScaraStatus.Image = Properties.Resources.on_2x2_pptx;
-                    btnScaraConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
-                    btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
-                    if (manager.StatusScaraEmulation)
-                        btnEmulateScara.BackgroundImage = Properties.Resources.emulationDisabled_2x2_pptx;
-                    else
-                        btnEmulateScara.BackgroundImage = Properties.Resources.robotDisabled_2x2_pptx;
-
-                }
-                else
-                {
-                    pbScaraStatus.Image = Properties.Resources.off_2x2_pptx;
-                    btnScaraConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
-                    btnScaraDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
-                    if (manager.StatusScaraEmulation)
-                        btnEmulateScara.BackgroundImage = Properties.Resources.emulationEnabled_2x2_pptx;
-                    else
-                        btnEmulateScara.BackgroundImage = Properties.Resources.robotEnabled_2x2_pptx;
-                }
+                btnEmulateScara.BackgroundImage = manager.StatusScaraEmulation
+                    ? Properties.Resources.emulationDisabled_2x2_pptx
+                    : Properties.Resources.robotDisabled_2x2_pptx;
             }
-
-            if (e.PropertyName == nameof(manager.StatusScaraEmulation))
+            else
             {
-                if (manager.StatusScaraEmulation)
-                    btnEmulateScara.BackgroundImage = Properties.Resources.emulationEnabled_2x2_pptx;
-
-                else
-                    btnEmulateScara.BackgroundImage = Properties.Resources.robotEnabled_2x2_pptx;
-            }
-
-
-
-            if (e.PropertyName == nameof(manager.StatusFlexibowl))
-            {
-                if (manager.StatusFlexibowl == true)
-                {
-                    pbFlexibowlStatus.Image = Properties.Resources.on_2x2_pptx;
-                    btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
-                    btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
-                }
-                else
-                {
-                    pbFlexibowlStatus.Image = Properties.Resources.off_2x2_pptx;
-                    btnFlexibowlConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
-                    btnFlexibowlDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
-                }
-            }
-
-            if (e.PropertyName == nameof(manager.StatusMqttClient))
-            {
-                if (manager.StatusMqttClient == true)
-                {
-                    pbMqttStatus.Image = Properties.Resources.on_2x2_pptx;
-                    btnMqttConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
-                    btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
-                }
-                else
-                {
-                    pbMqttStatus.Image = Properties.Resources.off_2x2_pptx;
-                    btnMqttConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
-                    btnMqttDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
-                }
-            }
-
-            if (e.PropertyName == nameof(manager.StatusCameraManager))
-            {
-                if (manager.StatusCameraManager == true)
-                {
-                    pbCameraStatus.Image = Properties.Resources.on_2x2_pptx;
-                    btnCamerasConnect.BackgroundImage = Properties.Resources.connectedDisabled_2x2_pptx;
-                    btnCamerasDisconnect.BackgroundImage = Properties.Resources.disconnectedEnabled_2x2_pptx;
-                    if (manager.StatusCameraTesting)
-                        btnCameraTesting.BackgroundImage = Properties.Resources.webcamDisabled_2x2_pptx;
-                    else
-                        btnCameraTesting.BackgroundImage = Properties.Resources.camerasDisabled_2x2_pptx;
-                }
-                else
-                {
-                    pbCameraStatus.Image = Properties.Resources.off_2x2_pptx;
-                    btnCamerasConnect.BackgroundImage = Properties.Resources.connectedEnabled_2x2_pptx;
-                    btnCamerasDisconnect.BackgroundImage = Properties.Resources.disconnectedDisabled_2x2_pptx;
-                    if (manager.StatusCameraTesting)
-                        btnCameraTesting.BackgroundImage = Properties.Resources.webcamEnabled_2x2_pptx;
-                    else
-                        btnCameraTesting.BackgroundImage = Properties.Resources.camerasEnabled_2x2_pptx;
-                }
-            }
-
-            if (e.PropertyName == nameof(manager.StatusCameraTesting))
-            {
-                if (manager.StatusCameraTesting)
-                    btnCameraTesting.BackgroundImage = Properties.Resources.webcamEnabled_2x2_pptx;
-
-                else
-                    btnCameraTesting.BackgroundImage = Properties.Resources.camerasEnabled_2x2_pptx;
+                btnEmulateScara.BackgroundImage = manager.StatusScaraEmulation
+                    ? Properties.Resources.emulationEnabled_2x2_pptx
+                    : Properties.Resources.robotEnabled_2x2_pptx;
             }
         }
+
+        private void UpdateFlexibowlStatus()
+        {
+            pbFlexibowlStatus.Image = manager.StatusFlexibowl ? Properties.Resources.on_2x2_pptx : Properties.Resources.off_2x2_pptx;
+            btnFlexibowlConnect.BackgroundImage = manager.StatusFlexibowl ? Properties.Resources.connectedDisabled_2x2_pptx : Properties.Resources.connectedEnabled_2x2_pptx;
+            btnFlexibowlDisconnect.BackgroundImage = manager.StatusFlexibowl ? Properties.Resources.disconnectedEnabled_2x2_pptx : Properties.Resources.disconnectedDisabled_2x2_pptx;
+        }
+
+        private void UpdateMqttStatus()
+        {
+            pbMqttStatus.Image = manager.StatusMqttClient ? Properties.Resources.on_2x2_pptx : Properties.Resources.off_2x2_pptx;
+            btnMqttConnect.BackgroundImage = manager.StatusMqttClient ? Properties.Resources.connectedDisabled_2x2_pptx : Properties.Resources.connectedEnabled_2x2_pptx;
+            btnMqttDisconnect.BackgroundImage = manager.StatusMqttClient ? Properties.Resources.disconnectedEnabled_2x2_pptx : Properties.Resources.disconnectedDisabled_2x2_pptx;
+        }
+
+        private void UpdateCameraStatus()
+        {
+            pbCameraStatus.Image = manager.StatusCameraManager ? Properties.Resources.on_2x2_pptx : Properties.Resources.off_2x2_pptx;
+            btnCamerasConnect.BackgroundImage = manager.StatusCameraManager ? Properties.Resources.connectedDisabled_2x2_pptx : Properties.Resources.connectedEnabled_2x2_pptx;
+            btnCamerasDisconnect.BackgroundImage = manager.StatusCameraManager ? Properties.Resources.disconnectedEnabled_2x2_pptx : Properties.Resources.disconnectedDisabled_2x2_pptx;
+
+            UpdateCameraTesting(); // StatusCameraTesting also affects this
+        }
+
+        private void UpdateCameraTesting()
+        {
+            if (manager.StatusCameraManager)
+            {
+                btnCameraTesting.BackgroundImage = manager.StatusCameraTesting
+                    ? Properties.Resources.webcamDisabled_2x2_pptx
+                    : Properties.Resources.camerasDisabled_2x2_pptx;
+            }
+            else
+            {
+                btnCameraTesting.BackgroundImage = manager.StatusCameraTesting
+                    ? Properties.Resources.webcamEnabled_2x2_pptx
+                    : Properties.Resources.camerasEnabled_2x2_pptx;
+            }
+        }
+
+        private void UpdateDigitalTwin()
+        {
+            pbDtStatus.Image = manager.StatusDigitalTwin ? Properties.Resources.on_2x2_pptx : Properties.Resources.off_2x2_pptx;
+            btnDtConnect.BackgroundImage = manager.StatusDigitalTwin ? Properties.Resources.connectedDisabled_2x2_pptx : Properties.Resources.connectedEnabled_2x2_pptx;
+            btnDtDisconnect.BackgroundImage = manager.StatusDigitalTwin ? Properties.Resources.disconnectedEnabled_2x2_pptx : Properties.Resources.disconnectedDisabled_2x2_pptx;
+        }
+
+        // -----------------------------------------------------------------------------------
+        // ---------------------------------- CONNECTIONS ------------------------------------
+        // -----------------------------------------------------------------------------------
 
         private void btnScaraConnect_Click(object sender, EventArgs e)
         {
@@ -428,6 +409,16 @@ namespace OptiSort
             manager.DisconnectCameras();
         }
 
+        private void btnDtConnect_Click(object sender, EventArgs e)
+        {
+            manager.ConnectDigitalTwin();
+        }
+
+        private void btnDtDisconnect_Click(object sender, EventArgs e)
+        {
+            manager.DisconnectDigitalTwin();
+        }
+
         // -----------------------------------------------------------------------------------
         // ------------------------------- CAMERA STREAM -------------------------------------
         // -----------------------------------------------------------------------------------
@@ -483,5 +474,6 @@ namespace OptiSort
             MessageBox.Show(message, title, MessageBoxButtons.OK, icon);
         }
 
+        
     }
 }

@@ -31,5 +31,10 @@ namespace OptiSort.userControls
         {
             
         }
+
+        private void btn_start_Click(object sender, System.EventArgs e)
+        {
+
+        }
     }
 }
