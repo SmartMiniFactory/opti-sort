@@ -26,7 +26,7 @@ namespace OptiSort.Classes
                 return 0;
             }
 
-            string pythonExe = LocatePythonInterpreter();
+            string pythonExe = LocatePythonInterpreter(scriptPath);
             if (string.IsNullOrEmpty(pythonExe))
             {
                 OnErrorReceived?.Invoke("Python interpreter not found.");
@@ -98,10 +98,10 @@ namespace OptiSort.Classes
             }
         }
 
-        private string LocatePythonInterpreter()
+        private string LocatePythonInterpreter(string scriptPath)
         {
             // Check if we're inside a virtual environment
-            string venvInterpreter = GetVenvInterpreter();
+            string venvInterpreter = GetVenvInterpreter(scriptPath);
             if (!string.IsNullOrEmpty(venvInterpreter))
             {
                 return venvInterpreter; // Return venv Python interpreter if inside a venv
@@ -139,14 +139,29 @@ namespace OptiSort.Classes
             return null;
         }
 
-        
-        private string GetVenvInterpreter()
+
+        private string GetVenvInterpreter(string scriptPath)
         {
             string venvPath = Environment.GetEnvironmentVariable("VIRTUAL_ENV");
-            if (!string.IsNullOrEmpty(venvPath))
+            if (string.IsNullOrEmpty(venvPath))
             {
-                return Path.Combine(venvPath, "Scripts", "python.exe"); // If in a venv, return the Python interpreter from the venv's 'Scripts' directory
+                // Check if the script path is within a venv directory structure
+                string scriptDirectory = Path.GetDirectoryName(scriptPath);
+                if (scriptDirectory != null && scriptDirectory.Contains("venv"))
+                {
+                    string venvInterpreterPath = Path.Combine(scriptDirectory, "Scripts", "python.exe");
+                    if (File.Exists(venvInterpreterPath))
+                    {
+                        return venvInterpreterPath; // Return venv Python interpreter if found
+                    }
+                }
             }
+            else
+            {
+                // If already in a venv, return its interpreter path
+                return Path.Combine(venvPath, "Scripts", "python.exe");
+            }
+
             return null;
         }
 
