@@ -26,9 +26,12 @@ B. Follow the Installation guide
 
 ## A. Install OptiSort Virtual Machine
 
-1. Install VirtualBox: https://www.virtualbox.org/
-2. Download OptiSort VM (.vdi file) from the SMF's onedrive (you will need to request access): ...
-3. You will find login credentials inside the SMF's onedrive folder
+1. Install VirtualBox on your host PC: https://www.virtualbox.org/
+2. Download OptiSort VM (.vbox & -vdi file) from the SMF's OneDrive (you must request access); you will find login credentials inside the SMF's OneDrive folder
+3. Move the files to a folder where they will remain permanently
+4. Open Virtual Box > Add > Select .vbox file
+5. Ensure your host PC has a network card/adapter set in the workstation's local network (you should probably set a static IP address)
+6. In the VM settings > network, make sure "bridged adapter" is selected and set to the correct network card (host PC)
 
 ### Description of the VM environment
 All the software required for the OptiSort system is already installed and prepared for you to use. Software types:
@@ -38,7 +41,7 @@ All the software required for the OptiSort system is already installed and prepa
 - Cameras (IDS cockpits, Basler cockpits, Luxonis packages, SDKs, ...): used to connect or parameterize cameras
 - MQTT (background broker, MQTTX): needed for internal or external message exchange or development supervision
 
-The document folder contains all the installers used for the virtual machine in case you might need to replicate installations somewhere else. On the desktop, you will find a folder called "OptiSort_project", which contains the source code (this repository cloned). Remember to pull the last version of the right branch before modifying something.
+The document folder contains all the installers used for the virtual machine in case you might need to replicate installations somewhere else. On the desktop, you will find a folder called "OptiSort_project", which contains the source code (this repository cloned). Please remember to pull the last version of the right branch before you modify something.
 
 ## B. Install Optisort System Manually
 
