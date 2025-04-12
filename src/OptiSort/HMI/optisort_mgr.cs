@@ -1,5 +1,4 @@
 ﻿using Ace.Core.Util;
-using Ace.UIBuilder.Client.Controls.Tools.WindowsForms;
 using FlexibowlLibrary;
 using OptiSort.Classes;
 using OptiSort.systems;
@@ -12,10 +11,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Security;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -27,6 +22,8 @@ namespace OptiSort
 
     internal class optisort_mgr : INotifyPropertyChanged
     {
+
+        #region declarations
 
         private frmMain _frmMain;
 
@@ -218,9 +215,13 @@ namespace OptiSort
         public event Action<string, string, MessageBoxIcon> MessageBoxEvent; // Event to notify subscribers
 
 
+        #endregion
+
         // -----------------------------------------------------------------------------------
         // ---------------------------------- CONSTRUCTOR -------------------------------------
         // -----------------------------------------------------------------------------------
+
+        #region constructor
 
         public optisort_mgr(frmMain frmMain)
         {
@@ -258,8 +259,6 @@ namespace OptiSort
 
         }
 
-
-
         private void OnPropertyUpdate(object sender, PropertyChangedEventArgs e)
         {
             // This method is triggered anytime one of the properties defined under "status" gets updated
@@ -277,6 +276,8 @@ namespace OptiSort
         {
             NewUserControlRequested?.Invoke(uc);
         }
+
+        #endregion
 
         // -----------------------------------------------------------------------------------
         // ---------------------------------- SUBSYSTEMS -------------------------------------
@@ -583,11 +584,11 @@ namespace OptiSort
 
         #endregion
 
-            // -----------------------------------------------------------------------------------
-            // ---------------------------------- MQTT MANAGEMENT --------------------------------
-            // -----------------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------------
+        // ---------------------------------- MQTT MANAGEMENT --------------------------------
+        // -----------------------------------------------------------------------------------
 
-            #region MQTT
+        #region MQTT
 
             /// <summary>
             /// Triggered each time an MQTT arrives
@@ -942,6 +943,8 @@ namespace OptiSort
         // ------------------------------------- LOG -------------------------------------
         // -----------------------------------------------------------------------------------
 
+        #region log
+        
         /// <summary>
         /// Can be called by any user control to log things inside the listbox in the frmain, which is invoked by this
         /// </summary>
@@ -967,6 +970,7 @@ namespace OptiSort
             MessageBoxEvent?.Invoke(text, title, icon);
         }
 
+        #endregion
 
         // -----------------------------------------------------------------------------------
         // ------------------------------------- PYTHON -------------------------------------

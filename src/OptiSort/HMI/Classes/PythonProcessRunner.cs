@@ -100,7 +100,14 @@ namespace OptiSort.Classes
 
         private string LocatePythonInterpreter()
         {
-            // Attempt to find Python in the PATH
+            // Check if we're inside a virtual environment
+            string venvInterpreter = GetVenvInterpreter();
+            if (!string.IsNullOrEmpty(venvInterpreter))
+            {
+                return venvInterpreter; // Return venv Python interpreter if inside a venv
+            }
+
+            // If not in a venv, attempt to find global Python in the PATH
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = "cmd.exe",
@@ -128,8 +135,20 @@ namespace OptiSort.Classes
                 // Ignore errors and fall back to alternative methods
             }
 
-            OnErrorReceived?.Invoke("Python interpreted not found; Double check installation and PATH configuration");
+            OnErrorReceived?.Invoke("Python interpreter not found; Double check installation and PATH configuration");
             return null;
         }
+
+        
+        private string GetVenvInterpreter()
+        {
+            string venvPath = Environment.GetEnvironmentVariable("VIRTUAL_ENV");
+            if (!string.IsNullOrEmpty(venvPath))
+            {
+                return Path.Combine(venvPath, "Scripts", "python.exe"); // If in a venv, return the Python interpreter from the venv's 'Scripts' directory
+            }
+            return null;
+        }
+
     }
 }
