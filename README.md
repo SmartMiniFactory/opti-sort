@@ -34,7 +34,9 @@ B. Follow the Installation guide
 6. In the VM settings > network, make sure "bridged adapter" is selected and set to the correct network card (host PC)
 7. If you need internet access in the VM, you need to set up a NAT network (the VM can access the internet via the host PC, but the internet cannot reach the VM). Steps 8-9:
 8. In VirtualBox > file > tools > Network Manager > NAT networks > add > leave defautls and take note of the NAT name
-9. Select the optisort VM > settings > network > adapter 2 > NAT network > select the NAT network just created 
+9. Select the optisort VM > settings > network > adapter 2 > NAT network > select the NAT network just created
+
+If you encounter any troubles using the VM, try following the manual OptiSort installation (B) to try to fix eventual issues.
 
 ### Description of the VM environment
 All the software required for the OptiSort system is already installed and prepared for you to use. Software types:
