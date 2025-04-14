@@ -183,6 +183,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\DigitalTwin.cs" />
+    <Compile Include="Classes\PerformanceReport.cs" />
     <Compile Include="Classes\PythonProcessRunner.cs" />
     <Compile Include="Classes\Watchdog.cs" />
     <Compile Include="optisort_mgr.cs" />
