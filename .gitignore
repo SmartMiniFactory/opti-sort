@@ -468,3 +468,5 @@ FodyWeavers.xsd
 # But don't ignore the Temp folder itself
 !/src/OptiSort/HMI/Temp/
 
+/src/python/.idea/inspectionProfiles
+/src/python/.idea

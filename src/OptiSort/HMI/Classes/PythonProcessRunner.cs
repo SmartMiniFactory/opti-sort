@@ -104,6 +104,7 @@ namespace OptiSort.Classes
             string venvInterpreter = GetVenvInterpreter(scriptPath);
             if (!string.IsNullOrEmpty(venvInterpreter))
             {
+                Console.WriteLine($"Using venv interpreter: {venvInterpreter}"); // Debugging
                 return venvInterpreter; // Return venv Python interpreter if inside a venv
             }
 
@@ -126,6 +127,7 @@ namespace OptiSort.Classes
                     string output = process.StandardOutput.ReadToEnd();
                     if (!string.IsNullOrWhiteSpace(output) && output.Contains("Python"))
                     {
+                        Console.WriteLine($"Using global Python interpreter: {output}"); // Debugging
                         return "python"; // Python was found in the PATH
                     }
                 }
@@ -142,28 +144,38 @@ namespace OptiSort.Classes
 
         private string GetVenvInterpreter(string scriptPath)
         {
-            string venvPath = Environment.GetEnvironmentVariable("VIRTUAL_ENV");
-            if (string.IsNullOrEmpty(venvPath))
+            string venvEnv = Environment.GetEnvironmentVariable("VIRTUAL_ENV");
+            if (!string.IsNullOrEmpty(venvEnv))
             {
-                // Check if the script path is within a venv directory structure
-                string scriptDirectory = Path.GetDirectoryName(scriptPath);
-                if (scriptDirectory != null && scriptDirectory.Contains("venv"))
-                {
-                    string venvInterpreterPath = Path.Combine(scriptDirectory, "Scripts", "python.exe");
-                    if (File.Exists(venvInterpreterPath))
-                    {
-                        return venvInterpreterPath; // Return venv Python interpreter if found
-                    }
-                }
-            }
-            else
-            {
-                // If already in a venv, return its interpreter path
-                return Path.Combine(venvPath, "Scripts", "python.exe");
+                string interpreter = Path.Combine(venvEnv, "Scripts", "python.exe");
+                if (File.Exists(interpreter))
+                    return interpreter;
             }
 
+            string[] venvFolderNames = new[] { ".venv", "venv", "env" };
+            DirectoryInfo currentDir = new DirectoryInfo(Path.GetDirectoryName(scriptPath));
+
+            while (currentDir != null)
+            {
+                // Stop at the root "python" folder
+                if (currentDir.Name.Equals("python", StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (var name in venvFolderNames)
+                    {
+                        string candidate = Path.Combine(currentDir.FullName, name, "Scripts", "python.exe");
+                        if (File.Exists(candidate))
+                        {
+                            return candidate;
+                        }
+                    }
+
+                    break;
+                }
+                currentDir = currentDir.Parent;
+            }
             return null;
         }
+
 
     }
 }
