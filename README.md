@@ -74,7 +74,7 @@ Open Visual Studio and clone (```https://github.com/SmartMiniFactory/opti-sort.g
 4. Search for the local folder where you cloned this directory, and find src>python
 5. Select the python folder as project folder
 6. When PyCharm asks to install git, accept the package installation
-7. PyCharm will detect a requirements.txt file indicating which dependancies and versions need to be installed and will ask to create a virtual environment (venv); accept it and ensure the interpreter, requirement, and venv are correctly detected/set:
+7. PyCharm will detect a requirements.txt file indicating which dependancies and versions need to be installed and will ask to create a virtual environment (venv); choose this carefully considering [issue #69](https://github.com/SmartMiniFactory/opti-sort/issues/69)
 
 <img width="455" alt="image" src="https://github.com/user-attachments/assets/d3464641-75ca-4748-91b4-16ce54cd6d8d" />
 
