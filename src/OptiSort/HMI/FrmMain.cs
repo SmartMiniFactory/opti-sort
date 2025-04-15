@@ -153,11 +153,6 @@ namespace OptiSort
             btnConfig.Enabled = true;
             btnConfig.BackgroundImage = Properties.Resources.configDisabled_2x2_pptx;
 
-            if (!ucProcessView.AutomaticProcess)
-            {
-                manager.NonBlockingMessageBox("Click the start button to activate automatic process", "Interlock!", MessageBoxIcon.Hand);
-            }
-
         }
 
 

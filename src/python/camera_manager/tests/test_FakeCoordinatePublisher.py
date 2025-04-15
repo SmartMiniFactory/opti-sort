@@ -6,21 +6,43 @@ import paho.mqtt.client as mqtt
 import keyboard
 import time
 import json
+import os
+import pathlib
 
-# Define MQTT broker details
-broker_address = "localhost"
-broker_port = 1883
 
-# Define topic and message
-topic = "optisort/scara/target"
+# Get script details and localization
+script_dir = pathlib.Path(__file__).parent.resolve()
+script_name = pathlib.Path(__file__).name
+temp_folder = script_dir / "../../OptiSort/HMI/Temp"
+config_folder = script_dir / "../../OptiSort/HMI/Config"
+script_id = str(os.getpid())
+
+# MQTT SETTINGS
+broker = '127.0.0.1'
+port = 1883
+client_name = 'fake_process'
+MQTT_KEEPALIVE_INTERVAL = 60
+mqttc = mqtt.Client()  # Initiate MQTT Client
+
+def publish(message, result):
+
+    global script_dir
+    payload = {
+        "script": {
+            "path": (script_dir / script_name).as_posix(),
+            "PID": script_id
+        },
+        "message": message
+    }
+    if result is not None:
+        payload["result"] = result
+
+    mqttc.publish('optisort/scara/target', str(json.dumps(payload)), qos=0)
+
 message = [300.07, -0.959, 302.12, 0.0, 180.0, 180.0]
 
-
-# Create MQTT client
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
-
 # Connect to MQTT broker
-client.connect(broker_address, broker_port)
+mqttc.connect(broker, port, MQTT_KEEPALIVE_INTERVAL)  # Connect with MQTT Broker
 print("Connected to MQTT broker")
 print("Press 'q' to quit")
 
@@ -37,7 +59,7 @@ def create_message(values):
         "ry": values[4],
         "rz": values[5]
     }
-    return json.dumps(message_dict)
+    return message_dict
 
 
 while True:
@@ -59,7 +81,7 @@ while True:
     json_message = create_message(message)
 
     # Publish message to topic
-    client.publish(topic, str(json_message))
+    publish(json_message, None)
     print("Message sent: ")
 
     time.sleep(1)
@@ -69,4 +91,4 @@ while True:
         break
 
 # Disconnect from MQTT broker
-client.disconnect()
+mqttc.disconnect()

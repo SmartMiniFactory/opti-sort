@@ -11,7 +11,7 @@ namespace OptiSort.userControls
         public bool AutomaticProcess { get; set; }
 
         private optisort_mgr _manager;
-        private ucScaraTargets _ucScaraTargets;
+        private ucScaraTargets ScaraTargets;
         private PerformanceReport _report;
 
         internal ucProcessView(optisort_mgr manager)
@@ -20,13 +20,11 @@ namespace OptiSort.userControls
             _manager = manager;
 
             // init scara dgv
-            _ucScaraTargets = new ucScaraTargets(_manager); // using log function
-            _ucScaraTargets.Dock = DockStyle.Fill;
-            pnlScara.Controls.Clear();
-            pnlScara.Controls.Add(_ucScaraTargets);
+            ScaraTargets = new ucScaraTargets(_manager); // using log function
+            ScaraTargets.Dock = DockStyle.Fill;
 
-            // TODO: revise this shit
-            _manager.MqttClient.MessageReceived += _ucScaraTargets.OnMessageReceived; // enable MQTT messages to trigger the user control
+            pnlScara.Controls.Clear();
+            pnlScara.Controls.Add(ScaraTargets);
 
             RefreshControls();
 
@@ -37,9 +35,42 @@ namespace OptiSort.userControls
             
         }
 
+        private void OnMessageReceived(string topic, JsonElement message)
+        {
+            if (topic == Properties.Settings.Default.mqtt_topic_scaraTarget)
+                ScaraTargets.UpdateTargetTable(message);
+
+            else if (topic == "PythonResultOrSomething...")
+            {
+                _manager.MqttClient.MessageReceived -= OnMessageReceived;
+                CompleteProcess(message);
+            }
+        }
+
 
         private void btn_start_Click(object sender, System.EventArgs e)
         {
+            if (!_manager.StatusScara)
+            {
+                _manager.NonBlockingMessageBox("Please connect SCARA to start automatic proces", "Interlock!", MessageBoxIcon.Hand);
+                return;
+            }
+
+            if (!_manager.StatusFlexibowl)
+            {
+                _manager.NonBlockingMessageBox("Please connect FLEXIBOWL to start automatic proces", "Interlock!", MessageBoxIcon.Hand);
+                return;
+            }
+
+            if (!_manager.StatusMqttClient)
+            {
+                _manager.NonBlockingMessageBox("Please connect CAMERA MANAGER to start automatic proces", "Interlock!", MessageBoxIcon.Hand);
+                return;
+            }
+
+            _manager.SubscribeMqttTopic(Properties.Settings.Default.mqtt_client, Properties.Settings.Default.mqtt_topic_scaraTarget);
+            _manager.MqttClient.MessageReceived += OnMessageReceived;
+
             _report = new PerformanceReport(cameraId: "luxonis_01", initTimeMs: 98);
             _manager.Log("Automatic process started...");
         }

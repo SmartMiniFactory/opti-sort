@@ -13,9 +13,7 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            // unsubscribe mqtt messages triggers
-            _manager.MqttClient.MessageReceived -= _ucScaraTargets.OnMessageReceived;
-
+            
             if (disposing && (components != null))
             {
                 components.Dispose();
