@@ -1,11 +1,11 @@
-﻿using MQTTnet.Protocol;
+﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net.Http;
+using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Timers;
+using WebSocketSharp;
 
 namespace OptiSort.Classes
 {
@@ -13,25 +13,39 @@ namespace OptiSort.Classes
     {
         private optisort_mgr _manager;
         private Thread _digitalTwinThread;
-        private MQTT _mqttClient;
-        private string _clientId = "OptisortDT";
-        private string _broker = "10.12.238.20";
-        private string _mqttTopic = "DT_BROADCAST";
-        private string _mqttPort;
         private Cobra600 _scaraRobot;
         private System.Timers.Timer _timer;
 
-        public DigitalTwin(optisort_mgr manager, MQTT mqttClient, string mqttPort, Cobra600 scaraRobot)
+        private WebSocketSharp.WebSocket ws;
+
+        public DigitalTwin(optisort_mgr manager, Cobra600 scaraRobot)
         {
             _manager = manager;
-
-            _mqttPort = mqttPort;
-            _mqttClient = mqttClient ?? throw new ArgumentNullException(nameof(mqttClient));
             _scaraRobot = scaraRobot ?? throw new ArgumentNullException(nameof(scaraRobot));
 
             _timer = new System.Timers.Timer(100); // publish each 0.1 seconds
             _timer.Elapsed += OnTimerElapsed;
             _timer.AutoReset = true;
+
+            ConnectWebSocket();
+        }
+
+
+        private void ConnectWebSocket()
+        {
+            ws = new WebSocketSharp.WebSocket("ws://192.168.10.145:8180");
+
+            ws.OnOpen += (s, e) =>
+            {
+                _manager.Log("✅ WebSocket connesso.", false, true);
+            };
+
+            ws.OnError += (s, e) =>
+            {
+                _manager.Log("❌ Errore WebSocket: " + e.Message, true, false);
+            };
+
+            ws.Connect();
         }
 
         public void Start()
@@ -41,38 +55,41 @@ namespace OptiSort.Classes
             _manager.Log("Digital Twin: Thread started", false, true);
         }
 
-        private async void RunDigitalTwin()
+        private void RunDigitalTwin()
         {
-            Task<bool> success = _mqttClient.CreateClient(_clientId, _broker, _mqttPort);
-            if (!await success)
-            {
-                _manager.Log("Digital Twin: MQTT client creation failed", true, false);
-                return;
-            }
             _timer.Start();
         }
 
-        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+        private async void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
 
             var joints = Cobra600.Motion.GetJointPositions(_scaraRobot.Robot);
 
-            var message = new
+            if (ws.ReadyState != WebSocketSharp.WebSocketState.Open)
             {
-                sender = "SCARA",
-                receiver = "IPHYSICS",
-                command = 10,
-                payload = new
-                {
-                    q1 = joints[0],
-                    q2 = joints[1],
-                    q3 = joints[2],
-                    q4 = joints[3]
-                }
-            };
+                _manager.Log("❌ WebSocket non connesso.", true, false);
+                return;
+            }
 
-            _ = _mqttClient.PublishMessage(_clientId, _mqttTopic, message);
+            for (int i = 0; i < 4; i++)
+            {
+                var request = new
+                {
+                    id = 100 + i, // ID univoco per ogni variabile
+                    method = "PUT",
+                    url = $"/io/COBRA 600 CAD MODEL/BASE ASSY-1/tQ{i + 1}",
+                    body = JsonConvert.SerializeObject(new { value = joints[i] }),
+                    headers = new { }
+                };
+
+                string json = JsonConvert.SerializeObject(request);
+                ws.Send(json);
+                _manager.Log($"DT inviato", false, true);
+            }
+
         }
+
+
 
         public void Stop()
         {
@@ -81,7 +98,6 @@ namespace OptiSort.Classes
             if (_digitalTwinThread.IsAlive)
             {
                 _digitalTwinThread.Join();
-                _ = _mqttClient.DestroyClient(_clientId);
                 _manager.Log("Digital Twin: Thread stopped", false, true);
             }
         }
