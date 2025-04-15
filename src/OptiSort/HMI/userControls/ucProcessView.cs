@@ -105,6 +105,24 @@ namespace OptiSort.userControls
             _report.ExportToJsonl("performance_report.jsonl");
 
             _manager.Log("Performance report saved.");
+
+            sendMessageToMontrac();
+        }
+
+        private void sendMessageToMontrac()
+        {
+            var message = new
+            {
+                sender = "SCARA",
+                receiver = "IPHYSICS",
+                command = 8001,
+                payload = new
+                {
+                    blisterReady = true
+                }
+            };
+
+            //_ = _mqttClient.PublishMessage(_clientId, _mqttTopic, message);
         }
     }
 }
