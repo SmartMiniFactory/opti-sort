@@ -84,7 +84,8 @@ while True:
     publish(json_message, None)
     print("Message sent: ")
 
-    time.sleep(1)
+    a = input("Send?")
+
     # Wait for user input to quit
     if keyboard.is_pressed('q'):
         print("\nqQuitting...")

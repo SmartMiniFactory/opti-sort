@@ -1,4 +1,6 @@
-﻿using OptiSort.Classes;
+﻿using FlexibowlLibrary;
+using OptiSort.Classes;
+using System;
 using System.Text.Json;
 using System.Windows.Forms;
 
@@ -13,6 +15,7 @@ namespace OptiSort.userControls
         private optisort_mgr _manager;
         private ucScaraTargets ScaraTargets;
         private PerformanceReport _report;
+        private Watchdog _watchdog;
 
         internal ucProcessView(optisort_mgr manager)
         {
@@ -25,6 +28,8 @@ namespace OptiSort.userControls
 
             pnlScara.Controls.Clear();
             pnlScara.Controls.Add(ScaraTargets);
+            
+            _watchdog = new Watchdog(5000); // 5 seconds; used to move flexibowl if no objects are detected
 
             RefreshControls();
 
@@ -56,12 +61,6 @@ namespace OptiSort.userControls
                 return;
             }
 
-            if (!_manager.StatusFlexibowl)
-            {
-                _manager.NonBlockingMessageBox("Please connect FLEXIBOWL to start automatic proces", "Interlock!", MessageBoxIcon.Hand);
-                return;
-            }
-
             if (!_manager.StatusMqttClient)
             {
                 _manager.NonBlockingMessageBox("Please connect CAMERA MANAGER to start automatic proces", "Interlock!", MessageBoxIcon.Hand);
@@ -71,8 +70,26 @@ namespace OptiSort.userControls
             _manager.SubscribeMqttTopic(Properties.Settings.Default.mqtt_client, Properties.Settings.Default.mqtt_topic_scaraTarget);
             _manager.MqttClient.MessageReceived += OnMessageReceived;
 
-            _report = new PerformanceReport(cameraId: "luxonis_01", initTimeMs: 98);
+            _watchdog.Start();
+            _watchdog.Elapsed += MoveFlexibowl;
+
+            ScaraTargets.ObjectDetected += ResetWatchdog;
+
+            //_report = new PerformanceReport(cameraId: "luxonis_01", initTimeMs: 98);
             _manager.Log("Automatic process started...");
+        }
+
+        private void MoveFlexibowl(object sender, EventArgs e)
+        {
+            _manager.Log("Flexibowl moving forward due to unrecognition...");
+            // Flexibowl.Move.Forward();
+            ResetWatchdog();
+        }
+
+        private void ResetWatchdog()
+        {
+            _manager.Log("Watchdog reset.");
+            _watchdog.Reset();
         }
 
         private void CountPieceLoading()

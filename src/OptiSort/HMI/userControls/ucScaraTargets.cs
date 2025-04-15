@@ -29,7 +29,9 @@ namespace OptiSort
         static bool _robotIsMoving = false;
         private Transform3D _lastTarget = new Transform3D(0, 0, 0, 0, 0, 0);
         private BindingList<Transform3D> _targetQueueList;
-        private int _backlog = 0;
+        public int Backlog { get; private set; } = 0;
+
+        public event Action ObjectDetected;
 
         internal ucScaraTargets(optisort_mgr manager)
         {
@@ -83,7 +85,8 @@ namespace OptiSort
             Transform3D row = new Transform3D(x, y, z, yaw, pitch, roll);
             AddLocRow(row);
 
-            _backlog++;
+            Backlog++;
+            ObjectDetected?.Invoke();
         }
 
         private void AddLocRow(Transform3D row)
