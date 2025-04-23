@@ -38,7 +38,7 @@ manip.initialConfig.setCropRect(0.3,0.1,0.7,0.9)
 manip.initialConfig.setResize(800, 800)  # Resize after cropping
 manip.setMaxOutputFrameSize(800 * 800 * 3)  # Assuming max square crop is 800x800
 manip.setKeepAspectRatio(False)
-manip.initialConfig.setFrameType(dai.ImgFrame.Type.GRAY8)  # Convert to greyscale
+#manip.initialConfig.setFrameType(dai.ImgFrame.Type.GRAY8)  # Convert to greyscale
 
 # Create node connections
 configIn = pipeline.create(dai.node.XLinkIn)

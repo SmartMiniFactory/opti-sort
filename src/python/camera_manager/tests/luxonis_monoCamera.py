@@ -42,6 +42,8 @@ with dai.Device(pipeline) as device:
     qLeft = device.getOutputQueue(name="monoLeft", maxSize=4, blocking=False)
     qRight = device.getOutputQueue(name="monoRight", maxSize=4, blocking=False)
 
+    print(f'{device.getDeviceInfo()}')
+
     while True:
         if qLeft.has():
             cv2.imshow("LLLLLLEFTT", qLeft.get().getCvFrame())
