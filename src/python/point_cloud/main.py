@@ -1,18 +1,31 @@
 from python.camera_manager.cameras.basler import Basler
+from python.camera_manager.cameras.ids import Ids
+from python.camera_manager.cameras.luxonis import Luxonis
 from machine_vision import OptiSortVision
 import cv2
 
 
 mv = OptiSortVision()
-camera = Basler(camera_id="basler")
-camera.initialize()
-camera.acquisition_start()
+#basler = Basler(camera_id="basler")
+#basler.initialize()
+#basler.acquisition_start()
 
-while True:
-    image = camera.capture_frame()
-    mv.get_flexibowl_centre(image)
+ids = Ids(camera_id="ids")
+ids.initialize()
+#ids.acquisition_start()
 
-    if cv2.waitKey(1) == ord('q'):
-        break
+#luxonis = Luxonis(camera_id="luxonis")
+#luxonis.initialize()
 
-camera.acquisition_stop()
+try:
+    while True:
+        image = ids.capture_frame()
+        mg_array = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        mv.get_centre(mg_array)
+
+        if cv2.waitKey(1) == ord('q'):
+            break
+
+    ids.acquisition_stop()
+except:
+    ids.acquisition_stop()
