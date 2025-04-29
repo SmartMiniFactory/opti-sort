@@ -45,7 +45,7 @@ namespace OptiSort.Classes
                 _manager.Log("❌ Errore WebSocket: " + e.Message, true, false);
             };
 
-            ws.Connect();
+            ThreadPool.QueueUserWorkItem(_ => ws.Connect());
         }
 
         public void Start()

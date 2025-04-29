@@ -251,7 +251,7 @@ namespace OptiSort
             Cameramanager = new CameraManager(this, frmMain);
 
             // Instance class dedicated to managing digital twin
-            DigitalTwin = new DigitalTwin(this, MqttClient, Properties.Settings.Default.mqtt_port, Cobra600); 
+            DigitalTwin = new DigitalTwin(this, Cobra600); 
 
             // Instance class dedicated to running python files
             _activeProcesses = new Dictionary<int, string>();
