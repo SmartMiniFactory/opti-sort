@@ -1,5 +1,5 @@
 # {05D8C294-F295-4dfb-9D01-096BD04049F4}
-# GenApi persistence file (version 3.0.1)
+# GenApi persistence file (version 3.1.0)
 # Device = Basler::GigECamera -- Basler generic GigEVision camera interface -- Device version = 3.1.10 -- Product GUID = 1F3C6A72-7842-4edd-9130-E2E90A2058BA -- Product version GUID = DAF8CAB9-9BCA-4EB2-B476-BCDA071B355B
 SequenceSetTotalNumber	2
 SequenceSetIndex	0
@@ -30,17 +30,17 @@ TriggerSelector	AcquisitionStart
 TriggerMode	Off
 TriggerSelector	FrameStart
 TriggerMode	Off
-TriggerControlImplementation	Legacy
+TriggerControlImplementation	Standard
 TriggerSelector	AcquisitionStart
 TriggerControlImplementation	Legacy
 TriggerSelector	AcquisitionStart
 TriggerSource	Line1
 TriggerControlImplementation	Standard
 TriggerSelector	AcquisitionStart
-TriggerSource	Line2
+TriggerSource	Software
 TriggerSelector	FrameStart
 TriggerSource	Line1
-TriggerControlImplementation	Legacy
+TriggerControlImplementation	Standard
 TriggerSelector	AcquisitionStart
 TriggerControlImplementation	Legacy
 TriggerSelector	AcquisitionStart
@@ -50,7 +50,7 @@ TriggerSelector	AcquisitionStart
 TriggerActivation	RisingEdge
 TriggerSelector	FrameStart
 TriggerActivation	RisingEdge
-TriggerControlImplementation	Legacy
+TriggerControlImplementation	Standard
 TriggerSelector	AcquisitionStart
 TriggerControlImplementation	Legacy
 TriggerSelector	AcquisitionStart
@@ -60,11 +60,11 @@ TriggerSelector	AcquisitionStart
 TriggerDelayAbs	0
 TriggerSelector	FrameStart
 TriggerDelayAbs	0
-TriggerControlImplementation	Legacy
+TriggerControlImplementation	Standard
 TriggerSelector	AcquisitionStart
 ExposureMode	Timed
 ExposureAuto	Off
-ExposureTimeRaw	3604
+ExposureTimeRaw	1994
 AcquisitionFrameRateEnable	1
 AcquisitionFrameRateAbs	25
 LineSelector	Line1
