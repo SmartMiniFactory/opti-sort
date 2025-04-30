@@ -100,6 +100,10 @@ namespace OptiSort.userControls
                 if (!_robotIsMoving && ScaraTargets.Backlog > 0) // prevent simultanous picking (physically impossible)
                 {
                     _robotIsMoving = true;
+                    if (_manager.Cobra600.GripperSuctionStatus)
+                    {
+                        _manager.Cobra600.ToggleGripperAction(); // turn off suction
+                    }
 
                     Transform3D _locTarget = ScaraTargets.TargetQueueList[0].Transform; // accessing first element to pick
 
@@ -115,6 +119,7 @@ namespace OptiSort.userControls
                     // pick object safely
                     Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, 20);
                     Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, true);
+                    _manager.Cobra600.ToggleGripperAction(); // turn on suction 
                     Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, 20);
 
                     // move at safe flexibowl position
@@ -128,12 +133,14 @@ namespace OptiSort.userControls
                     {
                         Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxA, 20);
                         Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxA, true);
+                        _manager.Cobra600.ToggleGripperAction(); // turn off suction
                         Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxA, 20);
                     }
                     else if (ScaraTargets.TargetQueueList[0].Component.Contains("Component B"))
                     {
                         Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, 20);
                         Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, true);
+                        _manager.Cobra600.ToggleGripperAction(); // turn off suction
                         Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, 20);
                     }
 
