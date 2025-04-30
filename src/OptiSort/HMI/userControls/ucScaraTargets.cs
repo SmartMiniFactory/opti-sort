@@ -22,11 +22,8 @@ namespace OptiSort
     {
         private optisort_mgr _manager;
 
-        Thread _thDefineLocation;
         static Thread _thReachLocation;
         bool _stop = false;
-        bool _msgReady = false;
-        string _msgReceived = string.Empty;
         static bool _robotIsMoving = false;
         private Transform3D _lastTarget = new Transform3D(0, 0, 0, 0, 0, 0);
         private BindingList<Transform3D> _targetQueueList;
@@ -78,31 +75,27 @@ namespace OptiSort
 
         public void UpdateTargetTable(JsonElement message)
         {
-            string component = message.GetProperty("message").GetProperty("type").GetString();
-            double x = message.GetProperty("message").GetProperty("x").GetDouble();
-            double y = message.GetProperty("message").GetProperty("y").GetDouble();
-            double z = message.GetProperty("message").GetProperty("z").GetDouble();
-            double yaw = message.GetProperty("message").GetProperty("rx").GetDouble();
-            double pitch = message.GetProperty("message").GetProperty("ry").GetDouble();
-            double roll = message.GetProperty("message").GetProperty("rz").GetDouble();
 
-            // Define a new target location
-            Transform3D row = new Transform3D(x, y, z, yaw, pitch, roll);
-            AddLocRow(row, component);
-
-            Backlog++;
-            ObjectDetected?.Invoke();
-        }
-
-        private void AddLocRow(Transform3D row, string component)
-        {
             if (InvokeRequired)
             {
-                // Marshal to the UI thread (needed to avoid cross-thread error)
-                Invoke(new Action<Transform3D, string>(AddLocRow), row, component);
+                Invoke(new Action<JsonElement>(UpdateTargetTable), message);
             }
             else
             {
+
+                string component = message.GetProperty("message").GetProperty("type").GetString();
+                double x = message.GetProperty("message").GetProperty("x").GetDouble();
+                double y = message.GetProperty("message").GetProperty("y").GetDouble();
+                double z = message.GetProperty("message").GetProperty("z").GetDouble();
+                double yaw = message.GetProperty("message").GetProperty("rx").GetDouble();
+                double pitch = message.GetProperty("message").GetProperty("ry").GetDouble();
+                double roll = message.GetProperty("message").GetProperty("rz").GetDouble();
+
+                // Define a new target location
+                Transform3D row = new Transform3D(x, y, z, yaw, pitch, roll);
+                
+                Backlog++;
+
                 // Only update the list if it's empty or the row is different from the last target
                 if (_targetQueueList.Count == 0 || _lastTarget != row)
                 {
@@ -133,6 +126,9 @@ namespace OptiSort
                         _manager.NonBlockingMessageBox($"Error adding new entry: {ex.Message}", "Error!", MessageBoxIcon.Error);
                     }
                 }
+
+                ObjectDetected?.Invoke();
+
             }
         }
 

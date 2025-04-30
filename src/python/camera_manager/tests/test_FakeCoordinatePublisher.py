@@ -88,7 +88,7 @@ while True:
             message = [360.0, 300.0, 340.0, 0.0, 180.0, -130.0]
 
     i += 1
-    if i == 4:
+    if i == 5:
         i = 1
 
     json_message = create_message(component, message)
