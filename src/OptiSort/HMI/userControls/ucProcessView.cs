@@ -119,18 +119,25 @@ namespace OptiSort.userControls
                     // move at safe flexibowl position
                     led_approachFlexibowl.On = true;
                     Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeFlexi, true);
+                    led_approachFlexibowl.On = false;
 
                     // pick object safely
+                    led_pick.On = true;
                     Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, 20);
                     Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, true);
                     _manager.Cobra600.ToggleGripperAction(); // turn on suction 
                     Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, 20);
+                    led_pick.On = false;
 
                     // move at safe flexibowl position
+                    led_approachShuttle.On = true;
                     Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeFlexi, true);
 
                     // move at safe boxes position
                     Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeBoxes, true);
+                    
+                    led_approachShuttle.On = false;
+                    led_place.On = true;
 
                     // Place
                     if (ScaraTargets.TargetQueueList[0].Component.Contains("Component A"))
@@ -149,6 +156,7 @@ namespace OptiSort.userControls
                     }
 
                     Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeBoxes, true);
+                    led_place.On = false;
 
                     _robotIsMoving = false;
                     ResetWatchdog();
