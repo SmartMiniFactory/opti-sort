@@ -7,6 +7,7 @@ using Ace.Core.Client.Sim3d.Controls;
 using Ace.Core.Server;
 using Ace.Core.Server.Device;
 using Ace.Core.Util;
+using Ace.UIBuilder.Client.Controls.Tools.AdvancedTools;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,6 +27,8 @@ namespace OptiSort
         public SimulationContainerControl SimulationContainerControl { get; private set; }
         //private ControlPanelManager PendantManager { get; set; }
 
+        public bool RingLightStatus { get; private set; }
+        private int _ringLightDigitalOutput = 99;
 
         // TODO: should think about using singletones or properties. For the MQTT class properties are useful because config may change. But the ace server in theroy cannot change easily...Must standardize. Then think about how to handle property changes in general
         private string _remotingName;
@@ -118,6 +121,8 @@ namespace OptiSort
                     Controller.Calibrate();
                 }
 
+                RingLightStatus = getDigitalOutput(_ringLightDigitalOutput); // get the current status of the ring light
+
                 Create3DDisplay();
             }
             catch (Exception ex)
@@ -190,7 +195,7 @@ namespace OptiSort
         }
 
 
-        public void ToggleDigitalOutput(int channel)
+        private void ToggleDigitalOutput(int channel)
         {
             try
             {
@@ -211,7 +216,7 @@ namespace OptiSort
             }
         }
 
-        public bool getDigitalOutput(int channel)
+        private bool getDigitalOutput(int channel)
         {
             try
             {
@@ -224,6 +229,14 @@ namespace OptiSort
                 return false;
             }
         }
+
+        public void toggleRingLight()
+        {
+            ToggleDigitalOutput(_ringLightDigitalOutput);
+            RingLightStatus = getDigitalOutput(_ringLightDigitalOutput);
+        }
+
+
 
         public class Motion
         {

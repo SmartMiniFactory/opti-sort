@@ -16,7 +16,6 @@ namespace OptiSort.userControls
     {
 
         private optisort_mgr _manager;
-        private int _ringLight = 99;
 
         internal ucManualControl(optisort_mgr manager)
         {
@@ -38,15 +37,10 @@ namespace OptiSort.userControls
         {
             if (_manager.StatusScara && !_manager.StatusScaraEmulation)
             {
-                bool status = _manager.Cobra600.getDigitalOutput(_ringLight);
-                if (status)
-                {
+                if (_manager.Cobra600.RingLightStatus)
                     btnLight.Text = "Turn ring light off";
-                }
                 else
-                {
                     btnLight.Text = "Turn ring light on";
-                }
             }
             else
                 btnLight.Text = "Toggle ring light";
@@ -138,7 +132,7 @@ namespace OptiSort.userControls
                 _manager.NonBlockingMessageBox("You should connect to the Scara robot first", "Interlock!", MessageBoxIcon.Hand);
                 return;
             }
-            _manager.Cobra600.ToggleDigitalOutput(_ringLight);
+            _manager.Cobra600.toggleRingLight();
             RefreshButtons();
         }
 
