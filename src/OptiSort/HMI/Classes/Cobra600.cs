@@ -269,6 +269,7 @@ namespace OptiSort
                     Controller.SetDigitalIO(-_gripperOpenDO);
                     Controller.SetDigitalIO(_gripperCloseDO);
                 }
+                GetGripperStatus();
             }
             catch (Exception)
             {
