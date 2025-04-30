@@ -39,7 +39,9 @@ def publish(message, result):
 
     mqttc.publish('optisort/scara/target', str(json.dumps(payload)), qos=0)
 
-message = [300.07, -0.959, 302.12, 0.0, 180.0, 180.0]
+
+component = None
+message = [0.0, 0.0, 0.0, 0.0, 180.0, -130.0]
 
 # Connect to MQTT broker
 mqttc.connect(broker, port, MQTT_KEEPALIVE_INTERVAL)  # Connect with MQTT Broker
@@ -50,8 +52,9 @@ i = 0
 j = 0
 
 
-def create_message(values):
+def create_message(comp, values):
     message_dict = {
+        "type": comp,
         "x": values[0],
         "y": values[1],
         "z": values[2],
@@ -64,21 +67,34 @@ def create_message(values):
 
 while True:
 
+
+    # internal z = 320.334
+    # external z = 325.772
+
+    # for testing we use z = 340.0
+
     match i:
         case 1:
-            message = [300.07, -0.959, 302.12, 0.0, 180.0, 180.0]
+            component = "ae"
+            message = [405.0, 200.0, 340.0, 0.0, 180.0, -130.0]
 
         case 2:
-            message = [250.07, -50.959, 302.12, 0.0, 180.0, 180.0]
+            component = "ai"
+            message = [425.0, 265.0, 340.0, 0.0, 180.0, -130.0]
 
         case 3:
-            message = [200.07, -50.959, 302.12, 0.0, 180.0, 180.0]
+            component = "be"
+            message = [330.0, 230.0, 340.0, 0.0, 180.0, -130.0]
+
+        case 4:
+            component = "bi"
+            message = [360.0, 300.0, 340.0, 0.0, 180.0, -130.0]
 
     i += 1
-    if i == 4:
+    if i == 5:
         i = 0
 
-    json_message = create_message(message)
+    json_message = create_message(component, message)
 
     # Publish message to topic
     publish(json_message, None)
