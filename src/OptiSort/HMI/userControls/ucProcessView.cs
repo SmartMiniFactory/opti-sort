@@ -136,7 +136,8 @@ namespace OptiSort.userControls
                         Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, true);
                         Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, 20);
                     }
-                       
+
+                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeBoxes, true);
 
                     _robotIsMoving = false;
                     ResetWatchdog();
