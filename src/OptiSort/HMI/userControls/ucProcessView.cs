@@ -1,7 +1,11 @@
-﻿using FlexibowlLibrary;
+﻿using Ace.Core.Server;
+using FlexibowlLibrary;
 using OptiSort.Classes;
 using System;
+using System.ComponentModel;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
@@ -16,6 +20,7 @@ namespace OptiSort.userControls
         private ucScaraTargets ScaraTargets;
         private PerformanceReport _report;
         private Watchdog _watchdog;
+        private bool _robotIsMoving = false;
 
         internal ucProcessView(optisort_mgr manager)
         {
@@ -28,7 +33,7 @@ namespace OptiSort.userControls
 
             pnlScara.Controls.Clear();
             pnlScara.Controls.Add(ScaraTargets);
-            
+
             _watchdog = new Watchdog(5000); // 5 seconds; used to move flexibowl if no objects are detected
 
             RefreshControls();
@@ -37,7 +42,7 @@ namespace OptiSort.userControls
 
         private void RefreshControls()
         {
-            
+
         }
 
         private void OnMessageReceived(string topic, JsonElement message)
@@ -73,16 +78,85 @@ namespace OptiSort.userControls
             _watchdog.Start();
             _watchdog.Elapsed += MoveFlexibowl;
 
-            ScaraTargets.ObjectDetected += ResetWatchdog;
+            ScaraTargets.ObjectDetected += OnObjectDetected;
 
             //_report = new PerformanceReport(cameraId: "luxonis_01", initTimeMs: 98);
             _manager.Log("Automatic process started...");
         }
 
+
+        private void OnObjectDetected()
+        {
+            Task.Run(() =>
+            {
+                PickAndPlace();
+            });
+        }
+
+        private void PickAndPlace()
+        {
+            try
+            {
+                if (!_robotIsMoving && ScaraTargets.Backlog > 0) // prevent simultanous picking (physically impossible)
+                {
+                    _robotIsMoving = true;
+
+                    Transform3D _locTarget = ScaraTargets.TargetQueueList[0].Transform; // accessing first element to pick
+
+                    Transform3D safeFlexi = new Transform3D(520.353, 226.946, 360.0, 0.0, 180.0, -130.0);
+                    Transform3D safeBoxes = new Transform3D(200.0, -450.0, 360.0, 0.0, 180.0, 50.0);
+                    Transform3D BoxA = new Transform3D(160, -450.0, 360.0, 0.0, 180.0, 50.0);
+                    Transform3D BoxB = new Transform3D(310, -450.0, 360.0, 0.0, 180.0, 50.0);
+
+
+                    // move at safe flexibowl position
+                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeFlexi, true);
+
+                    // pick object safely
+                    Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, 20);
+                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, true);
+                    Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, 20);
+
+                    // move at safe flexibowl position
+                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeFlexi, true);
+
+                    // move at safe boxes position
+                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeBoxes, true);
+
+                    // Place
+                    if (ScaraTargets.TargetQueueList[0].Component.Contains("Component A"))
+                    {
+                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxA, 20);
+                        Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxA, true);
+                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxA, 20);
+                    }
+                    else if (ScaraTargets.TargetQueueList[0].Component.Contains("Component B"))
+                    {
+                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, 20);
+                        Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, true);
+                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, 20);
+                    }
+                       
+
+                    _robotIsMoving = false;
+                    ResetWatchdog();
+                    ScaraTargets.PlacingCompleted();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _manager.NonBlockingMessageBox($"Error performing pick-and-plance operation: {ex}", "Error!", MessageBoxIcon.Error);
+            }
+        }
+
         private void MoveFlexibowl(object sender, EventArgs e)
         {
-            _manager.Log("Flexibowl moving forward due to unrecognition...");
-            // Flexibowl.Move.Forward();
+            if (!_robotIsMoving)
+            {
+                _manager.Log("Flexibowl moving forward due to unrecognition...");
+                // Flexibowl.Move.Forward(); 
+            }
             ResetWatchdog();
         }
 

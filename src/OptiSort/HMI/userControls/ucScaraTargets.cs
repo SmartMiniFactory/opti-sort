@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Collections.Generic;
+using static OptiSort.ucScaraTargets;
 
 
 namespace OptiSort
@@ -22,11 +23,11 @@ namespace OptiSort
     {
         private optisort_mgr _manager;
 
-        static Thread _thReachLocation;
-        bool _stop = false;
-        static bool _robotIsMoving = false;
-        private Transform3D _lastTarget = new Transform3D(0, 0, 0, 0, 0, 0);
-        private BindingList<Transform3D> _targetQueueList;
+        internal IReadOnlyList<TargetRow> TargetQueueList => _targetQueueList;
+        private BindingList<TargetRow> _targetQueueList = new BindingList<TargetRow>();
+
+        private TargetRow _lastTarget = new TargetRow(null, new Transform3D(0, 0, 0, 0, 0, 0));
+
         public int Backlog { get; private set; } = 0;
 
         public event Action ObjectDetected;
@@ -40,10 +41,11 @@ namespace OptiSort
         private void ucScara_Load(object sender, EventArgs e)
         {
             // init dgv
-            _targetQueueList = new BindingList<Transform3D>();
+            _targetQueueList = new BindingList<TargetRow>();
             dgvTargetQueue.AutoGenerateColumns = false;
-            DataGridViewTextBoxColumn componentColumn = new DataGridViewTextBoxColumn
-            { HeaderText = "Component", Name = "Component", Width = 100 };
+
+            DataGridViewTextBoxColumn cColumn = new DataGridViewTextBoxColumn
+            { HeaderText = "Component", DataPropertyName = "Component", Width = 300 };
             DataGridViewTextBoxColumn xColumn = new DataGridViewTextBoxColumn
             { HeaderText = "DX", DataPropertyName = "DX", Width = 100 };
             DataGridViewTextBoxColumn yColumn = new DataGridViewTextBoxColumn
@@ -57,19 +59,17 @@ namespace OptiSort
             DataGridViewTextBoxColumn rollColumn = new DataGridViewTextBoxColumn
             { HeaderText = "Roll", DataPropertyName = "Roll", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill };
 
-            dgvTargetQueue.Columns.Add(componentColumn);
+            dgvTargetQueue.Columns.Add(cColumn);
             dgvTargetQueue.Columns.Add(xColumn);
             dgvTargetQueue.Columns.Add(yColumn);
             dgvTargetQueue.Columns.Add(zColumn);
             dgvTargetQueue.Columns.Add(yawColumn);
             dgvTargetQueue.Columns.Add(pitchColumn);
             dgvTargetQueue.Columns.Add(rollColumn);
+
             dgvTargetQueue.DataSource = _targetQueueList;
             dgvTargetQueue.Rows.Clear();
 
-            // instance and start thread to control robot movement
-            _thReachLocation = new Thread(MoveToLoc);
-            _thReachLocation.Start();
         }
 
 
@@ -90,20 +90,16 @@ namespace OptiSort
                 double yaw = message.GetProperty("message").GetProperty("rx").GetDouble();
                 double pitch = message.GetProperty("message").GetProperty("ry").GetDouble();
                 double roll = message.GetProperty("message").GetProperty("rz").GetDouble();
-
-                // Define a new target location
-                Transform3D row = new Transform3D(x, y, z, yaw, pitch, roll);
+                TargetRow targetRow = new TargetRow(component, new Transform3D(x, y, z, yaw, pitch, roll));
                 
                 Backlog++;
 
                 // Only update the list if it's empty or the row is different from the last target
-                if (_targetQueueList.Count == 0 || _lastTarget != row)
+                if (_targetQueueList.Count == 0 || _lastTarget != targetRow)
                 {
                     try
                     {
-                        _targetQueueList.Add(row);
-                        _lastTarget = row;
-
+                       
                         // rewriting components strings to something understandable from the user
                         var componentMap = new Dictionary<string, string>
                         {
@@ -116,10 +112,14 @@ namespace OptiSort
                         componentMap.TryGetValue(component, out string readableComponent);
                         component = readableComponent ?? component;  // fallback to original if not mapped
 
-                        // writing detected component into dgv
-                        int rowIndex = dgvTargetQueue.Rows.Count - 1;
-                        if (rowIndex >= 0)
-                            dgvTargetQueue.Rows[rowIndex].Cells["Component"].Value = component;
+                        targetRow.Component = component;
+                        _targetQueueList.Add(targetRow);
+                        _lastTarget = targetRow;
+
+                        Console.WriteLine("Added");
+
+                        dgvTargetQueue.Refresh();
+
                     }
                     catch (Exception ex)
                     {
@@ -132,15 +132,16 @@ namespace OptiSort
             }
         }
 
-        private void RemoveFirstRow()
+        public void PlacingCompleted()
         {
             if (InvokeRequired)
             {
                 // Marshal to the UI thread (needed to avoid cross-thread error)
-                Invoke(new Action(RemoveFirstRow));
+                Invoke(new Action(PlacingCompleted));
             }
             else
             {
+                // removing the first entry from the list
                 try
                 {
                     _targetQueueList.RemoveAt(0);
@@ -149,45 +150,43 @@ namespace OptiSort
                 {
                     _manager.NonBlockingMessageBox($"Error removing an entry: " + ex.ToString(), "Error!", MessageBoxIcon.Error);
                 }
+
+                // reducing backlog
+                Backlog--;
+
+                if(Backlog > 0)
+                    ObjectDetected?.Invoke(); // recall event to let parent user control pick next component in backlog
+                
             }
         }
 
-        private void MoveToLoc()
+
+        /// <summary>
+        /// Represents a single row in the target queue table, containing both component description and coordinates.
+        /// (Compact internal class - only for ucScaraTargets)
+        /// </summary>
+        internal class TargetRow
         {
-            int busy = 0;
-            while (_stop == false)
+            public string Component { get; set; }
+            public double DX { get; set; }
+            public double DY { get; set; }
+            public double DZ { get; set; }
+            public double Yaw { get; set; }
+            public double Pitch { get; set; }
+            public double Roll { get; set; }
+
+            // Convenience property to get the Transform3D directly
+            public Transform3D Transform => new Transform3D(DX, DY, DZ, Yaw, Pitch, Roll);
+
+            internal TargetRow(string component, Transform3D transform)
             {
-                try
-                {
-                    if (_targetQueueList.Count > 0 && _robotIsMoving == false)
-                    {
-                        _robotIsMoving = true;
-                        if (busy == 0)
-                        {
-                            Transform3D _locTarget = _targetQueueList[0];
-
-                            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, 20);
-                            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, true);
-                            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _locTarget, 20);
-
-                            RemoveFirstRow();
-
-                            busy++;
-                        }
-                        _robotIsMoving = false;
-                    }
-                    if (busy > 20)
-                        busy = 0;
-                    else if (busy > 0)
-                        busy++;
-                }
-                catch (Exception ex)
-                {
-                    _manager.NonBlockingMessageBox($"Error moving: {ex}", "Error!", MessageBoxIcon.Error);
-                    if (ex is System.ObjectDisposedException)
-                        break;
-                }
-                Thread.Sleep(10);
+                Component = component;
+                DX = transform.DX;
+                DY = transform.DY;
+                DZ = transform.DZ;
+                Yaw = transform.Yaw;
+                Pitch = transform.Pitch;
+                Roll = transform.Roll;
             }
         }
 

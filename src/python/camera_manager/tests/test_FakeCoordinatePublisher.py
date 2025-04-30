@@ -70,6 +70,8 @@ while True:
     # external z = 325.772
     # for testing we use z = 340.0
 
+    a = input("Send?")
+
     match i:
         case 1:
             component = "ae"
@@ -97,7 +99,7 @@ while True:
     publish(json_message, None)
     print("Message sent: ")
 
-    a = input("Send?")
+
 
     # Wait for user input to quit
     if keyboard.is_pressed('q'):
