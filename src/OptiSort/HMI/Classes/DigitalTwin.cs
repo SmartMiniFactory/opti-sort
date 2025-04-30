@@ -33,7 +33,7 @@ namespace OptiSort.Classes
 
         private void ConnectWebSocket()
         {
-            ws = new WebSocketSharp.WebSocket("ws://192.168.10.145:8180");
+            ws = new WebSocketSharp.WebSocket("ws://10.90.90.92:8180");
 
             ws.OnOpen += (s, e) =>
             {
@@ -65,9 +65,11 @@ namespace OptiSort.Classes
 
             var joints = Cobra600.Motion.GetJointPositions(_scaraRobot.Robot);
 
+            // Console.WriteLine($"{joints[0]}, {joints[1]}, {joints[2]}, {joints[3]}"); // deubg line
+
             if (ws.ReadyState != WebSocketSharp.WebSocketState.Open)
             {
-                _manager.Log("❌ WebSocket non connesso.", true, false);
+                Console.WriteLine("❌ WebSocket non connesso.", true, false);
                 return;
             }
 
@@ -84,7 +86,6 @@ namespace OptiSort.Classes
 
                 string json = JsonConvert.SerializeObject(request);
                 ws.Send(json);
-                _manager.Log($"DT inviato", false, true);
             }
 
         }

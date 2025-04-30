@@ -112,11 +112,12 @@ namespace OptiSort.userControls
                     Transform3D BoxA = new Transform3D(160, -450.0, 180.0, 0.0, 180.0, 50.0);
                     Transform3D BoxB = new Transform3D(310, -450.0, 180.0, 0.0, 180.0, 50.0);
 
-
-                    // move at safe flexibowl position
                     _manager.Cobra600.toggleRingLight();
                     Thread.Sleep(500);
                     _manager.Cobra600.toggleRingLight();
+
+                    // move at safe flexibowl position
+                    led_approachFlexibowl.On = true;
                     Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeFlexi, true);
 
                     // pick object safely
