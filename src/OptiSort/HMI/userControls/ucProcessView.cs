@@ -103,10 +103,10 @@ namespace OptiSort.userControls
 
                     Transform3D _locTarget = ScaraTargets.TargetQueueList[0].Transform; // accessing first element to pick
 
-                    Transform3D safeFlexi = new Transform3D(520.353, 226.946, 360.0, 0.0, 180.0, -130.0);
+                    Transform3D safeFlexi = new Transform3D(375.0, 15.0, 385.0, 0.0, 180.0, -130.0);
                     Transform3D safeBoxes = new Transform3D(200.0, -450.0, 360.0, 0.0, 180.0, 50.0);
-                    Transform3D BoxA = new Transform3D(160, -450.0, 360.0, 0.0, 180.0, 50.0);
-                    Transform3D BoxB = new Transform3D(310, -450.0, 360.0, 0.0, 180.0, 50.0);
+                    Transform3D BoxA = new Transform3D(160, -450.0, 180.0, 0.0, 180.0, 50.0);
+                    Transform3D BoxB = new Transform3D(310, -450.0, 180.0, 0.0, 180.0, 50.0);
 
 
                     // move at safe flexibowl position
