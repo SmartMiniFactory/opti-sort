@@ -21,7 +21,8 @@ namespace OptiSort.userControls
         private ucScaraTargets ScaraTargets;
         private PerformanceReport _report;
         private Watchdog _watchdog;
-        private bool _robotIsMoving = false;
+        private bool _scaraIsMoving = false;
+        private bool _flexibowlIsMoving = false;
 
         internal ucProcessView(optisort_mgr manager)
         {
@@ -48,7 +49,7 @@ namespace OptiSort.userControls
 
         private void OnMessageReceived(string topic, JsonElement message)
         {
-            if (topic == Properties.Settings.Default.mqtt_topic_scaraTarget)
+            if (topic == Properties.Settings.Default.mqtt_topic_scaraTarget && !_flexibowlIsMoving) // topic should be correct, plus flexibowl shold be still to consider coordinates as valid
                 ScaraTargets.UpdateTargetTable(message);
 
             else if (topic == "PythonResultOrSomething...")
@@ -107,9 +108,16 @@ namespace OptiSort.userControls
         {
             try
             {
-                if (!_robotIsMoving && ScaraTargets.Backlog > 0) // prevent simultanous picking (physically impossible)
+                if (!_scaraIsMoving && ScaraTargets.Backlog > 0) // prevent simultanous picking (physically impossible)
                 {
-                    _robotIsMoving = true;
+
+                    if (_flexibowlIsMoving)
+                    {
+                        _manager.Log("Coordinate have been received (should have not) while flexibowl is moving! Cannot perform picking action", true, false);
+                        return;
+                    }
+
+                    _scaraIsMoving = true;
                     if (_manager.Cobra600.GripperSuctionStatus)
                     {
                         _manager.Cobra600.ToggleGripperAction(); // turn off suction
@@ -168,7 +176,7 @@ namespace OptiSort.userControls
                     Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeBoxes, true);
                     led_place.On = false;
 
-                    _robotIsMoving = false;
+                    _scaraIsMoving = false;
                     ResetWatchdog();
                     ScaraTargets.PlacingCompleted();
                 }
@@ -183,13 +191,24 @@ namespace OptiSort.userControls
 
         private void MoveFlexibowl()
         {
-            if (!_robotIsMoving)
+            if (!_scaraIsMoving)
             {
-                _manager.Log("Flexibowl moving forward due to unrecognition...");
+
+                _flexibowlIsMoving = true;
                 // Flexibowl.Move.Forward(); 
+
+                // TODO: flexibowl shoud be moved slightly to detect new objects
                 led_rotate.On = true;
                 Thread.Sleep(2000);
                 led_rotate.On = false;
+
+                // TODO: track position of pieces, so that when some get under the glass, flipping is possible
+                led_flip.On = true;
+                Thread.Sleep(500);
+                led_flip.On = false;
+
+                _flexibowlIsMoving = false;
+
             }
             ResetWatchdog();
         }
@@ -197,7 +216,6 @@ namespace OptiSort.userControls
 
         private void ResetWatchdog()
         {
-            _manager.Log("Watchdog reset.");
             _watchdog.Reset();
         }
 
