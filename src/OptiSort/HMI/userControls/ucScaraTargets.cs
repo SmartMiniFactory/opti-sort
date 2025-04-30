@@ -9,6 +9,7 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Collections.Generic;
 
 
 namespace OptiSort
@@ -44,6 +45,8 @@ namespace OptiSort
             // init dgv
             _targetQueueList = new BindingList<Transform3D>();
             dgvTargetQueue.AutoGenerateColumns = false;
+            DataGridViewTextBoxColumn componentColumn = new DataGridViewTextBoxColumn
+            { HeaderText = "Component", Name = "Component", Width = 100 };
             DataGridViewTextBoxColumn xColumn = new DataGridViewTextBoxColumn
             { HeaderText = "DX", DataPropertyName = "DX", Width = 100 };
             DataGridViewTextBoxColumn yColumn = new DataGridViewTextBoxColumn
@@ -57,6 +60,7 @@ namespace OptiSort
             DataGridViewTextBoxColumn rollColumn = new DataGridViewTextBoxColumn
             { HeaderText = "Roll", DataPropertyName = "Roll", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill };
 
+            dgvTargetQueue.Columns.Add(componentColumn);
             dgvTargetQueue.Columns.Add(xColumn);
             dgvTargetQueue.Columns.Add(yColumn);
             dgvTargetQueue.Columns.Add(zColumn);
@@ -74,6 +78,7 @@ namespace OptiSort
 
         public void UpdateTargetTable(JsonElement message)
         {
+            string component = message.GetProperty("message").GetProperty("type").GetString();
             double x = message.GetProperty("message").GetProperty("x").GetDouble();
             double y = message.GetProperty("message").GetProperty("y").GetDouble();
             double z = message.GetProperty("message").GetProperty("z").GetDouble();
@@ -83,18 +88,18 @@ namespace OptiSort
 
             // Define a new target location
             Transform3D row = new Transform3D(x, y, z, yaw, pitch, roll);
-            AddLocRow(row);
+            AddLocRow(row, component);
 
             Backlog++;
             ObjectDetected?.Invoke();
         }
 
-        private void AddLocRow(Transform3D row)
+        private void AddLocRow(Transform3D row, string component)
         {
             if (InvokeRequired)
             {
                 // Marshal to the UI thread (needed to avoid cross-thread error)
-                Invoke(new Action<Transform3D>(AddLocRow), row);
+                Invoke(new Action<Transform3D, string>(AddLocRow), row, component);
             }
             else
             {
@@ -105,6 +110,23 @@ namespace OptiSort
                     {
                         _targetQueueList.Add(row);
                         _lastTarget = row;
+
+                        // rewriting components strings to something understandable from the user
+                        var componentMap = new Dictionary<string, string>
+                        {
+                            { "ae", "Component A, external surface" },
+                            { "ai", "Component A, internal surface" },
+                            { "be", "Component B, external surface" },
+                            { "bi", "Component B, internal surface" }
+                        };
+
+                        componentMap.TryGetValue(component, out string readableComponent);
+                        component = readableComponent ?? component;  // fallback to original if not mapped
+
+                        // writing detected component into dgv
+                        int rowIndex = dgvTargetQueue.Rows.Count - 1;
+                        if (rowIndex >= 0)
+                            dgvTargetQueue.Rows[rowIndex].Cells["Component"].Value = component;
                     }
                     catch (Exception ex)
                     {

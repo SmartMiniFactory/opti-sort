@@ -48,9 +48,6 @@ mqttc.connect(broker, port, MQTT_KEEPALIVE_INTERVAL)  # Connect with MQTT Broker
 print("Connected to MQTT broker")
 print("Press 'q' to quit")
 
-i = 0
-j = 0
-
 
 def create_message(comp, values):
     message_dict = {
@@ -65,12 +62,12 @@ def create_message(comp, values):
     return message_dict
 
 
-while True:
+i = 1
 
+while True:
 
     # internal z = 320.334
     # external z = 325.772
-
     # for testing we use z = 340.0
 
     match i:
@@ -91,8 +88,8 @@ while True:
             message = [360.0, 300.0, 340.0, 0.0, 180.0, -130.0]
 
     i += 1
-    if i == 5:
-        i = 0
+    if i == 4:
+        i = 1
 
     json_message = create_message(component, message)
 

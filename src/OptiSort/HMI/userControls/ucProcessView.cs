@@ -63,7 +63,7 @@ namespace OptiSort.userControls
 
             if (!_manager.StatusMqttClient)
             {
-                _manager.NonBlockingMessageBox("Please connect CAMERA MANAGER to start automatic proces", "Interlock!", MessageBoxIcon.Hand);
+                _manager.NonBlockingMessageBox("Please connect MQTT to start automatic proces", "Interlock!", MessageBoxIcon.Hand);
                 return;
             }
 
