@@ -100,6 +100,8 @@ namespace OptiSort
                 }
 
                 Robot.Controller = Controller;
+                Robot.Power = true;
+                Controller.HighPower = true;
 
                 // Get the available end-effectors
                 IList<IAceObject> availableEndEffectors = Server.Root.Filter(new ObjectTypeFilter(typeof(IIODrivenEndEffector)), true);

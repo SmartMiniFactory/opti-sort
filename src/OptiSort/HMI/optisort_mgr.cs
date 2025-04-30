@@ -316,10 +316,7 @@ namespace OptiSort
             {
                 StatusScara = true;
                 Log("Robot successfully connected", false, true);
-                
-                Cobra600.Controller.HighPower = true; // Enable high power
-
-                // NonBlockingMessageBox("Scara connected, enabling power. Please press the physical button on the front panel!", "Success!", MessageBoxIcon.Information);
+                NonBlockingMessageBox("Scara connected, enabling power. Please press the physical button on the front panel!", "Success!", MessageBoxIcon.Information);
                 return true;
             }
             else
