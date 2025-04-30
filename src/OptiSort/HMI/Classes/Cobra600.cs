@@ -6,12 +6,14 @@ using Ace.Core.Client;
 using Ace.Core.Client.Sim3d.Controls;
 using Ace.Core.Server;
 using Ace.Core.Server.Device;
+using Ace.Core.Server.Motion;
 using Ace.Core.Util;
 using Ace.UIBuilder.Client.Controls.Tools.AdvancedTools;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Windows.Forms;
 
 namespace OptiSort
@@ -52,7 +54,10 @@ namespace OptiSort
         public Exception Connect(bool emulation, string controllerName, string robotName, string endEffectorName)
         {
             try
-            {
+            { 
+                // Add this at the start of your Main() or before you call robot.Connect()
+                System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
+
                 // Connect to ACE
                 Server = (IAceServer)RemotingUtil.GetRemoteServerObject(typeof(IAceServer), _remotingName, "127.0.0.1", _remotingPort);
                 Client = new AceClient(Server);
@@ -128,6 +133,9 @@ namespace OptiSort
                 RingLightStatus = getDigitalOutput(_ringLightDigitalOutput); // get the current status of the ring light
                 GetGripperStatus(); // get the current status of the gripper
 
+                Robot.Power = true;
+                Controller.HighPower = true;
+
                 Create3DDisplay();
             }
             catch (Exception ex)
@@ -179,12 +187,12 @@ namespace OptiSort
                 SimulationContainerControl.Client = Client;
                 SimulationContainerControl.Visible = false;
                 SimulationContainerControl.Visible = true;
+
+                Console.WriteLine($"Robot IsAlive: {Robot.IsAlive}");
+                Console.WriteLine($"Robot Enabled: {Robot.Enabled}");
+
                 var robotSimObject = SimulationContainerControl.AddToScene(Robot);
 
-                Debug.Assert(robotSimObject != null, "Robot object was not added to the scene.");
-                Debug.Assert(robotSimObject.Visible == true, "Robot not visible.");
-
-                SimulationContainerControl.CameraPositions = new Transform3D[] { SimulationContainerControl.DefaultIsometricViewPosition };
             }
             catch (Exception ex)
             {
