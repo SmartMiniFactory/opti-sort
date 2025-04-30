@@ -133,9 +133,6 @@ namespace OptiSort
                 RingLightStatus = getDigitalOutput(_ringLightDigitalOutput); // get the current status of the ring light
                 GetGripperStatus(); // get the current status of the gripper
 
-                Robot.Power = true;
-                Controller.HighPower = true;
-
                 Create3DDisplay();
             }
             catch (Exception ex)
