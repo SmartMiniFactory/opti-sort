@@ -41,6 +41,7 @@
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.btn_gripper = new System.Windows.Forms.Button();
             this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -79,7 +80,7 @@
             this.btnLight.Name = "btnLight";
             this.btnLight.Size = new System.Drawing.Size(401, 90);
             this.btnLight.TabIndex = 12;
-            this.btnLight.Text = "Toggle ring light";
+            this.btnLight.Text = "Toggle Ring Light";
             this.btnLight.UseVisualStyleBackColor = true;
             this.btnLight.Click += new System.EventHandler(this.btnLight_Click);
             // 
@@ -182,6 +183,7 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
+            this.tableLayoutPanel2.Controls.Add(this.btn_gripper, 2, 4);
             this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.label3, 0, 5);
             this.tableLayoutPanel2.Controls.Add(this.btn_coordinateCalibration, 1, 6);
@@ -236,6 +238,19 @@
             this.label2.Text = "Scara control";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // btn_gripper
+            // 
+            this.btn_gripper.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btn_gripper.Font = new System.Drawing.Font("Segoe UI", 14F);
+            this.btn_gripper.Location = new System.Drawing.Point(902, 480);
+            this.btn_gripper.Margin = new System.Windows.Forms.Padding(20);
+            this.btn_gripper.Name = "btn_gripper";
+            this.btn_gripper.Size = new System.Drawing.Size(403, 90);
+            this.btn_gripper.TabIndex = 13;
+            this.btn_gripper.Text = "Toggle Gripper Suction";
+            this.btn_gripper.UseVisualStyleBackColor = true;
+            this.btn_gripper.Click += new System.EventHandler(this.btn_gripper_Click);
+            // 
             // ucManualControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -263,5 +278,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button btn_gripper;
     }
 }

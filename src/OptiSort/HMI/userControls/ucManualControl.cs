@@ -38,12 +38,22 @@ namespace OptiSort.userControls
             if (_manager.StatusScara && !_manager.StatusScaraEmulation)
             {
                 if (_manager.Cobra600.RingLightStatus)
-                    btnLight.Text = "Turn ring light off";
+                    btnLight.Text = "Turn Ring Light Off";
                 else
-                    btnLight.Text = "Turn ring light on";
+                    btnLight.Text = "Turn Ring Light On";
             }
             else
-                btnLight.Text = "Toggle ring light";
+                btnLight.Text = "Toggle Ring Light";
+
+            if (_manager.StatusScara && !_manager.StatusScaraEmulation)
+            {
+                if (_manager.Cobra600.GripperSuctionStatus)
+                    btn_gripper.Text = "Turn Suction Off";
+                else
+                    btn_gripper.Text = "Turn Suction On";
+            }
+            else
+                btn_gripper.Text = "Toggle Gripper Suction";
         }
 
         private void btnScaraJog_Click(object sender, EventArgs e)
@@ -136,5 +146,15 @@ namespace OptiSort.userControls
             RefreshButtons();
         }
 
+        private void btn_gripper_Click(object sender, EventArgs e)
+        {
+            if (!_manager.StatusScara)
+            {
+                _manager.NonBlockingMessageBox("You should connect to the REAL Scara robot first", "Interlock!", MessageBoxIcon.Hand);
+                return;
+            }
+            _manager.Cobra600.ToggleGripperAction();
+            RefreshButtons();
+        }
     }
 }

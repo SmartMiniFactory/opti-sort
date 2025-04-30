@@ -30,6 +30,10 @@ namespace OptiSort
         public bool RingLightStatus { get; private set; }
         private int _ringLightDigitalOutput = 99;
 
+        public bool GripperSuctionStatus { get; private set; }
+        private int _gripperOpenDO = 97;
+        private int _gripperCloseDO = 98;
+
         // TODO: should think about using singletones or properties. For the MQTT class properties are useful because config may change. But the ace server in theroy cannot change easily...Must standardize. Then think about how to handle property changes in general
         private string _remotingName;
         private int _remotingPort;
@@ -122,6 +126,7 @@ namespace OptiSort
                 }
 
                 RingLightStatus = getDigitalOutput(_ringLightDigitalOutput); // get the current status of the ring light
+                GetGripperStatus(); // get the current status of the gripper
 
                 Create3DDisplay();
             }
@@ -236,8 +241,40 @@ namespace OptiSort
             RingLightStatus = getDigitalOutput(_ringLightDigitalOutput);
         }
 
+        private void GetGripperStatus()
+        {
+            bool open = getDigitalOutput(_gripperOpenDO);
+            bool close = getDigitalOutput(_gripperCloseDO);
 
+            if (open && !close)
+                GripperSuctionStatus = false;
 
+            if(!open && close)
+                GripperSuctionStatus = true;
+        }
+
+        public void ToggleGripperAction()
+        {
+            try
+            {
+                if (GripperSuctionStatus)
+                {
+                    // stop suction
+                    Controller.SetDigitalIO(_gripperOpenDO);
+                    Controller.SetDigitalIO(-_gripperCloseDO);
+                }
+                else
+                {
+                    // start suction
+                    Controller.SetDigitalIO(-_gripperOpenDO);
+                    Controller.SetDigitalIO(_gripperCloseDO);
+                }
+            }
+            catch (Exception)
+            {
+                Trace.WriteLine("Failed to toggle gripper suction action");
+            }
+        }
         public class Motion
         {
             public static double[] GetJointPositions(IAdeptRobot robot)
