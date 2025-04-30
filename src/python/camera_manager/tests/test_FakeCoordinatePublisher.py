@@ -61,8 +61,8 @@ def create_message(comp, values):
     }
     return message_dict
 
-
 i = 1
+j = 0
 
 while True:
 
@@ -70,7 +70,9 @@ while True:
     # external z = 325.772
     # for testing we use z = 340.0
 
-    a = input("Send?")
+    # a = input("Send?") # block execution with user input
+
+    time.sleep(1)
 
     match i:
         case 1:
@@ -98,7 +100,10 @@ while True:
     # Publish message to topic
     publish(json_message, None)
     print("Message sent: ")
+    j += 1
 
+    if j == 10:
+        time.sleep(10)
 
 
     # Wait for user input to quit

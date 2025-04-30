@@ -3,6 +3,7 @@ using FlexibowlLibrary;
 using OptiSort.Classes;
 using System;
 using System.ComponentModel;
+using System.Runtime.Remoting.Channels;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,7 +77,7 @@ namespace OptiSort.userControls
             _manager.MqttClient.MessageReceived += OnMessageReceived;
 
             _watchdog.Start();
-            _watchdog.Elapsed += MoveFlexibowl;
+            _watchdog.Elapsed += OnWatchdogElapsed;
 
             ScaraTargets.ObjectDetected += OnObjectDetected;
 
@@ -92,6 +93,15 @@ namespace OptiSort.userControls
                 PickAndPlace();
             });
         }
+
+        private void OnWatchdogElapsed(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                MoveFlexibowl();
+            });
+        }
+
 
         private void PickAndPlace()
         {
@@ -170,15 +180,20 @@ namespace OptiSort.userControls
             }
         }
 
-        private void MoveFlexibowl(object sender, EventArgs e)
+
+        private void MoveFlexibowl()
         {
             if (!_robotIsMoving)
             {
                 _manager.Log("Flexibowl moving forward due to unrecognition...");
                 // Flexibowl.Move.Forward(); 
+                led_rotate.On = true;
+                Thread.Sleep(2000);
+                led_rotate.On = false;
             }
             ResetWatchdog();
         }
+
 
         private void ResetWatchdog()
         {
