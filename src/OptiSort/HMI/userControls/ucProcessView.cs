@@ -114,6 +114,9 @@ namespace OptiSort.userControls
 
 
                     // move at safe flexibowl position
+                    _manager.Cobra600.toggleRingLight();
+                    Thread.Sleep(500);
+                    _manager.Cobra600.toggleRingLight();
                     Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeFlexi, true);
 
                     // pick object safely
