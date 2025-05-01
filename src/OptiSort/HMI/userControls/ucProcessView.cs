@@ -21,8 +21,17 @@ namespace OptiSort.userControls
         private ucScaraTargets ScaraTargets;
         private PerformanceReport _report;
         private Watchdog _watchdog;
+
+        private bool _processActive = false;
         private bool _scaraIsMoving = false;
         private bool _flexibowlIsMoving = false;
+
+        private DateTime _startTime;
+        private int _counterDetectedA = 0;
+        private int _counterDetectedB = 0;
+        private int _counterPicked = 0;
+        private int _counterDiscarded = 0;
+
 
         internal ucProcessView(optisort_mgr manager)
         {
@@ -32,20 +41,37 @@ namespace OptiSort.userControls
             // init scara dgv
             ScaraTargets = new ucScaraTargets(_manager); // using log function
             ScaraTargets.Dock = DockStyle.Fill;
-
             pnlScara.Controls.Clear();
             pnlScara.Controls.Add(ScaraTargets);
 
-            _watchdog = new Watchdog(5000); // 5 seconds; used to move flexibowl if no objects are detected
+            _manager.PropertyChanged += OnPropertyChanged;
 
             RefreshControls();
-
         }
 
-        private void RefreshControls()
+
+        // ----------------------------------------------------- Events --------------------------------------------------
+
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(_manager.StatusScara) || e.PropertyName == nameof(_manager.StatusMqttClient))
+            {
+                RefreshControls();
+            }
+
+            if (e.PropertyName == nameof(_manager.StatusScara) && !_manager.StatusScara && _processActive) // scara status dropped: interrupt process
+            {
+                StopProcess();
+            }
+
+            if (e.PropertyName == nameof(_manager.StatusMqttClient) && !_manager.StatusMqttClient && _processActive) // mqtt connection dropped: interrupt process
+            {
+                StopProcess();
+            }
 
         }
+        
 
         private void OnMessageReceived(string topic, JsonElement message)
         {
@@ -57,6 +83,53 @@ namespace OptiSort.userControls
                 _manager.MqttClient.MessageReceived -= OnMessageReceived;
                 CompleteProcess(message);
             }
+        }
+
+
+        private void OnObjectDetected()
+        {
+            Task.Run(() =>
+            {
+                PickAndPlace();
+            });
+        }
+
+
+        private void OnWatchdogElapsed(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                MoveFlexibowl();
+            });
+        }
+
+        // ----------------------------------------------------- Controls --------------------------------------------------
+
+        private void RefreshControls()
+        {
+            // update counters
+            lbl_Adetected.Text = _counterDetectedA.ToString();
+            lbl_Bdetected.Text = _counterDetectedB.ToString();
+            lbl_nrPicked.Text = _counterPicked.ToString();
+            lbl_nrDiscarded.Text = _counterDiscarded.ToString();
+
+            // update process time
+            if (_processActive)
+                lbl_cycleTimer.Text = $"{(DateTime.Now - _startTime):mm\\:ss}";
+
+            // change title colors to highlight active process
+            if (_processActive)
+            {
+                lbl_title_setup.BackColor = System.Drawing.Color.MediumSeaGreen;
+                lbl_title_control.BackColor = System.Drawing.Color.MediumSeaGreen;
+                lbl_title_coordinates.BackColor = System.Drawing.Color.MediumSeaGreen;
+            }
+
+            // update start/stop push buttons
+            btn_start.BackgroundImage = _manager.StatusScara & _manager.StatusMqttClient & !_processActive ? Properties.Resources.playEnabled_2x2_pptx : Properties.Resources.playDisabled_2x2_pptx;
+            btn_stop.BackgroundImage = _manager.StatusScara & _manager.StatusMqttClient & _processActive ? Properties.Resources.stopEnabled_2x2_pptx : Properties.Resources.stopDisabled_2x2_pptx;
+            btn_start.Enabled = !_processActive;
+            btn_stop.Enabled = _processActive;
         }
 
 
@@ -74,35 +147,40 @@ namespace OptiSort.userControls
                 return;
             }
 
+
+            _manager.Log("Automatic process started...");
+            _processActive = true;
+
+            // subscribe to target coordinates topic
             _manager.SubscribeMqttTopic(Properties.Settings.Default.mqtt_client, Properties.Settings.Default.mqtt_topic_scaraTarget);
             _manager.MqttClient.MessageReceived += OnMessageReceived;
+            
+            // subscribe to detected events: triggers pick and place
+            ScaraTargets.ObjectDetected += OnObjectDetected;
 
+            // 5 seconds; used to move flexibowl if no objects are detected
+            _watchdog = new Watchdog(5000); 
             _watchdog.Start();
             _watchdog.Elapsed += OnWatchdogElapsed;
 
-            ScaraTargets.ObjectDetected += OnObjectDetected;
+            // start timer count
+            lbl_actualSelectedCamera.Text = _manager.StreamingTopic;
+            _startTime = DateTime.Now;
 
+            // initiate performance report
             //_report = new PerformanceReport(cameraId: "luxonis_01", initTimeMs: 98);
-            _manager.Log("Automatic process started...");
         }
 
 
-        private void OnObjectDetected()
+        // refresh controls each second if process is active
+        private void tmr_process_Tick(object sender, EventArgs e)
         {
-            Task.Run(() =>
-            {
-                PickAndPlace();
-            });
+            if (_processActive)
+                RefreshControls();
         }
 
-        private void OnWatchdogElapsed(object sender, EventArgs e)
-        {
-            Task.Run(() =>
-            {
-                MoveFlexibowl();
-            });
-        }
 
+        // ----------------------------------------------------- Process --------------------------------------------------
 
         private void PickAndPlace()
         {
@@ -164,6 +242,7 @@ namespace OptiSort.userControls
                         Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxA, true);
                         _manager.Cobra600.ToggleGripperAction(); // turn off suction
                         Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxA, 20);
+                        _counterDetectedA++;
                     }
                     else if (ScaraTargets.TargetQueueList[0].Component.Contains("Component B"))
                     {
@@ -171,6 +250,7 @@ namespace OptiSort.userControls
                         Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, true);
                         _manager.Cobra600.ToggleGripperAction(); // turn off suction
                         Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, 20);
+                        _counterDetectedB++;
                     }
 
                     Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeBoxes, true);
@@ -213,17 +293,6 @@ namespace OptiSort.userControls
             ResetWatchdog();
         }
 
-
-        private void ResetWatchdog()
-        {
-            _watchdog.Reset();
-        }
-
-        private void CountPieceLoading()
-        {
-            _report.UpdateWorkpieceLoadingCount();
-        }
-
         private void CompleteProcess(JsonElement pythonMetrics)
         {
             _manager.Log("Automatic process completed.");
@@ -235,6 +304,32 @@ namespace OptiSort.userControls
 
             sendMessageToMontrac();
         }
+
+
+        // Interrupt in case of stop button push or disconnections/problems occurs
+        private void StopProcess()
+        {
+            RefreshControls();
+            _processActive = false;
+
+
+
+        }
+
+        // ----------------------------------------------------- Utils --------------------------------------------------
+
+
+        private void ResetWatchdog()
+        {
+            _watchdog.Reset();
+        }
+
+
+        private void CountPieceLoading()
+        {
+            _report.UpdateWorkpieceLoadingCount();
+        }
+        
 
         private void sendMessageToMontrac()
         {
@@ -251,5 +346,6 @@ namespace OptiSort.userControls
 
             //_ = _mqttClient.PublishMessage(_clientId, _mqttTopic, message);
         }
+
     }
 }

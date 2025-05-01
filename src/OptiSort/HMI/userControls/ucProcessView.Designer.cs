@@ -32,6 +32,8 @@
             this.components = new System.ComponentModel.Container();
             this.pnlScara = new System.Windows.Forms.Panel();
             this.tbl_controls = new System.Windows.Forms.TableLayoutPanel();
+            this.btn_stop = new System.Windows.Forms.Button();
+            this.lbl_actualSelectedCamera = new System.Windows.Forms.Label();
             this.lbl_title_setup = new System.Windows.Forms.Label();
             this.lbl_title_coordinates = new System.Windows.Forms.Label();
             this.lbl_title_control = new System.Windows.Forms.Label();
@@ -49,15 +51,21 @@
             this.led_rotate = new Bulb.LedBulb();
             this.led_shake = new Bulb.LedBulb();
             this.led_flip = new Bulb.LedBulb();
+            this.lbl_camera = new System.Windows.Forms.Label();
             this.lbl_approachFlexibowl = new System.Windows.Forms.Label();
             this.led_approachFlexibowl = new Bulb.LedBulb();
-            this.tmr_process = new System.Windows.Forms.Timer(this.components);
-            this.cmb_algorithm = new System.Windows.Forms.ComboBox();
-            this.lbl_detectionAlgorithm = new System.Windows.Forms.Label();
-            this.lbl_selectedCamera = new System.Windows.Forms.Label();
-            this.lbl_actualSelectedCamera = new System.Windows.Forms.Label();
             this.btn_start = new System.Windows.Forms.Button();
-            this.btn_stop = new System.Windows.Forms.Button();
+            this.tmr_process = new System.Windows.Forms.Timer(this.components);
+            this.lbl_elapsedTime = new System.Windows.Forms.Label();
+            this.lbl_cycleTimer = new System.Windows.Forms.Label();
+            this.lbl_Adect = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.lbl_Adetected = new System.Windows.Forms.Label();
+            this.lbl_Bdetected = new System.Windows.Forms.Label();
+            this.lbl_picked = new System.Windows.Forms.Label();
+            this.lbl_discarded = new System.Windows.Forms.Label();
+            this.lbl_nrPicked = new System.Windows.Forms.Label();
+            this.lbl_nrDiscarded = new System.Windows.Forms.Label();
             this.tbl_controls.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -79,10 +87,19 @@
             this.tbl_controls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 14.28572F));
             this.tbl_controls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 14.28572F));
             this.tbl_controls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 14.28572F));
-            this.tbl_controls.Controls.Add(this.btn_stop, 6, 2);
-            this.tbl_controls.Controls.Add(this.lbl_detectionAlgorithm, 0, 2);
-            this.tbl_controls.Controls.Add(this.lbl_actualSelectedCamera, 2, 1);
-            this.tbl_controls.Controls.Add(this.lbl_title_setup, 0, 0);
+            this.tbl_controls.Controls.Add(this.lbl_nrDiscarded, 6, 2);
+            this.tbl_controls.Controls.Add(this.lbl_nrPicked, 6, 1);
+            this.tbl_controls.Controls.Add(this.lbl_discarded, 5, 2);
+            this.tbl_controls.Controls.Add(this.lbl_picked, 5, 1);
+            this.tbl_controls.Controls.Add(this.lbl_Bdetected, 4, 2);
+            this.tbl_controls.Controls.Add(this.lbl_Adetected, 4, 1);
+            this.tbl_controls.Controls.Add(this.lbl_Adect, 2, 1);
+            this.tbl_controls.Controls.Add(this.label3, 2, 2);
+            this.tbl_controls.Controls.Add(this.lbl_cycleTimer, 1, 2);
+            this.tbl_controls.Controls.Add(this.lbl_elapsedTime, 0, 2);
+            this.tbl_controls.Controls.Add(this.btn_stop, 6, 0);
+            this.tbl_controls.Controls.Add(this.lbl_actualSelectedCamera, 1, 1);
+            this.tbl_controls.Controls.Add(this.lbl_title_setup, 1, 0);
             this.tbl_controls.Controls.Add(this.lbl_title_coordinates, 0, 7);
             this.tbl_controls.Controls.Add(this.lbl_title_control, 0, 3);
             this.tbl_controls.Controls.Add(this.lbl_pick, 1, 5);
@@ -99,11 +116,10 @@
             this.tbl_controls.Controls.Add(this.led_rotate, 4, 6);
             this.tbl_controls.Controls.Add(this.led_shake, 5, 6);
             this.tbl_controls.Controls.Add(this.led_flip, 6, 6);
-            this.tbl_controls.Controls.Add(this.lbl_selectedCamera, 0, 1);
+            this.tbl_controls.Controls.Add(this.lbl_camera, 0, 1);
             this.tbl_controls.Controls.Add(this.lbl_approachFlexibowl, 0, 5);
             this.tbl_controls.Controls.Add(this.led_approachFlexibowl, 0, 6);
-            this.tbl_controls.Controls.Add(this.cmb_algorithm, 2, 2);
-            this.tbl_controls.Controls.Add(this.btn_start, 6, 1);
+            this.tbl_controls.Controls.Add(this.btn_start, 0, 0);
             this.tbl_controls.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tbl_controls.Location = new System.Drawing.Point(0, 0);
             this.tbl_controls.Name = "tbl_controls";
@@ -120,47 +136,70 @@
             this.tbl_controls.Size = new System.Drawing.Size(1537, 513);
             this.tbl_controls.TabIndex = 21;
             // 
+            // btn_stop
+            // 
+            this.btn_stop.BackgroundImage = global::OptiSort.Properties.Resources.stopDisabled_2x2_pptx;
+            this.btn_stop.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btn_stop.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btn_stop.Location = new System.Drawing.Point(1317, 3);
+            this.btn_stop.Name = "btn_stop";
+            this.btn_stop.Size = new System.Drawing.Size(217, 52);
+            this.btn_stop.TabIndex = 24;
+            this.btn_stop.UseVisualStyleBackColor = true;
+            // 
+            // lbl_actualSelectedCamera
+            // 
+            this.lbl_actualSelectedCamera.AutoSize = true;
+            this.lbl_actualSelectedCamera.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_actualSelectedCamera.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_actualSelectedCamera.Location = new System.Drawing.Point(222, 58);
+            this.lbl_actualSelectedCamera.Name = "lbl_actualSelectedCamera";
+            this.lbl_actualSelectedCamera.Size = new System.Drawing.Size(213, 67);
+            this.lbl_actualSelectedCamera.TabIndex = 20;
+            this.lbl_actualSelectedCamera.Text = "None";
+            this.lbl_actualSelectedCamera.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // lbl_title_setup
             // 
             this.lbl_title_setup.AutoSize = true;
-            this.lbl_title_setup.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.tbl_controls.SetColumnSpan(this.lbl_title_setup, 7);
+            this.lbl_title_setup.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.tbl_controls.SetColumnSpan(this.lbl_title_setup, 5);
             this.lbl_title_setup.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_title_setup.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_title_setup.Location = new System.Drawing.Point(3, 0);
+            this.lbl_title_setup.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_title_setup.Location = new System.Drawing.Point(222, 0);
             this.lbl_title_setup.Name = "lbl_title_setup";
-            this.lbl_title_setup.Size = new System.Drawing.Size(1531, 58);
+            this.lbl_title_setup.Size = new System.Drawing.Size(1089, 58);
             this.lbl_title_setup.TabIndex = 18;
-            this.lbl_title_setup.Text = "Process setup";
-            this.lbl_title_setup.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lbl_title_setup.Text = "Process Statistics";
+            this.lbl_title_setup.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lbl_title_coordinates
             // 
             this.lbl_title_coordinates.AutoSize = true;
-            this.lbl_title_coordinates.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.lbl_title_coordinates.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.tbl_controls.SetColumnSpan(this.lbl_title_coordinates, 7);
             this.lbl_title_coordinates.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_title_coordinates.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_title_coordinates.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold);
             this.lbl_title_coordinates.Location = new System.Drawing.Point(3, 451);
             this.lbl_title_coordinates.Name = "lbl_title_coordinates";
             this.lbl_title_coordinates.Size = new System.Drawing.Size(1531, 62);
             this.lbl_title_coordinates.TabIndex = 17;
-            this.lbl_title_coordinates.Text = "MQTT locations backlog";
-            this.lbl_title_coordinates.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lbl_title_coordinates.Text = "Components Detection Backlog";
+            this.lbl_title_coordinates.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lbl_title_control
             // 
             this.lbl_title_control.AutoSize = true;
-            this.lbl_title_control.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.lbl_title_control.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.tbl_controls.SetColumnSpan(this.lbl_title_control, 7);
             this.lbl_title_control.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_title_control.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_title_control.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold);
             this.lbl_title_control.Location = new System.Drawing.Point(3, 192);
             this.lbl_title_control.Name = "lbl_title_control";
             this.lbl_title_control.Size = new System.Drawing.Size(1531, 58);
             this.lbl_title_control.TabIndex = 16;
-            this.lbl_title_control.Text = "Subsystems control";
-            this.lbl_title_control.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lbl_title_control.Text = "Subsystems Control";
+            this.lbl_title_control.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lbl_pick
             // 
@@ -320,6 +359,19 @@
             this.led_flip.TabIndex = 15;
             this.led_flip.Text = "ledBulb7";
             // 
+            // lbl_camera
+            // 
+            this.lbl_camera.AutoSize = true;
+            this.lbl_camera.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_camera.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_camera.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.lbl_camera.Location = new System.Drawing.Point(3, 58);
+            this.lbl_camera.Name = "lbl_camera";
+            this.lbl_camera.Size = new System.Drawing.Size(213, 67);
+            this.lbl_camera.TabIndex = 19;
+            this.lbl_camera.Text = "Active streaming:";
+            this.lbl_camera.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // lbl_approachFlexibowl
             // 
             this.lbl_approachFlexibowl.AutoSize = true;
@@ -342,77 +394,150 @@
             this.led_approachFlexibowl.Size = new System.Drawing.Size(60, 53);
             this.led_approachFlexibowl.TabIndex = 0;
             // 
-            // cmb_algorithm
-            // 
-            this.cmb_algorithm.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbl_controls.SetColumnSpan(this.cmb_algorithm, 2);
-            this.cmb_algorithm.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmb_algorithm.FormattingEnabled = true;
-            this.cmb_algorithm.Location = new System.Drawing.Point(441, 140);
-            this.cmb_algorithm.Name = "cmb_algorithm";
-            this.cmb_algorithm.Size = new System.Drawing.Size(432, 37);
-            this.cmb_algorithm.TabIndex = 22;
-            // 
-            // lbl_detectionAlgorithm
-            // 
-            this.lbl_detectionAlgorithm.AutoSize = true;
-            this.tbl_controls.SetColumnSpan(this.lbl_detectionAlgorithm, 2);
-            this.lbl_detectionAlgorithm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_detectionAlgorithm.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_detectionAlgorithm.Location = new System.Drawing.Point(3, 125);
-            this.lbl_detectionAlgorithm.Name = "lbl_detectionAlgorithm";
-            this.lbl_detectionAlgorithm.Size = new System.Drawing.Size(432, 67);
-            this.lbl_detectionAlgorithm.TabIndex = 21;
-            this.lbl_detectionAlgorithm.Text = "Detection algorithm:";
-            this.lbl_detectionAlgorithm.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lbl_selectedCamera
-            // 
-            this.lbl_selectedCamera.AutoSize = true;
-            this.tbl_controls.SetColumnSpan(this.lbl_selectedCamera, 2);
-            this.lbl_selectedCamera.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_selectedCamera.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_selectedCamera.Location = new System.Drawing.Point(3, 58);
-            this.lbl_selectedCamera.Name = "lbl_selectedCamera";
-            this.lbl_selectedCamera.Size = new System.Drawing.Size(432, 67);
-            this.lbl_selectedCamera.TabIndex = 19;
-            this.lbl_selectedCamera.Text = "Selected camera:";
-            this.lbl_selectedCamera.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lbl_actualSelectedCamera
-            // 
-            this.lbl_actualSelectedCamera.AutoSize = true;
-            this.lbl_actualSelectedCamera.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_actualSelectedCamera.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_actualSelectedCamera.Location = new System.Drawing.Point(441, 58);
-            this.lbl_actualSelectedCamera.Name = "lbl_actualSelectedCamera";
-            this.lbl_actualSelectedCamera.Size = new System.Drawing.Size(213, 67);
-            this.lbl_actualSelectedCamera.TabIndex = 20;
-            this.lbl_actualSelectedCamera.Text = "XXX";
-            this.lbl_actualSelectedCamera.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // btn_start
             // 
             this.btn_start.BackgroundImage = global::OptiSort.Properties.Resources.playDisabled_2x2_pptx;
             this.btn_start.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btn_start.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn_start.Location = new System.Drawing.Point(1317, 61);
+            this.btn_start.Location = new System.Drawing.Point(3, 3);
             this.btn_start.Name = "btn_start";
-            this.btn_start.Size = new System.Drawing.Size(217, 61);
+            this.btn_start.Size = new System.Drawing.Size(213, 52);
             this.btn_start.TabIndex = 23;
             this.btn_start.UseVisualStyleBackColor = true;
             this.btn_start.Click += new System.EventHandler(this.btn_start_Click);
             // 
-            // btn_stop
+            // tmr_process
             // 
-            this.btn_stop.BackgroundImage = global::OptiSort.Properties.Resources.stopDisabled_2x2_pptx;
-            this.btn_stop.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btn_stop.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn_stop.Location = new System.Drawing.Point(1317, 128);
-            this.btn_stop.Name = "btn_stop";
-            this.btn_stop.Size = new System.Drawing.Size(217, 61);
-            this.btn_stop.TabIndex = 24;
-            this.btn_stop.UseVisualStyleBackColor = true;
+            this.tmr_process.Enabled = true;
+            this.tmr_process.Interval = 1000;
+            this.tmr_process.Tick += new System.EventHandler(this.tmr_process_Tick);
+            // 
+            // lbl_elapsedTime
+            // 
+            this.lbl_elapsedTime.AutoSize = true;
+            this.lbl_elapsedTime.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_elapsedTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_elapsedTime.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.lbl_elapsedTime.Location = new System.Drawing.Point(3, 125);
+            this.lbl_elapsedTime.Name = "lbl_elapsedTime";
+            this.lbl_elapsedTime.Size = new System.Drawing.Size(213, 67);
+            this.lbl_elapsedTime.TabIndex = 25;
+            this.lbl_elapsedTime.Text = "Elapsed Time:";
+            this.lbl_elapsedTime.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lbl_cycleTimer
+            // 
+            this.lbl_cycleTimer.AutoSize = true;
+            this.lbl_cycleTimer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_cycleTimer.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_cycleTimer.Location = new System.Drawing.Point(222, 125);
+            this.lbl_cycleTimer.Name = "lbl_cycleTimer";
+            this.lbl_cycleTimer.Size = new System.Drawing.Size(213, 67);
+            this.lbl_cycleTimer.TabIndex = 26;
+            this.lbl_cycleTimer.Text = "mm:ss";
+            this.lbl_cycleTimer.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lbl_Adect
+            // 
+            this.lbl_Adect.AutoSize = true;
+            this.tbl_controls.SetColumnSpan(this.lbl_Adect, 2);
+            this.lbl_Adect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_Adect.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_Adect.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.lbl_Adect.Location = new System.Drawing.Point(441, 58);
+            this.lbl_Adect.Name = "lbl_Adect";
+            this.lbl_Adect.Size = new System.Drawing.Size(432, 67);
+            this.lbl_Adect.TabIndex = 28;
+            this.lbl_Adect.Text = "Components A detected:";
+            this.lbl_Adect.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.tbl_controls.SetColumnSpan(this.label3, 2);
+            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.label3.Location = new System.Drawing.Point(441, 125);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(432, 67);
+            this.label3.TabIndex = 27;
+            this.label3.Text = "Components B detected:";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lbl_Adetected
+            // 
+            this.lbl_Adetected.AutoSize = true;
+            this.lbl_Adetected.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_Adetected.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_Adetected.Location = new System.Drawing.Point(879, 58);
+            this.lbl_Adetected.Name = "lbl_Adetected";
+            this.lbl_Adetected.Size = new System.Drawing.Size(213, 67);
+            this.lbl_Adetected.TabIndex = 29;
+            this.lbl_Adetected.Text = "#";
+            this.lbl_Adetected.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lbl_Bdetected
+            // 
+            this.lbl_Bdetected.AutoSize = true;
+            this.lbl_Bdetected.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_Bdetected.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_Bdetected.Location = new System.Drawing.Point(879, 125);
+            this.lbl_Bdetected.Name = "lbl_Bdetected";
+            this.lbl_Bdetected.Size = new System.Drawing.Size(213, 67);
+            this.lbl_Bdetected.TabIndex = 30;
+            this.lbl_Bdetected.Text = "#";
+            this.lbl_Bdetected.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lbl_picked
+            // 
+            this.lbl_picked.AutoSize = true;
+            this.lbl_picked.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_picked.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_picked.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.lbl_picked.Location = new System.Drawing.Point(1098, 58);
+            this.lbl_picked.Name = "lbl_picked";
+            this.lbl_picked.Size = new System.Drawing.Size(213, 67);
+            this.lbl_picked.TabIndex = 31;
+            this.lbl_picked.Text = "Number picked:";
+            this.lbl_picked.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lbl_discarded
+            // 
+            this.lbl_discarded.AutoSize = true;
+            this.lbl_discarded.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_discarded.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_discarded.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.lbl_discarded.Location = new System.Drawing.Point(1098, 125);
+            this.lbl_discarded.Name = "lbl_discarded";
+            this.lbl_discarded.Size = new System.Drawing.Size(213, 67);
+            this.lbl_discarded.TabIndex = 32;
+            this.lbl_discarded.Text = "Number ignored:";
+            this.lbl_discarded.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lbl_nrPicked
+            // 
+            this.lbl_nrPicked.AutoSize = true;
+            this.lbl_nrPicked.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_nrPicked.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_nrPicked.Location = new System.Drawing.Point(1317, 58);
+            this.lbl_nrPicked.Name = "lbl_nrPicked";
+            this.lbl_nrPicked.Size = new System.Drawing.Size(217, 67);
+            this.lbl_nrPicked.TabIndex = 33;
+            this.lbl_nrPicked.Text = "#";
+            this.lbl_nrPicked.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lbl_nrDiscarded
+            // 
+            this.lbl_nrDiscarded.AutoSize = true;
+            this.lbl_nrDiscarded.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_nrDiscarded.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_nrDiscarded.Location = new System.Drawing.Point(1317, 125);
+            this.lbl_nrDiscarded.Name = "lbl_nrDiscarded";
+            this.lbl_nrDiscarded.Size = new System.Drawing.Size(217, 67);
+            this.lbl_nrDiscarded.TabIndex = 34;
+            this.lbl_nrDiscarded.Text = "#";
+            this.lbl_nrDiscarded.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // ucProcessView
             // 
@@ -453,10 +578,18 @@
         private System.Windows.Forms.Label lbl_title_setup;
         private System.Windows.Forms.Timer tmr_process;
         private System.Windows.Forms.Button btn_stop;
-        private System.Windows.Forms.Label lbl_detectionAlgorithm;
         private System.Windows.Forms.Label lbl_actualSelectedCamera;
-        private System.Windows.Forms.Label lbl_selectedCamera;
-        private System.Windows.Forms.ComboBox cmb_algorithm;
+        private System.Windows.Forms.Label lbl_camera;
         private System.Windows.Forms.Button btn_start;
+        private System.Windows.Forms.Label lbl_Adect;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label lbl_cycleTimer;
+        private System.Windows.Forms.Label lbl_elapsedTime;
+        private System.Windows.Forms.Label lbl_Adetected;
+        private System.Windows.Forms.Label lbl_nrDiscarded;
+        private System.Windows.Forms.Label lbl_nrPicked;
+        private System.Windows.Forms.Label lbl_discarded;
+        private System.Windows.Forms.Label lbl_picked;
+        private System.Windows.Forms.Label lbl_Bdetected;
     }
 }
