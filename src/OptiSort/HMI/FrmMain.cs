@@ -39,6 +39,8 @@ namespace OptiSort
         private string _mqttClient = Properties.Settings.Default.mqtt_client;
         private string _mqttBroker = Properties.Settings.Default.mqtt_broker;
 
+        private readonly ToolTip _toolTip = new ToolTip();
+
 
 
         // -----------------------------------------------------------------------------------
@@ -99,6 +101,9 @@ namespace OptiSort
 
             manager.Log("OptiSort ready for operation: please connect systems (Scara robot, flexibowl, MQTT service) to begin", false, false);
 
+
+            InitializeTooltips();
+
             // attach form closing event to process killer
             this.FormClosing += FrmMain_FormClosing;
         }
@@ -108,6 +113,24 @@ namespace OptiSort
             manager.KillAllProcesses(); // terminate all the python-related background processes
         }
 
+        private void InitializeTooltips()
+        {
+            _toolTip.SetToolTip(btnAuto, "Automatic process");
+            _toolTip.SetToolTip(btnManual, "Manual contorl of subsystems");
+            _toolTip.SetToolTip(btnConfig, "Configure HMI");
+            _toolTip.SetToolTip(btnEmulateScara, "Toggle scara emulation mode");
+            _toolTip.SetToolTip(btnScaraConnect, "Connect to scara robot");
+            _toolTip.SetToolTip(btnScaraDisconnect, "Disconnect from scara robot");
+            _toolTip.SetToolTip(btnFlexibowlConnect, "Connect to flexibowl robot");
+            _toolTip.SetToolTip(btnFlexibowlDisconnect, "Disconnect from flexibowl robot");
+            _toolTip.SetToolTip(btnMqttConnect, "Create MQTT client and connect to broker");
+            _toolTip.SetToolTip(btnMqttDisconnect, "Destroy MQTT client");
+            _toolTip.SetToolTip(btnCameraTesting, "Toggle camera manager testing mode (webcam)");
+            _toolTip.SetToolTip(btnCamerasConnect, "Launch camera manager in background");
+            _toolTip.SetToolTip(btnCamerasDisconnect, "Kill camera manager in background");
+            _toolTip.SetToolTip(btnDtConnect, "Activate scara digital shadow");
+            _toolTip.SetToolTip(btnDtConnect, "Deactivate scara digital shadow");
+        }
 
         // -----------------------------------------------------------------------------------
         // -------------------------------- FORM NAVIGATION ----------------------------------
