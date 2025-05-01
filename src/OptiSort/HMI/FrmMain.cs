@@ -260,18 +260,22 @@ namespace OptiSort
 
         private void UpdateConnectionButtons()
         {
-            btnScaraConnect.Enabled = !manager.StatusScara;
-            btnEmulateScara.Enabled = !manager.StatusScara;
-            btnFlexibowlConnect.Enabled = !manager.StatusFlexibowl;
-            btnMqttConnect.Enabled = !manager.StatusMqttClient;
-            btnCamerasConnect.Enabled = !manager.StatusCameraManager;
-            btnCameraTesting.Enabled = !manager.StatusCameraManager;
+            btnAuto.Enabled = !manager.AutomaticProcess;
+            btnManual.Enabled = !manager.AutomaticProcess;
+            btnConfig.Enabled = !manager.AutomaticProcess;
+
+            btnScaraConnect.Enabled = !manager.StatusScara & !manager.AutomaticProcess;
+            btnEmulateScara.Enabled = !manager.StatusScara & !manager.AutomaticProcess;
+            btnFlexibowlConnect.Enabled = !manager.StatusFlexibowl & !manager.AutomaticProcess;
+            btnMqttConnect.Enabled = !manager.StatusMqttClient & !manager.AutomaticProcess;
+            btnCamerasConnect.Enabled = !manager.StatusCameraManager & !manager.AutomaticProcess;
+            btnCameraTesting.Enabled = !manager.StatusCameraManager & !manager.AutomaticProcess;
             btnDtConnect.Enabled = !manager.StatusDigitalTwin;
 
-            btnScaraDisconnect.Enabled = manager.StatusScara;
-            btnFlexibowlDisconnect.Enabled = manager.StatusFlexibowl;
-            btnMqttDisconnect.Enabled = manager.StatusMqttClient;
-            btnCamerasDisconnect.Enabled = manager.StatusCameraManager;
+            btnScaraDisconnect.Enabled = manager.StatusScara & !manager.AutomaticProcess;
+            btnFlexibowlDisconnect.Enabled = manager.StatusFlexibowl & !manager.AutomaticProcess;
+            btnMqttDisconnect.Enabled = manager.StatusMqttClient & !manager.AutomaticProcess;
+            btnCamerasDisconnect.Enabled = manager.StatusCameraManager & !manager.AutomaticProcess;
             btnDtDisconnect.Enabled = manager.StatusDigitalTwin;
         }
 

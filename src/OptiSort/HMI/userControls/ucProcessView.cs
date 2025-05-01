@@ -15,14 +15,11 @@ namespace OptiSort.userControls
     public partial class ucProcessView : UserControl
     {
 
-        public bool AutomaticProcess { get; set; }
-
         private optisort_mgr _manager;
         private ucScaraTargets ScaraTargets;
         private PerformanceReport _report;
         private Watchdog _watchdog;
 
-        private bool _processActive = false;
         private bool _scaraIsMoving = false;
         private bool _flexibowlIsMoving = false;
 
@@ -31,7 +28,6 @@ namespace OptiSort.userControls
         private int _counterDetectedB = 0;
         private int _counterPicked = 0;
         private int _counterDiscarded = 0;
-
 
         internal ucProcessView(optisort_mgr manager)
         {
@@ -55,19 +51,19 @@ namespace OptiSort.userControls
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(_manager.StatusScara) || e.PropertyName == nameof(_manager.StatusMqttClient))
+            if (e.PropertyName == nameof(_manager.AutomaticProcess) || e.PropertyName == nameof(_manager.StatusScara) || e.PropertyName == nameof(_manager.StatusMqttClient))
             {
                 RefreshControls();
             }
 
-            if (e.PropertyName == nameof(_manager.StatusScara) && !_manager.StatusScara && _processActive) // scara status dropped: interrupt process
+            if (e.PropertyName == nameof(_manager.StatusScara) && !_manager.StatusScara && _manager.AutomaticProcess) // scara status dropped: interrupt process
             {
-                StopProcess();
+                InterruptProcess();
             }
 
-            if (e.PropertyName == nameof(_manager.StatusMqttClient) && !_manager.StatusMqttClient && _processActive) // mqtt connection dropped: interrupt process
+            if (e.PropertyName == nameof(_manager.StatusMqttClient) && !_manager.StatusMqttClient && _manager.AutomaticProcess) // mqtt connection dropped: interrupt process
             {
-                StopProcess();
+                InterruptProcess();
             }
 
         }
@@ -114,22 +110,18 @@ namespace OptiSort.userControls
             lbl_nrDiscarded.Text = _counterDiscarded.ToString();
 
             // update process time
-            if (_processActive)
-                lbl_cycleTimer.Text = $"{(DateTime.Now - _startTime):mm\\:ss}";
+            lbl_cycleTimer.Text = _manager.AutomaticProcess ? $"{(DateTime.Now - _startTime):mm\\:ss}" : "None";
 
             // change title colors to highlight active process
-            if (_processActive)
-            {
-                lbl_title_setup.BackColor = System.Drawing.Color.MediumSeaGreen;
-                lbl_title_control.BackColor = System.Drawing.Color.MediumSeaGreen;
-                lbl_title_coordinates.BackColor = System.Drawing.Color.MediumSeaGreen;
-            }
+            lbl_title_setup.BackColor = _manager.AutomaticProcess ? System.Drawing.Color.MediumSeaGreen : System.Drawing.SystemColors.GradientInactiveCaption;
+            lbl_title_control.BackColor = _manager.AutomaticProcess ? System.Drawing.Color.MediumSeaGreen : System.Drawing.SystemColors.GradientInactiveCaption;
+            lbl_title_coordinates.BackColor = _manager.AutomaticProcess ? System.Drawing.Color.MediumSeaGreen : System.Drawing.SystemColors.GradientInactiveCaption;
 
             // update start/stop push buttons
-            btn_start.BackgroundImage = _manager.StatusScara & _manager.StatusMqttClient & !_processActive ? Properties.Resources.playEnabled_2x2_pptx : Properties.Resources.playDisabled_2x2_pptx;
-            btn_stop.BackgroundImage = _manager.StatusScara & _manager.StatusMqttClient & _processActive ? Properties.Resources.stopEnabled_2x2_pptx : Properties.Resources.stopDisabled_2x2_pptx;
-            btn_start.Enabled = !_processActive;
-            btn_stop.Enabled = _processActive;
+            btn_start.BackgroundImage = _manager.StatusScara & _manager.StatusMqttClient & !_manager.AutomaticProcess ? Properties.Resources.playEnabled_2x2_pptx : Properties.Resources.playDisabled_2x2_pptx;
+            btn_stop.BackgroundImage = _manager.StatusScara & _manager.StatusMqttClient & _manager.AutomaticProcess ? Properties.Resources.stopEnabled_2x2_pptx : Properties.Resources.stopDisabled_2x2_pptx;
+            btn_start.Enabled = !_manager.AutomaticProcess;
+            btn_stop.Enabled = _manager.AutomaticProcess;
         }
 
 
@@ -147,9 +139,7 @@ namespace OptiSort.userControls
                 return;
             }
 
-
-            _manager.Log("Automatic process started...");
-            _processActive = true;
+            _manager.StartAutomaticProcess();
 
             // subscribe to target coordinates topic
             _manager.SubscribeMqttTopic(Properties.Settings.Default.mqtt_client, Properties.Settings.Default.mqtt_topic_scaraTarget);
@@ -172,10 +162,16 @@ namespace OptiSort.userControls
         }
 
 
+        private void btn_stop_Click(object sender, EventArgs e)
+        {
+            InterruptProcess();
+        }
+
+
         // refresh controls each second if process is active
         private void tmr_process_Tick(object sender, EventArgs e)
         {
-            if (_processActive)
+            if (_manager.AutomaticProcess)
                 RefreshControls();
         }
 
@@ -184,6 +180,10 @@ namespace OptiSort.userControls
 
         private void PickAndPlace()
         {
+
+            if (!_manager.AutomaticProcess)
+                return;
+                
             try
             {
                 if (!_scaraIsMoving && ScaraTargets.Backlog > 0) // prevent simultanous picking (physically impossible)
@@ -271,6 +271,9 @@ namespace OptiSort.userControls
 
         private void MoveFlexibowl()
         {
+            if (!_manager.AutomaticProcess)
+                return;
+
             if (!_scaraIsMoving)
             {
 
@@ -306,14 +309,30 @@ namespace OptiSort.userControls
         }
 
 
-        // Interrupt in case of stop button push or disconnections/problems occurs
-        private void StopProcess()
+        private void InterruptProcess()
         {
-            RefreshControls();
-            _processActive = false;
+            // wait until flexibowl is not moving anymore
+            while (_flexibowlIsMoving)
+            {
+                Thread.Sleep(100);
+            }
 
+            // wait until scara is not moving anymore
+            while (_scaraIsMoving)
+            {
+                Thread.Sleep(100);
+            }
 
+            _watchdog.Elapsed -= OnWatchdogElapsed;
+            _watchdog.Stop();
 
+            _manager.MqttClient.MessageReceived -= OnMessageReceived;
+            _manager.UnsubscribeMqttTopic(Properties.Settings.Default.mqtt_client, Properties.Settings.Default.mqtt_topic_scaraTarget);
+
+            ScaraTargets.ObjectDetected -= OnObjectDetected;
+            ScaraTargets.DropBacklog();
+
+            _manager.StopAutomaticProcess();
         }
 
         // ----------------------------------------------------- Utils --------------------------------------------------
@@ -347,5 +366,6 @@ namespace OptiSort.userControls
             //_ = _mqttClient.PublishMessage(_clientId, _mqttTopic, message);
         }
 
+        
     }
 }

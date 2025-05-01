@@ -32,8 +32,7 @@ namespace OptiSort
         public Cobra600 Cobra600 { get; set; }
         public Flexibowl Flexibowl { get; set; }
         public CameraManager Cameramanager { get; set; }
-        public DigitalTwin DigitalTwin { get; set; } 
-
+        public DigitalTwin DigitalTwin { get; set; }
 
 
         // Python runner
@@ -60,6 +59,7 @@ namespace OptiSort
         private bool _statusDigitalTwin = false;
         private string _streamingTopic = null;
         private bool _requestScreenshots = false;
+        private bool _automaticProcess = false;
 
         public bool StatusScara
         {
@@ -166,6 +166,18 @@ namespace OptiSort
                 {
                     _requestScreenshots = value;
                     OnPropertyChanged(nameof(RequestScreenshots));
+                }
+            }
+        }
+        public bool AutomaticProcess
+        {
+            get { return _automaticProcess; }
+            set
+            {
+                if (_automaticProcess != value) // setting value different from actual value -> store new value and trigger event
+                {
+                    _automaticProcess = value;
+                    OnPropertyChanged(nameof(AutomaticProcess));
                 }
             }
         }
@@ -580,7 +592,23 @@ namespace OptiSort
             DigitalTwin.Stop();
         }
 
+        public void StartAutomaticProcess()
+        {
+            if (!StatusScara || !StatusMqttClient)
+            {
+                NonBlockingMessageBox("Cannot start automatic process: SCARA robot or MQTT client is not connected", "Interlock!", MessageBoxIcon.Hand);
+                return;
+            }
+            
+            AutomaticProcess = true;
+            Log("Automatic process started!", false, false);
+        }
 
+        public void StopAutomaticProcess()
+        {
+            AutomaticProcess = false;
+            Log("Automatic process stopped!", false, false);
+        }
 
         #endregion
 
@@ -590,11 +618,11 @@ namespace OptiSort
 
         #region MQTT
 
-            /// <summary>
-            /// Triggered each time an MQTT arrives
-            /// </summary>
-            /// <param name="topic"></param>
-            /// <param name="message"></param>
+        /// <summary>
+        /// Triggered each time an MQTT arrives
+        /// </summary>
+        /// <param name="topic"></param>
+        /// <param name="message"></param>
         private void OnMessageReceived(string topic, JsonElement message)
         {
             // launch bitmap conversion only if message comes from streaming topics

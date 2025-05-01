@@ -160,6 +160,29 @@ namespace OptiSort
             }
         }
 
+        public void DropBacklog()
+        {
+            if (InvokeRequired)
+            {
+                // Marshal to the UI thread (needed to avoid cross-thread error)
+                Invoke(new Action(DropBacklog));
+            }
+            else
+            {
+                // removing all entries from the list
+                try
+                {
+                    _targetQueueList.Clear();
+                    Backlog = 0;
+                    dgvTargetQueue.Refresh();
+                }
+                catch (Exception ex)
+                {
+                    _manager.NonBlockingMessageBox($"Error clearing backlog: " + ex.ToString(), "Error!", MessageBoxIcon.Error);
+                }
+            }
+        }
+
 
         /// <summary>
         /// Represents a single row in the target queue table, containing both component description and coordinates.

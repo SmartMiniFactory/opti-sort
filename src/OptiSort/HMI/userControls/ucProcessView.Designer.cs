@@ -32,6 +32,16 @@
             this.components = new System.ComponentModel.Container();
             this.pnlScara = new System.Windows.Forms.Panel();
             this.tbl_controls = new System.Windows.Forms.TableLayoutPanel();
+            this.lbl_nrDiscarded = new System.Windows.Forms.Label();
+            this.lbl_nrPicked = new System.Windows.Forms.Label();
+            this.lbl_discarded = new System.Windows.Forms.Label();
+            this.lbl_picked = new System.Windows.Forms.Label();
+            this.lbl_Bdetected = new System.Windows.Forms.Label();
+            this.lbl_Adetected = new System.Windows.Forms.Label();
+            this.lbl_Adect = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.lbl_cycleTimer = new System.Windows.Forms.Label();
+            this.lbl_elapsedTime = new System.Windows.Forms.Label();
             this.btn_stop = new System.Windows.Forms.Button();
             this.lbl_actualSelectedCamera = new System.Windows.Forms.Label();
             this.lbl_title_setup = new System.Windows.Forms.Label();
@@ -56,16 +66,6 @@
             this.led_approachFlexibowl = new Bulb.LedBulb();
             this.btn_start = new System.Windows.Forms.Button();
             this.tmr_process = new System.Windows.Forms.Timer(this.components);
-            this.lbl_elapsedTime = new System.Windows.Forms.Label();
-            this.lbl_cycleTimer = new System.Windows.Forms.Label();
-            this.lbl_Adect = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.lbl_Adetected = new System.Windows.Forms.Label();
-            this.lbl_Bdetected = new System.Windows.Forms.Label();
-            this.lbl_picked = new System.Windows.Forms.Label();
-            this.lbl_discarded = new System.Windows.Forms.Label();
-            this.lbl_nrPicked = new System.Windows.Forms.Label();
-            this.lbl_nrDiscarded = new System.Windows.Forms.Label();
             this.tbl_controls.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -136,6 +136,133 @@
             this.tbl_controls.Size = new System.Drawing.Size(1537, 513);
             this.tbl_controls.TabIndex = 21;
             // 
+            // lbl_nrDiscarded
+            // 
+            this.lbl_nrDiscarded.AutoSize = true;
+            this.lbl_nrDiscarded.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_nrDiscarded.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_nrDiscarded.Location = new System.Drawing.Point(1317, 125);
+            this.lbl_nrDiscarded.Name = "lbl_nrDiscarded";
+            this.lbl_nrDiscarded.Size = new System.Drawing.Size(217, 67);
+            this.lbl_nrDiscarded.TabIndex = 34;
+            this.lbl_nrDiscarded.Text = "#";
+            this.lbl_nrDiscarded.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lbl_nrPicked
+            // 
+            this.lbl_nrPicked.AutoSize = true;
+            this.lbl_nrPicked.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_nrPicked.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_nrPicked.Location = new System.Drawing.Point(1317, 58);
+            this.lbl_nrPicked.Name = "lbl_nrPicked";
+            this.lbl_nrPicked.Size = new System.Drawing.Size(217, 67);
+            this.lbl_nrPicked.TabIndex = 33;
+            this.lbl_nrPicked.Text = "#";
+            this.lbl_nrPicked.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lbl_discarded
+            // 
+            this.lbl_discarded.AutoSize = true;
+            this.lbl_discarded.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_discarded.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_discarded.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.lbl_discarded.Location = new System.Drawing.Point(1098, 125);
+            this.lbl_discarded.Name = "lbl_discarded";
+            this.lbl_discarded.Size = new System.Drawing.Size(213, 67);
+            this.lbl_discarded.TabIndex = 32;
+            this.lbl_discarded.Text = "Number ignored:";
+            this.lbl_discarded.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lbl_picked
+            // 
+            this.lbl_picked.AutoSize = true;
+            this.lbl_picked.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_picked.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_picked.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.lbl_picked.Location = new System.Drawing.Point(1098, 58);
+            this.lbl_picked.Name = "lbl_picked";
+            this.lbl_picked.Size = new System.Drawing.Size(213, 67);
+            this.lbl_picked.TabIndex = 31;
+            this.lbl_picked.Text = "Number picked:";
+            this.lbl_picked.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lbl_Bdetected
+            // 
+            this.lbl_Bdetected.AutoSize = true;
+            this.lbl_Bdetected.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_Bdetected.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_Bdetected.Location = new System.Drawing.Point(879, 125);
+            this.lbl_Bdetected.Name = "lbl_Bdetected";
+            this.lbl_Bdetected.Size = new System.Drawing.Size(213, 67);
+            this.lbl_Bdetected.TabIndex = 30;
+            this.lbl_Bdetected.Text = "#";
+            this.lbl_Bdetected.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lbl_Adetected
+            // 
+            this.lbl_Adetected.AutoSize = true;
+            this.lbl_Adetected.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_Adetected.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_Adetected.Location = new System.Drawing.Point(879, 58);
+            this.lbl_Adetected.Name = "lbl_Adetected";
+            this.lbl_Adetected.Size = new System.Drawing.Size(213, 67);
+            this.lbl_Adetected.TabIndex = 29;
+            this.lbl_Adetected.Text = "#";
+            this.lbl_Adetected.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lbl_Adect
+            // 
+            this.lbl_Adect.AutoSize = true;
+            this.tbl_controls.SetColumnSpan(this.lbl_Adect, 2);
+            this.lbl_Adect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_Adect.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_Adect.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.lbl_Adect.Location = new System.Drawing.Point(441, 58);
+            this.lbl_Adect.Name = "lbl_Adect";
+            this.lbl_Adect.Size = new System.Drawing.Size(432, 67);
+            this.lbl_Adect.TabIndex = 28;
+            this.lbl_Adect.Text = "Components A detected:";
+            this.lbl_Adect.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.tbl_controls.SetColumnSpan(this.label3, 2);
+            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.label3.Location = new System.Drawing.Point(441, 125);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(432, 67);
+            this.label3.TabIndex = 27;
+            this.label3.Text = "Components B detected:";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lbl_cycleTimer
+            // 
+            this.lbl_cycleTimer.AutoSize = true;
+            this.lbl_cycleTimer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_cycleTimer.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_cycleTimer.Location = new System.Drawing.Point(222, 125);
+            this.lbl_cycleTimer.Name = "lbl_cycleTimer";
+            this.lbl_cycleTimer.Size = new System.Drawing.Size(213, 67);
+            this.lbl_cycleTimer.TabIndex = 26;
+            this.lbl_cycleTimer.Text = "mm:ss";
+            this.lbl_cycleTimer.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lbl_elapsedTime
+            // 
+            this.lbl_elapsedTime.AutoSize = true;
+            this.lbl_elapsedTime.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbl_elapsedTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_elapsedTime.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.lbl_elapsedTime.Location = new System.Drawing.Point(3, 125);
+            this.lbl_elapsedTime.Name = "lbl_elapsedTime";
+            this.lbl_elapsedTime.Size = new System.Drawing.Size(213, 67);
+            this.lbl_elapsedTime.TabIndex = 25;
+            this.lbl_elapsedTime.Text = "Elapsed Time:";
+            this.lbl_elapsedTime.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // btn_stop
             // 
             this.btn_stop.BackgroundImage = global::OptiSort.Properties.Resources.stopDisabled_2x2_pptx;
@@ -146,6 +273,7 @@
             this.btn_stop.Size = new System.Drawing.Size(217, 52);
             this.btn_stop.TabIndex = 24;
             this.btn_stop.UseVisualStyleBackColor = true;
+            this.btn_stop.Click += new System.EventHandler(this.btn_stop_Click);
             // 
             // lbl_actualSelectedCamera
             // 
@@ -411,133 +539,6 @@
             this.tmr_process.Enabled = true;
             this.tmr_process.Interval = 1000;
             this.tmr_process.Tick += new System.EventHandler(this.tmr_process_Tick);
-            // 
-            // lbl_elapsedTime
-            // 
-            this.lbl_elapsedTime.AutoSize = true;
-            this.lbl_elapsedTime.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_elapsedTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_elapsedTime.ForeColor = System.Drawing.SystemColors.AppWorkspace;
-            this.lbl_elapsedTime.Location = new System.Drawing.Point(3, 125);
-            this.lbl_elapsedTime.Name = "lbl_elapsedTime";
-            this.lbl_elapsedTime.Size = new System.Drawing.Size(213, 67);
-            this.lbl_elapsedTime.TabIndex = 25;
-            this.lbl_elapsedTime.Text = "Elapsed Time:";
-            this.lbl_elapsedTime.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lbl_cycleTimer
-            // 
-            this.lbl_cycleTimer.AutoSize = true;
-            this.lbl_cycleTimer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_cycleTimer.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_cycleTimer.Location = new System.Drawing.Point(222, 125);
-            this.lbl_cycleTimer.Name = "lbl_cycleTimer";
-            this.lbl_cycleTimer.Size = new System.Drawing.Size(213, 67);
-            this.lbl_cycleTimer.TabIndex = 26;
-            this.lbl_cycleTimer.Text = "mm:ss";
-            this.lbl_cycleTimer.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // lbl_Adect
-            // 
-            this.lbl_Adect.AutoSize = true;
-            this.tbl_controls.SetColumnSpan(this.lbl_Adect, 2);
-            this.lbl_Adect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_Adect.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_Adect.ForeColor = System.Drawing.SystemColors.AppWorkspace;
-            this.lbl_Adect.Location = new System.Drawing.Point(441, 58);
-            this.lbl_Adect.Name = "lbl_Adect";
-            this.lbl_Adect.Size = new System.Drawing.Size(432, 67);
-            this.lbl_Adect.TabIndex = 28;
-            this.lbl_Adect.Text = "Components A detected:";
-            this.lbl_Adect.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.tbl_controls.SetColumnSpan(this.label3, 2);
-            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.SystemColors.AppWorkspace;
-            this.label3.Location = new System.Drawing.Point(441, 125);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(432, 67);
-            this.label3.TabIndex = 27;
-            this.label3.Text = "Components B detected:";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lbl_Adetected
-            // 
-            this.lbl_Adetected.AutoSize = true;
-            this.lbl_Adetected.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_Adetected.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_Adetected.Location = new System.Drawing.Point(879, 58);
-            this.lbl_Adetected.Name = "lbl_Adetected";
-            this.lbl_Adetected.Size = new System.Drawing.Size(213, 67);
-            this.lbl_Adetected.TabIndex = 29;
-            this.lbl_Adetected.Text = "#";
-            this.lbl_Adetected.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // lbl_Bdetected
-            // 
-            this.lbl_Bdetected.AutoSize = true;
-            this.lbl_Bdetected.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_Bdetected.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_Bdetected.Location = new System.Drawing.Point(879, 125);
-            this.lbl_Bdetected.Name = "lbl_Bdetected";
-            this.lbl_Bdetected.Size = new System.Drawing.Size(213, 67);
-            this.lbl_Bdetected.TabIndex = 30;
-            this.lbl_Bdetected.Text = "#";
-            this.lbl_Bdetected.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // lbl_picked
-            // 
-            this.lbl_picked.AutoSize = true;
-            this.lbl_picked.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_picked.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_picked.ForeColor = System.Drawing.SystemColors.AppWorkspace;
-            this.lbl_picked.Location = new System.Drawing.Point(1098, 58);
-            this.lbl_picked.Name = "lbl_picked";
-            this.lbl_picked.Size = new System.Drawing.Size(213, 67);
-            this.lbl_picked.TabIndex = 31;
-            this.lbl_picked.Text = "Number picked:";
-            this.lbl_picked.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lbl_discarded
-            // 
-            this.lbl_discarded.AutoSize = true;
-            this.lbl_discarded.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_discarded.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_discarded.ForeColor = System.Drawing.SystemColors.AppWorkspace;
-            this.lbl_discarded.Location = new System.Drawing.Point(1098, 125);
-            this.lbl_discarded.Name = "lbl_discarded";
-            this.lbl_discarded.Size = new System.Drawing.Size(213, 67);
-            this.lbl_discarded.TabIndex = 32;
-            this.lbl_discarded.Text = "Number ignored:";
-            this.lbl_discarded.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lbl_nrPicked
-            // 
-            this.lbl_nrPicked.AutoSize = true;
-            this.lbl_nrPicked.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_nrPicked.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_nrPicked.Location = new System.Drawing.Point(1317, 58);
-            this.lbl_nrPicked.Name = "lbl_nrPicked";
-            this.lbl_nrPicked.Size = new System.Drawing.Size(217, 67);
-            this.lbl_nrPicked.TabIndex = 33;
-            this.lbl_nrPicked.Text = "#";
-            this.lbl_nrPicked.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // lbl_nrDiscarded
-            // 
-            this.lbl_nrDiscarded.AutoSize = true;
-            this.lbl_nrDiscarded.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbl_nrDiscarded.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_nrDiscarded.Location = new System.Drawing.Point(1317, 125);
-            this.lbl_nrDiscarded.Name = "lbl_nrDiscarded";
-            this.lbl_nrDiscarded.Size = new System.Drawing.Size(217, 67);
-            this.lbl_nrDiscarded.TabIndex = 34;
-            this.lbl_nrDiscarded.Text = "#";
-            this.lbl_nrDiscarded.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // ucProcessView
             // 
