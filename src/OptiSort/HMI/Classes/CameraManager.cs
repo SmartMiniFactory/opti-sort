@@ -14,32 +14,27 @@ namespace OptiSort.systems
     internal class CameraManager
     {
         private optisort_mgr _manager;
-        private frmMain _frmMain;
         private int _scriptID;
         private string _mqttClient = Properties.Settings.Default.mqtt_client;
+        private string _processingCamera = null;
 
-        public int Status { get; private set; }
+        public Status CurrentState { get; private set; } = Status.ended;
 
-        public enum status
+        public enum Status
         {
             init, 
-            webcam, 
-            cameras,
             idle,
-            config,
             ready,
             streaming,
-            processing, 
+            processing,
             ended
         }
 
 
-        public CameraManager(optisort_mgr manager, frmMain frmMain)
+        public CameraManager(optisort_mgr manager)
         {
             _manager = manager;
-            _frmMain = frmMain;
         } 
-
 
         public void ConnectCameraManager()
         {
@@ -60,6 +55,15 @@ namespace OptiSort.systems
             SendCommand("exit");
         }
 
+        private void SendCommand(string cmd)
+        {
+            var data = new
+            {
+                command = cmd
+            };
+            _manager.PublishMqttMessage(_mqttClient, "optisort/camera_manager/input", data);
+        }
+
 
         private void MqttMessageReceived(string topic, JsonElement message, int processID)
         {
@@ -69,27 +73,86 @@ namespace OptiSort.systems
                 {
                     string msg = messageElement.GetString();
                     _manager.Log($"Camera manager over MQTT ({processID}): " + msg, false, false);
+                }
 
-                    // TODO: review interaction mode
+                if (message.TryGetProperty("result", out JsonElement resultElement))
+                {
+                    int result = resultElement.GetInt16();
+                    
+                    if (Enum.IsDefined(typeof(Status), result))
+                    {
+                        Status newStatus = (Status)result;
 
-                    if (msg.Contains("booting"))
-                    {
- 
-                        if (_manager.StatusCameraTesting)
-                            SendCommand("webcam");
-                        else
-                            SendCommand("cameras");
+                        if (CurrentState != newStatus)
+                        {
+                            switch (newStatus)
+                            {
+                                case Status.init:
+                                    if (_manager.StatusCameraTesting)
+                                        SendCommand("webcam");
+                                    else
+                                        SendCommand("cameras");
+                                    break;
+
+                                case Status.idle:
+                                    if (_processingCamera != null)
+                                    {
+                                        var data = new
+                                        {
+                                            command = "process",
+                                            camera = _processingCamera
+                                        };
+                                        _manager.PublishMqttMessage(_mqttClient, "optisort/camera_manager/input", data);
+                                        _processingCamera = null;
+                                    }
+                                    else 
+                                        SendCommand("streaming");
+
+                                    break;
+                                
+                                case Status.ready:
+                                    SendCommand("start");
+                                    break;
+                            }
+                        }
+
+                        CurrentState = (Status)result;
+
                     }
-                    else if (msg.Contains("mode"))
+                    else
                     {
-                        SendCommand("streaming");
-                    }
-                    else if (msg.Contains("configured"))
-                    {
-                        SendCommand("start");
+                        Console.WriteLine($"Unknown state received: {result}");
                     }
 
                 }
+            }
+        }
+
+
+        public void SwitchToProcessing(string camera)
+        {
+            if (CurrentState == Status.streaming)
+            {
+                _processingCamera = camera;
+                SendCommand("stop");
+                _manager.Log($"Switching camera manager to processing mode for camera {camera}", false, false);
+            }
+            else
+            {
+                _manager.Log($"Camera manager is not in streaming mode, cannot switch to processing", true, false);
+            }
+        }
+
+        public void SwitchToStreaming()
+        {
+            if (CurrentState == Status.processing)
+            {
+                SendCommand("stop");
+                _manager.Log($"Switching camera manager to streaming mode ", false, false);
+            }
+            else
+            {
+                _manager.Log($"Camera manager is not in processing mode, cannot switch to streaming", true, false);
             }
         }
 
@@ -118,20 +181,6 @@ namespace OptiSort.systems
 
                 _manager.StatusCameraManager = false;
             }
-        }
-
-        private void UpdateCameraManagerStatus(status status)
-        {
-            Status = (int)status;
-        }
-
-        private void SendCommand(string cmd)
-        {
-            var data = new
-            {
-                command = cmd
-            };
-            _manager.PublishMqttMessage(_mqttClient, "optisort/camera_manager/input", data);
         }
 
     }

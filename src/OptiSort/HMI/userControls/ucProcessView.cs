@@ -139,6 +139,12 @@ namespace OptiSort.userControls
                 return;
             }
 
+            if (!_manager.StatusCameraManager)
+            {
+                _manager.NonBlockingMessageBox("Please connect Camera Manager to start automatic proces", "Interlock!", MessageBoxIcon.Hand);
+                return;
+            }
+
             _manager.StartAutomaticProcess();
 
             // subscribe to target coordinates topic
@@ -156,6 +162,8 @@ namespace OptiSort.userControls
             // start timer count
             lbl_actualSelectedCamera.Text = _manager.StreamingTopic;
             _startTime = DateTime.Now;
+
+            _manager.Cameramanager.SwitchToProcessing(_manager.StreamingTopic.Split('/')[1]); // extact camera name from streaming topic
 
             // initiate performance report
             //_report = new PerformanceReport(cameraId: "luxonis_01", initTimeMs: 98);

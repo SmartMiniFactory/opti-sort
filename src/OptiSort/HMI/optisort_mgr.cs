@@ -260,7 +260,7 @@ namespace OptiSort
             Flexibowl = new Flexibowl(flexibowlIP);
 
             // Instance class dedicated to managing cameras
-            Cameramanager = new CameraManager(this, frmMain);
+            Cameramanager = new CameraManager(this);
 
             // Instance class dedicated to managing digital twin
             DigitalTwin = new DigitalTwin(this, Cobra600); 

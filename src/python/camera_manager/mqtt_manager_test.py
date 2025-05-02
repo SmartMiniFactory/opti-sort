@@ -1,5 +1,4 @@
 import queue
-import sys
 import os
 import threading
 import paho.mqtt.client as mqtt
@@ -48,7 +47,7 @@ def on_publish(client, userdata, mid):
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT Broker!")
-        publish("Camera manager booting...", None)  # publish when connection is ensured
+        publish("Camera manager booting...", 0)  # publish when connection is ensured
     else:
         print(f"Failed to connect, return code {rc}")
 
@@ -277,7 +276,7 @@ class ProcessingHandler(threading.Thread):
         self.running.clear()
 
 
-states = ['init', 'webcam', 'cameras', 'idle', 'config', 'ready', 'streaming', 'processing', 'ended']
+states = ['init', 'idle', 'ready', 'streaming', 'processing', 'ended']
 
 
 # State Machine Class
@@ -376,18 +375,18 @@ class StateMachine:
         self.target_camera = None
 
         if self.testing:
-            publish("Webcam initialized! Send functioning mode [streaming only]", None)
+            publish("Webcam initialized! Send functioning mode [streaming only]", 1)
         else:
-            publish("Cameras initialized! Send functioning mode [streaming, processing]", None)
+            publish("Cameras initialized! Send functioning mode [streaming, processing]", 1)
 
 
     def config(self):
         try:
             self.camera_manager.configure(self.target_camera)
             if self.testing:
-                publish("Webcam configured! Send start command", None)
+                publish("Webcam configured! Send start command", 2)
             else:
-                publish("Cameras configured! Send start command", None)
+                publish("Cameras configured! Send start command", 2)
         except Exception as e:
             publish(f"{e}", None)  # publish error message over mqtt
 
@@ -395,7 +394,7 @@ class StateMachine:
         try:
             self.streaming_handler = StreamingHandler(self.camera_manager)
             self.streaming_handler.start()
-            publish("Stream started!", None)
+            publish("Stream started!", 3)
         except Exception as e:
             publish(f"{e}", None)  # publish error message over mqtt
 
@@ -406,7 +405,7 @@ class StateMachine:
             else:
                 self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
                 self.processing_handler.start()
-                publish("Process started!", None)
+                publish("Process started!", 4)
         except Exception as e:
             publish(f"{e}", None)  # publish error message over mqtt
 
