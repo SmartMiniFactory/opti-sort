@@ -152,7 +152,7 @@ def detect_shapes_and_classify(frame):
                     continue
 
                 marker_peri = cv2.arcLength(marker, True)
-                approx_marker = cv2.approxPolyDP(marker, 0.025 * marker_peri, True)
+                approx_marker = cv2.approxPolyDP(marker, 0.03 * marker_peri, True)
 
                 shape = None
                 marker_color = (0, 0, 255)  # Default red (unidentified)
@@ -321,87 +321,221 @@ def add_legend(image, labels_colors, position=(10, 10), box_size=(20, 20), spaci
     return image
 
 
-# Buffer per le posizioni rilevate (per esempio, memorizziamo le posizioni per 10 cicli)
-position_buffer = []
-BUFFER_SIZE = 10
+def compute_pixel_mm_scale(img, grid_size, square_size_mm, draw=True):
+    """ Compute pixel/mm ratio from checkerboard grid and visualize origin + axes """
+    pattern_size = grid_size  # (cols, rows)
+    objp = np.zeros((pattern_size[0]*pattern_size[1], 3), np.float32)
+    objp[:, :2] = np.mgrid[0:pattern_size[0], 0:pattern_size[1]].T.reshape(-1, 2)
+    objp *= square_size_mm
+
+    # Find corners
+    ret, corners = cv2.findChessboardCorners(img, pattern_size)
+    if not ret:
+        raise ValueError("Chessboard corners not found")
+
+    # Refine corners
+    if len(img.shape) == 3 and img.shape[2] == 3:
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    else:
+        gray = img.copy()
+    criteria = (cv2.TermCriteria_EPS + cv2.TermCriteria_MAX_ITER, 30, 0.001)
+    corners2 = cv2.cornerSubPix(gray, corners, (11,11), (-1,-1), criteria)
+
+    corners_np = corners2.reshape(-1, 2)
+
+    # === REORDER corners: always top-left to bottom-right ===
+    cols, rows = pattern_size
+    # Sort by Y first, then X (for row-wise ordering)
+    sorted_idx = np.lexsort((corners_np[:,0], corners_np[:,1]))  # Sort by Y then X
+    corners_ordered = corners_np[sorted_idx]
+
+    # Reshape in grid and check row consistency
+    corners_grid = corners_ordered.reshape((rows, cols, 2))  # Shape (rows, cols, 2)
+    # Ensure each row is left-to-right (sort X in each row)
+    for r in range(rows):
+        row = corners_grid[r]
+        row_sorted = row[np.argsort(row[:,0])]
+        corners_grid[r] = row_sorted
+
+    corners_np = corners_grid.reshape(-1, 2)
+
+    # Pixel distances
+    dx_pix = np.linalg.norm(corners_np[0] - corners_np[1])
+    dy_pix = np.linalg.norm(corners_np[0] - corners_np[cols])
+
+    scale_x = square_size_mm / dx_pix
+    scale_y = square_size_mm / dy_pix
+
+    # debug
+    # print(f"dx_pix (1 square X): {dx_pix:.2f} px")
+    # print(f"dy_pix (1 square Y): {dy_pix:.2f} px")
+    # print(f"Scale X: {scale_x:.4f} mm/px, Scale Y: {scale_y:.4f} mm/px")
+    # print(f"Pixel square ratio dx/dy: {dx_pix / dy_pix:.3f}")
+
+    # Compute top-left (origin) and center
+    chessboard_origin_px = tuple(corners_np[0])
+    chessboard_center_px = tuple(np.mean(corners_np, axis=0))
+
+    # Optional drawing
+    vis_img = None
+    if draw:
+        vis_img = img.copy()
+        if len(vis_img.shape) == 2:
+            vis_img = cv2.cvtColor(vis_img, cv2.COLOR_GRAY2BGR)
+
+        # Draw all corners
+        corners2_draw = corners_np.reshape(-1,1,2).astype(np.float32)
+        cv2.drawChessboardCorners(vis_img, pattern_size, corners2_draw, ret)
+
+        # Draw top-left origin (red)
+        cv2.circle(vis_img, (int(chessboard_origin_px[0]), int(chessboard_origin_px[1])), 7, (0,0,255), -1)
+        cv2.putText(vis_img, "Origin (0,0)", (int(chessboard_origin_px[0])+5, int(chessboard_origin_px[1])-5),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
+
+        # Draw center (green)
+        cv2.circle(vis_img, (int(chessboard_center_px[0]), int(chessboard_center_px[1])), 7, (0,255,0), -1)
+        cv2.putText(vis_img, "Center", (int(chessboard_center_px[0])+5, int(chessboard_center_px[1])-5),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1)
+
+        # Draw arrows showing X and Y directions
+        corner0 = corners_np[0]
+        corner_x = corners_np[1]
+        corner_y = corners_np[cols]
+        vec_x = corner_x - corner0
+        vec_y = corner_y - corner0
+
+        # Arrow X (blue)
+        end_x = (int(corner0[0] + vec_x[0]*2), int(corner0[1] + vec_x[1]*2))
+        cv2.arrowedLine(vis_img, (int(corner0[0]), int(corner0[1])), end_x, (255,0,0), 2, tipLength=0.2)
+        cv2.putText(vis_img, "+X", end_x, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 2)
+
+        # Arrow Y (cyan)
+        end_y = (int(corner0[0] + vec_y[0]*2), int(corner0[1] + vec_y[1]*2))
+        cv2.arrowedLine(vis_img, (int(corner0[0]), int(corner0[1])), end_y, (255,255,0), 2, tipLength=0.2)
+        cv2.putText(vis_img, "+Y", end_y, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,0), 2)
+
+    return scale_x, scale_y, chessboard_origin_px, chessboard_center_px, vis_img
+
+
+def pixel_to_scara(pixel_point, chessboard_center_px, scara_chessboard_center_mm, scale_x, scale_y, yaw_deg=0, apply_yaw=False):
+    """
+    Convert pixel point to SCARA coords using chessboard pixel center & scara center, with optional yaw rotation
+    + yaw = counter-clockwise rotation / openCV standard
+    + apply_yaw = boolean to decide whether to apply yaw rotation
+    """
+
+    # Compute pixel differences from chessboard center
+    dx_px = pixel_point[0] - chessboard_center_px[0]
+    dy_px = pixel_point[1] - chessboard_center_px[1]
+
+    # Flip X axis if necessary (as before)
+    dx_mm = -dx_px * scale_x
+    dy_mm = dy_px * scale_y
+
+    if apply_yaw:
+        # Convert yaw angle to radians
+        yaw_rad = np.deg2rad(yaw_deg)
+
+        # Rotation matrix
+        cos_yaw = np.cos(yaw_rad)
+        sin_yaw = np.sin(yaw_rad)
+
+        dx_mm_rot = cos_yaw * dx_mm - sin_yaw * dy_mm
+        dy_mm_rot = sin_yaw * dx_mm + cos_yaw * dy_mm
+    else:
+        dx_mm_rot = dx_mm
+        dy_mm_rot = dy_mm
+
+    # Final SCARA coordinates
+    X_scara = scara_chessboard_center_mm[0] + dx_mm_rot
+    Y_scara = scara_chessboard_center_mm[1] + dy_mm_rot
+
+    return (X_scara, Y_scara)
+
+
+# Buffer separati per ciascun tipo di componente
+position_buffers = {}  # Chiave: componente (es. 'AE'), Valore: lista di posizioni
+BUFFER_SIZE = 20 # higher = more restrictive
+TOLERANCE = 1.0  # Tolleranza massima in pixel (adatta questo valore dopo test)
+
 
 def stabilize_detection(result):
-    # Aggiungi la posizione rilevata al buffer
-    if result is not None:
-        position_buffer.append((result["x"], result["y"], result["angle"]))
+    """
+    Stabilizza la posizione rilevata usando una media mobile separata per tipo di componente.
+    Restituisce la posizione media stabilizzata solo se abbastanza stabile.
+    """
+    if result is None or "component" not in result:
+        return None
 
-        # Mantieni solo i primi BUFFER_SIZE risultati
-        if len(position_buffer) > BUFFER_SIZE:
-            position_buffer.pop(0)
+    component = result["component"]
 
-        # Calcola la posizione media se il buffer è abbastanza grande
-        if len(position_buffer) == BUFFER_SIZE:
-            avg_x = np.mean([pos[0] for pos in position_buffer])
-            avg_y = np.mean([pos[1] for pos in position_buffer])
-            avg_a = np.mean([pos[2] for pos in position_buffer])
-            return avg_x, avg_y, avg_a
+    # Inizializza il buffer se non esiste ancora per questo componente
+    if component not in position_buffers:
+        position_buffers[component] = []
+
+    buffer = position_buffers[component]
+    buffer.append((result["x"], result["y"], result["angle"]))
+
+    # Mantieni solo i primi BUFFER_SIZE risultati
+    if len(buffer) > BUFFER_SIZE:
+        buffer.pop(0)
+
+    # Calcola la media e verifica la stabilità se il buffer è pieno
+    if len(buffer) == BUFFER_SIZE:
+        xs = [pos[0] for pos in buffer]
+        ys = [pos[1] for pos in buffer]
+        angles = [pos[2] for pos in buffer]
+
+        avg_x = np.mean(xs)
+        avg_y = np.mean(ys)
+        avg_a = np.mean(angles)
+
+        std_x = np.std(xs)
+        std_y = np.std(ys)
+
+        if std_x < TOLERANCE and std_y < TOLERANCE:
+            return component, avg_x, avg_y, avg_a  # Ritorna anche il tipo di componente
         else:
-            return None  # Non abbastanza dati per una media stabile
-    return None
-
-
-def get_flexibowl_centre(image):
-
-    # Convert to grayscale if input is BGR
-    if len(frame.shape) == 3 and frame.shape[2] == 3:
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            return None  # Posizione non ancora stabile
     else:
-        gray = frame.copy()
+        return None
 
-    # Step 1: Canny Edge Detection
-    edges = cv2.Canny(gray, 50, 150)
 
-    # Step 2: Thresholding (Otsu)
-    _, binary = cv2.threshold(edges, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+# --- Parametri isteresi ---
+HYSTERESIS_DISTANCE_MM = 30.0  # distanza minima per triggerare un nuovo messaggio
 
-    # Step 3: Find contours
-    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+# Ultime posizioni inviate (per componente)
+last_sent_positions = {
+    'AE': None,
+    'BI': None,
+    'AI': None,
+    'BE': None
+}
 
-    best_fit = None
-    best_fit_score = 0
+def should_send_mqtt(component, current_scara_coords):
+    """
+    Determina se inviare il messaggio MQTT in base all'isteresi spaziale.
+    """
+    global last_sent_positions
 
-    for contour in contours:
-        if len(contour) < 50:  # Filter out small contours
-            continue
+    last_pos = last_sent_positions.get(component)
 
-        if len(contour) >= 5:  # fitEllipse requires at least 5 points
-            ellipse = cv2.fitEllipse(contour)
-            (x, y), (MA, ma), angle = ellipse
-            radius_estimate = (MA + ma) / 4  # approximate average radius
+    if last_pos is None:
+        # Nessuna posizione inviata prima → invia subito
+        last_sent_positions[component] = current_scara_coords
+        return True
 
-            if 50 < radius_estimate < 300:  # Radius filtering
-                # Step 5: Evaluate fit quality
-                ellipse_mask = np.zeros_like(gray)
-                cv2.ellipse(ellipse_mask, ellipse, 255, 2)
+    # Calcola distanza euclidea
+    dx = current_scara_coords[0] - last_pos[0]
+    dy = current_scara_coords[1] - last_pos[1]
+    distance = np.hypot(dx, dy)
 
-                # Count how many contour points fall on the ellipse
-                fit_score = 0
-                for pt in contour:
-                    px, py = pt[0]
-                    if ellipse_mask[py, px] == 255:
-                        fit_score += 1
-                fit_ratio = fit_score / len(contour)
-
-                # Update best match
-                if fit_ratio > best_fit_score and fit_ratio > 0.6:  # only good fits
-                    best_fit_score = fit_ratio
-                    best_fit = ellipse
-
-    # Step 6: Draw result
-    if best_fit is not None:
-        output = image.copy()
-        (x, y), (MA, ma), angle = best_fit
-        arc_center = (int(x), int(y))
-        return output, best_fit, arc_center
-
+    if distance >= HYSTERESIS_DISTANCE_MM:
+        # Aggiorna la posizione e consenti l'invio
+        last_sent_positions[component] = current_scara_coords
+        return True
     else:
-        print("No arc detected with sufficient fit quality.")
-
+        return False
 
 # ----------- Main -----------
 
@@ -410,6 +544,13 @@ if __name__ == "__main__":
     camera = IdsCamera()
     camera.initialize()
     camera.start_acquisition()
+
+    # Robot-provided chessboard center (where robot places center of checkerboard)
+    scara_chessboard_center_mm = (432.924, 224.126)  # Example mm, replace with your robot data
+    scara_chessboard_yaw_deg = 0
+
+    grid_size = (5, 7)  # cols, rows inner corners
+    square_size_mm = 4.5
 
     while True:
         # Capture frame
@@ -420,29 +561,51 @@ if __name__ == "__main__":
 
         # è possibile che serva stabilizzare il risultato
         if len(detected_objects) > 0:
-            print(detected_objects)
 
-        # stabilizzazione
-        """for result in detected_objects:
-            # Stabilizza la posizione del componente
-            stable_position = stabilize_detection(result)
+            for object in detected_objects:
 
-            if stable_position is not None:
-                # Mostra la posizione stabilizzata
-                stable_x, stable_y = stable_position
-                cv2.circle(labeled_image, (int(stable_x), int(stable_y)), 10, (0, 255, 0), -1)
-                print(f"Stabilized position: ({stable_x}, {stable_y})")"""
+                # print(object)
 
-        # Flexibowl center
-        output, best_fit, flexi_center = get_flexibowl_centre(frame)
-        cv2.ellipse(labeled_image, best_fit, (0, 255, 0), 2)
+                # Stabilizzazione
+                stable_position = stabilize_detection(object)  # Stabilizza la posizione del componente
 
-        print(f"Flexibowl's center {flexi_center}")
+                stable_position = stabilize_detection(object)
+
+                if stable_position is not None:
+                    component, stable_x, stable_y, stable_a = stable_position
+                    # print(f"[{component}] Stabilized position: ({stable_x:.2f}, {stable_y:.2f}, {stable_a:.2f})")
+
+                    # Prosegui solo con la posizione stabilizzata
+                    scale_x, scale_y, chessboard_origin_px, chessboard_center_px, vis_img = compute_pixel_mm_scale(
+                        frame, grid_size, square_size_mm
+                    )
+
+                    detected_pixel = (stable_x, stable_y)
+
+                    X_scara, Y_scara = pixel_to_scara(
+                        detected_pixel,
+                        chessboard_center_px,
+                        scara_chessboard_center_mm,
+                        scale_x,
+                        scale_y,
+                        scara_chessboard_yaw_deg
+                    )
+
+                    # print(f"[{component}] Pixel {detected_pixel} → Scara coords: ({X_scara:.2f}, {Y_scara:.2f}) mm\n")
+
+                    # ---- ISTERESI ----
+                    if should_send_mqtt(component, (X_scara, Y_scara)):
+                        # Placeholder per invio MQTT
+                        print(f"[MQTT] Send message for {component} at ({X_scara:.2f}, {Y_scara:.2f}) mm\n")
+
+
+
+                    if vis_img is not None:
+                        cv2.imshow("Chessboard + Axes", cv2.resize(vis_img, None, fx=0.5, fy=0.5))
 
         # Show the thresholded and labeled images
-        cv2.imshow("Thresholded", thresh)  # Uncomment if you want to see the thresholded image
-        # cv2.imshow("Flexibowl center", output)
-        cv2.imshow("Detected", labeled_image)
+        cv2.imshow("Thresholded", cv2.resize(thresh, None, fx=0.5, fy=0.5))  # Uncomment if you want to see the thresholded image
+        cv2.imshow("Detected", cv2.resize(labeled_image, None, fx=0.5, fy=0.5))
 
         # Exit condition (press 'q' to quit)
         if cv2.waitKey(1) & 0xFF == ord('q'):
