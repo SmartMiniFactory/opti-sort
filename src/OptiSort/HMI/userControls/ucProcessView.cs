@@ -146,27 +146,9 @@ namespace OptiSort.userControls
             }
 
             _manager.StartAutomaticProcess();
-
-            // subscribe to target coordinates topic
-            _manager.SubscribeMqttTopic(Properties.Settings.Default.mqtt_client, Properties.Settings.Default.mqtt_topic_scaraTarget);
-            _manager.MqttClient.MessageReceived += OnMessageReceived;
-            
-            // subscribe to detected events: triggers pick and place
-            ScaraTargets.ObjectDetected += OnObjectDetected;
-
-            // 5 seconds; used to move flexibowl if no objects are detected
-            _watchdog = new Watchdog(5000); 
-            _watchdog.Start();
-            _watchdog.Elapsed += OnWatchdogElapsed;
-
-            // start timer count
-            lbl_actualSelectedCamera.Text = _manager.StreamingTopic;
-            _startTime = DateTime.Now;
-
             _manager.Cameramanager.SwitchToProcessing(_manager.StreamingTopic.Split('/')[1]); // extact camera name from streaming topic
+            _manager.Cameramanager.CamerasWorking += BeginProcess; // subscribe to event to start process when cameras are ready
 
-            // initiate performance report
-            //_report = new PerformanceReport(cameraId: "luxonis_01", initTimeMs: 98);
         }
 
 
@@ -185,6 +167,33 @@ namespace OptiSort.userControls
 
 
         // ----------------------------------------------------- Process --------------------------------------------------
+
+
+        private void BeginProcess()
+        {
+
+            _manager.Cameramanager.CamerasWorking -= BeginProcess;
+
+            // subscribe to target coordinates topic
+            _manager.SubscribeMqttTopic(Properties.Settings.Default.mqtt_client, Properties.Settings.Default.mqtt_topic_scaraTarget);
+            _manager.MqttClient.MessageReceived += OnMessageReceived;
+
+            // subscribe to detected events: triggers pick and place
+            ScaraTargets.ObjectDetected += OnObjectDetected;
+
+            // 5 seconds; used to move flexibowl if no objects are detected
+            _watchdog = new Watchdog(5000);
+            _watchdog.Start();
+            _watchdog.Elapsed += OnWatchdogElapsed;
+
+            // start timer count
+            lbl_actualSelectedCamera.Text = _manager.StreamingTopic;
+            _startTime = DateTime.Now;
+
+
+            // initiate performance report
+            //_report = new PerformanceReport(cameraId: "luxonis_01", initTimeMs: 98);
+        }
 
         private void PickAndPlace()
         {
@@ -339,6 +348,8 @@ namespace OptiSort.userControls
 
             ScaraTargets.ObjectDetected -= OnObjectDetected;
             ScaraTargets.DropBacklog();
+
+            _manager.Cameramanager.SwitchToStreaming();
 
             _manager.StopAutomaticProcess();
         }

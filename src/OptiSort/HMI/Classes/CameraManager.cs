@@ -18,6 +18,8 @@ namespace OptiSort.systems
         private string _mqttClient = Properties.Settings.Default.mqtt_client;
         private string _processingCamera = null;
 
+        public event Action CamerasWorking;
+
         public Status CurrentState { get; private set; } = Status.ended;
 
         public enum Status
@@ -99,7 +101,7 @@ namespace OptiSort.systems
                                     {
                                         var data = new
                                         {
-                                            command = "process",
+                                            command = "processing",
                                             camera = _processingCamera
                                         };
                                         _manager.PublishMqttMessage(_mqttClient, "optisort/camera_manager/input", data);
@@ -112,6 +114,14 @@ namespace OptiSort.systems
                                 
                                 case Status.ready:
                                     SendCommand("start");
+                                    break;
+
+                                case Status.streaming:
+                                    CamerasWorking?.Invoke();
+                                    break;
+
+                                case Status.processing:
+                                    CamerasWorking?.Invoke();
                                     break;
                             }
                         }
