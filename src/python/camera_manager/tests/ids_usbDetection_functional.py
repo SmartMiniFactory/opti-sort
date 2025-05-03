@@ -569,8 +569,6 @@ if __name__ == "__main__":
                 # Stabilizzazione
                 stable_position = stabilize_detection(object)  # Stabilizza la posizione del componente
 
-                stable_position = stabilize_detection(object)
-
                 if stable_position is not None:
                     component, stable_x, stable_y, stable_a = stable_position
                     # print(f"[{component}] Stabilized position: ({stable_x:.2f}, {stable_y:.2f}, {stable_a:.2f})")

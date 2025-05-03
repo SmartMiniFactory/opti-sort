@@ -279,7 +279,14 @@ class ProcessingHandler:
 
     def _process_camera(self):
         try:
-            print("check")
+
+            # Robot-provided chessboard center (where robot places center of checkerboard)
+            scara_chessboard_center_mm = (432.924, 224.126)  # Example mm, replace with your robot data
+            scara_chessboard_yaw_deg = 0
+
+            grid_size = (5, 7)  # cols, rows inner corners
+            square_size_mm = 4.5
+
             self.camera_manager.start_acquisition(self.target_camera)
             while self.running.is_set():
                 next_publish_time = time.time() + 0.1
@@ -291,10 +298,58 @@ class ProcessingHandler:
                     print(f"[{self.target_camera}] Capture failed (likely stop): {e}")
                     break
 
-                if frame is not None:
-                    encoded = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])[1].tobytes()
+                proc = self.processor
+                thresh, labeled_image, detected_objects = proc.detect_shapes_and_classify(frame)
+
+                if labeled_image is not None:
+                    encoded = cv2.imencode(".jpg", labeled_image, [int(cv2.IMWRITE_JPEG_QUALITY), 90])[
+                        1].tobytes()
                     if encoded:
                         mqttc.publish(f"optisort/{self.target_camera}/stream", im2json(encoded))
+
+                if len(detected_objects) > 0:
+                    for object in detected_objects:
+                        stable_position = proc.stabilize_detection(object)  # Stabilizza la posizione del componente
+
+                        if stable_position is not None:
+                            component, stable_x, stable_y, stable_a = stable_position
+
+                            scale_x, scale_y, chessboard_origin_px, chessboard_center_px, vis_img = proc.compute_pixel_mm_scale(
+                                frame, grid_size, square_size_mm
+                            )
+
+                            detected_pixel = (stable_x, stable_y)
+
+                            X_scara, Y_scara = proc.pixel_to_scara(
+                                detected_pixel,
+                                chessboard_center_px,
+                                scara_chessboard_center_mm,
+                                scale_x,
+                                scale_y,
+                                scara_chessboard_yaw_deg
+                            )
+
+                            # ---- ISTERESI ----
+                            if proc.should_send_mqtt(component, (X_scara, Y_scara)):
+
+                                payload = {
+                                    "script": {
+                                        "path": (script_dir / script_name).as_posix(),
+                                        "PID": script_id
+                                    },
+                                    "message": {
+                                        "type": component,
+                                        "x": X_scara,
+                                        "y": Y_scara,
+                                        "z": 0.0,
+                                        "rx": 0.0,
+                                        "ry": 0.0,
+                                        "rz": 999.9
+                                    }
+                                }
+
+                                mqttc.publish('optisort/scara/target', str(json.dumps(payload)), qos=0)
+
                 time.sleep(max(next_publish_time - time.time(), 0))
         except Exception as e:
             raise ValueError(f"Processing failed: {e}") from e
