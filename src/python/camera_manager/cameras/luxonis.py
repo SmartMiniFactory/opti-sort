@@ -89,7 +89,6 @@ class Luxonis(BaseCamera):
         except Exception as e:
             raise RuntimeError(f"Failed to start streaming for Luxonis camera: {e}")
 
-
     def capture_frame(self):
         """
         Capture a single frame from the Luxonis camera stream.

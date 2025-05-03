@@ -68,19 +68,6 @@ class Basler(BaseCamera):
         except Exception as e:
             raise RuntimeError(f"Failed to start streaming for Basler camera: {e}")
 
-    def acquisition_stop(self):
-        """
-        Stop streaming images and close the camera.
-        """
-        try:
-            if self.camera and self.camera.IsGrabbing():
-                self.camera.StopGrabbing()
-            if self.camera and self.camera.IsOpen():
-                self.camera.Close()
-            print(f"Basler camera - acquisition stopped successfully!")
-        except Exception as e:
-            raise RuntimeError(f"Failed to stop streaming for Basler camera: {e}")
-
     def capture_frame(self):
         """
         Capture a single frame from the Basler camera stream.
@@ -101,3 +88,16 @@ class Basler(BaseCamera):
                 raise RuntimeError(f"Frame capture failed: {grab_result.ErrorCode} - {grab_result.ErrorDescription}")
         except Exception as e:
             raise RuntimeError(f"Failed to capture frame from Basler camera: {e}")
+
+    def acquisition_stop(self):
+        """
+        Stop streaming images and close the camera.
+        """
+        try:
+            if self.camera and self.camera.IsGrabbing():
+                self.camera.StopGrabbing()
+            if self.camera and self.camera.IsOpen():
+                self.camera.Close()
+            print(f"Basler camera - acquisition stopped successfully!")
+        except Exception as e:
+            raise RuntimeError(f"Failed to stop streaming for Basler camera: {e}")

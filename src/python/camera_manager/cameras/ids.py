@@ -110,22 +110,8 @@ class Ids(BaseCamera):
             raise RuntimeError(f"Failed to start streaming for IDS camera: {e}")
 
 
-    def acquisition_stop(self):
-        """
-        Stop the streaming process and release resources.
-        """
-        try:
-            # TODO: unrevised; check documentation
-            self.data_stream.stop_acquisition()
-            self.device.close()
-            print(f"IDS camera - acquisition stopped successfully!")
-        except Exception as e:
-            raise RuntimeError(f"Failed to stop streaming for IDS camera: {e}")
-
-
     def capture_frame(self):
         try:
-
             # https://www.1stvision.com/cameras/IDS/IDS-manuals/en/program-convert-images-generic.html
 
             # Wait for the buffer to be finished (timeout of 5000ms)
@@ -157,3 +143,24 @@ class Ids(BaseCamera):
 
         except Exception as e:
             raise RuntimeError(f"Failed to capture frame from IDS camera: {e}")
+
+
+    def acquisition_stop(self):
+        """
+        Stop the streaming process and release resources.
+        """
+        try:
+            for buffer in self.buffer_queue:
+                try:
+                    self.data_stream.revoke_buffer(buffer)
+                except Exception as e:
+                    print(f"Revoke buffer error (ignored): {e}")
+
+            # Device and system
+            try:
+                self.device.close()
+            except Exception as e:
+                print(f"Device close error (ignored): {e}")
+            print(f"IDS camera - acquisition stopped successfully!")
+        except Exception as e:
+            raise RuntimeError(f"Failed to stop streaming for IDS camera: {e}")
