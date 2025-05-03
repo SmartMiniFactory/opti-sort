@@ -158,7 +158,7 @@ class Ids(BaseCamera):
 
             # Device and system
             try:
-                self.device.close()
+                self.device = None
             except Exception as e:
                 print(f"Device close error (ignored): {e}")
             print(f"IDS camera - acquisition stopped successfully!")

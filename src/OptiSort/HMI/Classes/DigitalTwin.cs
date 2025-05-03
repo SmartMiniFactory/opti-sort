@@ -24,11 +24,10 @@ namespace OptiSort.Classes
             _scaraRobot = scaraRobot ?? throw new ArgumentNullException(nameof(scaraRobot));
 
             _timer = new System.Timers.Timer(100); // publish each 0.1 seconds
-            _timer.Elapsed += OnTimerElapsed;
+            
             _timer.AutoReset = true;
-
-            ConnectWebSocket();
         }
+
 
 
         private void ConnectWebSocket()
@@ -37,12 +36,12 @@ namespace OptiSort.Classes
 
             ws.OnOpen += (s, e) =>
             {
-                _manager.Log("✅ WebSocket connesso.", false, true);
+                _manager.Log("WebSocket connesso.", false, true);
             };
 
             ws.OnError += (s, e) =>
             {
-                _manager.Log("❌ Errore WebSocket: " + e.Message, true, false);
+                _manager.Log("Errore WebSocket: " + e.Message, true, false);
             };
 
             ThreadPool.QueueUserWorkItem(_ => ws.Connect());
@@ -50,6 +49,9 @@ namespace OptiSort.Classes
 
         public void Start()
         {
+            ConnectWebSocket();
+            _timer.Elapsed += OnTimerElapsed;
+
             _digitalTwinThread = new Thread(new ThreadStart(RunDigitalTwin));
             _digitalTwinThread.Start();
             _manager.Log("Digital Twin: Thread started", false, true);
@@ -91,7 +93,6 @@ namespace OptiSort.Classes
         }
 
 
-
         public void Stop()
         {
             // Stop the timer and the thread
@@ -101,6 +102,8 @@ namespace OptiSort.Classes
                 _digitalTwinThread.Join();
                 _manager.Log("Digital Twin: Thread stopped", false, true);
             }
+
+            ws.Close();
         }
     }
 }

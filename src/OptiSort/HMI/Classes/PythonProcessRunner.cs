@@ -39,6 +39,9 @@ namespace OptiSort.Classes
                 return 0;
             }
 
+            Console.WriteLine(Environment.Is64BitProcess ? "C# is 64 bit" : "C# is 32 bit");
+            // TODO: compile this whole class as x64 to avoid DLL issues
+
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = pythonExe,

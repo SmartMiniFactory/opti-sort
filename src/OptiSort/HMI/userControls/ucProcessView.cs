@@ -145,10 +145,9 @@ namespace OptiSort.userControls
                 return;
             }
 
-            _manager.StartAutomaticProcess();
             _manager.Cameramanager.SwitchToProcessing(_manager.StreamingTopic.Split('/')[1]); // extact camera name from streaming topic
             _manager.Cameramanager.CamerasWorking += BeginProcess; // subscribe to event to start process when cameras are ready
-
+            btn_start.Enabled = false; // disable button until process is started
         }
 
 
@@ -173,6 +172,7 @@ namespace OptiSort.userControls
         {
 
             _manager.Cameramanager.CamerasWorking -= BeginProcess;
+            _manager.StartAutomaticProcess();
 
             // subscribe to target coordinates topic
             _manager.SubscribeMqttTopic(Properties.Settings.Default.mqtt_client, Properties.Settings.Default.mqtt_topic_scaraTarget);

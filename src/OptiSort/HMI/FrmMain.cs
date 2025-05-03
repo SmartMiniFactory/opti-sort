@@ -261,6 +261,8 @@ namespace OptiSort
 
         private void UpdateConnectionButtons()
         {
+            cmbCameras.AllowDrop = !manager.AutomaticProcess;
+
             btnAuto.Enabled = !manager.AutomaticProcess;
             btnManual.Enabled = !manager.AutomaticProcess;
             btnConfig.Enabled = !manager.AutomaticProcess;

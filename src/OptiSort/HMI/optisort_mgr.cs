@@ -559,8 +559,10 @@ namespace OptiSort
                 return;
             }
 
-            Cameramanager.ConnectCameraManager();
-            StatusCameraManager = true;
+            if (Cameramanager.ConnectCameraManager())
+            {
+                StatusCameraManager = true;
+            }
         }
 
         public void DisconnectCameras()

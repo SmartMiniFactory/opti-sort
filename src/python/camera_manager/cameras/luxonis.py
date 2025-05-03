@@ -109,8 +109,8 @@ class Luxonis(BaseCamera):
         Stop the Luxonis camera device.
         """
         try:
-            if self.device:
-                del self.device
+            self.device.close()
+            self.device = None
             print("Luxonis camera - device disconnected!")
         except Exception as e:
             raise RuntimeError(f"Failed to stop streaming for Luxonis camera: {e}")

@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WebSocketSharp;
 
 namespace OptiSort.systems
 {
@@ -28,6 +29,7 @@ namespace OptiSort.systems
             idle,
             streaming,
             processing,
+            stopped,
             ended
         }
 
@@ -37,7 +39,7 @@ namespace OptiSort.systems
             _manager = manager;
         } 
 
-        public void ConnectCameraManager()
+        public bool ConnectCameraManager()
         {
             // subscribe to mqtt topic to receive updates from python file
             _manager.SubscribeMqttTopic(_mqttClient, "optisort/camera_manager/output");
@@ -50,7 +52,20 @@ namespace OptiSort.systems
             string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\camera_manager\main_CameraManager.py"));
             _scriptID = _manager.ExecuteScript(scriptPath);
 
-            _manager.Log($"Camera manager execution launched in background! (PID = {_scriptID})", false, false);
+            if (_scriptID == 0) 
+            {
+                _manager.NonBlockingMessageBox("Last camera manager execution remained unkilled in background! Please proceed to kill manually before retrying connection", "WARNING!", MessageBoxIcon.Warning);
+                _manager.UnsubscribeMqttTopic(_mqttClient, "optisort/camera_manager/output");
+                _manager.MqttMessageReceived -= MqttMessageReceived;
+                _manager.OnErrorReceived -= PythonErrorHandler;
+                _manager.OnExecutionTerminated -= PythonTerminationHandler;
+                return false;
+            }
+            else
+            {
+                _manager.Log($"Camera manager execution launched in background! (PID = {_scriptID})", false, false);
+                return true;
+            }
         }
 
         public void DisconnectCameraManager()
@@ -141,7 +156,7 @@ namespace OptiSort.systems
 
         public void SwitchToProcessing(string camera)
         {
-            if (CurrentState == Status.streaming)
+            if (CurrentState == Status.idle || CurrentState == Status.streaming)
             {
                 _processingCamera = camera;
                 SendCommand("stop");
@@ -149,20 +164,20 @@ namespace OptiSort.systems
             }
             else
             {
-                _manager.Log($"Camera manager is not in streaming mode, cannot switch to processing", true, false);
+                _manager.Log($"Unable to command processing mode", true, false);
             }
         }
 
         public void SwitchToStreaming()
         {
-            if (CurrentState == Status.processing)
+            if (CurrentState == Status.idle || CurrentState == Status.processing)
             {
                 SendCommand("stop");
                 _manager.Log($"Switching camera manager to streaming mode ", false, false);
             }
             else
             {
-                _manager.Log($"Camera manager is not in processing mode, cannot switch to streaming", true, false);
+                _manager.Log($"Unable to command streaming mode", true, false);
             }
         }
 

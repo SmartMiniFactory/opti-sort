@@ -26,6 +26,10 @@ temp_folder = script_dir / "../../OptiSort/HMI/Temp"
 config_folder = script_dir / "../../OptiSort/HMI/Config"
 ids_configfile = config_folder / "ids_configuration.ini"
 basler_configfile = config_folder / "basler_configuration.pfs"
+# os.add_dll_directory(r"C:\Program Files\Basler\pylon 8\Runtime\Win32")
+
+
+
 
 # MQTT configuration
 broker = '127.0.0.1'
@@ -191,21 +195,11 @@ class CameraManager:
 
     def stop_acquisition(self, cam_name):
         """Stops acquisition for a given camera."""
-        self.cameras[cam_name].acquisition_stop()
-
-    def shutdown(self):
-        """Release all camera resources safely."""
         with self.lock:
-            for name, cam in self.cameras.items():
-                try:
-                    if self.testing and name == 'webcam':
-                        cam.release()
-                    else:
-                        cam.acquisition_stop()  # in case running
-                        cam.close()  # or cam.shutdown(), depends on SDK
-                except Exception as e:
-                    print(f"[WARN] Failed to cleanly shutdown {name}: {e}")
-            self.cameras.clear()
+            try:
+                self.cameras[cam_name].acquisition_stop()
+            except Exception as e:
+                publish(f"[WARN] Failed to cleanly shutdown {cam_name}: {e}", None)
 
 
 # === STREAMING HANDLER ===
@@ -233,7 +227,13 @@ class StreamingHandler:
             self.camera_manager.start_acquisition(cam_name)
             while self.running.is_set():
                 next_publish_time = time.time() + 0.5
-                frame = self.camera_manager.capture_frame(cam_name)
+
+                try:
+                    frame = self.camera_manager.capture_frame(cam_name)
+                except Exception as e:
+                    # quitting if camera results closed
+                    print(f"[{cam_name}] Capture failed (likely stop): {e}")
+                    break
 
                 if frame is not None:
                     encoded = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])[1].tobytes()
@@ -251,11 +251,12 @@ class StreamingHandler:
     def stop(self):
         """Stops all streaming threads and camera acquisitions."""
         self.running.clear()
-        for thread in self.threads.values():
-            thread.join()
 
         for cam in self.cameras:
             self.camera_manager.stop_acquisition(cam)
+
+        for thread in self.threads.values():
+            thread.join()
 
 
 # === PROCESSING HANDLER ===
@@ -282,7 +283,14 @@ class ProcessingHandler:
             self.camera_manager.start_acquisition(self.target_camera)
             while self.running.is_set():
                 next_publish_time = time.time() + 0.1
-                frame = self.camera_manager.capture_frame(self.target_camera)
+
+                try:
+                    frame = self.camera_manager.capture_frame(self.target_camera)
+                except Exception as e:
+                    # quitting if camera results closed
+                    print(f"[{self.target_camera}] Capture failed (likely stop): {e}")
+                    break
+
                 if frame is not None:
                     encoded = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])[1].tobytes()
                     if encoded:
@@ -294,8 +302,9 @@ class ProcessingHandler:
     def stop(self):
         """Stops processing and publishes final metrics."""
         self.running.clear()
-        self.thread.join()
         self.camera_manager.stop_acquisition(self.target_camera)
+        self.thread.join()
+
 
 
 
@@ -396,8 +405,8 @@ class StateMachine:
             self.processing_handler.stop()
             self.processing_handler = None
 
-        self.camera_manager.shutdown()
-        publish("All activities stopped. Attempting self-reinitialization...", None)
+        self.camera_manager = None
+        publish("All activities stopped. Attempting self-reinitialization...", 4)
         mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
         self.initialize()
 
@@ -408,6 +417,9 @@ class StateMachine:
 
             if self.processing_handler is not None:
                 self.processing_handler.stop()
+
+            self.camera_manager = None
+            publish(f"Terminating program", 5)
 
         except Exception as e:
             publish(f"Error while terminating: {e}")
