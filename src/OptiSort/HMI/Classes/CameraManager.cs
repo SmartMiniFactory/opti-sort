@@ -49,11 +49,14 @@ namespace OptiSort.systems
 
             string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\camera_manager\main_CameraManager.py"));
             _scriptID = _manager.ExecuteScript(scriptPath);
+
+            _manager.Log($"Camera manager execution launched in background! (PID = {_scriptID})", false, false);
         }
 
         public void DisconnectCameraManager()
         {
             SendCommand("exit");
+            _manager.Log($"Terminating camera manager background execution (PID = {_scriptID})", false, false);
         }
 
         private void SendCommand(string cmd)
@@ -63,6 +66,7 @@ namespace OptiSort.systems
                 command = cmd
             };
             _manager.PublishMqttMessage(_mqttClient, "optisort/camera_manager/input", data);
+            _manager.Log($"Command sent to camera manager: {cmd}", false, false);
         }
 
 
@@ -105,6 +109,7 @@ namespace OptiSort.systems
                                         };
                                         _manager.PublishMqttMessage(_mqttClient, "optisort/camera_manager/input", data);
                                         _processingCamera = null;
+                                        _manager.Log($"Command sent to camera manager: process", false, false);
                                     }
                                     else 
                                         SendCommand("stream");
