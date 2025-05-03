@@ -194,7 +194,6 @@ class CameraManager:
 # === STREAMING HANDLER ===
 
 class StreamingHandler:
-    """Handles continuous streaming of frames from cameras to MQTT."""
 
     def __init__(self, camera_manager):
         self.camera_manager = camera_manager
@@ -244,37 +243,42 @@ class StreamingHandler:
 
 # === PROCESSING HANDLER ===
 
-class ProcessingHandler(threading.Thread):
-    """Handles image acquisition and processing for a specific camera."""
+class ProcessingHandler:
 
     def __init__(self, camera_manager, target_camera):
-        super().__init__()
         self.camera_manager = camera_manager
+        self.thread = None
+        self.running = threading.Event()
         self.target_camera = target_camera
         self.running = threading.Event()
-        self.running.set()
         self.processor = ImageProcessor()
 
     def run(self):
         """Continuously captures, processes, and publishes frames."""
+        self.running.set()
+        self.thread = threading.Thread(target=self._process_camera())
+        self.thread.start()
+
+    def _process_camera(self):
         try:
             self.camera_manager.start_acquisition(self.target_camera)
             while self.running.is_set():
+                next_publish_time = time.time() + 0.1
                 frame = self.camera_manager.capture_frame(self.target_camera)
                 if frame is not None:
-                    self.processor.calculate_image_quality(frame)
-                    encoded, buffer = cv2.imencode('.jpg', frame)
+                    encoded = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])[1].tobytes()
                     if encoded:
-                        mqttc.publish(f"optisort/{self.target_camera}/stream", im2json(buffer))
-                time.sleep(0.01)
+                        mqttc.publish(f"optisort/{self.target_camera}/stream", im2json(encoded))
+                time.sleep(max(next_publish_time - time.time(), 0))
         except Exception as e:
             raise ValueError(f"Processing failed: {e}") from e
 
     def stop(self):
         """Stops processing and publishes final metrics."""
-        self.camera_manager.stop_acquisition(self.target_camera)
-        publish("Processing ended", self.processor.get_metrics())
         self.running.clear()
+        self.thread.join()
+        self.camera_manager.stop_acquisition(self.target_camera)
+
 
 
 # === STATE MACHINE ===
