@@ -26,7 +26,6 @@ namespace OptiSort.systems
         {
             init, 
             idle,
-            ready,
             streaming,
             processing,
             ended
@@ -48,7 +47,7 @@ namespace OptiSort.systems
             _manager.OnErrorReceived += PythonErrorHandler;
             _manager.OnExecutionTerminated += PythonTerminationHandler;
 
-            string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\camera_manager\mqtt_manager_test.py"));
+            string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\camera_manager\main_CameraManager.py"));
             _scriptID = _manager.ExecuteScript(scriptPath);
         }
 
@@ -101,14 +100,14 @@ namespace OptiSort.systems
                                     {
                                         var data = new
                                         {
-                                            command = "processing",
+                                            command = "process",
                                             camera = _processingCamera
                                         };
                                         _manager.PublishMqttMessage(_mqttClient, "optisort/camera_manager/input", data);
                                         _processingCamera = null;
                                     }
                                     else 
-                                        SendCommand("streaming");
+                                        SendCommand("stream");
 
                                     break;
                                 

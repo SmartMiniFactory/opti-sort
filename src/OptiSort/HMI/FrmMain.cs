@@ -12,6 +12,7 @@ using FlexibowlLibrary;
 using System.Drawing.Text;
 using System.IO;
 using OptiSort.systems;
+using System.Text.RegularExpressions;
 
 
 namespace OptiSort
@@ -475,8 +476,11 @@ namespace OptiSort
             var logEntry = lstLog.Items[e.Index] as optisort_mgr.LogEntry;
             if (logEntry == null) return;
 
+            // define regex to catch numbers in parentheses (python processes)
+            Regex numberInParentheses = new Regex(@"\(\d+\)");
+
             // Set the text color based on IsError or isSuccess
-            Brush textBrush = logEntry.IsError ? Brushes.Red : logEntry.IsSuccess ? Brushes.Green : Brushes.Black;
+            Brush textBrush = logEntry.IsError ? Brushes.Red : logEntry.IsSuccess ? Brushes.Green : numberInParentheses.IsMatch(logEntry.Message) ? Brushes.Blue : Brushes.Black;
 
             // Draw the background and text
             e.DrawBackground();
