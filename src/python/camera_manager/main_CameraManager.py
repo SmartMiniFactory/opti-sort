@@ -6,7 +6,6 @@ import datetime
 import pathlib
 import base64
 import json
-import queue
 import xml.etree.ElementTree as ET
 import cv2
 import paho.mqtt.client as mqtt
@@ -53,11 +52,6 @@ def publish(message, result=None):
     mqttc.publish('optisort/camera_manager/output', json.dumps(payload), qos=0)
 
 
-def on_publish(client, userdata, mid):
-    """Callback for confirming MQTT publish (debugging)."""
-    print(f"Message Published: {client}, {userdata}, {mid}")
-
-
 def on_connect(client, userdata, flags, rc):
     """Callback for MQTT connection event."""
     if rc == 0:
@@ -69,6 +63,8 @@ def on_connect(client, userdata, flags, rc):
 
 def parse_appconfig(file_path):
     """Parses XML configuration to extract broker, port, and camera topics."""
+    broker = "127.0.0.1"
+    port = 1883
     camera_topics = []
     tree = ET.parse(file_path)
     for element in tree.getroot():
@@ -208,16 +204,16 @@ class StreamingHandler:
         self.running = threading.Event()
         self.cameras = []
 
-    def start(self):
+    def run(self):
         """Starts streaming threads for all cameras."""
         self.running.set()
         self.cameras = ['webcam', 'webcam', 'webcam'] if self.camera_manager.testing else ['ids', 'basler', 'luxonis']
 
         for cam in self.cameras:
-            self.threads[cam] = threading.Thread(target=self.stream_camera, args=(cam,))
+            self.threads[cam] = threading.Thread(target=self._stream_camera, args=(cam,))
             self.threads[cam].start()
 
-    def stream_camera(self, cam_name):
+    def _stream_camera(self, cam_name):
         """Captures and publishes frames from a single camera."""
         try:
             self.camera_manager.start_acquisition(cam_name)
@@ -240,9 +236,10 @@ class StreamingHandler:
 
     def stop(self):
         """Stops all streaming threads and camera acquisitions."""
-        self.running.clear()
         for cam in self.cameras:
             self.camera_manager.stop_acquisition(cam)
+
+        self.running.clear()
         for thread in self.threads.values():
             thread.join()
 
@@ -277,6 +274,7 @@ class ProcessingHandler(threading.Thread):
 
     def stop(self):
         """Stops processing and publishes final metrics."""
+        self.camera_manager.stop_acquisition(self.target_camera)
         publish("Processing ended", self.processor.get_metrics())
         self.running.clear()
 
@@ -291,9 +289,9 @@ class StateMachine:
     def __init__(self):
         self.machine = Machine(model=self, states=states, initial='init')
         self.machine.add_transition('initialize', 'init', 'idle', after=self.idle)
-        self.machine.add_transition('set_idle', '*', 'idle', after=self.idle)
-        self.machine.add_transition('start_stream', 'ready', 'streaming', after=self.stream)
-        self.machine.add_transition('start_process', 'ready', 'processing', after=self.process)
+        self.machine.add_transition('start_stream', 'idle', 'streaming', after=self.stream)
+        self.machine.add_transition('start_process', 'idle', 'processing', after=self.process)
+        self.machine.add_transition('stop', '[streaming, processing]', 'idle', after=self.stop)
         self.machine.add_transition('terminate', '*', 'ended', after=self.exit_script)
 
         self.camera_manager = None
@@ -316,42 +314,21 @@ class StateMachine:
 
             self.testing = (command == "webcam")
             publish(f"Initializing {'webcam' if self.testing else 'cameras'}...", None)
-
-            try:
-                self.camera_manager = CameraManager(self.testing)
-                self.initialize()
-            except Exception as e:
-                publish(str(e), None)
-                self.terminate()
+            self.initialize()
 
         else:
-
             if command == "stream":
-                try:
-                    self.camera_manager.configure_stream()
-                    self.start_stream()
-                except Exception as e:
-                    publish(str(e), None)
-                    self.terminate()
+                self.start_stream()
 
             elif command == "process":
                 self.target_camera = payload.get("camera")
                 if self.target_camera not in ["ids", "basler", "luxonis"]:
                     publish("Specify which camera to process [ids, basler, luxonis]", None)
-                    return
-                try:
-                    self.camera_manager.configure_process(self.target_camera)
+                else:
                     self.start_process()
-                except Exception as e:
-                    publish(str(e), None)
-                    self.terminate()
 
             elif command == "stop":
-                if self.state == 'streaming' and self.streaming_handler:
-                    self.streaming_handler.stop()
-                elif self.state == 'processing' and self.processing_handler:
-                    self.processing_handler.stop()
-                self.set_idle()
+                self.stop()
 
             elif command == "exit":
                 self.terminate()
@@ -361,6 +338,37 @@ class StateMachine:
 
     def idle(self):
 
+        try:
+            self.camera_manager = CameraManager(self.testing)
+        except Exception as e:
+            publish(str(e), None)
+            self.terminate()
+
+        self.target_camera = None
+        publish(f"{'Webcam' if self.testing else 'Cameras'} initialized! Send functioning mode {'[stream]' if self.testing else '[stream, process]'}", 1)
+
+    def stream(self):
+        try:
+            self.camera_manager.configure_stream()
+            self.streaming_handler = StreamingHandler(self.camera_manager)
+            self.streaming_handler.start()
+            publish("Stream started!", 2)
+        except Exception as e:
+            publish(f"Streaming error: {e}", None)  # publish error message over mqtt
+
+    def process(self):
+        try:
+            if self.testing:
+                publish("Cannot use processing mode while testing", None)
+            else:
+                self.camera_manager.configure_process()
+                self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
+                self.processing_handler.start()
+                publish("Process started!", 3)
+        except Exception as e:
+            publish(f"Processing error: {e}", None)  # publish error message over mqtt
+
+    def stop(self):
         if self.streaming_handler is not None:
             self.streaming_handler.stop()
             self.streaming_handler = None
@@ -369,40 +377,18 @@ class StateMachine:
             self.processing_handler.stop()
             self.processing_handler = None
 
-        self.target_camera = None
-        publish(f"{'Webcam' if self.testing else 'Cameras'} initialized! Send functioning mode {'[stream]' if self.testing else '[stream, process]'}", 1)
-
-
-    def stream(self):
-        try:
-            self.streaming_handler = StreamingHandler(self.camera_manager)
-            self.streaming_handler.start()
-            publish("Stream started!", 2)
-        except Exception as e:
-            publish(f"{e}", None)  # publish error message over mqtt
-
-    def process(self):
-        try:
-            if self.testing:
-                publish("Cannot use processing mode while testing", None)
-            else:
-                self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
-                self.processing_handler.start()
-                publish("Process started!", 3)
-        except Exception as e:
-            publish(f"{e}", None)  # publish error message over mqtt
+        publish(f"All activities stopped; Waiting for next functioning mode {'[stream]' if self.testing else '[stream, process]'}")
 
     def exit_script(self):
         try:
-            if self.streaming_handler:
+            if self.streaming_handler is not None:
                 self.streaming_handler.stop()
 
-            if self.processing_handler:
+            if self.processing_handler is not None:
                 self.processing_handler.stop()
 
-            self.camera_manager.release()
         except Exception as e:
-            print(f"Error while terminating: {e}")
+            publish(f"Error while terminating: {e}")
         self.running = False
 
 
@@ -410,7 +396,6 @@ class StateMachine:
 
 def main():
     mqttc.on_connect = on_connect  # Register connect callback
-    mqttc.on_publish = on_publish  # Register publish callback function
     mqttc.connect(broker, port, MQTT_KEEPALIVE_INTERVAL)  # Connect with MQTT Broker
     mqttc.subscribe("optisort/camera_manager/input")  # subscribe to topic for receiving commands
     mqttc.loop_start()  # Start the loop in a separate thread
@@ -424,6 +409,7 @@ def main():
     # Ensure cleanup
     mqttc.loop_stop()
     mqttc.disconnect()
+
 
 if __name__ == "__main__":
     main()
