@@ -239,7 +239,7 @@ class ImageProcessor:
         ]
 
         # Add legend
-        image_with_legend = _add_legend(labeled_image, labels_colors)
+        image_with_legend = self._add_legend(labeled_image, labels_colors)
 
         return thresh, image_with_legend, detected_objects
 

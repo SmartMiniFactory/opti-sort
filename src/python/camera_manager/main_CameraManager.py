@@ -269,7 +269,6 @@ class ProcessingHandler:
         self.running = threading.Event()
         self.target_camera = target_camera
         self.running = threading.Event()
-        self.processor = ImageProcessor()
 
     def run(self):
         """Continuously captures, processes, and publishes frames."""
@@ -288,8 +287,10 @@ class ProcessingHandler:
             square_size_mm = 4.5
 
             self.camera_manager.start_acquisition(self.target_camera)
+            proc = ImageProcessor()
+
             while self.running.is_set():
-                next_publish_time = time.time() + 0.1
+                # next_publish_time = time.time() + 0.1
 
                 try:
                     frame = self.camera_manager.capture_frame(self.target_camera)
@@ -298,7 +299,9 @@ class ProcessingHandler:
                     print(f"[{self.target_camera}] Capture failed (likely stop): {e}")
                     break
 
-                proc = self.processor
+                if frame is None:
+                    continue
+
                 thresh, labeled_image, detected_objects = proc.detect_shapes_and_classify(frame)
 
                 if labeled_image is not None:
@@ -350,7 +353,7 @@ class ProcessingHandler:
 
                                 mqttc.publish('optisort/scara/target', str(json.dumps(payload)), qos=0)
 
-                time.sleep(max(next_publish_time - time.time(), 0))
+                # time.sleep(max(next_publish_time - time.time(), 0))
         except Exception as e:
             raise ValueError(f"Processing failed: {e}") from e
 
