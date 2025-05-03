@@ -110,10 +110,6 @@ namespace OptiSort.systems
                                         SendCommand("stream");
 
                                     break;
-                                
-                                case Status.ready:
-                                    SendCommand("start");
-                                    break;
 
                                 case Status.streaming:
                                     CamerasWorking?.Invoke();

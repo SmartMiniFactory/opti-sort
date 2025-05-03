@@ -147,7 +147,7 @@ namespace OptiSort
             _frameCount++;
 
             // Check for timeout condition
-            if (received.AddSeconds(2) < DateTime.Now)
+            if (received.AddSeconds(1) < DateTime.Now)
             {
                 RenderTimeoutOverlay(g);
             }

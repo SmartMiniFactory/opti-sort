@@ -190,6 +190,20 @@ class CameraManager:
         """Stops acquisition for a given camera."""
         self.cameras[cam_name].acquisition_stop()
 
+    def shutdown(self):
+        """Release all camera resources safely."""
+        with self.lock:
+            for name, cam in self.cameras.items():
+                try:
+                    if self.testing and name == 'webcam':
+                        cam.release()
+                    else:
+                        cam.acquisition_stop()  # in case running
+                        cam.close()  # or cam.shutdown(), depends on SDK
+                except Exception as e:
+                    print(f"[WARN] Failed to cleanly shutdown {name}: {e}")
+            self.cameras.clear()
+
 
 # === STREAMING HANDLER ===
 
@@ -256,11 +270,12 @@ class ProcessingHandler:
     def run(self):
         """Continuously captures, processes, and publishes frames."""
         self.running.set()
-        self.thread = threading.Thread(target=self._process_camera())
+        self.thread = threading.Thread(target=self._process_camera)
         self.thread.start()
 
     def _process_camera(self):
         try:
+            print("check")
             self.camera_manager.start_acquisition(self.target_camera)
             while self.running.is_set():
                 next_publish_time = time.time() + 0.1
@@ -283,17 +298,17 @@ class ProcessingHandler:
 
 # === STATE MACHINE ===
 
-states = ['init', 'idle', 'streaming', 'processing', 'ended']
+states = ['init', 'idle', 'streaming', 'processing', 'stopped',  'ended']
 
 class StateMachine:
     """Manages system states and transitions (initialize, configure, stream, process, terminate)."""
 
     def __init__(self):
         self.machine = Machine(model=self, states=states, initial='init')
-        self.machine.add_transition('initialize', 'init', 'idle', after=self.idle)
+        self.machine.add_transition('initialize', ['init', 'stopped'], 'idle', after=self.idle)
         self.machine.add_transition('start_stream', 'idle', 'streaming', after=self.stream)
         self.machine.add_transition('start_process', 'idle', 'processing', after=self.process)
-        self.machine.add_transition('stop_all', ['streaming', 'processing'], 'idle', after=self.stop)
+        self.machine.add_transition('stop_all', ['streaming', 'processing'], 'stopped', after=self.stop)
         self.machine.add_transition('terminate', '*', 'ended', after=self.exit_script)
 
         self.camera_manager = None
@@ -341,12 +356,11 @@ class StateMachine:
     def idle(self):
         try:
             self.camera_manager = CameraManager(self.testing)
+            self.target_camera = None
+            publish(f"{'Webcam' if self.testing else 'Cameras'} initialized! Send functioning mode {'[stream]' if self.testing else '[stream, process]'}",1)
         except Exception as e:
             publish(str(e), None)
             self.terminate()
-
-        self.target_camera = None
-        publish(f"{'Webcam' if self.testing else 'Cameras'} initialized! Send functioning mode {'[stream]' if self.testing else '[stream, process]'}", 1)
 
     def stream(self):
         try:
@@ -358,14 +372,14 @@ class StateMachine:
             publish(f"Streaming error: {e}", None)  # publish error message over mqtt
 
     def process(self):
+        if self.testing:
+            publish("Cannot use processing mode while testing", None)
+            return
         try:
-            if self.testing:
-                publish("Cannot use processing mode while testing", None)
-            else:
-                self.camera_manager.configure_process(self.target_camera)
-                self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
-                self.processing_handler.run()
-                publish("Process started!", 3)
+            self.camera_manager.configure_process(self.target_camera)
+            self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
+            self.processing_handler.run()
+            publish("Process started!", 3)
         except Exception as e:
             publish(f"Processing error: {e}", None)  # publish error message over mqtt
 
@@ -378,7 +392,9 @@ class StateMachine:
             self.processing_handler.stop()
             self.processing_handler = None
 
-        publish(f"All activities stopped; Waiting for next functioning mode {'[stream]' if self.testing else '[stream, process]'}")
+        self.camera_manager.shutdown()
+        publish("All activities stopped. Attempting self-reinitialization...", None)
+        self.initialize()
 
     def exit_script(self):
         try:
