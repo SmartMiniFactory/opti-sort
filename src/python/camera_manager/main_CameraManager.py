@@ -63,8 +63,6 @@ def on_connect(client, userdata, flags, rc):
 
 def parse_appconfig(file_path):
     """Parses XML configuration to extract broker, port, and camera topics."""
-    broker = "127.0.0.1"
-    port = 1883
     camera_topics = []
     tree = ET.parse(file_path)
     for element in tree.getroot():
@@ -351,7 +349,7 @@ class StateMachine:
         try:
             self.camera_manager.configure_stream()
             self.streaming_handler = StreamingHandler(self.camera_manager)
-            self.streaming_handler.start()
+            self.streaming_handler.run()
             publish("Stream started!", 2)
         except Exception as e:
             publish(f"Streaming error: {e}", None)  # publish error message over mqtt
@@ -363,7 +361,7 @@ class StateMachine:
             else:
                 self.camera_manager.configure_process()
                 self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
-                self.processing_handler.start()
+                self.processing_handler.run()
                 publish("Process started!", 3)
         except Exception as e:
             publish(f"Processing error: {e}", None)  # publish error message over mqtt
