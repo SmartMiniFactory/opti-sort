@@ -125,14 +125,17 @@ class CameraManager:
             self.cameras['ids'] = Ids(camera_id="ids")
             self.cameras['ids'].initialize()
             publish("IDS camera initialized")
+            mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
 
             self.cameras['basler'] = Basler(camera_id="basler")
             self.cameras['basler'].initialize()
             publish("Basler camera initialized")
+            mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
 
             self.cameras['luxonis'] = Luxonis(camera_id="luxonis")
             self.cameras['luxonis'].initialize()
             publish("Luxonis camera initialized")
+            mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
 
         except Exception as e:
             raise ValueError(f"Cameras initialization failed: {e}") from e
@@ -331,6 +334,7 @@ class StateMachine:
 
             self.testing = (command == "webcam")
             publish(f"Initializing {'webcam' if self.testing else 'cameras'}...", None)
+            mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
             self.initialize()
 
         else:
@@ -351,7 +355,7 @@ class StateMachine:
                 self.terminate()
 
             else:
-                publish("Command not recognized", None)
+                publish("Command not valid", None)
 
     def idle(self):
         try:
@@ -394,6 +398,7 @@ class StateMachine:
 
         self.camera_manager.shutdown()
         publish("All activities stopped. Attempting self-reinitialization...", None)
+        mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
         self.initialize()
 
     def exit_script(self):
@@ -415,7 +420,7 @@ def main():
     mqttc.on_connect = on_connect  # Register connect callback
     mqttc.connect(broker, port, MQTT_KEEPALIVE_INTERVAL)  # Connect with MQTT Broker
     mqttc.subscribe("optisort/camera_manager/input")  # subscribe to topic for receiving commands
-    mqttc.loop_start()  # Start the loop in a separate thread
+    mqttc.loop_start()  # Start a non-blocking separate thread for mqtt communications
 
     state_machine = StateMachine()  # activate state machine class
     mqttc.on_message = state_machine.on_message  # attach MQTT messages to state machine class
