@@ -234,12 +234,12 @@ class StreamingHandler:
 
     def stop(self):
         """Stops all streaming threads and camera acquisitions."""
-        for cam in self.cameras:
-            self.camera_manager.stop_acquisition(cam)
-
         self.running.clear()
         for thread in self.threads.values():
             thread.join()
+
+        for cam in self.cameras:
+            self.camera_manager.stop_acquisition(cam)
 
 
 # === PROCESSING HANDLER ===
@@ -289,7 +289,7 @@ class StateMachine:
         self.machine.add_transition('initialize', 'init', 'idle', after=self.idle)
         self.machine.add_transition('start_stream', 'idle', 'streaming', after=self.stream)
         self.machine.add_transition('start_process', 'idle', 'processing', after=self.process)
-        self.machine.add_transition('stop', '[streaming, processing]', 'idle', after=self.stop)
+        self.machine.add_transition('stop_all', ['streaming', 'processing'], 'idle', after=self.stop)
         self.machine.add_transition('terminate', '*', 'ended', after=self.exit_script)
 
         self.camera_manager = None
@@ -326,7 +326,7 @@ class StateMachine:
                     self.start_process()
 
             elif command == "stop":
-                self.stop()
+                self.stop_all()
 
             elif command == "exit":
                 self.terminate()
@@ -335,7 +335,6 @@ class StateMachine:
                 publish("Command not recognized", None)
 
     def idle(self):
-
         try:
             self.camera_manager = CameraManager(self.testing)
         except Exception as e:
@@ -359,7 +358,7 @@ class StateMachine:
             if self.testing:
                 publish("Cannot use processing mode while testing", None)
             else:
-                self.camera_manager.configure_process()
+                self.camera_manager.configure_process(self.target_camera)
                 self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
                 self.processing_handler.run()
                 publish("Process started!", 3)
