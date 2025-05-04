@@ -349,8 +349,6 @@ namespace OptiSort.userControls
             ScaraTargets.ObjectDetected -= OnObjectDetected;
             ScaraTargets.DropBacklog();
 
-            _manager.Cameramanager.SwitchToStreaming();
-
             _manager.StopAutomaticProcess();
         }
 

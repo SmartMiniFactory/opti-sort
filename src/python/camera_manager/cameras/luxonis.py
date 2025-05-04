@@ -5,7 +5,7 @@ This file is provided with the specific functionalities to interact with the OAK
 
 from .base_camera import BaseCamera
 import depthai as dai
-import cv2
+import time
 
 
 class Luxonis(BaseCamera):
@@ -21,10 +21,11 @@ class Luxonis(BaseCamera):
         self.configQueue = None
         self.video = None
 
-    def initialize(self):
+    def initialize(self, max_retries=5, retry_interval=1.0):
         """
         Set up the DepthAI pipeline and initialize the Luxonis device.
         """
+        attempt = 0
         try:
             # Define sources and outputs
             cam = self.pipeline.create(dai.node.Camera)  # RGB camera
@@ -62,7 +63,14 @@ class Luxonis(BaseCamera):
             print(f"Luxonis camera initialized successfully! Using device: {self.device.getCameraSensorNames()}")
 
         except Exception as e:
-            raise RuntimeError(f"Failed to initialize Luxonis camera: {e}")
+            error_message = str(e)
+            if "No available device" in error_message:
+                attempt += 1
+                print(f"Attempt {attempt}/{max_retries}: No available device. Retrying in {retry_interval} seconds...")
+                time.sleep(retry_interval)
+            else:
+                # Other exceptions should raise immediately
+                raise RuntimeError(f"Failed to initialize Luxonis camera: {e}")
 
     def configure(self, config_path):
         """

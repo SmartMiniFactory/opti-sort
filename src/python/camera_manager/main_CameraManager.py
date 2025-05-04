@@ -28,9 +28,6 @@ ids_configfile = config_folder / "ids_configuration.ini"
 basler_configfile = config_folder / "basler_configuration.pfs"
 # os.add_dll_directory(r"C:\Program Files\Basler\pylon 8\Runtime\Win32")
 
-
-
-
 # MQTT configuration
 broker = '127.0.0.1'
 port = 1883
@@ -110,6 +107,7 @@ class CameraManager:
         self.testing = testing
         self.cameras = {}
         self.lock = threading.Lock()
+        self.target_camera = target_camera
 
         if testing:
             self._initialize_webcam()
@@ -126,41 +124,47 @@ class CameraManager:
     def _initialize_cameras(self, target_camera):
         try:
             for camera in target_camera:
-                self.cameras[camera] = Ids(camera_id=camera)
+                self.cameras[camera] = (
+                    Ids(camera_id=camera) if camera == "ids" else
+                    Basler(camera_id=camera) if camera == "basler" else
+                    Luxonis(camera_id=camera) if camera == "luxonis" else None
+                )
                 self.cameras[camera].initialize()
                 publish(f"{camera} camera initialized")
                 mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
 
+            if len(target_camera) > 1:
+                self._configure_stream()
+            else:
+                self._configure_process()
+
         except Exception as e:
             raise ValueError(f"Cameras initialization failed: {e}") from e
 
-    def configure_stream(self):
-        """Loads camera configuration files and applies them."""
-
+    def _configure_stream(self):
+        """Loads camera configuration for streaming performance."""
         check_file_readable(ids_configfile)
         check_file_readable(basler_configfile)
-
         try:
             self.cameras['ids'].configure(ids_configfile)
             self.cameras['basler'].configure(basler_configfile)
             self.cameras['luxonis'].configure(None)
-
         except Exception as e:
             raise ValueError(f"Cameras streaming configuration failed: {e}") from e
 
-    def configure_process(self, target_camera):
-
+    def _configure_process(self):
+        """Load camera configuration for processing performance."""
         check_file_readable(ids_configfile)
         check_file_readable(basler_configfile)
-
+        camera = self.target_camera[0]
         try:
-            self.cameras[target_camera].configure(
-                ids_configfile if target_camera == 'ids'
-                else basler_configfile if target_camera == 'basler'
+            self.cameras[camera].configure(
+                ids_configfile if camera == 'ids'
+                else basler_configfile if camera == 'basler'
                 else None
             )
         except Exception as e:
-            raise ValueError(f"Camera {target_camera} process configuration failed: {e}") from e
+            raise ValueError(f"Camera {camera} process configuration failed: {e}") from e
 
     def start_acquisition(self, cam_name):
         """Starts acquisition for a given camera."""
@@ -257,7 +261,7 @@ class ProcessingHandler:
         self.camera_manager = camera_manager
         self.thread = None
         self.running = threading.Event()
-        self.target_camera = target_camera
+        self.target_camera = target_camera[0]
         self.running = threading.Event()
 
     def run(self):
@@ -396,10 +400,11 @@ class StateMachine:
                 self.start_stream()
 
             elif command == "process":
-                self.target_camera = payload.get("camera")
-                if self.target_camera not in ["ids", "basler", "luxonis"]:
+                cam = payload.get("camera")
+                if cam not in ["ids", "basler", "luxonis"]:
                     publish("Specify which camera to process [ids, basler, luxonis]", None)
                 else:
+                    self.target_camera = [cam]
                     self.start_process()
 
             elif command == "stop":
@@ -424,13 +429,12 @@ class StateMachine:
         self.target_camera = None
         self.camera_manager = None
 
-        publish(f"{'Webcam' if self.testing else 'Cameras'} initialized! Send functioning mode {'[stream]' if self.testing else '[stream, process]'}",1)
+        publish(f"State machine in idle! Send functioning mode {'[stream]' if self.testing else '[stream, process]'}",1)
         mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
 
     def stream(self):
         try:
-            self.camera_manager = CameraManager(testing=self.testing, target_camera=self.target_camera)
-            self.camera_manager.configure_stream()
+            self.camera_manager = CameraManager(testing=self.testing, target_camera=["ids", "basler", "luxonis"])  # cameras get ignored if testing is True
             self.streaming_handler = StreamingHandler(self.camera_manager)
             self.streaming_handler.run()
             publish("Stream started!", 2)
@@ -442,8 +446,7 @@ class StateMachine:
             publish("Cannot use processing mode while testing", None)
             return
         try:
-            self.camera_manager = CameraManager(testing=self.testing, target_camera=self.target_camera)
-            self.camera_manager.configure_process(self.target_camera)
+            self.camera_manager = CameraManager(testing=False, target_camera=self.target_camera)
             self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
             self.processing_handler.run()
             publish("Process started!", 3)
@@ -460,7 +463,7 @@ class StateMachine:
                 self.processing_handler.stop()
 
             self.camera_manager = None
-            publish(f"Terminating program", 5)
+            publish(f"Terminating program", 4)
 
         except Exception as e:
             publish(f"Error while terminating: {e}")

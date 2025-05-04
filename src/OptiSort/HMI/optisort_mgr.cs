@@ -610,6 +610,7 @@ namespace OptiSort
         {
             AutomaticProcess = false;
             Log("Automatic process stopped!", false, false);
+            Cameramanager.SwitchToStreaming();
         }
 
         #endregion

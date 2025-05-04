@@ -25,11 +25,10 @@ namespace OptiSort.systems
 
         public enum Status
         {
-            init, 
+            init,
             idle,
             streaming,
             processing,
-            stopped,
             ended
         }
 
@@ -37,7 +36,7 @@ namespace OptiSort.systems
         public CameraManager(optisort_mgr manager)
         {
             _manager = manager;
-        } 
+        }
 
         public bool ConnectCameraManager()
         {
@@ -52,7 +51,7 @@ namespace OptiSort.systems
             string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\camera_manager\main_CameraManager.py"));
             _scriptID = _manager.ExecuteScript(scriptPath);
 
-            if (_scriptID == 0) 
+            if (_scriptID == 0)
             {
                 _manager.NonBlockingMessageBox("Last camera manager execution remained unkilled in background! Please proceed to kill manually before retrying connection", "WARNING!", MessageBoxIcon.Warning);
                 _manager.UnsubscribeMqttTopic(_mqttClient, "optisort/camera_manager/output");
@@ -98,50 +97,43 @@ namespace OptiSort.systems
                 if (message.TryGetProperty("result", out JsonElement resultElement))
                 {
                     int result = resultElement.GetInt16();
-                    
+
                     if (Enum.IsDefined(typeof(Status), result))
                     {
-                        Status newStatus = (Status)result;
-
-                        if (CurrentState != newStatus)
-                        {
-                            switch (newStatus)
-                            {
-                                case Status.init:
-                                    if (_manager.StatusCameraTesting)
-                                        SendCommand("webcam");
-                                    else
-                                        SendCommand("cameras");
-                                    break;
-
-                                case Status.idle:
-                                    if (_processingCamera != null)
-                                    {
-                                        var data = new
-                                        {
-                                            command = "process",
-                                            camera = _processingCamera
-                                        };
-                                        _manager.PublishMqttMessage(_mqttClient, "optisort/camera_manager/input", data);
-                                        _processingCamera = null;
-                                        _manager.Log($"Command sent to camera manager: process", false, false);
-                                    }
-                                    else 
-                                        SendCommand("stream");
-
-                                    break;
-
-                                case Status.streaming:
-                                    CamerasWorking?.Invoke();
-                                    break;
-
-                                case Status.processing:
-                                    CamerasWorking?.Invoke();
-                                    break;
-                            }
-                        }
-
                         CurrentState = (Status)result;
+                        switch (CurrentState)
+                        {
+                            case Status.init:
+                                if (_manager.StatusCameraTesting)
+                                    SendCommand("webcam");
+                                else
+                                    SendCommand("cameras");
+                                break;
+
+                            case Status.idle:
+                                if (_processingCamera != null)
+                                {
+                                    var data = new
+                                    {
+                                        command = "process",
+                                        camera = _processingCamera
+                                    };
+                                    _manager.PublishMqttMessage(_mqttClient, "optisort/camera_manager/input", data);
+                                    _processingCamera = null;
+                                    _manager.Log($"Command sent to camera manager: process", false, false);
+                                }
+                                else
+                                    SendCommand("stream");
+                                break;
+
+                            case Status.streaming:
+                                CamerasWorking?.Invoke();
+                                break;
+
+                            case Status.processing:
+                                CamerasWorking?.Invoke();
+                                break;
+                        }
 
                     }
                     else
@@ -200,7 +192,7 @@ namespace OptiSort.systems
                 _manager.MqttMessageReceived -= MqttMessageReceived;
                 _manager.OnErrorReceived -= PythonErrorHandler;
                 _manager.OnExecutionTerminated -= PythonTerminationHandler;
-                
+
                 _manager.UnsubscribeMqttTopic(_mqttClient, "optisort/camera_manager/output");
                 _manager.StopExecution(_scriptID); // needed to reset active processes memory
 
