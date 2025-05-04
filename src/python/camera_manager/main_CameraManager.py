@@ -106,7 +106,7 @@ def check_file_readable(file_path):
 class CameraManager:
     """Manages initialization, configuration, and acquisition of cameras."""
 
-    def __init__(self, testing=False):
+    def __init__(self, testing=False, target_camera=None):
         self.testing = testing
         self.cameras = {}
         self.lock = threading.Lock()
@@ -114,7 +114,7 @@ class CameraManager:
         if testing:
             self._initialize_webcam()
         else:
-            self._initialize_cameras()
+            self._initialize_cameras(target_camera)
 
     def _initialize_webcam(self):
         """Initialize default webcam."""
@@ -123,23 +123,13 @@ class CameraManager:
         except Exception as e:
             raise ValueError(f"No available webcam found: {e}") from e
 
-    def _initialize_cameras(self):
-        """Initialize IDS, Basler, and Luxonis cameras."""
+    def _initialize_cameras(self, target_camera):
         try:
-            self.cameras['ids'] = Ids(camera_id="ids")
-            self.cameras['ids'].initialize()
-            publish("IDS camera initialized")
-            mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
-
-            self.cameras['basler'] = Basler(camera_id="basler")
-            self.cameras['basler'].initialize()
-            publish("Basler camera initialized")
-            mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
-
-            self.cameras['luxonis'] = Luxonis(camera_id="luxonis")
-            self.cameras['luxonis'].initialize()
-            publish("Luxonis camera initialized")
-            mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
+            for camera in target_camera:
+                self.cameras[camera] = Ids(camera_id=camera)
+                self.cameras[camera].initialize()
+                publish(f"{camera} camera initialized")
+                mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
 
         except Exception as e:
             raise ValueError(f"Cameras initialization failed: {e}") from e
@@ -364,21 +354,18 @@ class ProcessingHandler:
         self.thread.join()
 
 
-
-
 # === STATE MACHINE ===
 
-states = ['init', 'idle', 'streaming', 'processing', 'stopped',  'ended']
+states = ['init', 'idle', 'streaming', 'processing',  'ended']
 
 class StateMachine:
     """Manages system states and transitions (initialize, configure, stream, process, terminate)."""
 
     def __init__(self):
         self.machine = Machine(model=self, states=states, initial='init')
-        self.machine.add_transition('initialize', ['init', 'stopped'], 'idle', after=self.idle)
+        self.machine.add_transition('initialize', '*', 'idle', after=self.idle)
         self.machine.add_transition('start_stream', 'idle', 'streaming', after=self.stream)
         self.machine.add_transition('start_process', 'idle', 'processing', after=self.process)
-        self.machine.add_transition('stop_all', ['streaming', 'processing'], 'stopped', after=self.stop)
         self.machine.add_transition('terminate', '*', 'ended', after=self.exit_script)
 
         self.camera_manager = None
@@ -416,7 +403,7 @@ class StateMachine:
                     self.start_process()
 
             elif command == "stop":
-                self.stop_all()
+                self.initialize()
 
             elif command == "exit":
                 self.terminate()
@@ -425,36 +412,7 @@ class StateMachine:
                 publish("Command not valid", None)
 
     def idle(self):
-        try:
-            self.camera_manager = CameraManager(self.testing)
-            self.target_camera = None
-            publish(f"{'Webcam' if self.testing else 'Cameras'} initialized! Send functioning mode {'[stream]' if self.testing else '[stream, process]'}",1)
-        except Exception as e:
-            publish(str(e), None)
-            self.terminate()
 
-    def stream(self):
-        try:
-            self.camera_manager.configure_stream()
-            self.streaming_handler = StreamingHandler(self.camera_manager)
-            self.streaming_handler.run()
-            publish("Stream started!", 2)
-        except Exception as e:
-            publish(f"Streaming error: {e}", None)  # publish error message over mqtt
-
-    def process(self):
-        if self.testing:
-            publish("Cannot use processing mode while testing", None)
-            return
-        try:
-            self.camera_manager.configure_process(self.target_camera)
-            self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
-            self.processing_handler.run()
-            publish("Process started!", 3)
-        except Exception as e:
-            publish(f"Processing error: {e}", None)  # publish error message over mqtt
-
-    def stop(self):
         if self.streaming_handler is not None:
             self.streaming_handler.stop()
             self.streaming_handler = None
@@ -463,10 +421,35 @@ class StateMachine:
             self.processing_handler.stop()
             self.processing_handler = None
 
+        self.target_camera = None
         self.camera_manager = None
-        publish("All activities stopped. Attempting self-reinitialization...", 4)
+
+        publish(f"{'Webcam' if self.testing else 'Cameras'} initialized! Send functioning mode {'[stream]' if self.testing else '[stream, process]'}",1)
         mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
-        self.initialize()
+
+    def stream(self):
+        try:
+            self.camera_manager = CameraManager(testing=self.testing, target_camera=self.target_camera)
+            self.camera_manager.configure_stream()
+            self.streaming_handler = StreamingHandler(self.camera_manager)
+            self.streaming_handler.run()
+            publish("Stream started!", 2)
+        except Exception as e:
+            publish(f"Streaming initialization error: {e}", None)  # publish error message over mqtt
+
+    def process(self):
+        if self.testing:
+            publish("Cannot use processing mode while testing", None)
+            return
+        try:
+            self.camera_manager = CameraManager(testing=self.testing, target_camera=self.target_camera)
+            self.camera_manager.configure_process(self.target_camera)
+            self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
+            self.processing_handler.run()
+            publish("Process started!", 3)
+        except Exception as e:
+            publish(f"Processing error: {e}", None)  # publish error message over mqtt
+
 
     def exit_script(self):
         try:
