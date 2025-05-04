@@ -596,8 +596,6 @@ if __name__ == "__main__":
                         # Placeholder per invio MQTT
                         print(f"[MQTT] Send message for {component} at ({X_scara:.2f}, {Y_scara:.2f}) mm\n")
 
-
-
                     if vis_img is not None:
                         cv2.imshow("Chessboard + Axes", cv2.resize(vis_img, None, fx=0.5, fy=0.5))
 

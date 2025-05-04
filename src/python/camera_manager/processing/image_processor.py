@@ -8,7 +8,6 @@ class ImageProcessor:
         self.position_buffers = {}  # Chiave: componente (es. 'AE'), Valore: lista di posizioni
         self.BUFFER_SIZE = 20  # higher = more restrictive
         self.TOLERANCE = 1.0  # Tolleranza massima in pixel (adatta questo valore dopo test)
-
         self.HYSTERESIS_DISTANCE_MM = 30.0  # distanza minima per triggerare un nuovo messaggio
 
         self.last_sent_positions = {
