@@ -440,6 +440,7 @@ class StateMachine:
             publish("Stream started!", 2)
         except Exception as e:
             publish(f"Streaming initialization error: {e}", None)  # publish error message over mqtt
+            self.terminate()
 
     def process(self):
         if self.testing:
@@ -452,6 +453,7 @@ class StateMachine:
             publish("Process started!", 3)
         except Exception as e:
             publish(f"Processing error: {e}", None)  # publish error message over mqtt
+            self.terminate()
 
 
     def exit_script(self):

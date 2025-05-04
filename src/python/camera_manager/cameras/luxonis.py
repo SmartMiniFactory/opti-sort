@@ -16,61 +16,66 @@ class Luxonis(BaseCamera):
         :param config_path: path to the configuration file exported by the manufacturer's application.
         """
         super().__init__(camera_id)
-        self.pipeline = dai.Pipeline()  # DepthAI pipeline for configuring streams
+        self.pipeline = None  # DepthAI pipeline for configuring streams
         self.device = None  # Luxonis device object
         self.configQueue = None
         self.video = None
 
-    def initialize(self, max_retries=5, retry_interval=1.0):
+    def initialize(self, max_retries=5, retry_interval=5.0):
         """
         Set up the DepthAI pipeline and initialize the Luxonis device.
         """
         attempt = 0
-        try:
-            # Define sources and outputs
-            cam = self.pipeline.create(dai.node.Camera)  # RGB camera
-            cam.setBoardSocket(dai.CameraBoardSocket.CAM_B)
-            cam.setSize((1280, 800))  # Initial resolution selection
+        while attempt < max_retries:
+            try:
+                # Always start with a fresh pipeline on each attempt
+                self.pipeline = dai.Pipeline()
 
-            # ImageManip node for cropping an AOI to 1:1 aspect ratio
-            manip = self.pipeline.create(dai.node.ImageManip)
-            manip.initialConfig.setCropRect(0.3, 0.1, 0.7, 0.9)
-            manip.initialConfig.setResize(800, 800)  # Resize after cropping
-            manip.setMaxOutputFrameSize(800 * 800 * 3)  # Assuming max square crop is 800x800
-            manip.setKeepAspectRatio(False)
-            manip.initialConfig.setFrameType(dai.ImgFrame.Type.GRAY8)  # Convert to greyscale
+                # Define sources and outputs
+                cam = self.pipeline.create(dai.node.Camera)  # RGB camera
+                cam.setBoardSocket(dai.CameraBoardSocket.CAM_B)
+                cam.setSize((1280, 800))  # Initial resolution selection
 
-            # Create node connections
-            configIn = self.pipeline.create(dai.node.XLinkIn)
-            videoOut = self.pipeline.create(dai.node.XLinkOut)
+                # ImageManip node for cropping an AOI to 1:1 aspect ratio
+                manip = self.pipeline.create(dai.node.ImageManip)
+                manip.initialConfig.setCropRect(0.3, 0.1, 0.7, 0.9)
+                manip.initialConfig.setResize(800, 800)  # Resize after cropping
+                manip.setMaxOutputFrameSize(800 * 800 * 3)  # Assuming max square crop is 800x800
+                manip.setKeepAspectRatio(False)
+                manip.initialConfig.setFrameType(dai.ImgFrame.Type.GRAY8)  # Convert to greyscale
 
-            # Stream names
-            configIn.setStreamName('config')
-            videoOut.setStreamName("video")
+                # Create node connections
+                configIn = self.pipeline.create(dai.node.XLinkIn)
+                videoOut = self.pipeline.create(dai.node.XLinkOut)
 
-            # Linking nodes
-            configIn.out.link(cam.inputConfig)
-            cam.video.link(manip.inputImage)
-            manip.out.link(videoOut.input)
+                # Stream names
+                configIn.setStreamName('config')
+                videoOut.setStreamName("video")
 
-            # Create the device AFTER defining the full pipeline
-            self.device = dai.Device(self.pipeline)
+                # Linking nodes
+                configIn.out.link(cam.inputConfig)
+                cam.video.link(manip.inputImage)
+                manip.out.link(videoOut.input)
 
-            # Output queues will be used to get the grayscale frames from the outputs defined above
-            self.configQueue = self.device.getInputQueue('config')
-            self.video = self.device.getOutputQueue(name="video", maxSize=1, blocking=False)
+                # Create the device AFTER defining the full pipeline
+                self.device = dai.Device(self.pipeline)
 
-            print(f"Luxonis camera initialized successfully! Using device: {self.device.getCameraSensorNames()}")
+                # Output queues will be used to get the grayscale frames from the outputs defined above
+                self.configQueue = self.device.getInputQueue('config')
+                self.video = self.device.getOutputQueue(name="video", maxSize=1, blocking=False)
 
-        except Exception as e:
-            error_message = str(e)
-            if "No available device" in error_message:
-                attempt += 1
-                print(f"Attempt {attempt}/{max_retries}: No available device. Retrying in {retry_interval} seconds...")
-                time.sleep(retry_interval)
-            else:
-                # Other exceptions should raise immediately
-                raise RuntimeError(f"Failed to initialize Luxonis camera: {e}")
+                print(f"Luxonis camera initialized successfully! Using device: {self.device.getCameraSensorNames()}")
+                return
+
+            except Exception as e:
+                error_message = str(e)
+                if "No available device" in error_message:
+                    attempt += 1
+                    print(f"Attempt {attempt}/{max_retries}: No available device. Retrying in {retry_interval} seconds...")
+                    time.sleep(retry_interval)
+                else:
+                    # Other exceptions should raise immediately
+                    raise RuntimeError(f"Failed to initialize Luxonis camera: {e}")
 
     def configure(self, config_path):
         """

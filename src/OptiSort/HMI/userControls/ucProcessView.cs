@@ -147,7 +147,6 @@ namespace OptiSort.userControls
 
             _manager.Cameramanager.SwitchToProcessing(_manager.StreamingTopic.Split('/')[1]); // extact camera name from streaming topic
             _manager.Cameramanager.CamerasWorking += BeginProcess; // subscribe to event to start process when cameras are ready
-            btn_start.Enabled = false; // disable button until process is started
         }
 
 
@@ -190,6 +189,7 @@ namespace OptiSort.userControls
             lbl_actualSelectedCamera.Text = _manager.StreamingTopic;
             _startTime = DateTime.Now;
 
+            RefreshControls();
 
             // initiate performance report
             //_report = new PerformanceReport(cameraId: "luxonis_01", initTimeMs: 98);
