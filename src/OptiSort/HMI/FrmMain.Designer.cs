@@ -391,7 +391,7 @@
             this.lblCamerasStatus.Name = "lblCamerasStatus";
             this.lblCamerasStatus.Size = new System.Drawing.Size(236, 64);
             this.lblCamerasStatus.TabIndex = 13;
-            this.lblCamerasStatus.Text = "CAMERAS";
+            this.lblCamerasStatus.Text = "CAMERA MGR";
             this.lblCamerasStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnEmulateScara

@@ -1,10 +1,12 @@
 ﻿using ActiproSoftware.SyntaxEditor;
 using Newtonsoft.Json.Linq;
+using OptiSort.systems;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -200,13 +202,52 @@ namespace OptiSort
         /// <param name="g"></param>
         private void RenderTimeoutOverlay(Graphics g)
         {
-            if (_manager.StatusMqttClient)
+            if (_manager.StatusMqttClient && _manager.StatusCameraManager)
             {
-                g.Clear(Color.Black);
-                using (var pen = new Pen(Color.Red, 10))
+                // drawing a red cross if camera manager is running and no image is coming
+                if (_manager.Cameramanager.CurrentState == CameraManager.Status.streaming || _manager.Cameramanager.CurrentState == CameraManager.Status.processing)
                 {
-                    g.DrawLine(pen, pictureBox.Width / 3, pictureBox.Height / 3, pictureBox.Width * 2 / 3, pictureBox.Height * 2 / 3);
-                    g.DrawLine(pen, pictureBox.Width / 3, pictureBox.Height * 2 / 3, pictureBox.Width * 2 / 3, pictureBox.Height / 3);
+                    g.Clear(Color.Black);
+                    using (var pen = new Pen(Color.Red, 10))
+                    {
+                        g.DrawLine(pen, pictureBox.Width / 3, pictureBox.Height / 3, pictureBox.Width * 2 / 3, pictureBox.Height * 2 / 3);
+                        g.DrawLine(pen, pictureBox.Width / 3, pictureBox.Height * 2 / 3, pictureBox.Width * 2 / 3, pictureBox.Height / 3);
+                    }
+                }
+                else // drawing a loading symbol if camera manager is running and loading
+                {
+                    g.Clear(Color.Black);
+
+                    int centerX = pictureBox.Width / 2;
+                    int centerY = pictureBox.Height / 2;
+                    int radiusOuter = Math.Min(pictureBox.Width, pictureBox.Height) / 2 - 100;
+                    int radiusInner = radiusOuter - 20;
+
+                    int numSegments = 12;
+                    float angleStep = 360f / numSegments;
+
+                    for (int i = 0; i < numSegments; i++)
+                    {
+                        // Calcola l'angolo in radianti
+                        float angle = (i * angleStep) * (float)Math.PI / 180f;
+
+                        // Calcola punto iniziale e finale del segmento (interno -> esterno)
+                        float x1 = centerX + (float)(Math.Cos(angle) * radiusInner);
+                        float y1 = centerY + (float)(Math.Sin(angle) * radiusInner);
+                        float x2 = centerX + (float)(Math.Cos(angle) * radiusOuter);
+                        float y2 = centerY + (float)(Math.Sin(angle) * radiusOuter);
+
+                        // Gradiente di opacità (più chiaro in avanti)
+                        int alpha = (int)(255 * ((float)i / numSegments));  // Da 0 a 255
+                        Color color = Color.FromArgb(alpha, Color.LightBlue);
+
+                        using (var pen = new Pen(color, 8))
+                        {
+                            pen.StartCap = LineCap.Round;
+                            pen.EndCap = LineCap.Round;
+                            g.DrawLine(pen, x1, y1, x2, y2);
+                        }
+                    }
                 }
             }
             else
@@ -220,7 +261,14 @@ namespace OptiSort
                 using (Font font = new Font("Arial", 12, FontStyle.Bold))
                 using (Brush textBrush = new SolidBrush(Color.White))
                 {
-                    string message = "Connect MQTT client for camera streaming";
+                    string message = "Disconnected!";
+
+                    if (!_manager.StatusCameraManager)
+                        message = "Connect Camera Manager for camera streaming";
+
+                    if (!_manager.StatusMqttClient)
+                        message = "Connect MQTT client for camera streaming";
+
                     SizeF textSize = g.MeasureString(message, font);
                     PointF textLocation = new PointF((pictureBox.Width - textSize.Width) / 2, (pictureBox.Height - textSize.Height) / 2);
                     g.DrawString(message, font, textBrush, textLocation);
