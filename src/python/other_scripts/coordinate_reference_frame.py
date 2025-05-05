@@ -32,7 +32,7 @@ def on_connect(client, userdata, flags, rc):
 
 
 # Timeout setup
-SELF_DESTRUCT_TIMEOUT = 20  # seconds
+SELF_DESTRUCT_TIMEOUT = 10  # seconds
 self_destruct_timer = None
 
 # MQTT SETUP
@@ -54,7 +54,7 @@ def numpy_to_native(obj):
         return [numpy_to_native(v) for v in obj]
     elif isinstance(obj, np.ndarray):
         return obj.tolist()
-    elif isinstance(obj, (np.float_, np.float16, np.float32, np.float64)):
+    elif isinstance(obj, (np.float16, np.float32, np.float64)):
         return float(obj)
     elif isinstance(obj, (np.int_, np.int16, np.int32, np.int64)):
         return int(obj)
@@ -122,7 +122,7 @@ publish("Calibration script started. Send grid dimensions and square size...", N
 last_activity_time = time.time()
 
 while True:
-    mqttc.loop(timeout=1.0)  # Process network events (non-blocking, ~1s)
+    mqttc.loop(timeout=0.1)  # Process network events (non-blocking, ~1s)
     elapsed = time.time() - last_activity_time
     if elapsed > SELF_DESTRUCT_TIMEOUT:
         publish("Timeout reached. Exiting.", None)

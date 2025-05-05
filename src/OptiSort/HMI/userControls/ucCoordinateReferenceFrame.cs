@@ -79,9 +79,11 @@ namespace OptiSort.userControls
 
 
             // Save screenshots
-            _manager.RequestScreenshots = true;
-            _manager.BitmapQueued += SaveShots; // subscribe to the event to save screenshots
-            _elapsedTime = DateTime.Now;
+            //_manager.RequestScreenshots = true;
+            //_manager.BitmapQueued += SaveShots; // subscribe to the event to save screenshots
+            //_elapsedTime = DateTime.Now;
+
+            StartCalibrationScript();
         }
 
 
@@ -158,13 +160,13 @@ namespace OptiSort.userControls
         private void StartCalibrationScript()
         {
             // launch python file and memorize processId
-            string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
-            _pythonProcessId = _manager.ExecuteScript(scriptPath);
-            _manager.OnExecutionTerminated -= PythonTerminationHandler;
-            _manager.Log($"Coordinate reference frame calibration file launched in background (PID = {_pythonProcessId})", false, false);
             _manager.SubscribeMqttTopic(_mqttClient, "optisort/reference_calibration/output");
             _manager.MqttMessageReceived += CalibrationMqttMessageReceived;
-            
+            _manager.OnExecutionTerminated += PythonTerminationHandler;
+
+            string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
+            _pythonProcessId = _manager.ExecuteScript(scriptPath);
+            _manager.Log($"Coordinate reference frame calibration file launched in background (PID = {_pythonProcessId})", false, false);
         }
 
         private void CalibrationMqttMessageReceived(string topic, JsonElement message, int processID)
@@ -206,8 +208,6 @@ namespace OptiSort.userControls
                 _manager.UnsubscribeMqttTopic(_mqttClient, "optisort/reference_calibration/output");
                 _manager.StopExecution(_pythonProcessId); // needed to reset active processes memory
 
-                _manager.StatusCameraManager = false;
-
                 RemoveCalibrationGrid();
             }
         }
@@ -232,7 +232,7 @@ namespace OptiSort.userControls
             _manager.Cobra600.ToggleGripperAction(); // turn off suction
             Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, 50);
 
-            _manager.Log("Reference plane calibration procedure completed!", false, true)
+            _manager.Log("Reference plane calibration procedure completed!", false, true);
         }
 
 
