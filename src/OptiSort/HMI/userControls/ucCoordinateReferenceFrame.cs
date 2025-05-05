@@ -49,11 +49,11 @@ namespace OptiSort.userControls
                 return;
             }
 
-            StartCalibrationRoutine();
+            PlaceCalibrationGrid();
 
         }
 
-        private void StartCalibrationRoutine()
+        private void PlaceCalibrationGrid()
         {
             Transform3D safeFlexi = new Transform3D(375.0, 15.0, 385.0, 0.0, 180.0, -130.0);
             Transform3D storagePick = new Transform3D(516.0, -80.0, 320.0, 0.0, 180.0, -130.0);
@@ -160,9 +160,11 @@ namespace OptiSort.userControls
             // launch python file and memorize processId
             string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
             _pythonProcessId = _manager.ExecuteScript(scriptPath);
-            _manager.Log($"Coordinate reference fram calibration file launched in background (PID = {_pythonProcessId})", false, false);
+            _manager.OnExecutionTerminated -= PythonTerminationHandler;
+            _manager.Log($"Coordinate reference frame calibration file launched in background (PID = {_pythonProcessId})", false, false);
             _manager.SubscribeMqttTopic(_mqttClient, "optisort/reference_calibration/output");
             _manager.MqttMessageReceived += CalibrationMqttMessageReceived;
+            
         }
 
         private void CalibrationMqttMessageReceived(string topic, JsonElement message, int processID)
@@ -173,10 +175,66 @@ namespace OptiSort.userControls
                 {
                     string msg = messageElement.GetString();
                     _manager.Log($"Calibration file over MQTT ({processID}): " + msg, false, false);
-                }
 
+                    if (msg.Contains("started"))
+                    {
+
+                        var data = new
+                        {
+                            columns = 5,
+                            rows = 5,
+                            size = 12
+                        };
+
+                        _manager.PublishMqttMessage(_mqttClient, "optisort/reference_calibration/input", data);
+                        _manager.Log($"Grid parameters sent to calibration file", false, false);
+                    }
+                }
             }
         }
+
+
+        private void PythonTerminationHandler(int processID, bool executionTerminated)
+        {
+            if (processID == _pythonProcessId)
+            {
+                _manager.Log("Camera manager file has closed!", false, false);
+
+                _manager.MqttMessageReceived -= CalibrationMqttMessageReceived;
+                _manager.OnExecutionTerminated -= PythonTerminationHandler;
+
+                _manager.UnsubscribeMqttTopic(_mqttClient, "optisort/reference_calibration/output");
+                _manager.StopExecution(_pythonProcessId); // needed to reset active processes memory
+
+                _manager.StatusCameraManager = false;
+
+                RemoveCalibrationGrid();
+            }
+        }
+
+
+        private void RemoveCalibrationGrid()
+        {
+            Transform3D safeFlexi = new Transform3D(375.0, 15.0, 385.0, 0.0, 180.0, -130.0);
+            Transform3D storagePick = new Transform3D(516.0, -80.0, 320.0, 0.0, 180.0, -130.0);
+            Transform3D flexiPlace = new Transform3D(432.924, 224.126, 330.0, 0.0, 180.0, -130.0);
+
+            // Pick tile from flexibowl
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, flexiPlace, 50);
+            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, flexiPlace, true);
+            _manager.Cobra600.ToggleGripperAction(); // turn on suction
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, flexiPlace, 50);
+
+
+            // Place tile
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, 50);
+            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, true);
+            _manager.Cobra600.ToggleGripperAction(); // turn off suction
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, 50);
+
+            _manager.Log("Reference plane calibration procedure completed!", false, true)
+        }
+
 
     }
 }
