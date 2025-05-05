@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -27,6 +28,8 @@ namespace OptiSort.userControls
         {
             InitializeComponent();
             _manager = manager;
+
+            RefreshCalibrationTimestamp();
         }
 
         private void btn_StartCoordinateRefCalibration_Click(object sender, EventArgs e)
@@ -50,8 +53,26 @@ namespace OptiSort.userControls
             }
 
             PlaceCalibrationGrid();
-
         }
+
+
+        private void RefreshCalibrationTimestamp()
+        {
+            // Generate file path
+            string filePath = Path.Combine(_manager.ConfigFolder, "ReferenceFrameCalibration.yaml");
+
+            // Update the label text
+            if (!File.Exists(filePath))
+            {
+                lbl_lastCalibrationDateTime.Text = "Last calibration: NEVER!";
+            }
+            else
+            {
+                string timestamp = File.GetLastWriteTime(filePath).ToString("dd/MM/yyyy HH:mm");
+                lbl_lastCalibrationDateTime.Text = $"Last calibration: {timestamp}";
+            }
+        }
+
 
         private void PlaceCalibrationGrid()
         {
@@ -183,9 +204,9 @@ namespace OptiSort.userControls
 
                         var data = new
                         {
-                            columns = 5,
-                            rows = 5,
-                            size = 12
+                            columns = num_columns,
+                            rows = num_rows,
+                            size = num_size
                         };
 
                         _manager.PublishMqttMessage(_mqttClient, "optisort/reference_calibration/input", data);
@@ -233,6 +254,8 @@ namespace OptiSort.userControls
             Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, 50);
 
             _manager.Log("Reference plane calibration procedure completed!", false, true);
+
+            RefreshCalibrationTimestamp();
         }
 
 
