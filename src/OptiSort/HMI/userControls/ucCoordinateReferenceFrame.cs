@@ -20,6 +20,7 @@ namespace OptiSort.userControls
         private bool _idsShot = false;
         private bool _luxonisShot = false;
         private bool _baslerShot = false;
+        private bool _busy = false;
         private DateTime _elapsedTime;
         private int _pythonProcessId;
         private string _mqttClient = Properties.Settings.Default.mqtt_client;
@@ -52,12 +53,22 @@ namespace OptiSort.userControls
                 return;
             }
 
+            _busy = true;
+            _manager.SubscribeMqttTopic(_mqttClient, "optisort/reference_calibration/output"); // launch here or subscription is too slow to catch publishing
             PlaceCalibrationGrid();
         }
 
 
         private void RefreshCalibrationTimestamp()
         {
+
+            // Ensure UI updates are thread-safe
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => RefreshCalibrationTimestamp()));
+                return;
+            }
+
             // Generate file path
             string filePath = Path.Combine(_manager.ConfigFolder, "ReferenceFrameCalibration.yaml");
 
@@ -76,6 +87,8 @@ namespace OptiSort.userControls
 
         private void PlaceCalibrationGrid()
         {
+            _manager.Log("Positioning calibration grid...", false, false);
+
             Transform3D safeFlexi = new Transform3D(375.0, 15.0, 385.0, 0.0, 180.0, -130.0);
             Transform3D storagePick = new Transform3D(516.0, -80.0, 320.0, 0.0, 180.0, -130.0);
             Transform3D flexiPlace = new Transform3D(432.924, 224.126, 330.0, 0.0, 180.0, -130.0);
@@ -181,11 +194,11 @@ namespace OptiSort.userControls
         private void StartCalibrationScript()
         {
             // launch python file and memorize processId
-            _manager.SubscribeMqttTopic(_mqttClient, "optisort/reference_calibration/output");
             _manager.MqttMessageReceived += CalibrationMqttMessageReceived;
             _manager.OnExecutionTerminated += PythonTerminationHandler;
+            _manager.OnErrorReceived += PythonErrorHandler;
 
-            string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\cameras_calibration.py"));
+            string scriptPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\python\other_scripts\coordinate_reference_frame.py"));
             _pythonProcessId = _manager.ExecuteScript(scriptPath);
             _manager.Log($"Coordinate reference frame calibration file launched in background (PID = {_pythonProcessId})", false, false);
         }
@@ -204,27 +217,49 @@ namespace OptiSort.userControls
 
                         var data = new
                         {
-                            columns = num_columns,
-                            rows = num_rows,
-                            size = num_size
+                            columns = num_columns.Value,
+                            rows = num_rows.Value,
+                            size = num_size.Value
                         };
 
                         _manager.PublishMqttMessage(_mqttClient, "optisort/reference_calibration/input", data);
                         _manager.Log($"Grid parameters sent to calibration file", false, false);
                     }
                 }
+
+                if (message.TryGetProperty("result", out JsonElement resultElement))
+                {
+                    int result = resultElement.GetInt16();
+                    if (result == 1)
+                    {
+                        _busy = false;
+                        _manager.Log("Reference plane calibration procedure completed!", false, true);
+                    }
+                }
             }
         }
 
+
+        private void PythonErrorHandler(int processID, string output)
+        {
+            if (processID == _pythonProcessId)
+            {
+                _manager.Log($"Reference frame calibration file threw an error: {output}", true, false);
+            }
+        }
 
         private void PythonTerminationHandler(int processID, bool executionTerminated)
         {
             if (processID == _pythonProcessId)
             {
-                _manager.Log("Camera manager file has closed!", false, false);
+                _manager.Log("Reference frame calibration file has closed!", false, false);
+
+                if (_busy)
+                    _manager.Log("Calibration procedure failed", true, false);
 
                 _manager.MqttMessageReceived -= CalibrationMqttMessageReceived;
                 _manager.OnExecutionTerminated -= PythonTerminationHandler;
+                _manager.OnErrorReceived -= PythonErrorHandler;
 
                 _manager.UnsubscribeMqttTopic(_mqttClient, "optisort/reference_calibration/output");
                 _manager.StopExecution(_pythonProcessId); // needed to reset active processes memory
@@ -253,9 +288,8 @@ namespace OptiSort.userControls
             _manager.Cobra600.ToggleGripperAction(); // turn off suction
             Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, 50);
 
-            _manager.Log("Reference plane calibration procedure completed!", false, true);
-
             RefreshCalibrationTimestamp();
+            _manager.Log("Scara movements ended", false, false);
         }
 
 

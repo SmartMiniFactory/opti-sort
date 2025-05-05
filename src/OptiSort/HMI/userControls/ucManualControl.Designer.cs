@@ -39,9 +39,9 @@
             this.btnFlexibowlFw = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.btn_gripper = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.btn_gripper = new System.Windows.Forms.Button();
             this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,10 +49,10 @@
             // 
             this.btn_coordinateCalibration.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btn_coordinateCalibration.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btn_coordinateCalibration.Location = new System.Drawing.Point(461, 710);
-            this.btn_coordinateCalibration.Margin = new System.Windows.Forms.Padding(20);
+            this.btn_coordinateCalibration.Location = new System.Drawing.Point(307, 460);
+            this.btn_coordinateCalibration.Margin = new System.Windows.Forms.Padding(13, 13, 13, 13);
             this.btn_coordinateCalibration.Name = "btn_coordinateCalibration";
-            this.btn_coordinateCalibration.Size = new System.Drawing.Size(401, 91);
+            this.btn_coordinateCalibration.Size = new System.Drawing.Size(268, 61);
             this.btn_coordinateCalibration.TabIndex = 10;
             this.btn_coordinateCalibration.Text = "Coordinate reference frame";
             this.btn_coordinateCalibration.UseVisualStyleBackColor = true;
@@ -62,10 +62,10 @@
             // 
             this.btn_lensCalibration.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btn_lensCalibration.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btn_lensCalibration.Location = new System.Drawing.Point(20, 710);
-            this.btn_lensCalibration.Margin = new System.Windows.Forms.Padding(20);
+            this.btn_lensCalibration.Location = new System.Drawing.Point(13, 460);
+            this.btn_lensCalibration.Margin = new System.Windows.Forms.Padding(13, 13, 13, 13);
             this.btn_lensCalibration.Name = "btn_lensCalibration";
-            this.btn_lensCalibration.Size = new System.Drawing.Size(401, 91);
+            this.btn_lensCalibration.Size = new System.Drawing.Size(268, 61);
             this.btn_lensCalibration.TabIndex = 9;
             this.btn_lensCalibration.Text = "Camera lenses";
             this.btn_lensCalibration.UseVisualStyleBackColor = true;
@@ -75,10 +75,10 @@
             // 
             this.btnLight.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnLight.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btnLight.Location = new System.Drawing.Point(461, 480);
-            this.btnLight.Margin = new System.Windows.Forms.Padding(20);
+            this.btnLight.Location = new System.Drawing.Point(307, 311);
+            this.btnLight.Margin = new System.Windows.Forms.Padding(13, 13, 13, 13);
             this.btnLight.Name = "btnLight";
-            this.btnLight.Size = new System.Drawing.Size(401, 90);
+            this.btnLight.Size = new System.Drawing.Size(268, 58);
             this.btnLight.TabIndex = 12;
             this.btnLight.Text = "Toggle Ring Light";
             this.btnLight.UseVisualStyleBackColor = true;
@@ -88,10 +88,10 @@
             // 
             this.btnScaraJog.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnScaraJog.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btnScaraJog.Location = new System.Drawing.Point(20, 480);
-            this.btnScaraJog.Margin = new System.Windows.Forms.Padding(20);
+            this.btnScaraJog.Location = new System.Drawing.Point(13, 311);
+            this.btnScaraJog.Margin = new System.Windows.Forms.Padding(13, 13, 13, 13);
             this.btnScaraJog.Name = "btnScaraJog";
-            this.btnScaraJog.Size = new System.Drawing.Size(401, 90);
+            this.btnScaraJog.Size = new System.Drawing.Size(268, 58);
             this.btnScaraJog.TabIndex = 6;
             this.btnScaraJog.Text = "Open Manual Control";
             this.btnScaraJog.UseVisualStyleBackColor = true;
@@ -101,11 +101,11 @@
             // 
             this.btnFaultReset.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFaultReset.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btnFaultReset.Location = new System.Drawing.Point(902, 120);
-            this.btnFaultReset.Margin = new System.Windows.Forms.Padding(20);
+            this.btnFaultReset.Location = new System.Drawing.Point(601, 78);
+            this.btnFaultReset.Margin = new System.Windows.Forms.Padding(13, 13, 13, 13);
             this.btnFaultReset.Name = "btnFaultReset";
             this.tableLayoutPanel2.SetRowSpan(this.btnFaultReset, 2);
-            this.btnFaultReset.Size = new System.Drawing.Size(403, 220);
+            this.btnFaultReset.Size = new System.Drawing.Size(269, 142);
             this.btnFaultReset.TabIndex = 7;
             this.btnFaultReset.Text = "Fault reset";
             this.btnFaultReset.UseVisualStyleBackColor = true;
@@ -115,10 +115,10 @@
             // 
             this.btnFlexibowlShake.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFlexibowlShake.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btnFlexibowlShake.Location = new System.Drawing.Point(461, 250);
-            this.btnFlexibowlShake.Margin = new System.Windows.Forms.Padding(20);
+            this.btnFlexibowlShake.Location = new System.Drawing.Point(307, 162);
+            this.btnFlexibowlShake.Margin = new System.Windows.Forms.Padding(13, 13, 13, 13);
             this.btnFlexibowlShake.Name = "btnFlexibowlShake";
-            this.btnFlexibowlShake.Size = new System.Drawing.Size(401, 90);
+            this.btnFlexibowlShake.Size = new System.Drawing.Size(268, 58);
             this.btnFlexibowlShake.TabIndex = 4;
             this.btnFlexibowlShake.Text = "Shake";
             this.btnFlexibowlShake.UseVisualStyleBackColor = true;
@@ -128,10 +128,10 @@
             // 
             this.btnFlexibowlFlip.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFlexibowlFlip.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btnFlexibowlFlip.Location = new System.Drawing.Point(20, 250);
-            this.btnFlexibowlFlip.Margin = new System.Windows.Forms.Padding(20);
+            this.btnFlexibowlFlip.Location = new System.Drawing.Point(13, 162);
+            this.btnFlexibowlFlip.Margin = new System.Windows.Forms.Padding(13, 13, 13, 13);
             this.btnFlexibowlFlip.Name = "btnFlexibowlFlip";
-            this.btnFlexibowlFlip.Size = new System.Drawing.Size(401, 90);
+            this.btnFlexibowlFlip.Size = new System.Drawing.Size(268, 58);
             this.btnFlexibowlFlip.TabIndex = 3;
             this.btnFlexibowlFlip.Text = "Filp";
             this.btnFlexibowlFlip.UseVisualStyleBackColor = true;
@@ -141,10 +141,10 @@
             // 
             this.btnFlexibowlBw.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFlexibowlBw.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btnFlexibowlBw.Location = new System.Drawing.Point(461, 120);
-            this.btnFlexibowlBw.Margin = new System.Windows.Forms.Padding(20);
+            this.btnFlexibowlBw.Location = new System.Drawing.Point(307, 78);
+            this.btnFlexibowlBw.Margin = new System.Windows.Forms.Padding(13, 13, 13, 13);
             this.btnFlexibowlBw.Name = "btnFlexibowlBw";
-            this.btnFlexibowlBw.Size = new System.Drawing.Size(401, 90);
+            this.btnFlexibowlBw.Size = new System.Drawing.Size(268, 58);
             this.btnFlexibowlBw.TabIndex = 2;
             this.btnFlexibowlBw.Text = "Backward";
             this.btnFlexibowlBw.UseVisualStyleBackColor = true;
@@ -154,10 +154,10 @@
             // 
             this.btnFlexibowlFw.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFlexibowlFw.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btnFlexibowlFw.Location = new System.Drawing.Point(20, 120);
-            this.btnFlexibowlFw.Margin = new System.Windows.Forms.Padding(20);
+            this.btnFlexibowlFw.Location = new System.Drawing.Point(13, 78);
+            this.btnFlexibowlFw.Margin = new System.Windows.Forms.Padding(13, 13, 13, 13);
             this.btnFlexibowlFw.Name = "btnFlexibowlFw";
-            this.btnFlexibowlFw.Size = new System.Drawing.Size(401, 90);
+            this.btnFlexibowlFw.Size = new System.Drawing.Size(268, 58);
             this.btnFlexibowlFw.TabIndex = 1;
             this.btnFlexibowlFw.Text = "Forward";
             this.btnFlexibowlFw.UseVisualStyleBackColor = true;
@@ -170,9 +170,10 @@
             this.tableLayoutPanel2.SetColumnSpan(this.label1, 3);
             this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label1.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(3, 0);
+            this.label1.Location = new System.Drawing.Point(2, 0);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(1319, 100);
+            this.label1.Size = new System.Drawing.Size(879, 65);
             this.label1.TabIndex = 1;
             this.label1.Text = "Flexibowl control";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -198,17 +199,31 @@
             this.tableLayoutPanel2.Controls.Add(this.btnFaultReset, 2, 1);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 7;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 65F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 65F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 65F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(1325, 821);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(883, 534);
             this.tableLayoutPanel2.TabIndex = 2;
+            // 
+            // btn_gripper
+            // 
+            this.btn_gripper.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btn_gripper.Font = new System.Drawing.Font("Segoe UI", 14F);
+            this.btn_gripper.Location = new System.Drawing.Point(601, 311);
+            this.btn_gripper.Margin = new System.Windows.Forms.Padding(13, 13, 13, 13);
+            this.btn_gripper.Name = "btn_gripper";
+            this.btn_gripper.Size = new System.Drawing.Size(269, 58);
+            this.btn_gripper.TabIndex = 13;
+            this.btn_gripper.Text = "Toggle Gripper Suction";
+            this.btn_gripper.UseVisualStyleBackColor = true;
+            this.btn_gripper.Click += new System.EventHandler(this.btn_gripper_Click);
             // 
             // label3
             // 
@@ -217,11 +232,12 @@
             this.tableLayoutPanel2.SetColumnSpan(this.label3, 3);
             this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label3.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(3, 590);
+            this.label3.Location = new System.Drawing.Point(2, 382);
+            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(1319, 100);
+            this.label3.Size = new System.Drawing.Size(879, 65);
             this.label3.TabIndex = 0;
-            this.label3.Text = "Cameras control";
+            this.label3.Text = "Cameras calibrations";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label2
@@ -231,33 +247,22 @@
             this.tableLayoutPanel2.SetColumnSpan(this.label2, 3);
             this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(3, 360);
+            this.label2.Location = new System.Drawing.Point(2, 233);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(1319, 100);
+            this.label2.Size = new System.Drawing.Size(879, 65);
             this.label2.TabIndex = 0;
             this.label2.Text = "Scara control";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // btn_gripper
-            // 
-            this.btn_gripper.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btn_gripper.Font = new System.Drawing.Font("Segoe UI", 14F);
-            this.btn_gripper.Location = new System.Drawing.Point(902, 480);
-            this.btn_gripper.Margin = new System.Windows.Forms.Padding(20);
-            this.btn_gripper.Name = "btn_gripper";
-            this.btn_gripper.Size = new System.Drawing.Size(403, 90);
-            this.btn_gripper.TabIndex = 13;
-            this.btn_gripper.Text = "Toggle Gripper Suction";
-            this.btn_gripper.UseVisualStyleBackColor = true;
-            this.btn_gripper.Click += new System.EventHandler(this.btn_gripper_Click);
-            // 
             // ucManualControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tableLayoutPanel2);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "ucManualControl";
-            this.Size = new System.Drawing.Size(1325, 821);
+            this.Size = new System.Drawing.Size(883, 534);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);

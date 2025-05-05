@@ -1,5 +1,4 @@
 import numpy as np
-from python.camera_manager.processing.image_processor import ImageProcessor
 import paho.mqtt.client as mqtt
 import cv2
 import json
@@ -9,6 +8,8 @@ import sys
 import pathlib
 import yaml
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from python.camera_manager.processing.image_processor import ImageProcessor
 
 # SCRIPT IDENTIFICATION (get script path and define TEMP, CONFIG folder paths)
 script_dir = pathlib.Path(__file__).parent.resolve()
@@ -96,18 +97,23 @@ def on_message(client, userdata, msg):
                     "chessboard_center": chessboard_center_px
                 }
 
-                publish(f"Calibration successful for {camera}!", None)
             except Exception as e:
                 publish(f"Calibration failed for {camera} camera: {e}", None)
-                continue
+                break
         else:
             publish(f"No image found in the TEMP folder for {camera} camera. Procedure aborted.", None)
-            return
+            break
 
     last_activity_time = time.time()  # refresh to avoid program closing during file writing
-    with open(config_folder / f"ReferenceFrameCalibration.yaml", "w") as f:
-        yaml.dump(numpy_to_native(result), f)
-        publish(f"Reference frame calibration data saved to .yaml file", None)
+
+    if len(result) == 3:
+        with open(config_folder / f"ReferenceFrameCalibration.yaml", "w") as f:
+            yaml.dump(numpy_to_native(result), f)
+            publish(f"Reference frame calibration data saved to .yaml file", 1)
+
+    mqttc.loop(timeout=0.1)  # process network events for a short time
+    time.sleep(0.2)  # small wait to ensure packets flush
+    mqttc.disconnect()  # clean disconnect (flush outgoing messages)
     sys.exit(0)
 
 
@@ -122,7 +128,7 @@ publish("Calibration script started. Send grid dimensions and square size...", N
 last_activity_time = time.time()
 
 while True:
-    mqttc.loop(timeout=0.1)  # Process network events (non-blocking, ~1s)
+    mqttc.loop(timeout=0.1)
     elapsed = time.time() - last_activity_time
     if elapsed > SELF_DESTRUCT_TIMEOUT:
         publish("Timeout reached. Exiting.", None)
