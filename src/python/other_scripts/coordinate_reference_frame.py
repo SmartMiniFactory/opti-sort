@@ -1,3 +1,4 @@
+import numpy as np
 from python.camera_manager.processing.image_processor import ImageProcessor
 import paho.mqtt.client as mqtt
 import cv2
@@ -46,6 +47,21 @@ last_activity_time = time.time()
 result = {}
 
 
+def numpy_to_native(obj):
+    if isinstance(obj, dict):
+        return {k: numpy_to_native(v) for k, v in obj.items()}
+    elif isinstance(obj, list) or isinstance(obj, tuple):
+        return [numpy_to_native(v) for v in obj]
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, (np.float_, np.float16, np.float32, np.float64)):
+        return float(obj)
+    elif isinstance(obj, (np.int_, np.int16, np.int32, np.int64)):
+        return int(obj)
+    else:
+        return obj
+
+
 def on_message(client, userdata, msg):
     global last_activity_time, result
     last_activity_time = time.time()
@@ -90,7 +106,7 @@ def on_message(client, userdata, msg):
 
     last_activity_time = time.time()  # refresh to avoid program closing during file writing
     with open(config_folder / f"ReferenceFrameCalibration.yaml", "w") as f:
-        yaml.dump(result, f)
+        yaml.dump(numpy_to_native(result), f)
         publish(f"Reference frame calibration data saved to .yaml file", None)
     sys.exit(0)
 
