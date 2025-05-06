@@ -188,6 +188,8 @@
     <Compile Include="Classes\DigitalTwin.cs" />
     <Compile Include="Classes\PerformanceReport.cs" />
     <Compile Include="Classes\PythonProcessRunner.cs" />
+    <Compile Include="Classes\Transform3DSimple.cs" />
+    <Compile Include="Classes\TransformConfig.cs" />
     <Compile Include="Classes\Watchdog.cs" />
     <Compile Include="optisort_mgr.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -238,6 +240,12 @@
     <Compile Include="userControls\ucCameraLensCalibration.Designer.cs">
       <DependentUpon>ucCameraLensCalibration.cs</DependentUpon>
     </Compile>
+    <Compile Include="userControls\ucFixedCoordinatesDefinition.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="userControls\ucFixedCoordinatesDefinition.Designer.cs">
+      <DependentUpon>ucFixedCoordinatesDefinition.cs</DependentUpon>
+    </Compile>
     <Compile Include="userControls\ucManualControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -286,6 +294,9 @@
     <EmbeddedResource Include="userControls\ucCameraLensCalibration.resx">
       <DependentUpon>ucCameraLensCalibration.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="userControls\ucFixedCoordinatesDefinition.resx">
+      <DependentUpon>ucFixedCoordinatesDefinition.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="userControls\ucManualControl.resx">
       <DependentUpon>ucManualControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -317,6 +328,8 @@
     <None Include="icons\camerasEnabled_2x2_pptx.png" />
     <None Include="icons\webcamDisabled_2x2_pptx.png" />
     <None Include="icons\webcamEnabled_2x2_pptx.png" />
+    <None Include="icons\help_2x2_pptx.png" />
+    <None Include="icons\helpGray_2x2_pptx.png" />
     <Content Include="LedBulb.png" />
     <Content Include="optisort_logo_icon.ico" />
     <None Include="Resources\Optisort_Logo.jpg" />

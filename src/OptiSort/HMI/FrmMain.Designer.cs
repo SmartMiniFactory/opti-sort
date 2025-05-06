@@ -31,49 +31,49 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.lstLog = new System.Windows.Forms.ListBox();
             this.tblPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.pnlCurrentUc = new System.Windows.Forms.Panel();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.lblDtStatus = new System.Windows.Forms.Label();
+            this.lblCamerasStatus = new System.Windows.Forms.Label();
+            this.lblMqttStatus = new System.Windows.Forms.Label();
+            this.lblFlexibowlStatus = new System.Windows.Forms.Label();
+            this.lblScaraStatus = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.tblMainStructure = new System.Windows.Forms.TableLayoutPanel();
+            this.pnlRobotView = new System.Windows.Forms.Panel();
+            this.cmbCameras = new System.Windows.Forms.ComboBox();
+            this.pnlCameraStream = new System.Windows.Forms.Panel();
             this.btnConfig = new System.Windows.Forms.Button();
             this.btnManual = new System.Windows.Forms.Button();
             this.btnAuto = new System.Windows.Forms.Button();
-            this.pnlCurrentUc = new System.Windows.Forms.Panel();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.pbCameraStatus = new System.Windows.Forms.PictureBox();
             this.pbMqttStatus = new System.Windows.Forms.PictureBox();
             this.pbFlexibowlStatus = new System.Windows.Forms.PictureBox();
             this.pbScaraStatus = new System.Windows.Forms.PictureBox();
-            this.panel4 = new System.Windows.Forms.Panel();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
             this.btnDtDisconnect = new System.Windows.Forms.Button();
             this.btnDtConnect = new System.Windows.Forms.Button();
-            this.lblDtStatus = new System.Windows.Forms.Label();
             this.btnCameraTesting = new System.Windows.Forms.Button();
             this.btnCamerasDisconnect = new System.Windows.Forms.Button();
             this.btnCamerasConnect = new System.Windows.Forms.Button();
-            this.lblCamerasStatus = new System.Windows.Forms.Label();
             this.btnEmulateScara = new System.Windows.Forms.Button();
             this.btnMqttDisconnect = new System.Windows.Forms.Button();
             this.btnFlexibowlDisconnect = new System.Windows.Forms.Button();
             this.btnScaraDisconnect = new System.Windows.Forms.Button();
             this.btnMqttConnect = new System.Windows.Forms.Button();
             this.btnFlexibowlConnect = new System.Windows.Forms.Button();
-            this.lblMqttStatus = new System.Windows.Forms.Label();
-            this.lblFlexibowlStatus = new System.Windows.Forms.Label();
-            this.lblScaraStatus = new System.Windows.Forms.Label();
             this.btnScaraConnect = new System.Windows.Forms.Button();
-            this.panel1 = new System.Windows.Forms.Panel();
             this.pbDtStatus = new System.Windows.Forms.PictureBox();
-            this.tblMainStructure = new System.Windows.Forms.TableLayoutPanel();
-            this.pnlRobotView = new System.Windows.Forms.Panel();
-            this.cmbCameras = new System.Windows.Forms.ComboBox();
-            this.pnlCameraStream = new System.Windows.Forms.Panel();
             this.tblPanel.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
+            this.tblMainStructure.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCameraStatus)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbMqttStatus)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbFlexibowlStatus)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbScaraStatus)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbDtStatus)).BeginInit();
-            this.tblMainStructure.SuspendLayout();
             this.SuspendLayout();
             // 
             // lstLog
@@ -107,48 +107,6 @@
             this.tblPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tblPanel.Size = new System.Drawing.Size(1898, 113);
             this.tblPanel.TabIndex = 1;
-            // 
-            // btnConfig
-            // 
-            this.btnConfig.BackgroundImage = global::OptiSort.Properties.Resources.configDisabled_2x2_pptx;
-            this.btnConfig.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnConfig.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnConfig.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnConfig.Location = new System.Drawing.Point(1741, 3);
-            this.btnConfig.Name = "btnConfig";
-            this.btnConfig.Size = new System.Drawing.Size(154, 107);
-            this.btnConfig.TabIndex = 3;
-            this.btnConfig.TabStop = false;
-            this.btnConfig.UseVisualStyleBackColor = true;
-            this.btnConfig.Click += new System.EventHandler(this.btnConfig_Click);
-            // 
-            // btnManual
-            // 
-            this.btnManual.BackgroundImage = global::OptiSort.Properties.Resources.manualEnabled_2x2_pptx;
-            this.btnManual.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnManual.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnManual.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnManual.Location = new System.Drawing.Point(1584, 3);
-            this.btnManual.Name = "btnManual";
-            this.btnManual.Size = new System.Drawing.Size(151, 107);
-            this.btnManual.TabIndex = 2;
-            this.btnManual.TabStop = false;
-            this.btnManual.UseVisualStyleBackColor = true;
-            this.btnManual.Click += new System.EventHandler(this.btnManual_Click);
-            // 
-            // btnAuto
-            // 
-            this.btnAuto.BackgroundImage = global::OptiSort.Properties.Resources.autoDisabled_2x2_pptx;
-            this.btnAuto.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnAuto.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnAuto.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAuto.Location = new System.Drawing.Point(1427, 3);
-            this.btnAuto.Name = "btnAuto";
-            this.btnAuto.Size = new System.Drawing.Size(151, 107);
-            this.btnAuto.TabIndex = 1;
-            this.btnAuto.TabStop = false;
-            this.btnAuto.UseVisualStyleBackColor = true;
-            this.btnAuto.Click += new System.EventHandler(this.btnAuto_Click);
             // 
             // pnlCurrentUc
             // 
@@ -216,6 +174,208 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1898, 129);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
+            // panel4
+            // 
+            this.panel4.BackColor = System.Drawing.Color.Black;
+            this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel4.Location = new System.Drawing.Point(1522, 0);
+            this.panel4.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.panel4.Name = "panel4";
+            this.tableLayoutPanel1.SetRowSpan(this.panel4, 2);
+            this.panel4.Size = new System.Drawing.Size(1, 129);
+            this.panel4.TabIndex = 27;
+            // 
+            // panel3
+            // 
+            this.panel3.BackColor = System.Drawing.Color.Black;
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel3.Location = new System.Drawing.Point(1139, 0);
+            this.panel3.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.panel3.Name = "panel3";
+            this.tableLayoutPanel1.SetRowSpan(this.panel3, 2);
+            this.panel3.Size = new System.Drawing.Size(1, 129);
+            this.panel3.TabIndex = 26;
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.Black;
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(756, 0);
+            this.panel2.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.panel2.Name = "panel2";
+            this.tableLayoutPanel1.SetRowSpan(this.panel2, 2);
+            this.panel2.Size = new System.Drawing.Size(1, 129);
+            this.panel2.TabIndex = 25;
+            // 
+            // lblDtStatus
+            // 
+            this.lblDtStatus.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.lblDtStatus, 2);
+            this.lblDtStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblDtStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblDtStatus.Location = new System.Drawing.Point(1535, 0);
+            this.lblDtStatus.Name = "lblDtStatus";
+            this.lblDtStatus.Size = new System.Drawing.Size(236, 64);
+            this.lblDtStatus.TabIndex = 20;
+            this.lblDtStatus.Text = "DIGITAL TWIN";
+            this.lblDtStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblCamerasStatus
+            // 
+            this.lblCamerasStatus.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.lblCamerasStatus, 2);
+            this.lblCamerasStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblCamerasStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCamerasStatus.Location = new System.Drawing.Point(1152, 0);
+            this.lblCamerasStatus.Name = "lblCamerasStatus";
+            this.lblCamerasStatus.Size = new System.Drawing.Size(236, 64);
+            this.lblCamerasStatus.TabIndex = 13;
+            this.lblCamerasStatus.Text = "CAMERA MGR";
+            this.lblCamerasStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblMqttStatus
+            // 
+            this.lblMqttStatus.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.lblMqttStatus, 2);
+            this.lblMqttStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblMqttStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMqttStatus.Location = new System.Drawing.Point(769, 0);
+            this.lblMqttStatus.Name = "lblMqttStatus";
+            this.lblMqttStatus.Size = new System.Drawing.Size(236, 64);
+            this.lblMqttStatus.TabIndex = 4;
+            this.lblMqttStatus.Text = "MQTT";
+            this.lblMqttStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblFlexibowlStatus
+            // 
+            this.lblFlexibowlStatus.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.lblFlexibowlStatus, 2);
+            this.lblFlexibowlStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblFlexibowlStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblFlexibowlStatus.Location = new System.Drawing.Point(386, 0);
+            this.lblFlexibowlStatus.Name = "lblFlexibowlStatus";
+            this.lblFlexibowlStatus.Size = new System.Drawing.Size(236, 64);
+            this.lblFlexibowlStatus.TabIndex = 2;
+            this.lblFlexibowlStatus.Text = "FLEXIBOWL";
+            this.lblFlexibowlStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // lblScaraStatus
+            // 
+            this.lblScaraStatus.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.lblScaraStatus, 2);
+            this.lblScaraStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblScaraStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblScaraStatus.Location = new System.Drawing.Point(3, 0);
+            this.lblScaraStatus.Name = "lblScaraStatus";
+            this.lblScaraStatus.Size = new System.Drawing.Size(236, 64);
+            this.lblScaraStatus.TabIndex = 0;
+            this.lblScaraStatus.Text = "SCARA";
+            this.lblScaraStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // panel1
+            // 
+            this.panel1.BackColor = System.Drawing.Color.Black;
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(373, 0);
+            this.panel1.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.panel1.Name = "panel1";
+            this.tableLayoutPanel1.SetRowSpan(this.panel1, 2);
+            this.panel1.Size = new System.Drawing.Size(1, 129);
+            this.panel1.TabIndex = 24;
+            // 
+            // tblMainStructure
+            // 
+            this.tblMainStructure.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Inset;
+            this.tblMainStructure.ColumnCount = 2;
+            this.tblMainStructure.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75F));
+            this.tblMainStructure.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tblMainStructure.Controls.Add(this.pnlCurrentUc, 0, 0);
+            this.tblMainStructure.Controls.Add(this.pnlRobotView, 1, 2);
+            this.tblMainStructure.Controls.Add(this.cmbCameras, 1, 0);
+            this.tblMainStructure.Controls.Add(this.pnlCameraStream, 1, 1);
+            this.tblMainStructure.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tblMainStructure.Location = new System.Drawing.Point(0, 129);
+            this.tblMainStructure.Name = "tblMainStructure";
+            this.tblMainStructure.RowCount = 3;
+            this.tblMainStructure.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.tblMainStructure.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45F));
+            this.tblMainStructure.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45F));
+            this.tblMainStructure.Size = new System.Drawing.Size(1898, 782);
+            this.tblMainStructure.TabIndex = 5;
+            // 
+            // pnlRobotView
+            // 
+            this.pnlRobotView.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlRobotView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlRobotView.Location = new System.Drawing.Point(1426, 434);
+            this.pnlRobotView.Name = "pnlRobotView";
+            this.pnlRobotView.Size = new System.Drawing.Size(467, 343);
+            this.pnlRobotView.TabIndex = 6;
+            // 
+            // cmbCameras
+            // 
+            this.cmbCameras.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cmbCameras.DropDownHeight = 120;
+            this.cmbCameras.Font = new System.Drawing.Font("Microsoft Sans Serif", 25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cmbCameras.FormattingEnabled = true;
+            this.cmbCameras.IntegralHeight = false;
+            this.cmbCameras.Location = new System.Drawing.Point(1426, 5);
+            this.cmbCameras.Name = "cmbCameras";
+            this.cmbCameras.Size = new System.Drawing.Size(467, 66);
+            this.cmbCameras.TabIndex = 7;
+            this.cmbCameras.SelectedIndexChanged += new System.EventHandler(this.cmbCameras_SelectedIndexChanged);
+            // 
+            // pnlCameraStream
+            // 
+            this.pnlCameraStream.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlCameraStream.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlCameraStream.Location = new System.Drawing.Point(1426, 84);
+            this.pnlCameraStream.Name = "pnlCameraStream";
+            this.pnlCameraStream.Size = new System.Drawing.Size(467, 342);
+            this.pnlCameraStream.TabIndex = 5;
+            // 
+            // btnConfig
+            // 
+            this.btnConfig.BackgroundImage = global::OptiSort.Properties.Resources.configDisabled_2x2_pptx;
+            this.btnConfig.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnConfig.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnConfig.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnConfig.Location = new System.Drawing.Point(1741, 3);
+            this.btnConfig.Name = "btnConfig";
+            this.btnConfig.Size = new System.Drawing.Size(154, 107);
+            this.btnConfig.TabIndex = 3;
+            this.btnConfig.TabStop = false;
+            this.btnConfig.UseVisualStyleBackColor = true;
+            this.btnConfig.Click += new System.EventHandler(this.btnConfig_Click);
+            // 
+            // btnManual
+            // 
+            this.btnManual.BackgroundImage = global::OptiSort.Properties.Resources.manualEnabled_2x2_pptx;
+            this.btnManual.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnManual.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnManual.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnManual.Location = new System.Drawing.Point(1584, 3);
+            this.btnManual.Name = "btnManual";
+            this.btnManual.Size = new System.Drawing.Size(151, 107);
+            this.btnManual.TabIndex = 2;
+            this.btnManual.TabStop = false;
+            this.btnManual.UseVisualStyleBackColor = true;
+            this.btnManual.Click += new System.EventHandler(this.btnManual_Click);
+            // 
+            // btnAuto
+            // 
+            this.btnAuto.BackgroundImage = global::OptiSort.Properties.Resources.autoDisabled_2x2_pptx;
+            this.btnAuto.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnAuto.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnAuto.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAuto.Location = new System.Drawing.Point(1427, 3);
+            this.btnAuto.Name = "btnAuto";
+            this.btnAuto.Size = new System.Drawing.Size(151, 107);
+            this.btnAuto.TabIndex = 1;
+            this.btnAuto.TabStop = false;
+            this.btnAuto.UseVisualStyleBackColor = true;
+            this.btnAuto.Click += new System.EventHandler(this.btnAuto_Click);
+            // 
             // pbCameraStatus
             // 
             this.pbCameraStatus.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
@@ -268,39 +428,6 @@
             this.pbScaraStatus.TabIndex = 29;
             this.pbScaraStatus.TabStop = false;
             // 
-            // panel4
-            // 
-            this.panel4.BackColor = System.Drawing.Color.Black;
-            this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel4.Location = new System.Drawing.Point(1522, 0);
-            this.panel4.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.panel4.Name = "panel4";
-            this.tableLayoutPanel1.SetRowSpan(this.panel4, 2);
-            this.panel4.Size = new System.Drawing.Size(1, 129);
-            this.panel4.TabIndex = 27;
-            // 
-            // panel3
-            // 
-            this.panel3.BackColor = System.Drawing.Color.Black;
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel3.Location = new System.Drawing.Point(1139, 0);
-            this.panel3.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.panel3.Name = "panel3";
-            this.tableLayoutPanel1.SetRowSpan(this.panel3, 2);
-            this.panel3.Size = new System.Drawing.Size(1, 129);
-            this.panel3.TabIndex = 26;
-            // 
-            // panel2
-            // 
-            this.panel2.BackColor = System.Drawing.Color.Black;
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(756, 0);
-            this.panel2.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.panel2.Name = "panel2";
-            this.tableLayoutPanel1.SetRowSpan(this.panel2, 2);
-            this.panel2.Size = new System.Drawing.Size(1, 129);
-            this.panel2.TabIndex = 25;
-            // 
             // btnDtDisconnect
             // 
             this.btnDtDisconnect.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnDtDisconnect.BackgroundImage")));
@@ -327,19 +454,6 @@
             this.btnDtConnect.TabIndex = 22;
             this.btnDtConnect.UseVisualStyleBackColor = true;
             this.btnDtConnect.Click += new System.EventHandler(this.btnDtConnect_Click);
-            // 
-            // lblDtStatus
-            // 
-            this.lblDtStatus.AutoSize = true;
-            this.tableLayoutPanel1.SetColumnSpan(this.lblDtStatus, 2);
-            this.lblDtStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblDtStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDtStatus.Location = new System.Drawing.Point(1535, 0);
-            this.lblDtStatus.Name = "lblDtStatus";
-            this.lblDtStatus.Size = new System.Drawing.Size(236, 64);
-            this.lblDtStatus.TabIndex = 20;
-            this.lblDtStatus.Text = "DIGITAL TWIN";
-            this.lblDtStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnCameraTesting
             // 
@@ -380,19 +494,6 @@
             this.btnCamerasConnect.TabIndex = 15;
             this.btnCamerasConnect.UseVisualStyleBackColor = true;
             this.btnCamerasConnect.Click += new System.EventHandler(this.btnCamerasConnect_Click);
-            // 
-            // lblCamerasStatus
-            // 
-            this.lblCamerasStatus.AutoSize = true;
-            this.tableLayoutPanel1.SetColumnSpan(this.lblCamerasStatus, 2);
-            this.lblCamerasStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblCamerasStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCamerasStatus.Location = new System.Drawing.Point(1152, 0);
-            this.lblCamerasStatus.Name = "lblCamerasStatus";
-            this.lblCamerasStatus.Size = new System.Drawing.Size(236, 64);
-            this.lblCamerasStatus.TabIndex = 13;
-            this.lblCamerasStatus.Text = "CAMERA MGR";
-            this.lblCamerasStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnEmulateScara
             // 
@@ -475,45 +576,6 @@
             this.btnFlexibowlConnect.UseVisualStyleBackColor = true;
             this.btnFlexibowlConnect.Click += new System.EventHandler(this.btnFlexibowlConnect_Click);
             // 
-            // lblMqttStatus
-            // 
-            this.lblMqttStatus.AutoSize = true;
-            this.tableLayoutPanel1.SetColumnSpan(this.lblMqttStatus, 2);
-            this.lblMqttStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblMqttStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMqttStatus.Location = new System.Drawing.Point(769, 0);
-            this.lblMqttStatus.Name = "lblMqttStatus";
-            this.lblMqttStatus.Size = new System.Drawing.Size(236, 64);
-            this.lblMqttStatus.TabIndex = 4;
-            this.lblMqttStatus.Text = "MQTT";
-            this.lblMqttStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lblFlexibowlStatus
-            // 
-            this.lblFlexibowlStatus.AutoSize = true;
-            this.tableLayoutPanel1.SetColumnSpan(this.lblFlexibowlStatus, 2);
-            this.lblFlexibowlStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblFlexibowlStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFlexibowlStatus.Location = new System.Drawing.Point(386, 0);
-            this.lblFlexibowlStatus.Name = "lblFlexibowlStatus";
-            this.lblFlexibowlStatus.Size = new System.Drawing.Size(236, 64);
-            this.lblFlexibowlStatus.TabIndex = 2;
-            this.lblFlexibowlStatus.Text = "FLEXIBOWL";
-            this.lblFlexibowlStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lblScaraStatus
-            // 
-            this.lblScaraStatus.AutoSize = true;
-            this.tableLayoutPanel1.SetColumnSpan(this.lblScaraStatus, 2);
-            this.lblScaraStatus.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblScaraStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblScaraStatus.Location = new System.Drawing.Point(3, 0);
-            this.lblScaraStatus.Name = "lblScaraStatus";
-            this.lblScaraStatus.Size = new System.Drawing.Size(236, 64);
-            this.lblScaraStatus.TabIndex = 0;
-            this.lblScaraStatus.Text = "SCARA";
-            this.lblScaraStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // btnScaraConnect
             // 
             this.btnScaraConnect.BackgroundImage = global::OptiSort.Properties.Resources.connectedEnabled_2x2_pptx;
@@ -527,17 +589,6 @@
             this.btnScaraConnect.UseVisualStyleBackColor = true;
             this.btnScaraConnect.Click += new System.EventHandler(this.btnScaraConnect_Click);
             // 
-            // panel1
-            // 
-            this.panel1.BackColor = System.Drawing.Color.Black;
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(373, 0);
-            this.panel1.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
-            this.panel1.Name = "panel1";
-            this.tableLayoutPanel1.SetRowSpan(this.panel1, 2);
-            this.panel1.Size = new System.Drawing.Size(1, 129);
-            this.panel1.TabIndex = 24;
-            // 
             // pbDtStatus
             // 
             this.pbDtStatus.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
@@ -550,57 +601,6 @@
             this.pbDtStatus.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pbDtStatus.TabIndex = 28;
             this.pbDtStatus.TabStop = false;
-            // 
-            // tblMainStructure
-            // 
-            this.tblMainStructure.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Inset;
-            this.tblMainStructure.ColumnCount = 2;
-            this.tblMainStructure.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75F));
-            this.tblMainStructure.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tblMainStructure.Controls.Add(this.pnlCurrentUc, 0, 0);
-            this.tblMainStructure.Controls.Add(this.pnlRobotView, 1, 2);
-            this.tblMainStructure.Controls.Add(this.cmbCameras, 1, 0);
-            this.tblMainStructure.Controls.Add(this.pnlCameraStream, 1, 1);
-            this.tblMainStructure.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tblMainStructure.Location = new System.Drawing.Point(0, 129);
-            this.tblMainStructure.Name = "tblMainStructure";
-            this.tblMainStructure.RowCount = 3;
-            this.tblMainStructure.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
-            this.tblMainStructure.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45F));
-            this.tblMainStructure.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45F));
-            this.tblMainStructure.Size = new System.Drawing.Size(1898, 782);
-            this.tblMainStructure.TabIndex = 5;
-            // 
-            // pnlRobotView
-            // 
-            this.pnlRobotView.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlRobotView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlRobotView.Location = new System.Drawing.Point(1426, 434);
-            this.pnlRobotView.Name = "pnlRobotView";
-            this.pnlRobotView.Size = new System.Drawing.Size(467, 343);
-            this.pnlRobotView.TabIndex = 6;
-            // 
-            // cmbCameras
-            // 
-            this.cmbCameras.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.cmbCameras.DropDownHeight = 120;
-            this.cmbCameras.Font = new System.Drawing.Font("Microsoft Sans Serif", 25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmbCameras.FormattingEnabled = true;
-            this.cmbCameras.IntegralHeight = false;
-            this.cmbCameras.Location = new System.Drawing.Point(1426, 5);
-            this.cmbCameras.Name = "cmbCameras";
-            this.cmbCameras.Size = new System.Drawing.Size(467, 66);
-            this.cmbCameras.TabIndex = 7;
-            this.cmbCameras.SelectedIndexChanged += new System.EventHandler(this.cmbCameras_SelectedIndexChanged);
-            // 
-            // pnlCameraStream
-            // 
-            this.pnlCameraStream.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlCameraStream.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlCameraStream.Location = new System.Drawing.Point(1426, 84);
-            this.pnlCameraStream.Name = "pnlCameraStream";
-            this.pnlCameraStream.Size = new System.Drawing.Size(467, 342);
-            this.pnlCameraStream.TabIndex = 5;
             // 
             // frmMain
             // 
@@ -620,12 +620,12 @@
             this.tblPanel.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            this.tblMainStructure.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pbCameraStatus)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbMqttStatus)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbFlexibowlStatus)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbScaraStatus)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbDtStatus)).EndInit();
-            this.tblMainStructure.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

@@ -220,10 +220,6 @@ namespace OptiSort.userControls
 
                     Transform3D _locTarget = ScaraTargets.TargetQueueList[0].Transform; // accessing first element to pick
 
-                    Transform3D safeFlexi = new Transform3D(375.0, 15.0, 385.0, 0.0, 180.0, -130.0);
-                    Transform3D safeBoxes = new Transform3D(200.0, -450.0, 360.0, 0.0, 180.0, 50.0);
-                    Transform3D BoxA = new Transform3D(160, -450.0, 180.0, 0.0, 180.0, 50.0);
-                    Transform3D BoxB = new Transform3D(310, -450.0, 180.0, 0.0, 180.0, 50.0);
 
                     _manager.Cobra600.toggleRingLight();
                     Thread.Sleep(500);
@@ -231,7 +227,7 @@ namespace OptiSort.userControls
 
                     // move at safe flexibowl position
                     led_approachFlexibowl.On = true;
-                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeFlexi, true);
+                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.SafeFlexi, true);
                     led_approachFlexibowl.On = false;
 
                     // pick object safely
@@ -244,10 +240,10 @@ namespace OptiSort.userControls
 
                     // move at safe flexibowl position
                     led_approachShuttle.On = true;
-                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeFlexi, true);
+                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.SafeFlexi, true);
 
                     // move at safe boxes position
-                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeBoxes, true);
+                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.SafeBoxes, true);
                     
                     led_approachShuttle.On = false;
                     led_place.On = true;
@@ -255,22 +251,22 @@ namespace OptiSort.userControls
                     // Place
                     if (ScaraTargets.TargetQueueList[0].Component.Contains("Component A"))
                     {
-                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxA, 20);
-                        Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxA, true);
+                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.BoxPlaceA, 20);
+                        Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.BoxPlaceA, true);
                         _manager.Cobra600.ToggleGripperAction(); // turn off suction
-                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxA, 20);
+                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.BoxPlaceA, 20);
                         _counterDetectedA++;
                     }
                     else if (ScaraTargets.TargetQueueList[0].Component.Contains("Component B"))
                     {
-                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, 20);
-                        Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, true);
+                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.BoxPlaceB, 20);
+                        Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.BoxPlaceB, true);
                         _manager.Cobra600.ToggleGripperAction(); // turn off suction
-                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, BoxB, 20);
+                        Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.BoxPlaceB, 20);
                         _counterDetectedB++;
                     }
 
-                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeBoxes, true);
+                    Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.SafeBoxes, true);
                     led_place.On = false;
 
                     _scaraIsMoving = false;

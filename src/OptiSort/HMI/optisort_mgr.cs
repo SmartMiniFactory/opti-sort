@@ -1,4 +1,5 @@
-﻿using Ace.Core.Util;
+﻿using Ace.Core.Server;
+using Ace.Core.Util;
 using FlexibowlLibrary;
 using OptiSort.Classes;
 using OptiSort.systems;
@@ -16,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace OptiSort
 {
@@ -24,6 +26,8 @@ namespace OptiSort
     {
 
         #region declarations
+
+        // TODO: change public singletones to private ones and expose them through properties (e.g. MqttClient, Cobra600, etc.) to avoid exposing the whole class to the user controls
 
         private frmMain _frmMain;
 
@@ -227,6 +231,45 @@ namespace OptiSort
         public event Action<string, string, MessageBoxIcon> MessageBoxEvent; // Event to notify subscribers
 
 
+        // Coordinates
+        private Transform3D _gridPick;
+        private Transform3D _gridPlace;
+        private Transform3D _safeFlexi;
+        private Transform3D _boxPlaceA;
+        private Transform3D _boxPlaceB;
+        private Transform3D _safeBoxes;
+
+        public Transform3D GridPick
+        {
+            get => _gridPick;
+            set => _gridPick = value;
+        }
+        public Transform3D GridPlace
+        {
+            get => _gridPlace;
+            set => _gridPlace = value;
+        }
+        public Transform3D SafeFlexi
+        {
+            get => _safeFlexi;
+            set => _safeFlexi = value;
+        }
+        public Transform3D BoxPlaceA
+        {
+            get => _boxPlaceA;
+            set => _boxPlaceA = value;
+        }
+        public Transform3D BoxPlaceB
+        {
+            get => _boxPlaceB;
+            set => _boxPlaceB = value;
+        }
+        public Transform3D SafeBoxes
+        {
+            get => _safeBoxes;
+            set => _safeBoxes = value;
+        }
+
         #endregion
 
         // -----------------------------------------------------------------------------------
@@ -268,6 +311,9 @@ namespace OptiSort
             // Instance class dedicated to running python files
             _activeProcesses = new Dictionary<int, string>();
             _runners = new Dictionary<int, PythonProcessRunner>();
+
+            // Retreive coordinates files
+            LoadTransformConfig();
 
         }
 
@@ -968,6 +1014,77 @@ namespace OptiSort
             }
         }
 
+
+        public void SaveTransformConfig()
+        {
+            var config = new TransformConfig
+            {
+                GridPick = FromTransform3D(_gridPick),
+                GridPlace = FromTransform3D(_gridPlace),
+                SafeFlexi = FromTransform3D(_safeFlexi),
+                BoxPlaceA = FromTransform3D(_boxPlaceA),
+                BoxPlaceB = FromTransform3D(_boxPlaceB),
+                SafeBoxes = FromTransform3D(_safeBoxes)
+            };
+
+            string json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(Path.Combine(ConfigFolder, "transform_config.json"), json);
+        }
+
+        private void LoadTransformConfig()
+        {
+            string path = Path.Combine(ConfigFolder, "transform_config.json");
+            if (!File.Exists(path))
+            {
+                var defaultConfig = new TransformConfig();
+                string json = JsonSerializer.Serialize(defaultConfig, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(path, json);
+            }
+
+            string fileContent = File.ReadAllText(path);
+            var config = JsonSerializer.Deserialize<TransformConfig>(fileContent);
+
+            if (config != null)
+            {
+                _gridPick = ToTransform3D(config.GridPick);
+                _gridPlace = ToTransform3D(config.GridPlace);
+                _safeFlexi = ToTransform3D(config.SafeFlexi);
+                _boxPlaceA = ToTransform3D(config.BoxPlaceA);
+                _boxPlaceB = ToTransform3D(config.BoxPlaceB);
+                _safeBoxes = ToTransform3D(config.SafeBoxes);
+            }
+        }
+
+        // Load → Convert DTO → Transform3D
+        private Transform3D ToTransform3D(Transform3DSimple simple)
+        {
+            return new Transform3D(simple.X, simple.Y, simple.Z, simple.Yaw, simple.Pitch, simple.Roll);
+        }
+
+        // Save → Convert Transform3D → DTO
+        private Transform3DSimple FromTransform3D(Transform3D t3d)
+        {
+            return new Transform3DSimple(t3d.DX, t3d.DY, t3d.DZ, t3d.Yaw, t3d.Pitch, t3d.Roll);
+        }
+
+        public void RestoreDefaultTransformConfig()
+        {
+            try
+            {
+                string filePath = Path.Combine(ConfigFolder, "transform_config.json");
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+                else
+                    Console.WriteLine($"Delete failed because file is not found: {filePath}");
+                LoadTransformConfig(); // reload default config
+            }
+            catch (Exception ex)
+            {
+                Log($"Error restoring transform defaults: {ex.Message}", true, false);
+            }
+        }
+
+
         #endregion
 
         // -----------------------------------------------------------------------------------
@@ -975,7 +1092,7 @@ namespace OptiSort
         // -----------------------------------------------------------------------------------
 
         #region log
-        
+
         /// <summary>
         /// Can be called by any user control to log things inside the listbox in the frmain, which is invoked by this
         /// </summary>

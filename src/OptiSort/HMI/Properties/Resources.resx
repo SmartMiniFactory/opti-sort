@@ -151,6 +151,9 @@
   <data name="home_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icons\home_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="robot_2x2_pptx1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\robot_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="camerasEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icons\camerasEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -187,6 +190,9 @@
   <data name="OptisortLogo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\OptisortLogo.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="help_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\help_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="autoDisabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icons\autoDisabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -205,10 +211,10 @@
   <data name="autoEnabled_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icons\autoEnabled_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="robot_2x2_pptx1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\robot_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="off_2x2_pptx1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icons\off_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="helpGray_2x2_pptx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\helpGray_2x2_pptx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

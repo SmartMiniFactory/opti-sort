@@ -89,27 +89,23 @@ namespace OptiSort.userControls
         {
             _manager.Log("Positioning calibration grid...", false, false);
 
-            Transform3D safeFlexi = new Transform3D(375.0, 15.0, 385.0, 0.0, 180.0, -130.0);
-            Transform3D storagePick = new Transform3D(516.0, -80.0, 320.0, 0.0, 180.0, -130.0);
-            Transform3D flexiPlace = new Transform3D(432.924, 224.126, 330.0, 0.0, 180.0, -130.0);
-
             // Move to safe position
-            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, safeFlexi, true);
+            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.SafeFlexi, true);
 
             // Pick tile
-            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, 50);
-            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, true);
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPick, 50);
+            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPick, true);
             _manager.Cobra600.ToggleGripperAction(); // turn on suction
-            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, 50);
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPick, 50);
 
             // Place tile
-            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, flexiPlace, 50);
-            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, flexiPlace, true);
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPlace, 50);
+            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPlace, true);
             _manager.Cobra600.ToggleGripperAction(); // turn off suction
-            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, flexiPlace, 50);
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPlace, 50);
 
             // Move robot out the camera sight
-            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, 50);
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPick, 50);
 
 
             // Save screenshots
@@ -271,22 +267,19 @@ namespace OptiSort.userControls
 
         private void RemoveCalibrationGrid()
         {
-            Transform3D safeFlexi = new Transform3D(375.0, 15.0, 385.0, 0.0, 180.0, -130.0);
-            Transform3D storagePick = new Transform3D(516.0, -80.0, 320.0, 0.0, 180.0, -130.0);
-            Transform3D flexiPlace = new Transform3D(432.924, 224.126, 330.0, 0.0, 180.0, -130.0);
 
             // Pick tile from flexibowl
-            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, flexiPlace, 50);
-            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, flexiPlace, true);
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPlace, 50);
+            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPlace, true);
             _manager.Cobra600.ToggleGripperAction(); // turn on suction
-            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, flexiPlace, 50);
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPlace, 50);
 
 
             // Place tile
-            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, 50);
-            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, true);
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPick, 50);
+            Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPick, true);
             _manager.Cobra600.ToggleGripperAction(); // turn off suction
-            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, storagePick, 50);
+            Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPick, 50);
 
             RefreshCalibrationTimestamp();
             _manager.Log("Scara movements ended", false, false);

@@ -8,6 +8,7 @@ import base64
 import json
 import xml.etree.ElementTree as ET
 import cv2
+import yaml
 import paho.mqtt.client as mqtt
 from transitions import Machine
 
@@ -26,6 +27,7 @@ temp_folder = script_dir / "../../OptiSort/HMI/Temp"
 config_folder = script_dir / "../../OptiSort/HMI/Config"
 ids_configfile = config_folder / "ids_configuration.ini"
 basler_configfile = config_folder / "basler_configuration.pfs"
+reference_calibfile = config_folder / "ReferenceFrameCalibration.yaml"
 # os.add_dll_directory(r"C:\Program Files\Basler\pylon 8\Runtime\Win32")
 
 # MQTT configuration
@@ -273,12 +275,16 @@ class ProcessingHandler:
     def _process_camera(self):
         try:
 
-            # Robot-provided chessboard center (where robot places center of checkerboard)
-            scara_chessboard_center_mm = (432.924, 224.126)  # Example mm, replace with your robot data
-            scara_chessboard_yaw_deg = 0
+            check_file_readable(reference_calibfile)
 
-            grid_size = (5, 7)  # cols, rows inner corners
-            square_size_mm = 4.5
+            with open(reference_calibfile, 'r') as file:
+                data = yaml.safe_load(file)
+
+            chessboard_center_scara = data[self.target_camera]["chessboard_scara"]
+            chessboard_center_px = data[self.target_camera]["chessboard_center_px"]
+            chessboard_yaw = data[self.target_camera]["chessboard_yaw"]
+            scale_x = data[self.target_camera]["scale_x"]
+            scale_y = data[self.target_camera]["scale_y"]
 
             self.camera_manager.start_acquisition(self.target_camera)
             proc = ImageProcessor()
@@ -306,28 +312,24 @@ class ProcessingHandler:
 
                 if len(detected_objects) > 0:
                     for object in detected_objects:
-                        stable_position = proc.stabilize_detection(object)  # Stabilizza la posizione del componente
 
+                        stable_position = proc.stabilize_detection(object)  # Stabilizza la posizione del componente
                         if stable_position is not None:
                             component, stable_x, stable_y, stable_a = stable_position
 
-                            scale_x, scale_y, chessboard_origin_px, chessboard_center_px, vis_img = proc.compute_pixel_mm_scale(
-                                frame, grid_size, square_size_mm
-                            )
+                            component_center_px = (stable_x, stable_y)
 
-                            detected_pixel = (stable_x, stable_y)
-
-                            X_scara, Y_scara = proc.pixel_to_scara(
-                                detected_pixel,
+                            X_pick, Y_pick = proc.pixel_to_scara(
+                                component_center_px,
                                 chessboard_center_px,
-                                scara_chessboard_center_mm,
+                                chessboard_center_scara,
                                 scale_x,
                                 scale_y,
-                                scara_chessboard_yaw_deg
+                                chessboard_yaw
                             )
 
                             # ---- ISTERESI ----
-                            if proc.should_send_mqtt(component, (X_scara, Y_scara)):
+                            if proc.should_send_mqtt(component, (X_pick, Y_pick)):
 
                                 payload = {
                                     "script": {
@@ -336,8 +338,8 @@ class ProcessingHandler:
                                     },
                                     "message": {
                                         "type": component,
-                                        "x": X_scara,
-                                        "y": Y_scara,
+                                        "x": X_pick,
+                                        "y": Y_pick,
                                         "z": 0.0,
                                         "rx": 0.0,
                                         "ry": 0.0,

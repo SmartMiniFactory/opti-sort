@@ -156,5 +156,11 @@ namespace OptiSort.userControls
             _manager.Cobra600.ToggleGripperAction();
             RefreshButtons();
         }
+
+        private void btn_fixedCoord_Click(object sender, EventArgs e)
+        {
+            ucFixedCoordinatesDefinition ucFixedCoordinatesDefinition = new ucFixedCoordinatesDefinition(_manager);
+            _manager.RequestNewUcLoading(ucFixedCoordinatesDefinition);
+        }
     }
 }

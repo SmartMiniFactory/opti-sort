@@ -73,6 +73,9 @@ def on_message(client, userdata, msg):
     columns = payload.get("columns")
     rows = payload.get("rows")
     size = payload.get("size")
+    scara_center_positioning = payload.get("center") # a point (x, y) in scara coordinates
+    scara_yaw = payload.get("yaw")
+
 
     if columns is None or rows is None or size is None:
         publish("Please input columns, rows and size", None)
@@ -86,15 +89,16 @@ def on_message(client, userdata, msg):
             image = cv2.imread(str(absolute_path))
             try:
 
-                scale_x, scale_y, chessboard_origin_px, chessboard_center_px, vis_img = processor.compute_pixel_mm_scale(
+                scale_x, scale_y, chessboard_center_px, vis_img = processor.compute_pixel_mm_scale(
                     img=image, grid_size=(columns, rows), square_size_mm=size
                 )
 
                 result[camera] = {
                     "scale_x": scale_x,
                     "scale_y": scale_y,
-                    "chessboard_origin": chessboard_origin_px,
-                    "chessboard_center": chessboard_center_px
+                    "chessboard_center_px": chessboard_center_px,
+                    "chessboard_scara": scara_center_positioning,
+                    "chessboard_yaw": scara_yaw
                 }
 
             except Exception as e:

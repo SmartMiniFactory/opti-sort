@@ -357,7 +357,7 @@ class ImageProcessor:
             cv2.arrowedLine(vis_img, (int(corner0[0]), int(corner0[1])), end_y, (255, 255, 0), 2, tipLength=0.2)
             cv2.putText(vis_img, "+Y", end_y, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2)
 
-        return scale_x, scale_y, chessboard_origin_px, chessboard_center_px, vis_img
+        return scale_x, scale_y, chessboard_center_px, vis_img
 
     def pixel_to_scara(self, pixel_point, chessboard_center_px, scara_chessboard_center_mm, scale_x, scale_y, yaw_deg=0,
                        apply_yaw=False):
