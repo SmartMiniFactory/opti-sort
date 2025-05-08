@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -107,13 +108,14 @@ namespace OptiSort.userControls
             // Move robot out the camera sight
             Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.GridPick, 50);
 
+            Thread.Sleep(1500); // Streaming is too slow to update: scara results still in front of the grid when picture gets taken
 
-            // Save screenshots
-            //_manager.RequestScreenshots = true;
-            //_manager.BitmapQueued += SaveShots; // subscribe to the event to save screenshots
-            //_elapsedTime = DateTime.Now;
+             //Save screenshots
+            _manager.RequestScreenshots = true;
+            _manager.BitmapQueued += SaveShots; // subscribe to the event to save screenshots
+            _elapsedTime = DateTime.Now;
 
-            StartCalibrationScript();
+            //StartCalibrationScript();
         }
 
 
