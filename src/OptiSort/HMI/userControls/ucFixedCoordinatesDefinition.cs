@@ -120,20 +120,17 @@ namespace OptiSort.userControls
 
         private void btn_restoreDefaults_Click(object sender, EventArgs e)
         {
-            _manager.RestoreDefaultTransformConfig();
-            LoadValues();
+            
         }
 
         private void btn_save_Click(object sender, EventArgs e)
         {
-            _manager.GridPick = BuildTransformFromNuds(nud_gridPick_x, nud_gridPick_y, nud_gridPick_z, nud_gridPick_yaw, nud_gridPick_pitch, nud_gridPick_roll);
-            _manager.GridPlace = BuildTransformFromNuds(nud_gridPlace_x, nud_gridPlace_y, nud_gridPlace_z, nud_gridPlace_yaw, nud_gridPlace_pitch, nud_gridPlace_roll);
-            _manager.SafeFlexi = BuildTransformFromNuds(nud_safeFlexi_x, nud_safeFlexi_y, nud_safeFlexi_z, nud_safeFlexi_yaw, nud_safeFlexi_pitch, nud_safeFlexi_roll);
-            _manager.BoxPlaceA = BuildTransformFromNuds(nud_boxPlaceA_x, nud_boxPlaceA_y, nud_boxPlaceA_z, nud_boxPlaceA_yaw, nud_boxPlaceA_pitch, nud_boxPlaceA_roll);
-            _manager.BoxPlaceB = BuildTransformFromNuds(nud_boxPlaceB_x, nud_boxPlaceB_y, nud_boxPlaceB_z, nud_boxPlaceB_yaw, nud_boxPlaceB_pitch, nud_boxPlaceB_roll);
-            _manager.SafeBoxes = BuildTransformFromNuds(nud_safeBoxes_x, nud_safeBoxes_y, nud_safeBoxes_z, nud_safeBoxes_yaw, nud_safeBoxes_pitch, nud_safeBoxes_roll);
-
-            _manager.SaveTransformConfig();
+            //_manager.UpdateCoordinate("GridPick", BuildTransformFromNuds(nud_gridPick_x, nud_gridPick_y, nud_gridPick_z, nud_gridPick_yaw, nud_gridPick_pitch, nud_gridPick_roll));
+            //_manager.UpdateCoordinate("GridPlace", BuildTransformFromNuds(nud_gridPlace_x, nud_gridPlace_y, nud_gridPlace_z, nud_gridPlace_yaw, nud_gridPlace_pitch, nud_gridPlace_roll));
+            //_manager.UpdateCoordinate("SafeFlexi", BuildTransformFromNuds(nud_safeFlexi_x, nud_safeFlexi_y, nud_safeFlexi_z, nud_safeFlexi_yaw, nud_safeFlexi_pitch, nud_safeFlexi_roll));
+            //_manager.UpdateCoordinate("BoxPlaceA", BuildTransformFromNuds(nud_boxPlaceA_x, nud_boxPlaceA_y, nud_boxPlaceA_z, nud_boxPlaceA_yaw, nud_boxPlaceA_pitch, nud_boxPlaceA_roll));
+            //_manager.UpdateCoordinate("BoxPlaceB", BuildTransformFromNuds(nud_boxPlaceB_x, nud_boxPlaceB_y, nud_boxPlaceB_z, nud_boxPlaceB_yaw, nud_boxPlaceB_pitch, nud_boxPlaceB_roll));
+            //_manager.UpdateCoordinate("SafeBoxes", BuildTransformFromNuds(nud_safeBoxes_x, nud_safeBoxes_y, nud_safeBoxes_z, nud_safeBoxes_yaw, nud_safeBoxes_pitch, nud_safeBoxes_roll));
 
             isModified = false;
             btn_save.Enabled = false;

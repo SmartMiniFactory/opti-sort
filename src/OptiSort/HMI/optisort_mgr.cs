@@ -1,6 +1,7 @@
 ﻿using Ace.Core.Server;
 using Ace.Core.Util;
 using FlexibowlLibrary;
+using Newtonsoft.Json;
 using OptiSort.Classes;
 using OptiSort.systems;
 using System;
@@ -10,8 +11,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Drawing.Text;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -230,45 +233,14 @@ namespace OptiSort
 
         public event Action<string, string, MessageBoxIcon> MessageBoxEvent; // Event to notify subscribers
 
-
-        // Coordinates
-        private Transform3D _gridPick;
-        private Transform3D _gridPlace;
-        private Transform3D _safeFlexi;
-        private Transform3D _boxPlaceA;
-        private Transform3D _boxPlaceB;
-        private Transform3D _safeBoxes;
-
-        public Transform3D GridPick
-        {
-            get => _gridPick;
-            set => _gridPick = value;
-        }
-        public Transform3D GridPlace
-        {
-            get => _gridPlace;
-            set => _gridPlace = value;
-        }
-        public Transform3D SafeFlexi
-        {
-            get => _safeFlexi;
-            set => _safeFlexi = value;
-        }
-        public Transform3D BoxPlaceA
-        {
-            get => _boxPlaceA;
-            set => _boxPlaceA = value;
-        }
-        public Transform3D BoxPlaceB
-        {
-            get => _boxPlaceB;
-            set => _boxPlaceB = value;
-        }
-        public Transform3D SafeBoxes
-        {
-            get => _safeBoxes;
-            set => _safeBoxes = value;
-        }
+        
+        public Transform3D GridPick { get; set; } = new Transform3D(516.00, -80.00, 320.00, 0, 180.00, -130);
+        public Transform3D GridPlace { get; set; } = new Transform3D(395.0, 280.0, 330.00, 0, 180.00, -130);
+        public Transform3D SafeFlexi { get; set; } = new Transform3D(375.00, 15.00, 385.00, 0, 180.00, -130);
+        public Transform3D BoxPlaceA { get; set; } = new Transform3D(160.00, -450.00, 180.00, 0, 180.00, 50);
+        public Transform3D BoxPlaceB { get; set; } = new Transform3D(310.00, -450.00, 180.00, 0, 180.00, 50);
+        public Transform3D SafeBoxes { get; set; } = new Transform3D(200.00, -450.00, 360.00, 0, 180.00, 50);
+                
 
         #endregion
 
@@ -306,14 +278,27 @@ namespace OptiSort
             Cameramanager = new CameraManager(this);
 
             // Instance class dedicated to managing digital twin
-            DigitalTwin = new DigitalTwin(this, Cobra600); 
+            DigitalTwin = new DigitalTwin(this, Cobra600);
 
             // Instance class dedicated to running python files
             _activeProcesses = new Dictionary<int, string>();
             _runners = new Dictionary<int, PythonProcessRunner>();
 
             // Retreive coordinates files
-            LoadTransformConfig();
+            string path = Path.Combine(ConfigFolder, "transforms.txt");
+            SaveTransforms(path, GridPick, GridPlace, SafeFlexi, BoxPlaceA, BoxPlaceB, SafeBoxes);
+
+            /*
+            Transform3D[] loaded = LoadTransforms(path);
+            if (loaded.Length >= 6)
+            {
+                GridPick = loaded[0];
+                GridPlace = loaded[1];
+                SafeFlexi = loaded[2];
+                BoxPlaceA = loaded[3];
+                BoxPlaceB = loaded[4];
+                SafeBoxes = loaded[5];
+            }*/
 
         }
 
@@ -1015,75 +1000,43 @@ namespace OptiSort
         }
 
 
-        public void SaveTransformConfig()
-        {
-            var config = new TransformConfig
-            {
-                GridPick = FromTransform3D(_gridPick),
-                GridPlace = FromTransform3D(_gridPlace),
-                SafeFlexi = FromTransform3D(_safeFlexi),
-                BoxPlaceA = FromTransform3D(_boxPlaceA),
-                BoxPlaceB = FromTransform3D(_boxPlaceB),
-                SafeBoxes = FromTransform3D(_safeBoxes)
-            };
+        #endregion
 
-            string json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(Path.Combine(ConfigFolder, "transform_config.json"), json);
+        // -----------------------------------------------------------------------------------
+        // ---------------------------------- FILE MANAGEMENT --------------------------------
+        // -----------------------------------------------------------------------------------
+
+
+        #region transformations
+
+        /// <summary>
+        /// Save an array of Transform3D instances to a plain‐text file.
+        /// Each line will be the 6 numbers (DX DY DZ Yaw Pitch Roll) separated by spaces.
+        /// </summary>
+        public static void SaveTransforms(string filePath, params Transform3D[] transforms)
+        {
+            // Turn each transform into its default‐Euler string, e.g. "12.3 4.5 6.7 10 20 30"
+            var lines = transforms.Select(t => t.ToString());
+            File.WriteAllLines(filePath, lines);
         }
 
-        private void LoadTransformConfig()
+        /// <summary>
+        /// Load a sequence of Transform3D from a text file previously written
+        /// by SaveTransforms.  Returns one Transform3D per non‐empty line.
+        /// </summary>
+        public static Transform3D[] LoadTransforms(string filePath)
         {
-            string path = Path.Combine(ConfigFolder, "transform_config.json");
-            if (!File.Exists(path))
-            {
-                var defaultConfig = new TransformConfig();
-                string json = JsonSerializer.Serialize(defaultConfig, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(path, json);
-            }
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException("Transform file not found", filePath);
 
-            string fileContent = File.ReadAllText(path);
-            var config = JsonSerializer.Deserialize<TransformConfig>(fileContent);
+            var lines = File.ReadAllLines(filePath)
+                            .Where(line => !string.IsNullOrWhiteSpace(line));
 
-            if (config != null)
-            {
-                _gridPick = ToTransform3D(config.GridPick);
-                _gridPlace = ToTransform3D(config.GridPlace);
-                _safeFlexi = ToTransform3D(config.SafeFlexi);
-                _boxPlaceA = ToTransform3D(config.BoxPlaceA);
-                _boxPlaceB = ToTransform3D(config.BoxPlaceB);
-                _safeBoxes = ToTransform3D(config.SafeBoxes);
-            }
+            // Parse each line using the built‐in parser (DefaultEulerAngles + 6 numbers)
+            return lines
+                .Select(line => Transform3D.Parse(line.Trim()))
+                .ToArray();
         }
-
-        // Load → Convert DTO → Transform3D
-        private Transform3D ToTransform3D(Transform3DSimple simple)
-        {
-            return new Transform3D(simple.X, simple.Y, simple.Z, simple.Yaw, simple.Pitch, simple.Roll);
-        }
-
-        // Save → Convert Transform3D → DTO
-        private Transform3DSimple FromTransform3D(Transform3D t3d)
-        {
-            return new Transform3DSimple(t3d.DX, t3d.DY, t3d.DZ, t3d.Yaw, t3d.Pitch, t3d.Roll);
-        }
-
-        public void RestoreDefaultTransformConfig()
-        {
-            try
-            {
-                string filePath = Path.Combine(ConfigFolder, "transform_config.json");
-                if (File.Exists(filePath))
-                    File.Delete(filePath);
-                else
-                    Console.WriteLine($"Delete failed because file is not found: {filePath}");
-                LoadTransformConfig(); // reload default config
-            }
-            catch (Exception ex)
-            {
-                Log($"Error restoring transform defaults: {ex.Message}", true, false);
-            }
-        }
-
 
         #endregion
 
