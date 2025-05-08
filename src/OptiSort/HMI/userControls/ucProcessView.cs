@@ -147,7 +147,7 @@ namespace OptiSort.userControls
                 return;
             }
 
-            _manager.Cameramanager.SwitchToProcessing(_manager.StreamingTopic.Split('/')[1]); // extact camera name from streaming topic
+            _manager.Cameramanager.SwitchToProcessing(_manager.StreamingTopic.Split('/')[1], nud_thresh.Value, nud_polyOut.Value, nud_polyIn.Value); // extact camera name from streaming topic
             _manager.Cameramanager.CamerasWorking += BeginProcess; // subscribe to event to start process when cameras are ready
         }
 

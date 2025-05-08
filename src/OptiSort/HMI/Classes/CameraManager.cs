@@ -18,6 +18,9 @@ namespace OptiSort.systems
         private int _scriptID;
         private string _mqttClient = Properties.Settings.Default.mqtt_client;
         private string _processingCamera = null;
+        private decimal _thresh;
+        private decimal _poly_out;
+        private decimal _poly_in;
 
         public event Action CamerasWorking;
 
@@ -116,7 +119,10 @@ namespace OptiSort.systems
                                     var data = new
                                     {
                                         command = "process",
-                                        camera = _processingCamera
+                                        camera = _processingCamera,
+                                        thresh = _thresh,
+                                        poly_out = _poly_out,
+                                        poly_in = _poly_in
                                     };
                                     _manager.PublishMqttMessage(_mqttClient, "optisort/camera_manager/input", data);
                                     _processingCamera = null;
@@ -146,10 +152,15 @@ namespace OptiSort.systems
         }
 
 
-        public void SwitchToProcessing(string camera)
+        public void SwitchToProcessing(string camera, decimal thresh, decimal poly_out, decimal poly_in)
         {
             if (CurrentState == Status.idle || CurrentState == Status.streaming)
             {
+
+                _thresh = thresh;
+                _poly_out = poly_out;
+                _poly_in = poly_in;
+
                 _processingCamera = camera;
                 SendCommand("stop");
                 _manager.Log($"Switching camera manager to processing mode for camera {camera}", false, false);

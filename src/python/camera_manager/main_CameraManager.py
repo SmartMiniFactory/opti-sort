@@ -259,12 +259,15 @@ class StreamingHandler:
 
 class ProcessingHandler:
 
-    def __init__(self, camera_manager, target_camera):
+    def __init__(self, camera_manager, target_camera, thresh, poly_out, poly_in):
         self.camera_manager = camera_manager
         self.thread = None
         self.running = threading.Event()
         self.target_camera = target_camera[0]
         self.running = threading.Event()
+        self.thresh = thresh
+        self.poly_out = poly_out
+        self.poly_in = poly_in
 
     def run(self):
         """Continuously captures, processes, and publishes frames."""
@@ -304,7 +307,7 @@ class ProcessingHandler:
                 if frame is None:
                     continue
 
-                thresh, labeled_image, detected_objects = proc.detect_shapes_and_classify(frame)
+                thresh, labeled_image, detected_objects = proc.detect_shapes_and_classify(frame, self.thresh, self.poly_out, self.poly_in)
 
                 if labeled_image is not None:
                     encoded = cv2.imencode(".jpg", labeled_image, [int(cv2.IMWRITE_JPEG_QUALITY), 90])[
@@ -406,10 +409,17 @@ class StateMachine:
 
             elif command == "process":
                 cam = payload.get("camera")
+                thresh = payload.get("thresh")
+                poly_out = payload.get("poly_in")
+                poly_in = payload.get("poly_out")
+
                 if cam not in ["ids", "basler", "luxonis"]:
                     publish("Specify which camera to process [ids, basler, luxonis]", None)
                 else:
                     self.target_camera = [cam]
+                    self.thresh = thresh
+                    self.poly_in = poly_in
+                    self.poly_out = poly_out
                     self.start_process()
 
             elif command == "stop":
@@ -453,7 +463,7 @@ class StateMachine:
             return
         try:
             self.camera_manager = CameraManager(testing=False, target_camera=self.target_camera)
-            self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera)
+            self.processing_handler = ProcessingHandler(self.camera_manager, self.target_camera, self.thresh, self.poly_out, self.poly_in)
             self.processing_handler.run()
             publish("Process started!", 3)
         except Exception as e:

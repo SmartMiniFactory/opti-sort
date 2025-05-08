@@ -21,7 +21,7 @@ class ImageProcessor:
                         "white_saturation": [], "black_saturation": [], "midtones": [], "illum_uniformity": [],
                         "hist_spread": [], "snr": []}
 
-    def detect_shapes_and_classify(self, frame):
+    def detect_shapes_and_classify(self, frame, threshold, poly_out, poly_in):
         # Convert to BGR if grayscale for visualization
         labeled_image = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR) if len(frame.shape) == 2 else frame.copy()
 
@@ -35,7 +35,7 @@ class ImageProcessor:
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
         # Binary inverse threshold (black objects on white background)
-        _, thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY_INV)
+        _, thresh = cv2.threshold(blurred, threshold, 255, cv2.THRESH_BINARY_INV)
 
         # Morphological closing to clean small holes
         kernel = np.ones((3, 3), np.uint8)
@@ -54,7 +54,7 @@ class ImageProcessor:
 
             # Approximate contour
             peri = cv2.arcLength(cnt, True)
-            approx = cv2.approxPolyDP(cnt, 0.04 * peri, True)
+            approx = cv2.approxPolyDP(cnt, poly_out * peri, True)
 
             # Default ROI contour color (red = invalid)
             roi_color = (0, 0, 255)
@@ -95,7 +95,7 @@ class ImageProcessor:
                         continue
 
                     marker_peri = cv2.arcLength(marker, True)
-                    approx_marker = cv2.approxPolyDP(marker, 0.03 * marker_peri, True)
+                    approx_marker = cv2.approxPolyDP(marker, poly_in * marker_peri, True)
 
                     shape = None
                     marker_color = (0, 0, 255)  # Default red (unidentified)
