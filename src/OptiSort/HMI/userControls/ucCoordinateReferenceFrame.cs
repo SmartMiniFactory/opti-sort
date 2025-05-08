@@ -114,8 +114,6 @@ namespace OptiSort.userControls
             _manager.RequestScreenshots = true;
             _manager.BitmapQueued += SaveShots; // subscribe to the event to save screenshots
             _elapsedTime = DateTime.Now;
-
-            //StartCalibrationScript();
         }
 
 

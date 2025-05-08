@@ -292,18 +292,8 @@ namespace OptiSort.userControls
             {
 
                 _flexibowlIsMoving = true;
-                // Flexibowl.Move.Forward(); 
-
-                // TODO: flexibowl shoud be moved slightly to detect new objects
-                led_rotate.On = true;
-                Thread.Sleep(2000);
-                led_rotate.On = false;
-
-                // TODO: track position of pieces, so that when some get under the glass, flipping is possible
-                led_flip.On = true;
+                Flexibowl.Move.Forward(); 
                 Thread.Sleep(500);
-                led_flip.On = false;
-
                 _flexibowlIsMoving = false;
 
             }
