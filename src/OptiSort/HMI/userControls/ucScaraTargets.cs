@@ -73,61 +73,75 @@ namespace OptiSort
         }
 
 
-        public void UpdateTargetTable(JsonElement message)
+        public void UpdateTargetTable(JsonElement content)
         {
 
             if (InvokeRequired)
             {
-                Invoke(new Action<JsonElement>(UpdateTargetTable), message);
+                Invoke(new Action<JsonElement>(UpdateTargetTable), content);
             }
             else
             {
 
-                string component = message.GetProperty("message").GetProperty("type").GetString();
-                double x = message.GetProperty("message").GetProperty("x").GetDouble();
-                double y = message.GetProperty("message").GetProperty("y").GetDouble();
-                double z = message.GetProperty("message").GetProperty("z").GetDouble();
-                double yaw = message.GetProperty("message").GetProperty("rx").GetDouble();
-                double pitch = message.GetProperty("message").GetProperty("ry").GetDouble();
-                double roll = message.GetProperty("message").GetProperty("rz").GetDouble();
-                TargetRow targetRow = new TargetRow(component, new Transform3D(x, y, z, yaw, pitch, roll));
-                
-                Backlog++;
-
-                // Only update the list if it's empty or the row is different from the last target
-                if (_targetQueueList.Count == 0 || _lastTarget != targetRow)
+                if (content.TryGetProperty("coordinate", out JsonElement coordinateElement))
                 {
-                    try
+                    // coordinateElement is a string JsonElement → get its string value
+                    string coordinateStr = coordinateElement.GetString();
+
+                    // Replace single quotes with double quotes to make valid JSON
+                    string fixedCoordinateStr = coordinateStr.Replace("'", "\"");
+
+                    // Parse the fixed string into a JsonDocument
+                    var coordDoc = JsonDocument.Parse(fixedCoordinateStr);
+                    JsonElement coord = coordDoc.RootElement;
+
+                    string component = coord.GetProperty("type").GetString();
+                    double x = coord.GetProperty("x").GetDouble();
+                    double y = coord.GetProperty("y").GetDouble();
+                    double z = coord.GetProperty("z").GetDouble();
+                    double yaw = coord.GetProperty("rx").GetDouble();
+                    double pitch = coord.GetProperty("ry").GetDouble();
+                    double roll = coord.GetProperty("rz").GetDouble();
+
+                    TargetRow targetRow = new TargetRow(component, new Transform3D(x, y, z, yaw, pitch, roll));
+
+                    Backlog++;
+
+                    // Only update the list if it's empty or the row is different from the last target
+                    if (_targetQueueList.Count == 0 || _lastTarget != targetRow)
                     {
-                       
-                        // rewriting components strings to something understandable from the user
-                        var componentMap = new Dictionary<string, string>
+                        try
                         {
-                            { "ae", "Component A, external surface" },
-                            { "ai", "Component A, internal surface" },
-                            { "be", "Component B, external surface" },
-                            { "bi", "Component B, internal surface" }
-                        };
 
-                        componentMap.TryGetValue(component, out string readableComponent);
-                        component = readableComponent ?? component;  // fallback to original if not mapped
+                            // rewriting components strings to something understandable from the user
+                            var componentMap = new Dictionary<string, string>
+                            {
+                                { "AE", "Component A, external surface" },
+                                { "AI", "Component A, internal surface" },
+                                { "BE", "Component B, external surface" },
+                                { "BI", "Component B, internal surface" }
+                            };
 
-                        targetRow.Component = component;
-                        _targetQueueList.Add(targetRow);
-                        _lastTarget = targetRow;
+                            componentMap.TryGetValue(component, out string readableComponent);
+                            component = readableComponent ?? component;  // fallback to original if not mapped
 
-                        Console.WriteLine("Added");
+                            targetRow.Component = component;
+                            _targetQueueList.Add(targetRow);
+                            _lastTarget = targetRow;
 
-                        dgvTargetQueue.Refresh();
+                            Console.WriteLine("Added");
 
+                            dgvTargetQueue.Refresh();
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _manager.NonBlockingMessageBox($"Error adding new entry: {ex.Message}", "Error!", MessageBoxIcon.Error);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        _manager.NonBlockingMessageBox($"Error adding new entry: {ex.Message}", "Error!", MessageBoxIcon.Error);
-                    }
+
+                    ObjectDetected?.Invoke();
                 }
-
-                ObjectDetected?.Invoke();
 
             }
         }
@@ -154,9 +168,9 @@ namespace OptiSort
                 // reducing backlog
                 Backlog--;
 
-                if(Backlog > 0)
+                if (Backlog > 0)
                     ObjectDetected?.Invoke(); // recall event to let parent user control pick next component in backlog
-                
+
             }
         }
 

@@ -672,6 +672,7 @@ namespace OptiSort
                     Console.WriteLine($"Mqtt PID: {PID}");
                     foreach (var activeProcessID in _activeProcesses)
                     {
+                        Console.WriteLine($"Acvite process: {activeProcessID} and PID {PID}");
                         if (activeProcessID.Key == PID)
                         {
                             MqttMessageReceived?.Invoke(topic, message, PID); // expose mqtt message with process value (user forms need the process value to trigger event handlers)

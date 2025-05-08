@@ -1,24 +1,30 @@
 basler:
   chessboard_center_px:
-  - 862.70263671875
-  - 428.9246520996094
-  chessboard_scara: null
-  chessboard_yaw: null
-  scale_x: 0.1560477614402771
-  scale_y: 0.15685132145881653
+  - 868.2077026367188
+  - 429.19696044921875
+  chessboard_scara:
+  - 395
+  - 280
+  chessboard_yaw: 0
+  scale_x: 0.1560114175081253
+  scale_y: 0.15675599873065948
 ids:
   chessboard_center_px:
-  - 538.9171142578125
-  - 573.8289794921875
-  chessboard_scara: null
-  chessboard_yaw: null
-  scale_x: 0.22092075645923615
-  scale_y: 0.22034220397472382
+  - 542.8436279296875
+  - 573.9962768554688
+  chessboard_scara:
+  - 395
+  - 280
+  chessboard_yaw: 0
+  scale_x: 0.2207801640033722
+  scale_y: 0.22039370238780975
 luxonis:
   chessboard_center_px:
-  - 606.4481201171875
-  - 457.8661193847656
-  chessboard_scara: null
-  chessboard_yaw: null
-  scale_x: 0.6925501823425293
-  scale_y: 0.7000706791877747
+  - 607.6553344726562
+  - 458.10711669921875
+  chessboard_scara:
+  - 395
+  - 280
+  chessboard_yaw: 0
+  scale_x: 0.6929017305374146
+  scale_y: 0.6873918771743774

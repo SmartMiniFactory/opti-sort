@@ -217,7 +217,10 @@ namespace OptiSort.userControls
                         {
                             columns = num_columns.Value,
                             rows = num_rows.Value,
-                            size = num_size.Value
+                            size = num_size.Value,
+                            center_x = _manager.GridPlace.DX,
+                            center_y = _manager.GridPlace.DY,
+                            yaw = _manager.GridPlace.Yaw
                         };
 
                         _manager.PublishMqttMessage(_mqttClient, "optisort/reference_calibration/input", data);

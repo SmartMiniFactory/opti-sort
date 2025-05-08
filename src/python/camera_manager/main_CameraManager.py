@@ -280,6 +280,8 @@ class ProcessingHandler:
             with open(reference_calibfile, 'r') as file:
                 data = yaml.safe_load(file)
 
+            print(data)
+
             chessboard_center_scara = data[self.target_camera]["chessboard_scara"]
             chessboard_center_px = data[self.target_camera]["chessboard_center_px"]
             chessboard_yaw = data[self.target_camera]["chessboard_yaw"]
@@ -336,18 +338,19 @@ class ProcessingHandler:
                                         "path": (script_dir / script_name).as_posix(),
                                         "PID": script_id
                                     },
-                                    "message": {
+                                    "coordinate": str({
                                         "type": component,
-                                        "x": X_pick,
-                                        "y": Y_pick,
-                                        "z": 0.0,
+                                        "x": float(X_pick),
+                                        "y": float(Y_pick),
+                                        "z": 330.00,
                                         "rx": 0.0,
-                                        "ry": 0.0,
-                                        "rz": 999.9
-                                    }
+                                        "ry": 180.0,
+                                        "rz": 50.0
+                                    })
                                 }
 
-                                mqttc.publish('optisort/scara/target', str(json.dumps(payload)), qos=0)
+                                mqttc.publish('optisort/scara/target', json.dumps(payload), qos=0)
+                                mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
 
                 # time.sleep(max(next_publish_time - time.time(), 0))
         except Exception as e:

@@ -35,7 +35,7 @@ class ImageProcessor:
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
         # Binary inverse threshold (black objects on white background)
-        _, thresh = cv2.threshold(blurred, 50, 255, cv2.THRESH_BINARY_INV)
+        _, thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY_INV)
 
         # Morphological closing to clean small holes
         kernel = np.ones((3, 3), np.uint8)

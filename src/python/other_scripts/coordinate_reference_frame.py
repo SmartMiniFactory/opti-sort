@@ -73,7 +73,8 @@ def on_message(client, userdata, msg):
     columns = payload.get("columns")
     rows = payload.get("rows")
     size = payload.get("size")
-    scara_center_positioning = payload.get("center") # a point (x, y) in scara coordinates
+    scara_x = payload.get("center_x")
+    scara_y = payload.get("center_y")
     scara_yaw = payload.get("yaw")
 
 
@@ -97,7 +98,7 @@ def on_message(client, userdata, msg):
                     "scale_x": scale_x,
                     "scale_y": scale_y,
                     "chessboard_center_px": chessboard_center_px,
-                    "chessboard_scara": scara_center_positioning,
+                    "chessboard_scara": (scara_x, scara_y),
                     "chessboard_yaw": scara_yaw
                 }
 

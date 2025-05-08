@@ -69,15 +69,16 @@ namespace OptiSort.userControls
         }
         
 
-        private void OnMessageReceived(string topic, JsonElement message)
+        private void OnTargetReceived(string topic, JsonElement content, int processID)
         {
-            if (topic == Properties.Settings.Default.mqtt_topic_scaraTarget && !_flexibowlIsMoving) // topic should be correct, plus flexibowl shold be still to consider coordinates as valid
-                ScaraTargets.UpdateTargetTable(message);
+
+            if (topic == Properties.Settings.Default.mqtt_topic_scaraTarget) // topic should be correct, plus flexibowl shold be still to consider coordinates as valid
+                ScaraTargets.UpdateTargetTable(content);
 
             else if (topic == "PythonResultOrSomething...")
             {
-                _manager.MqttClient.MessageReceived -= OnMessageReceived;
-                CompleteProcess(message);
+                _manager.MqttMessageReceived -= OnTargetReceived;
+                //CompleteProcess(message);
             }
         }
 
@@ -175,7 +176,7 @@ namespace OptiSort.userControls
 
             // subscribe to target coordinates topic
             _manager.SubscribeMqttTopic(Properties.Settings.Default.mqtt_client, Properties.Settings.Default.mqtt_topic_scaraTarget);
-            _manager.MqttClient.MessageReceived += OnMessageReceived;
+            _manager.MqttMessageReceived += OnTargetReceived;
 
             // subscribe to detected events: triggers pick and place
             ScaraTargets.ObjectDetected += OnObjectDetected;
@@ -339,7 +340,7 @@ namespace OptiSort.userControls
             _watchdog.Elapsed -= OnWatchdogElapsed;
             _watchdog.Stop();
 
-            _manager.MqttClient.MessageReceived -= OnMessageReceived;
+            _manager.MqttMessageReceived -= OnTargetReceived;
             _manager.UnsubscribeMqttTopic(Properties.Settings.Default.mqtt_client, Properties.Settings.Default.mqtt_topic_scaraTarget);
 
             ScaraTargets.ObjectDetected -= OnObjectDetected;

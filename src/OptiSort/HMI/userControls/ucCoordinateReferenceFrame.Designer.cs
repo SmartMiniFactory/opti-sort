@@ -61,7 +61,7 @@
             this.tableLayoutPanel1.Controls.Add(this.num_columns, 0, 3);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 7;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
@@ -137,7 +137,7 @@
             this.btn_StartCoordinateRefCalibration.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btn_StartCoordinateRefCalibration.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_StartCoordinateRefCalibration.Location = new System.Drawing.Point(259, 277);
-            this.btn_StartCoordinateRefCalibration.Margin = new System.Windows.Forms.Padding(13, 13, 13, 13);
+            this.btn_StartCoordinateRefCalibration.Margin = new System.Windows.Forms.Padding(13);
             this.btn_StartCoordinateRefCalibration.Name = "btn_StartCoordinateRefCalibration";
             this.btn_StartCoordinateRefCalibration.Size = new System.Drawing.Size(221, 62);
             this.btn_StartCoordinateRefCalibration.TabIndex = 5;
@@ -208,7 +208,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "ucCoordinateReferenceFrame";
             this.Size = new System.Drawing.Size(741, 441);
             this.tableLayoutPanel1.ResumeLayout(false);
