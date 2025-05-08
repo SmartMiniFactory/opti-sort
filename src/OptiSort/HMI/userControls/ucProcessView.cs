@@ -1,4 +1,5 @@
 ﻿using Ace.Core.Server;
+using Crownwood.DotNetMagic.Docking;
 using FlexibowlLibrary;
 using OptiSort.Classes;
 using System;
@@ -170,6 +171,10 @@ namespace OptiSort.userControls
 
         private void BeginProcess()
         {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(BeginProcess));
+            }
 
             _manager.Cameramanager.CamerasWorking -= BeginProcess;
             _manager.StartAutomaticProcess();
@@ -189,6 +194,10 @@ namespace OptiSort.userControls
             // start timer count
             lbl_actualSelectedCamera.Text = _manager.StreamingTopic;
             _startTime = DateTime.Now;
+
+            // setup flexiwbol
+            Flexibowl.Set.Rotation.Speed(50);
+            Flexibowl.Set.Rotation.Angle(60);
 
             RefreshControls();
 
@@ -288,12 +297,13 @@ namespace OptiSort.userControls
             if (!_manager.AutomaticProcess)
                 return;
 
-            if (!_scaraIsMoving)
+            if (!_scaraIsMoving && ScaraTargets.Backlog == 0)
             {
 
                 _flexibowlIsMoving = true;
-                Flexibowl.Move.Forward(); 
+                Flexibowl.Move.Forward();
                 Thread.Sleep(500);
+                Flexibowl.Move.Flip(1);
                 _flexibowlIsMoving = false;
 
             }

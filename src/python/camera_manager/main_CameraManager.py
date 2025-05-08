@@ -342,10 +342,10 @@ class ProcessingHandler:
                                         "type": component,
                                         "x": float(X_pick),
                                         "y": float(Y_pick),
-                                        "z": 330.00,
+                                        "z": 320.00,
                                         "rx": 0.0,
                                         "ry": 180.0,
-                                        "rz": 50.0
+                                        "rz": 0.0
                                     })
                                 }
 

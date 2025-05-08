@@ -96,6 +96,10 @@ namespace OptiSort
                     JsonElement coord = coordDoc.RootElement;
 
                     string component = coord.GetProperty("type").GetString();
+
+                    if (component == "AI" || component == "BI")
+                        return;
+
                     double x = coord.GetProperty("x").GetDouble();
                     double y = coord.GetProperty("y").GetDouble();
                     double z = coord.GetProperty("z").GetDouble();
