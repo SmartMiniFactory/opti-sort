@@ -73,7 +73,7 @@ namespace OptiSort.userControls
         private void OnTargetReceived(string topic, JsonElement content, int processID)
         {
 
-            if (topic == Properties.Settings.Default.mqtt_topic_scaraTarget) // topic should be correct, plus flexibowl shold be still to consider coordinates as valid
+            if (topic == Properties.Settings.Default.mqtt_topic_scaraTarget & !_flexibowlIsMoving) // topic should be correct, plus flexibowl shold be still to consider coordinates as valid
                 ScaraTargets.UpdateTargetTable(content);
 
             else if (topic == "PythonResultOrSomething...")
@@ -199,6 +199,11 @@ namespace OptiSort.userControls
             Flexibowl.Set.Rotation.Speed(50);
             Flexibowl.Set.Rotation.Angle(60);
 
+            _counterDetectedA = 0;
+            _counterDetectedB = 0;
+            _counterPicked = 0;
+            _counterDiscarded = 0;
+
             RefreshControls();
 
             // initiate performance report
@@ -207,10 +212,11 @@ namespace OptiSort.userControls
 
         private void PickAndPlace()
         {
-
             if (!_manager.AutomaticProcess)
                 return;
-                
+            
+            ResetWatchdog(); // trying to avoid the instant where the robot appears to not be moving but it's about to move soon and the flexibowl could move in this very short time
+
             try
             {
                 if (!_scaraIsMoving && ScaraTargets.Backlog > 0) // prevent simultanous picking (physically impossible)
@@ -228,12 +234,8 @@ namespace OptiSort.userControls
                         _manager.Cobra600.ToggleGripperAction(); // turn off suction
                     }
 
+
                     Transform3D _locTarget = ScaraTargets.TargetQueueList[0].Transform; // accessing first element to pick
-
-
-                    _manager.Cobra600.toggleRingLight();
-                    Thread.Sleep(500);
-                    _manager.Cobra600.toggleRingLight();
 
                     // move at safe flexibowl position
                     led_approachFlexibowl.On = true;
@@ -275,19 +277,28 @@ namespace OptiSort.userControls
                         Cobra600.Motion.Approach(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.BoxPlaceB, 20);
                         _counterDetectedB++;
                     }
+                    _counterPicked++;
 
                     Cobra600.Motion.CartesianMove(_manager.Cobra600.Server, _manager.Cobra600.Robot, _manager.SafeBoxes, true);
                     led_place.On = false;
 
                     _scaraIsMoving = false;
                     ResetWatchdog();
-                    ScaraTargets.PlacingCompleted();
+
+                    ScaraTargets.PlacingCompleted(); 
+
+                    if (_counterDetectedA == 3 & _counterDetectedB == 3)
+                    {
+                        InterruptProcess();
+                    }
+
                 }
 
             }
             catch (Exception ex)
             {
-                _manager.NonBlockingMessageBox($"Error performing pick-and-plance operation: {ex}", "Error!", MessageBoxIcon.Error);
+                InterruptProcess();
+                _manager.NonBlockingMessageBox($"Error performing pick-and-plance operation: {ex}", "PROCESS INTERRUPTED!", MessageBoxIcon.Warning);
             }
         }
 
@@ -297,21 +308,27 @@ namespace OptiSort.userControls
             if (!_manager.AutomaticProcess)
                 return;
 
-            if (!_scaraIsMoving && ScaraTargets.Backlog == 0)
+            if (ScaraTargets.Backlog == 0 & !_flexibowlIsMoving)
             {
 
                 _flexibowlIsMoving = true;
-                Flexibowl.Move.Forward();
-                Thread.Sleep(500);
-                Flexibowl.Move.Flip(1);
-                _flexibowlIsMoving = false;
+                led_rotate.On = true;
+                bool moved = Flexibowl.Move.Forward();
 
+                if (moved)
+                {
+                    led_rotate.On = false;
+                    _flexibowlIsMoving = false;
+                }
             }
             ResetWatchdog();
         }
 
         private void CompleteProcess(JsonElement pythonMetrics)
         {
+
+
+
             _manager.Log("Automatic process completed.");
 
             _report.MergePythonMetrics(pythonMetrics);

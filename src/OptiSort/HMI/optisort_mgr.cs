@@ -416,14 +416,21 @@ namespace OptiSort
         {
             Log("Trying to connect to flexibowl", false, false);
 
-            Flexibowl.Connect();
+            
             try
             {
-                Flexibowl.Set.Servo(true);
-                // TODO: should check for a connection by asking for a response
-                StatusFlexibowl = true;
-                Log("Flexibowl connected and servo ON", false, true);
-                return true;
+                bool connected = Flexibowl.Connect();
+                if (connected)
+                {
+                    Flexibowl.Set.Servo(true);
+                    StatusFlexibowl = true;
+                    Log("Flexibowl connected and servo ON", false, true);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             catch (Exception ex)
             {

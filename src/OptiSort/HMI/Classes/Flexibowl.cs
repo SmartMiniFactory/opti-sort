@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Remoting.Messaging;
+using System.Windows.Forms;
 
 namespace FlexibowlLibrary
 {
@@ -32,21 +33,37 @@ namespace FlexibowlLibrary
         {
             try
             {
-                UdpClient = new UdpClient(5001);
+                // Evita doppia connessione se già connesso
+                if (UdpClient != null)
+                {
+                    Console.WriteLine("Already connected to FlexiBowl");
+                    return true;
+                }
+
+                UdpClient = new UdpClient();
+                UdpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+
+                uint IOC_IN = 0x80000000;
+                uint IOC_VENDOR = 0x18000000;
+                uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+                UdpClient.Client.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+
                 Endpoint = new IPEndPoint(IP, 5001);
                 UdpClient.Connect(Endpoint);
+
                 UdpClient.Client.SendTimeout = 500;
                 UdpClient.Client.ReceiveTimeout = 500;
-                Console.Write("Connected to flexibowl");
+
+                Console.WriteLine("Connected to FlexiBowl");
                 return true;
             }
-            catch (ArgumentNullException ex)
+            catch (SocketException ex)
             {
-                Console.Write($"ArgumentNullException: {ex}");
+                Console.WriteLine($"SocketException during connection: {ex.Message}");
+                Disconnect();  // Solo se fallisce, chiudo
                 return false;
             }
         }
-
 
         /// <summary>
         /// Disconnect flexibowl from UDP connection
@@ -56,19 +73,22 @@ namespace FlexibowlLibrary
         {
             try
             {
-                UdpClient.Dispose();
-                UdpClient.Close();
-                UdpClient = null;
-                Endpoint = null;
-                Console.Write("Disconnected from FlexiBowl");
+                if (UdpClient != null)
+                {
+                    UdpClient.Close();  // Close prima di Dispose è sufficiente
+                    UdpClient = null;
+                    Endpoint = null;
+                    Console.WriteLine("Disconnected from FlexiBowl");
+                }
                 return true;
             }
             catch (Exception ex)
             {
-                Console.Write($"Unable to disconnect from FlexiBowl: {ex}");
+                Console.WriteLine($"Unable to disconnect from FlexiBowl: {ex.Message}");
                 return false;
             }
         }
+
 
         // ----------------------------------------------------------------------------------
         // --------------------------------- SUPPORT ----------------------------------------
@@ -91,54 +111,64 @@ namespace FlexibowlLibrary
             bool available = false;
             do
             {
-                // Convert the command to bytes
-                Byte[] SCLstring = Encoding.ASCII.GetBytes("ob[4]");
-                Byte[] sendBytes = new Byte[SCLstring.Length + 1];
-
-                Array.Copy(SCLstring, 0, sendBytes, 0, SCLstring.Length);
-                sendBytes[sendBytes.Length - 1] = 13; // CR
-
-                // Send the command to the server
-                byteSent = client.Send(sendBytes, sendBytes.Length);
-
-                // Receive data from the server
-                Byte[] receivedData = client.Receive(ref endpoint);
-                receiveString = Encoding.ASCII.GetString(receivedData);
-
-                // Define a separator byte
-                byte separator = 13;
-
-                // Convert byte array to a list of bytes
-                List<byte> byteList = new List<byte>(receivedData);
-
-                // Create a list to hold the divided byte arrays
-                List<byte[]> dividedByteArrays = new List<byte[]>();
-
-                int lastSeparatorIndex = 0;
-                for (int i = 0; i < byteList.Count; i++)
+                try
                 {
-                    if (byteList[i] == separator)
+                    // Convert the command to bytes
+                    Byte[] SCLstring = Encoding.ASCII.GetBytes("ob[4]");
+                    Byte[] sendBytes = new Byte[SCLstring.Length + 1];
+
+                    Array.Copy(SCLstring, 0, sendBytes, 0, SCLstring.Length);
+                    sendBytes[sendBytes.Length - 1] = 13; // CR
+
+                    // Send the command to the server
+                    byteSent = client.Send(sendBytes, sendBytes.Length);
+
+                    // Receive data from the server
+                    Byte[] receivedData = client.Receive(ref endpoint);
+                    receiveString = Encoding.ASCII.GetString(receivedData);
+
+                    // Define a separator byte
+                    byte separator = 13;
+
+                    // Convert byte array to a list of bytes
+                    List<byte> byteList = new List<byte>(receivedData);
+
+                    // Create a list to hold the divided byte arrays
+                    List<byte[]> dividedByteArrays = new List<byte[]>();
+
+                    int lastSeparatorIndex = 0;
+                    for (int i = 0; i < byteList.Count; i++)
                     {
-                        // Get the range of bytes from the last separator index to the current index
-                        byte[] dividedArray = byteList.GetRange(lastSeparatorIndex, i - lastSeparatorIndex).ToArray();
-                        dividedByteArrays.Add(dividedArray);
+                        if (byteList[i] == separator)
+                        {
+                            // Get the range of bytes from the last separator index to the current index
+                            byte[] dividedArray = byteList.GetRange(lastSeparatorIndex, i - lastSeparatorIndex).ToArray();
+                            dividedByteArrays.Add(dividedArray);
 
-                        // Update the last separator index
-                        lastSeparatorIndex = i + 1;
+                            // Update the last separator index
+                            lastSeparatorIndex = i + 1;
+                        }
                     }
-                }
 
-                // Handle the case where the byte array does not end with a separator
-                if (lastSeparatorIndex != byteList.Count)
+                    // Handle the case where the byte array does not end with a separator
+                    if (lastSeparatorIndex != byteList.Count)
+                    {
+                        byte[] dividedArray = byteList.GetRange(lastSeparatorIndex, byteList.Count - lastSeparatorIndex).ToArray();
+                        dividedByteArrays.Add(dividedArray);
+                    }
+
+                    // Convert the second byte array to a string
+                    string answer = Encoding.ASCII.GetString(dividedByteArrays[1]);
+
+                    bool.TryParse(answer, out available);
+                }
+                catch (SocketException ex)
                 {
-                    byte[] dividedArray = byteList.GetRange(lastSeparatorIndex, byteList.Count - lastSeparatorIndex).ToArray();
-                    dividedByteArrays.Add(dividedArray);
+                    Console.WriteLine($"Socket error: {ex.Message}");
+                    client.Close();  // Chiudo e preparo a riconnettere
+                    //client.Connect();
+                    return true;    // Ignoro l'errore e considero "busy"
                 }
-
-                // Convert the second byte array to a string
-                string answer = Encoding.ASCII.GetString(dividedByteArrays[1]);
-
-                bool.TryParse(answer, out available);
 
             } while (available == true);
 
@@ -262,22 +292,76 @@ namespace FlexibowlLibrary
             string receiveString = "";
             int byteSent = 0;
 
-            // Convert the command to bytes
-            Byte[] SCLstring = Encoding.ASCII.GetBytes(command);
-            Byte[] sendBytes = new Byte[SCLstring.Length + 1];
+            if (UdpClient == null)
+            {
+                Console.WriteLine("Error: Not connected to FlexiBowl.");
+                return "";
+            }
 
-            System.Array.Copy(SCLstring, 0, sendBytes, 0, SCLstring.Length);
-            sendBytes[sendBytes.Length - 1] = 13; // CR
+            // wait until eventual completion of previous processes
+            while (isBusy(UdpClient, Endpoint))
+            {
+                System.Threading.Thread.Sleep(50);
+            }
 
-            // Send the command to the server
-            byteSent = UdpClient.Send(sendBytes, sendBytes.Length);
-            //Console.WriteLine("\nCommand sent");
 
-            // Receive data from the server
-            IPEndPoint ep = Endpoint;
-            Byte[] receivedData = UdpClient.Receive(ref ep);
+            try
+            {
+                // Convert the command to bytes
+                Byte[] SCLstring = Encoding.ASCII.GetBytes(command);
+                Byte[] sendBytes = new Byte[SCLstring.Length + 1];
 
-            receiveString = Encoding.ASCII.GetString(receivedData);
+                Array.Copy(SCLstring, 0, sendBytes, 0, SCLstring.Length);
+                sendBytes[sendBytes.Length - 1] = 13; // CR
+
+                // Send the command to the server
+                byteSent = UdpClient.Send(sendBytes, sendBytes.Length);
+
+                // Receive data from the server
+                IPEndPoint ep = Endpoint;
+                Byte[] receivedData = UdpClient.Receive(ref ep);
+
+                receiveString = Encoding.ASCII.GetString(receivedData);
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine($"SocketException in SendCommand: {ex.Message}");
+                try
+                {
+                    if (UdpClient != null)
+                    {
+                        UdpClient.Close();  // Close prima di Dispose è sufficiente
+                        UdpClient = null;
+                        Endpoint = null;
+                        Console.WriteLine("Disconnectedd from FlexiBowl");
+                    }
+                }
+                catch (Exception exx)
+                {
+                    Console.WriteLine($"Unable to disconnectt from FlexiBowl: {exx.Message}");   
+                }
+                
+                receiveString = "";
+            }
+            catch (Exception exxx)
+            {
+                Console.WriteLine($"Unexpected exception in SendCommand: {exxx.Message}");
+                try
+                {
+                    if (UdpClient != null)
+                    {
+                        UdpClient.Close();  // Close prima di Dispose è sufficiente
+                        UdpClient = null;
+                        Endpoint = null;
+                        Console.WriteLine("Disconnecteddd from FlexiBowl");
+                    }
+                }
+                catch (Exception exx)
+                {
+                    Console.WriteLine($"Unable to disconnecttt from FlexiBowl: {exx.Message}");
+                }
+                receiveString = "";
+            }
 
             return receiveString;
         }
@@ -555,7 +639,7 @@ namespace FlexibowlLibrary
             /// <summary>
             /// Moves the feeder forward with the current parameters
             /// </summary>
-            public static void Forward()
+            public static bool Forward()
             {
                 string cmd = "forward=1";
                 string rsp = SendCommand(cmd);
@@ -564,6 +648,7 @@ namespace FlexibowlLibrary
                 {
                     System.Threading.Thread.Sleep(50);
                 }
+                return true;
             }
 
 

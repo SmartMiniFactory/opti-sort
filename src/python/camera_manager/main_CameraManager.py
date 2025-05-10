@@ -283,8 +283,6 @@ class ProcessingHandler:
             with open(reference_calibfile, 'r') as file:
                 data = yaml.safe_load(file)
 
-            print(data)
-
             chessboard_center_scara = data[self.target_camera]["chessboard_scara"]
             chessboard_center_px = data[self.target_camera]["chessboard_center_px"]
             chessboard_yaw = data[self.target_camera]["chessboard_yaw"]
@@ -295,7 +293,7 @@ class ProcessingHandler:
             proc = ImageProcessor()
 
             while self.running.is_set():
-                # next_publish_time = time.time() + 0.1
+                next_publish_time = time.time() + 0.05
 
                 try:
                     frame = self.camera_manager.capture_frame(self.target_camera)
@@ -320,21 +318,23 @@ class ProcessingHandler:
 
                         stable_position = proc.stabilize_detection(object)  # Stabilizza la posizione del componente
                         if stable_position is not None:
+
                             component, stable_x, stable_y, stable_a = stable_position
+                            mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
 
-                            component_center_px = (stable_x, stable_y)
 
-                            X_pick, Y_pick = proc.pixel_to_scara(
-                                component_center_px,
+                            X_pick, Y_pick, A_pick = proc.pixel_to_scara(
+                                (stable_x, stable_y),
+                                stable_a,
                                 chessboard_center_px,
                                 chessboard_center_scara,
                                 scale_x,
                                 scale_y,
-                                chessboard_yaw
                             )
 
-                            # ---- ISTERESI ----
-                            if proc.should_send_mqtt(component, (X_pick, Y_pick)):
+                            if proc.validate(X_pick, Y_pick, component):
+
+                                publish(f"Detected: {X_pick}, {Y_pick}, {A_pick}, {component}", None)
 
                                 payload = {
                                     "script": {
@@ -348,14 +348,15 @@ class ProcessingHandler:
                                         "z": 320.00,
                                         "rx": 0.0,
                                         "ry": 180.0,
-                                        "rz": 0.0
+                                        "rz": float(A_pick)
                                     })
                                 }
 
                                 mqttc.publish('optisort/scara/target', json.dumps(payload), qos=0)
-                                mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediately
+                                mqttc.loop(timeout=0.1)  # force for a short time the main thread to publish mqtt message immediatel
 
-                # time.sleep(max(next_publish_time - time.time(), 0))
+
+                time.sleep(max(next_publish_time - time.time(), 0))
         except Exception as e:
             raise ValueError(f"Processing failed: {e}") from e
 
@@ -410,16 +411,16 @@ class StateMachine:
             elif command == "process":
                 cam = payload.get("camera")
                 thresh = payload.get("thresh")
-                poly_out = payload.get("poly_in")
-                poly_in = payload.get("poly_out")
+                poly_out = payload.get("poly_out")
+                poly_in = payload.get("poly_in")
 
                 if cam not in ["ids", "basler", "luxonis"]:
                     publish("Specify which camera to process [ids, basler, luxonis]", None)
                 else:
                     self.target_camera = [cam]
                     self.thresh = thresh
-                    self.poly_in = poly_in
                     self.poly_out = poly_out
+                    self.poly_in = poly_in
                     self.start_process()
 
             elif command == "stop":

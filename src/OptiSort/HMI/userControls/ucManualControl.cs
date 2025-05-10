@@ -88,7 +88,7 @@ namespace OptiSort.userControls
                 return;
             }
 
-            Flexibowl.Move.Backward();
+            Flexibowl.Move.Shake();
             _manager.Log("Flexibowl: backward command sent", false, false);
         }
 

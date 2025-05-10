@@ -1,21 +1,16 @@
+import math
 import cv2
 import numpy as np
 
 
 class ImageProcessor:
-    def __init__(self):
+    def __init__(self ):
+
+        self.memory = {"type": [], "point":[]}
 
         self.position_buffers = {}  # Chiave: componente (es. 'AE'), Valore: lista di posizioni
         self.BUFFER_SIZE = 10  # higher = more restrictive
-        self.TOLERANCE = 1.0  # Tolleranza massima in pixel (adatta questo valore dopo test)
-        self.HYSTERESIS_DISTANCE_MM = 30.0  # distanza minima per triggerare un nuovo messaggio
-
-        self.last_sent_positions = {
-            'AE': None,
-            'BI': None,
-            'AI': None,
-            'BE': None
-        }
+        self.TOLERANCE = 100.0  # Tolleranza massima in pixel (adatta questo valore dopo test)
 
         self.metrics = {"mean_brightness": [], "median_brightness": [], "cnr": [], "sharpness": [],
                         "white_saturation": [], "black_saturation": [], "midtones": [], "illum_uniformity": [],
@@ -264,7 +259,7 @@ class ImageProcessor:
 
         return image
 
-    def compute_pixel_mm_scale(self, img, grid_size, square_size_mm, draw=True):
+    def compute_pixel_mm_scale(self, img, grid_size, square_size_mm):
         """ Compute pixel/mm ratio from checkerboard grid and visualize origin + axes """
         pattern_size = grid_size  # (cols, rows)
         objp = np.zeros((pattern_size[0] * pattern_size[1], 3), np.float32)
@@ -319,81 +314,85 @@ class ImageProcessor:
         chessboard_origin_px = tuple(corners_np[0])
         chessboard_center_px = tuple(np.mean(corners_np, axis=0))
 
-        # Optional drawing
+        # drawing
         vis_img = None
-        if draw:
-            vis_img = img.copy()
-            if len(vis_img.shape) == 2:
-                vis_img = cv2.cvtColor(vis_img, cv2.COLOR_GRAY2BGR)
+        vis_img = img.copy()
+        if len(vis_img.shape) == 2:
+            vis_img = cv2.cvtColor(vis_img, cv2.COLOR_GRAY2BGR)
 
-            # Draw all corners
-            corners2_draw = corners_np.reshape(-1, 1, 2).astype(np.float32)
-            cv2.drawChessboardCorners(vis_img, pattern_size, corners2_draw, ret)
+        # Draw all corners
+        corners2_draw = corners_np.reshape(-1, 1, 2).astype(np.float32)
+        cv2.drawChessboardCorners(vis_img, pattern_size, corners2_draw, ret)
 
-            # Draw top-left origin (red)
-            cv2.circle(vis_img, (int(chessboard_origin_px[0]), int(chessboard_origin_px[1])), 7, (0, 0, 255), -1)
-            cv2.putText(vis_img, "Origin (0,0)", (int(chessboard_origin_px[0]) + 5, int(chessboard_origin_px[1]) - 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+        # Draw top-left origin (red)
+        cv2.circle(vis_img, (int(chessboard_origin_px[0]), int(chessboard_origin_px[1])), 7, (0, 0, 255), -1)
+        cv2.putText(vis_img, "Origin (0,0)", (int(chessboard_origin_px[0]) + 5, int(chessboard_origin_px[1]) - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
-            # Draw center (green)
-            cv2.circle(vis_img, (int(chessboard_center_px[0]), int(chessboard_center_px[1])), 7, (0, 255, 0), -1)
-            cv2.putText(vis_img, "Center", (int(chessboard_center_px[0]) + 5, int(chessboard_center_px[1]) - 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        # Draw center (green)
+        cv2.circle(vis_img, (int(chessboard_center_px[0]), int(chessboard_center_px[1])), 7, (0, 255, 0), -1)
+        cv2.putText(vis_img, "Center", (int(chessboard_center_px[0]) + 5, int(chessboard_center_px[1]) - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
-            # Draw arrows showing X and Y directions
-            corner0 = corners_np[0]
-            corner_x = corners_np[1]
-            corner_y = corners_np[cols]
-            vec_x = corner_x - corner0
-            vec_y = corner_y - corner0
+        # Draw arrows showing X and Y directions
+        corner0 = corners_np[0]
+        corner_x = corners_np[1]
+        corner_y = corners_np[cols]
+        vec_x = corner_x - corner0
+        vec_y = corner_y - corner0
 
-            # Arrow X (blue)
-            end_x = (int(corner0[0] + vec_x[0] * 2), int(corner0[1] + vec_x[1] * 2))
-            cv2.arrowedLine(vis_img, (int(corner0[0]), int(corner0[1])), end_x, (255, 0, 0), 2, tipLength=0.2)
-            cv2.putText(vis_img, "+X", end_x, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+        # Arrow X (blue)
+        end_x = (int(corner0[0] + vec_x[0] * 2), int(corner0[1] + vec_x[1] * 2))
+        cv2.arrowedLine(vis_img, (int(corner0[0]), int(corner0[1])), end_x, (255, 0, 0), 2, tipLength=0.2)
+        cv2.putText(vis_img, "+X", end_x, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-            # Arrow Y (cyan)
-            end_y = (int(corner0[0] + vec_y[0] * 2), int(corner0[1] + vec_y[1] * 2))
-            cv2.arrowedLine(vis_img, (int(corner0[0]), int(corner0[1])), end_y, (255, 255, 0), 2, tipLength=0.2)
-            cv2.putText(vis_img, "+Y", end_y, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2)
+        # Arrow Y (cyan)
+        end_y = (int(corner0[0] + vec_y[0] * 2), int(corner0[1] + vec_y[1] * 2))
+        cv2.arrowedLine(vis_img, (int(corner0[0]), int(corner0[1])), end_y, (255, 255, 0), 2, tipLength=0.2)
+        cv2.putText(vis_img, "+Y", end_y, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2)
 
         return scale_x, scale_y, chessboard_center_px, vis_img
 
-    def pixel_to_scara(self, pixel_point, chessboard_center_px, scara_chessboard_center_mm, scale_x, scale_y, yaw_deg=0,
-                       apply_yaw=False):
+    def pixel_to_scara(self,
+                       pixel_point,  # (u,v) in px
+                       component_angle_deg,  # θ_img
+                       chessboard_center_px,  # (u0,v0) in px
+                       scara_chessboard_center_mm,  # (X0,Y0) in mm
+                       scale_x, # mm/px
+                       scale_y  # mm/px
+                       ):
         """
-        Convert pixel point to SCARA coords using chessboard pixel center & scara center, with optional yaw rotation
-        + yaw = counter-clockwise rotation / openCV standard
-        + apply_yaw = boolean to decide whether to apply yaw rotation
+        Convert pixel → SCARA X,Y (mm) *and* map a vision‐detected
+        angle into the same SCARA frame.
+        Assumes `self.yaw_deg` was set once at calibration (CCW +).
         """
 
-        # Compute pixel differences from chessboard center
+        # TODO: import yaw difference between scara positioning and image (yaw_deg)
+        yaw_deg = 0
+
+
+        # 1) pixel offsets
         dx_px = pixel_point[0] - chessboard_center_px[0]
         dy_px = pixel_point[1] - chessboard_center_px[1]
 
-        # Flip X axis if necessary (as before)
+        # 2) to mm, flipping X if needed
         dx_mm = -dx_px * scale_x
         dy_mm = dy_px * scale_y
 
-        if apply_yaw:
-            # Convert yaw angle to radians
-            yaw_rad = np.deg2rad(yaw_deg)
+        # 3) rotate by your (fixed or per‐image) yaw
+        yaw_rad = np.deg2rad(yaw_deg)
+        c, s = np.cos(yaw_rad), np.sin(yaw_rad)
+        dxr = c * dx_mm - s * dy_mm
+        dyr = s * dx_mm + c * dy_mm
 
-            # Rotation matrix
-            cos_yaw = np.cos(yaw_rad)
-            sin_yaw = np.sin(yaw_rad)
+        # 4) translate into SCARA coords
+        X = scara_chessboard_center_mm[0] + dxr
+        Y = scara_chessboard_center_mm[1] + dyr
 
-            dx_mm_rot = cos_yaw * dx_mm - sin_yaw * dy_mm
-            dy_mm_rot = sin_yaw * dx_mm + cos_yaw * dy_mm
-        else:
-            dx_mm_rot = dx_mm
-            dy_mm_rot = dy_mm
+        # 5) rotate the angle
+        θ = component_angle_deg + yaw_deg
 
-        # Final SCARA coordinates
-        X_scara = scara_chessboard_center_mm[0] + dx_mm_rot
-        Y_scara = scara_chessboard_center_mm[1] + dy_mm_rot
-
-        return (X_scara, Y_scara)
+        return X, Y, θ
 
     def stabilize_detection(self, result):
         """
@@ -436,29 +435,34 @@ class ImageProcessor:
         else:
             return None
 
-    def should_send_mqtt(self, component, current_scara_coords):
-        """
-        Determina se inviare il messaggio MQTT in base all'isteresi spaziale.
-        """
-        self.last_sent_positions
-        last_pos = self.last_sent_positions.get(component)
+    def validate(self, x, y, component):
+        array = self.memory.setdefault(component, [])
 
-        if last_pos is None:
-            # Nessuna posizione inviata prima → invia subito
-            self.last_sent_positions[component] = current_scara_coords
+        x = round(x, 3)
+        y = round(y, 3)
+
+        approved_point = (x, y)
+
+        # Se è il primo punto → approva subito
+        if not array:
+            array.append(approved_point)
             return True
 
-        # Calcola distanza euclidea
-        dx = current_scara_coords[0] - last_pos[0]
-        dy = current_scara_coords[1] - last_pos[1]
-        distance = np.hypot(dx, dy)
+        # Controlla la distanza con i punti esistenti
+        for point in array:
+            dx = x - point[0]
+            dy = y - point[1]
+            distance = math.hypot(dx, dy)
+            if distance < 5:
+                return False
 
-        if distance >= self.HYSTERESIS_DISTANCE_MM:
-            # Aggiorna la posizione e consenti l'invio
-            last_sent_positions[component] = current_scara_coords
-            return True
-        else:
-            return False
+        # Memorizza il punto approvato
+        array.append(approved_point)
+
+        if len(array) > 5:
+            array.pop(0)  # FIFO
+
+        return True
 
     def calculate_image_quality(self, frame):
 

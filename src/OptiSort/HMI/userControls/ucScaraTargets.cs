@@ -109,10 +109,30 @@ namespace OptiSort
 
                     TargetRow targetRow = new TargetRow(component, new Transform3D(x, y, z, yaw, pitch, roll));
 
-                    Backlog++;
+
+
+                    // Check if list is empty OR distance between new and last target is at least 1 mm (in x OR y)
+                    bool shouldAdd = false;
+                    if (_targetQueueList.Count == 0)
+                    {
+                        shouldAdd = true;
+                    }
+                    else
+                    {
+                        double lastX = _lastTarget.Transform.DX;
+                        double lastY = _lastTarget.Transform.DY;
+
+                        double deltaX = Math.Abs(x - lastX);
+                        double deltaY = Math.Abs(y - lastY);
+
+                        if (deltaX >= 1.0 || deltaY >= 1.0)
+                        {
+                            shouldAdd = true;
+                        }
+                    }
 
                     // Only update the list if it's empty or the row is different from the last target
-                    if (_targetQueueList.Count == 0 || _lastTarget != targetRow)
+                    if (shouldAdd)
                     {
                         try
                         {
@@ -133,9 +153,10 @@ namespace OptiSort
                             _targetQueueList.Add(targetRow);
                             _lastTarget = targetRow;
 
-                            Console.WriteLine("Added");
+                            Backlog++;
 
                             dgvTargetQueue.Refresh();
+                            ObjectDetected?.Invoke();
 
                         }
                         catch (Exception ex)
@@ -143,8 +164,6 @@ namespace OptiSort
                             _manager.NonBlockingMessageBox($"Error adding new entry: {ex.Message}", "Error!", MessageBoxIcon.Error);
                         }
                     }
-
-                    ObjectDetected?.Invoke();
                 }
 
             }
@@ -162,18 +181,22 @@ namespace OptiSort
                 // removing the first entry from the list
                 try
                 {
-                    _targetQueueList.RemoveAt(0);
+                    if (_targetQueueList.Count > 0)
+                    {
+                        _targetQueueList.RemoveAt(0);
+                        _manager.Log("test", false, false);
+                        Backlog--;
+                    }
+
+                    if (Backlog > 0)
+                        ObjectDetected?.Invoke(); // recall event to let parent user control pick next component in backlog
+
                 }
                 catch (Exception ex)
                 {
-                    _manager.NonBlockingMessageBox($"Error removing an entry: " + ex.ToString(), "Error!", MessageBoxIcon.Error);
+                    Console.WriteLine($"Error removing an entry: " + ex.ToString());
+                    _manager.Log($"Error removing an entry: " + ex.ToString(), true, false);
                 }
-
-                // reducing backlog
-                Backlog--;
-
-                if (Backlog > 0)
-                    ObjectDetected?.Invoke(); // recall event to let parent user control pick next component in backlog
 
             }
         }
