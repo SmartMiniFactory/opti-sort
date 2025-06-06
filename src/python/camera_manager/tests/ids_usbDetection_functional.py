@@ -92,7 +92,7 @@ def detect_shapes_and_classify(frame):
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
     # Binary inverse threshold (black objects on white background)
-    _, thresh = cv2.threshold(blurred, 50, 255, cv2.THRESH_BINARY_INV)
+    _, thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY_INV)
 
     # Morphological closing to clean small holes
     kernel = np.ones((3, 3), np.uint8)
@@ -152,7 +152,7 @@ def detect_shapes_and_classify(frame):
                     continue
 
                 marker_peri = cv2.arcLength(marker, True)
-                approx_marker = cv2.approxPolyDP(marker, 0.03 * marker_peri, True)
+                approx_marker = cv2.approxPolyDP(marker, 0.05 * marker_peri, True)
 
                 shape = None
                 marker_color = (0, 0, 255)  # Default red (unidentified)
@@ -549,8 +549,8 @@ if __name__ == "__main__":
     scara_chessboard_center_mm = (432.924, 224.126)  # Example mm, replace with your robot data
     scara_chessboard_yaw_deg = 0
 
-    grid_size = (5, 7)  # cols, rows inner corners
-    square_size_mm = 4.5
+    grid_size = (5, 4)  # cols, rows inner corners
+    square_size_mm = 12
 
     while True:
         # Capture frame
@@ -571,7 +571,7 @@ if __name__ == "__main__":
 
                 if stable_position is not None:
                     component, stable_x, stable_y, stable_a = stable_position
-                    # print(f"[{component}] Stabilized position: ({stable_x:.2f}, {stable_y:.2f}, {stable_a:.2f})")
+                    print(f"[{component}] Stabilized position: ({stable_x:.2f}, {stable_y:.2f}, {stable_a:.2f})")
 
                     # Prosegui solo con la posizione stabilizzata
                     scale_x, scale_y, chessboard_origin_px, chessboard_center_px, vis_img = compute_pixel_mm_scale(
@@ -592,9 +592,9 @@ if __name__ == "__main__":
                     # print(f"[{component}] Pixel {detected_pixel} → Scara coords: ({X_scara:.2f}, {Y_scara:.2f}) mm\n")
 
                     # ---- ISTERESI ----
-                    if should_send_mqtt(component, (X_scara, Y_scara)):
+                    '''if should_send_mqtt(component, (X_scara, Y_scara)):
                         # Placeholder per invio MQTT
-                        print(f"[MQTT] Send message for {component} at ({X_scara:.2f}, {Y_scara:.2f}) mm\n")
+                        print(f"[MQTT] Send message for {component} at ({X_scara:.2f}, {Y_scara:.2f}) mm\n")'''
 
                     if vis_img is not None:
                         cv2.imshow("Chessboard + Axes", cv2.resize(vis_img, None, fx=0.5, fy=0.5))

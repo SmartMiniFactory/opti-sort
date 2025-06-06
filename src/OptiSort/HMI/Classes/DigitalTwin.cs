@@ -81,7 +81,7 @@ namespace OptiSort.Classes
                 {
                     id = 100 + i, // ID univoco per ogni variabile
                     method = "PUT",
-                    url = $"/io/COBRA 600 CAD MODEL/BASE ASSY-1/tQ{i + 1}",
+                    url = $"/io/COBRA 600 CAD MODEL/BASE ASSY-1/cQ{i + 1}",
                     body = JsonConvert.SerializeObject(new { value = joints[i] }),
                     headers = new { }
                 };

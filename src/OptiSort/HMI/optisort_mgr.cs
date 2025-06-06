@@ -234,8 +234,8 @@ namespace OptiSort
         public event Action<string, string, MessageBoxIcon> MessageBoxEvent; // Event to notify subscribers
 
         
-        public Transform3D GridPick { get; set; } = new Transform3D(516.00, -80.00, 320.00, 0, 180.00, -130);
-        public Transform3D GridPlace { get; set; } = new Transform3D(395.0, 280.0, 330.00, 0, 180.00, -130);
+        public Transform3D GridPick { get; set; } = new Transform3D(520.483, -101.565, 315.248, 0, 180.00, -130);
+        public Transform3D GridPlace { get; set; } = new Transform3D(395.0, 280.0, 320.00, 0, 180.00, -130);
         public Transform3D SafeFlexi { get; set; } = new Transform3D(375.00, 15.00, 385.00, 0, 180.00, -130);
         public Transform3D BoxPlaceA { get; set; } = new Transform3D(160.00, -450.00, 180.00, 0, 180.00, 50);
         public Transform3D BoxPlaceB { get; set; } = new Transform3D(310.00, -450.00, 180.00, 0, 180.00, 50);

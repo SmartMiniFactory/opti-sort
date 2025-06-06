@@ -179,7 +179,6 @@ namespace OptiSort
 
         }
 
-
         private void btnManual_Click(object sender, System.EventArgs e)
         {
             CleanPnlCurrentUc();
